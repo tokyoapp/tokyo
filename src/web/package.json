@@ -13,8 +13,6 @@
   },
   "homepage": "https://github.com/luckydye/obs-tools-widget#readme",
   "devDependencies": {
-    "lit-scss-loader": "^1.1.0",
-    "ts-loader": "^9.3.0",
     "vite": "^2.9.9"
   }
 }
