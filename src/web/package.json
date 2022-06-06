@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "web client",
   "scripts": {
-    "dev": "webpack -w",
-    "build": "webpack"
+    "dev": "vite",
+    "build": "vite build"
   },
   "author": "",
   "license": "ISC",
@@ -12,10 +12,9 @@
     "url": "https://github.com/luckydye/obs-tools-widget/issues"
   },
   "homepage": "https://github.com/luckydye/obs-tools-widget#readme",
-  "dependencies": {
+  "devDependencies": {
     "lit-scss-loader": "^1.1.0",
     "ts-loader": "^9.3.0",
-    "webpack": "^5.70.0",
-    "webpack-cli": "^4.9.2"
+    "vite": "^2.9.9"
   }
 }
