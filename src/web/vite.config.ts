@@ -12,6 +12,9 @@ export default defineConfig({
   define: {
     __APP_VERSION__: pkg.version,
   },
+  server: {
+    open: "/index.html",
+  },
   build: {
     outDir: "../../dist",
     lib: {
