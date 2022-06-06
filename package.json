@@ -1,0 +1,25 @@
+{
+  "name": "project-evolution",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "turbo run start",
+    "build": "turbo run build --force --no-cache",
+    "dev": "turbo run dev --parallel",
+    "format": "prettier --write **/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.luckydye.de:apps/project-evolution.git"
+  },
+  "dependencies": {
+    "turbo": "^1.2.14"
+  },
+  "author": "",
+  "license": "ISC"
+}
