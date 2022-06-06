@@ -21,8 +21,5 @@ export default defineConfig({
       entry: "src/main.ts",
       formats: ["es"],
     },
-    rollupOptions: {
-      external: /^lit/,
-    },
   },
 });

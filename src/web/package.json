@@ -14,5 +14,8 @@
   "homepage": "https://github.com/luckydye/obs-tools-widget#readme",
   "devDependencies": {
     "vite": "^2.9.9"
+  },
+  "dependencies": {
+    "lit": "^2.2.5"
   }
 }
