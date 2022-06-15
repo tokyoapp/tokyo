@@ -5,9 +5,10 @@
       "outputs": ["dist/**"]
     },
     "dev": {
-      "cache": false
+      "dependsOn": ["build"]
     },
     "start": {
+      "dependsOn": ["build"],
       "cache": false
     }
   }

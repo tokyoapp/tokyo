@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "web client",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite serve --force",
     "build": "vite build"
   },
   "author": "",

@@ -1,3 +1,15 @@
 node_modules
 
 dist
+
+**/.DS_Store
+
+# turbo
+**/.turbo
+
+# ides
+.vscode
+
+# rust
+**/pkg
+**/target

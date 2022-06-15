@@ -10,16 +10,13 @@ export default defineConfig({
   publicDir: "static",
   mode: process.NODE_ENV,
   define: {
-    __APP_VERSION__: pkg.version,
+    __APP_VERSION__: `"${pkg.version.toString()}"`,
   },
   server: {
-    open: "/index.html",
+    open: "/",
   },
   build: {
     outDir: "../../dist",
-    lib: {
-      entry: "src/main.ts",
-      formats: ["es"],
-    },
+    target: "es2018",
   },
 });
