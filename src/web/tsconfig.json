@@ -3,17 +3,14 @@
     "target": "ESNext",
     "module": "ESNext",
     "strict": true,
-    "allowJs": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "esModuleInterop": true,
+    "strictNullChecks": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "baseUrl": ".",
-    "lib": ["ESNext", "dom", "dom.iterable", "scripthost"]
+    "noUncheckedIndexedAccess": true,
+    "experimentalDecorators": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }
