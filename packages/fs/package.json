@@ -1,0 +1,6 @@
+{
+  "name": "fs",
+  "version": "1.0.0",
+  "main": "./worker.ts",
+  "scripts": {}
+}

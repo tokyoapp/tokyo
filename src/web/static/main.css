@@ -4,4 +4,9 @@ body {
   color: #fff;
   font-family: monospace;
   font-size: 14px;
+  overscroll-behavior: none;
+}
+
+pre {
+  text-shadow: 0 0 20px rgb(255 255 255 / 75%);
 }

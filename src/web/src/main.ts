@@ -1,21 +1,12 @@
 import Greet from "./modules/greet";
-import EXR from "./modules/exr";
-import { exec } from "./nodes/vidToWebp";
+import "./modules/ffmpeg";
+import { log } from "./log";
+
+import "./components/FileDropzone";
 
 declare global {
   const __APP_VERSION__: string;
-}
-
-function log(string: string) {
-  const pre = document.querySelector("pre");
-  if (pre) {
-    const lines = pre.innerHTML.split("\n");
-    lines.push(string);
-    if (lines.length > 6) {
-      lines.shift();
-    }
-    pre.innerHTML = lines.join("\n");
-  }
+  const __IS_DEBUG__: boolean;
 }
 
 async function main() {
@@ -30,20 +21,18 @@ async function main() {
   log("Test greet module");
   Greet.greet("js");
 
-  log("Load example EXR file");
-  const exrFile = await (await fetch("./powder.exr")).arrayBuffer();
+  // log("Load example EXR file");
+  // const exrFile = await (await fetch("./powder.exr")).arrayBuffer();
 
-  log("decode exr file");
-  await EXR.load(new Uint8Array(exrFile))
-    .then(() => {
-      log("done");
-    })
-    .catch((err) => {
-      console.error(err);
-      log("decode failed");
-    });
-
-  exec();
+  // log("decode exr file");
+  // await EXR.load(new Uint8Array(exrFile))
+  //   .then(() => {
+  //     log("done");
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //     log("decode failed");
+  // });
 }
 
 window.addEventListener("DOMContentLoaded", main);

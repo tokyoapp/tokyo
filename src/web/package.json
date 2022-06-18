@@ -16,6 +16,8 @@
     "vite": "^2.9.9"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.10.0",
+    "@ffmpeg/ffmpeg": "^0.10.1",
     "lit": "^2.2.5"
   }
 }
