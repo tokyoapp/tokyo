@@ -13,11 +13,13 @@ async function convertFiles(files) {
     },
   });
 
+  const extension = files[0].name.split(".").reverse()[0];
+
   // ffmpeg -apply_trc iec61966_2_1 -start_number 1100 -i input%04d.exr output.mp4
 
   const args = [
     "-i",
-    "%04d.exr",
+    `%04d.${extension}`,
     "-start_number",
     "0001",
     "-pix_fmt",
