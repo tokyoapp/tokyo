@@ -13,3 +13,6 @@ dist
 # rust
 **/pkg
 **/target
+
+# firebase
+.firebase
