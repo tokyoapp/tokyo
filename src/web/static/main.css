@@ -1,3 +1,7 @@
 body {
   margin: 40px;
+  background: black;
+  color: #fff;
+  font-family: monospace;
+  font-size: 14px;
 }

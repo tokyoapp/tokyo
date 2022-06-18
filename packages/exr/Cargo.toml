@@ -1,0 +1,13 @@
+[package]
+name = "exr"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.31"
+exr = "1.4.2"
+block = "0.1.6"

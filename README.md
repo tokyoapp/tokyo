@@ -7,3 +7,7 @@ Install dependencies
 
 Run  
 `npm run dev`
+
+## Create new rust wasm package
+
+`cargo new --lib hello-wasm`
