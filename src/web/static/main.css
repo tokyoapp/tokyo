@@ -3,8 +3,13 @@ body {
   background: black;
   color: #fff;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 11px;
   overscroll-behavior: none;
+}
+
+img,
+video {
+  max-width: 100%;
 }
 
 pre {
