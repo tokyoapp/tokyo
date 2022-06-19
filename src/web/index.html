@@ -7,7 +7,25 @@
 
     <link rel="stylesheet" href="./static/main.css" />
 
+    <link rel="manifest" href="./manifest.json" />
+
     <script type="module" src="./src/main.ts"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./service.js").then(
+          (registration) => {
+            console.log(
+              "ServiceWorker registration successful with scope: ",
+              registration.scope
+            );
+          },
+          function (err) {
+            console.log("ServiceWorker registration failed: ", err);
+          }
+        );
+      }
+    </script>
   </head>
   <body>
     <pre></pre>

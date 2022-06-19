@@ -1,0 +1,43 @@
+{
+  "id": "/",
+  "name": "evolution",
+  "short_name": "evolution",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1c1c1c",
+  "description": "evolution",
+  "theme_color": "#1c1c1c",
+  "icons": [
+    {
+      "src": "./icons/icon48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon262.png",
+      "sizes": "262x262",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "route_to": "existing-client",
+    "navigate_existing_client": "always"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+evolution",
+      "url": "/?ref=%s"
+    }
+  ]
+}
