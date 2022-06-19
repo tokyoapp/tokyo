@@ -1,5 +1,5 @@
 import Greet from "./modules/greet";
-import "./modules/ffmpeg";
+import "./modules/ffmpeg/ffmpeg";
 import { log } from "./log";
 
 import "./components/FileDropzone";

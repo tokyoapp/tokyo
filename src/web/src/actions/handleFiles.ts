@@ -51,6 +51,8 @@ async function convertFiles(files) {
 
   // ffmpeg -apply_trc iec61966_2_1 -start_number 1100 -i input%04d.exr output.mp4
 
+  const outputFile = "output.webm";
+
   const args = [
     "-i",
     fileEntry,
@@ -59,14 +61,17 @@ async function convertFiles(files) {
     "-pix_fmt",
     "yuv420p",
     "-vcodec",
-    "libwebp",
+    "libvpx-vp9",
     "-loop",
     "0",
-    "output.webp",
+    outputFile,
   ];
 
   // image sequence to video:
   // ffmpeg -r 1/5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
+
+  // png seq to webm
+  // ffmpeg -framerate 25 -f image2 -i ./%04d.png -c:v libvpx -auto-alt-ref 0 -pix_fmt yuva420p output.webm
 
   await ffmpeg.load();
 
@@ -80,7 +85,7 @@ async function convertFiles(files) {
   console.log("Run ffmpeg");
 
   await ffmpeg.run(...args);
-  const data = ffmpeg.FS("readFile", "output.webp");
+  const data = ffmpeg.FS("readFile", outputFile);
   const blob = new Blob([data.buffer]);
 
   const url = URL.createObjectURL(blob);
@@ -88,6 +93,10 @@ async function convertFiles(files) {
   const img = new Image();
   img.src = url;
   document.body.append(img);
+
+  const video = document.createElement("video");
+  video.src = url;
+  document.body.append(video);
 }
 
 export default function (files: FileList) {
