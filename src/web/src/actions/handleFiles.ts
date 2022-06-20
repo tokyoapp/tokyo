@@ -5,11 +5,13 @@ import { log } from "../log";
 import * as FFMPEG from "@ffmpeg/ffmpeg";
 
 function getNameTemplate(name, template = "####") {
-  return name.replace(/[0-9]+/g, template);
+  return name.replace(/[0-9]+/, template);
 }
 
-function firstFrameOfSeq(seq: string[]) {
+function frameRangeOfSeq(seq: string[]): [number, number] {
   let min = Infinity;
+  let max = -Infinity;
+
   for (const file of seq) {
     try {
       if (file) {
@@ -17,13 +19,15 @@ function firstFrameOfSeq(seq: string[]) {
         if (f) {
           const n = parseInt(f.toString());
           min = Math.min(n, min);
+          max = Math.max(n, max);
         }
       }
     } catch (err) {
       console.error(err);
     }
   }
-  return min;
+
+  return [min, max];
 }
 
 async function convertFiles(files) {
@@ -41,10 +45,18 @@ async function convertFiles(files) {
     padding = template.toString().length;
   }
 
-  const fileEntry = getNameTemplate(files[0].name, `%0${padding}d`);
-  const firstFrame = firstFrameOfSeq([...files].map((file) => file.name))
-    .toString()
-    .padStart(padding, "0");
+  const frameTemplate = `%0${padding}d`;
+  const fileEntry = getNameTemplate(files[0].name, frameTemplate);
+  const frameRange = frameRangeOfSeq([...files].map((file) => file.name));
+  const firstFrame = frameRange[0].toString();
+  const lastFrame = frameRange[1].toString();
+
+  const itemName = fileEntry.replace(
+    frameTemplate,
+    `[${firstFrame}..${lastFrame}]`
+  );
+
+  console.log("ITEM ", itemName);
 
   log(`Converting files ${fileEntry} from frame ${firstFrame}.`);
   console.log(`Converting files ${fileEntry} at frame ${firstFrame}.`);
@@ -57,7 +69,7 @@ async function convertFiles(files) {
     "-i",
     fileEntry,
     "-start_number",
-    firstFrame,
+    firstFrame.padStart(padding, "0"),
     "-pix_fmt",
     "yuv420p",
     "-vcodec",
@@ -97,10 +109,41 @@ async function convertFiles(files) {
   const video = document.createElement("video");
   video.src = url;
   document.body.append(video);
+
+  return blob;
 }
 
-export default function (files: FileList) {
-  // fs.add(files);
+export default async function (files: FileList) {
+  if (files.length == 0 || !files[0]) return;
 
-  convertFiles(files);
+  await fs.add([...files]);
+
+  // check if it contains a sequence and stack those frames
+
+  const template = files[0].name.match(/[0-9]+/g);
+  let padding = 4;
+  if (template) {
+    padding = template.toString().length;
+  }
+
+  const frameTemplate = `%0${padding}d`;
+  const fileEntry = getNameTemplate(files[0].name, frameTemplate);
+  const frameRange = frameRangeOfSeq([...files].map((file) => file.name));
+  const firstFrame = frameRange[0].toString();
+  const lastFrame = frameRange[1].toString();
+
+  const itemName = fileEntry.replace(
+    frameTemplate,
+    `[${firstFrame}..${lastFrame}]`
+  );
+
+  console.log(itemName);
+
+  // organize files
+  //  put sequences together into one item
+  //  analyze files and read meta data
+
+  const output = await convertFiles(await fs.list());
+  const file = new File([output], "output.webm", {});
+  await fs.add([file]);
 }
