@@ -7,21 +7,24 @@ export default function (
   fps: number = 24,
   loop: boolean
 ) {
-  const outputFile = "output.webm";
+  const outputFile = "output.mp4";
 
-  return [
-    "-i",
-    fileEntry,
-    "-vf",
-    `fps=${fps}`,
-    "-start_number",
-    firstFrame,
-    "-pix_fmt",
-    "yuv420p",
-    "-vcodec",
-    "libx264",
-    "-loop",
-    loop === false ? "1" : "0",
-    outputFile,
-  ];
+  return {
+    args: [
+      "-i",
+      fileEntry,
+      "-vf",
+      `fps=${fps}`,
+      "-start_number",
+      firstFrame,
+      "-pix_fmt",
+      "yuv420p",
+      "-vcodec",
+      "libx264",
+      "-loop",
+      loop === false ? "1" : "0",
+      outputFile,
+    ],
+    format: "mp4",
+  };
 }

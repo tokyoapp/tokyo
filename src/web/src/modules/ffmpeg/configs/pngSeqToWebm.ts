@@ -9,19 +9,22 @@ export default function (
 ) {
   const outputFile = "output.webm";
 
-  return [
-    "-i",
-    fileEntry,
-    "-vf",
-    `fps=${fps}`,
-    "-start_number",
-    firstFrame,
-    "-pix_fmt",
-    "yuv420p",
-    "-vcodec",
-    "libvpx-vp9",
-    "-loop",
-    loop === false ? "1" : "0",
-    outputFile,
-  ];
+  return {
+    args: [
+      "-i",
+      fileEntry,
+      "-vf",
+      `fps=${fps}`,
+      "-start_number",
+      firstFrame,
+      "-pix_fmt",
+      "yuv420p",
+      "-vcodec",
+      "libvpx-vp9",
+      "-loop",
+      loop === false ? "1" : "0",
+      outputFile,
+    ],
+    format: "webm",
+  };
 }

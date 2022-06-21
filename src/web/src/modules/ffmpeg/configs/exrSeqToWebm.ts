@@ -9,23 +9,26 @@ export default function (
 ) {
   const outputFile = "output.webm";
 
-  return [
-    "-framerate",
-    fps.toString(),
-    "-start_number",
-    firstFrame,
-    "-gamma",
-    "2.2",
-    // "-f",
-    // "image2",
-    "-i",
-    fileEntry,
-    "-auto-alt-ref",
-    "0",
-    "-c:v",
-    "libvpx",
-    "-loop",
-    loop === false ? "1" : "0",
-    outputFile,
-  ];
+  return {
+    args: [
+      "-framerate",
+      fps.toString(),
+      "-start_number",
+      firstFrame,
+      "-gamma",
+      "2.2",
+      // "-f",
+      // "image2",
+      "-i",
+      fileEntry,
+      "-auto-alt-ref",
+      "0",
+      "-c:v",
+      "libvpx",
+      "-loop",
+      loop === false ? "1" : "0",
+      outputFile,
+    ],
+    format: "webm",
+  };
 }

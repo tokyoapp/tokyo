@@ -36,7 +36,9 @@ export async function convertFiles(media) {
       },
     };
 
-    const args = argTypeMap[type]();
+    const conv = argTypeMap[type]();
+    const format = conv.format;
+    const args = conv.args;
 
     await ffmpeg.load();
 
@@ -50,7 +52,7 @@ export async function convertFiles(media) {
     console.log("Run ffmpeg");
 
     await ffmpeg.run(...args);
-    const data = ffmpeg.FS("readFile", "output.webm");
+    const data = ffmpeg.FS("readFile", `output.${format}`);
     const blob = new Blob([data.buffer]);
 
     const url = URL.createObjectURL(blob);
