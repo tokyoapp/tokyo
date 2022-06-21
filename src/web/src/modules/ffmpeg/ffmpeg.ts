@@ -65,6 +65,6 @@ export async function convertFiles(media) {
     video.src = url;
     document.body.append(video);
 
-    return blob;
+    return new File([blob], `output.${format}`, {});
   }
 }

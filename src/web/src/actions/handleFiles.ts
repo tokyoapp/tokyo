@@ -84,11 +84,12 @@ export default async function (files: FileList) {
   //  put sequences together into one item
   //  analyze files and read meta data
 
-  const output = await convertFiles(stackedMedia);
+  const outputFile = await convertFiles(stackedMedia);
 
-  if (output) {
-    const outputFile = new File([output], "output.webm", {});
-    await fs.add([{ name: "output.webm", type: "webm", files: [outputFile] }]);
+  if (outputFile) {
+    await fs.add([
+      { name: outputFile.name, type: "webm", files: [outputFile] },
+    ]);
 
     State.scope("media", { items: (await fs.list()).map((item) => item.name) });
   } else {
