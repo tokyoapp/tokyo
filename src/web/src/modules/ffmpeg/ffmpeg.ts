@@ -1,27 +1,68 @@
+import { Media } from "./../Media";
 // https://github.com/ffmpegwasm/ffmpeg.wasm
 import * as FFMPEG from "@ffmpeg/ffmpeg";
+import exrSeqToWebm from "./configs/exrSeqToWebm";
+import { log } from "../../log";
+import pngSeqToWebp from "./configs/pngSeqToWebp";
 
-async function main() {
+export async function convertFiles(media) {
+  const item: Media = media[0];
+
+  const type = item.type;
+
+  const files = item.files;
+  const fileEntry = item.template;
+  const frameRange = item.frames;
+
   const ffmpeg = FFMPEG.createFFmpeg({
     corePath: "/ffmpeg-core.js",
     log: __IS_DEBUG__,
+    logger: ({ message }) => {
+      log(message);
+    },
   });
 
-  const toWebpP = {
-    args: ["-i", "video.avi", "-vcodec", "libwebp", "-loop", "0", "video.webp"],
-    inFilename: "video.avi",
-    outFilename: "video.webp",
-    mediaType: "video/mp4",
-  };
+  if (fileEntry && frameRange && frameRange.length > 1 && frameRange[0]) {
+    const firstFrame = frameRange[0].toString();
 
-  // image sequence to video:
-  // ffmpeg -r 1/5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
+    const fps = item.framerate || 24;
 
-  await ffmpeg.load();
-  // ffmpeg.FS("writeFile", toWebpP.inFilename, await fetchFile("./test.avi"));
-  // await ffmpeg.run(...toWebpP.args);
-  // const data = ffmpeg.FS("readFile", "output.mp4");
-  // const blob = new Blob([data.buffer], { type: "video/mp4" });
+    const argTypeMap = {
+      exr() {
+        return exrSeqToWebm(fileEntry, firstFrame, fps, true);
+      },
+      png() {
+        return pngSeqToWebp(fileEntry, firstFrame, fps, true);
+      },
+    };
+
+    const args = argTypeMap[type]();
+
+    await ffmpeg.load();
+
+    console.log("Buffer files");
+
+    for (let file of files) {
+      const buffer = await file.arrayBuffer();
+      ffmpeg.FS("writeFile", file.name, new Uint8Array(buffer));
+    }
+
+    console.log("Run ffmpeg");
+
+    await ffmpeg.run(...args);
+    const data = ffmpeg.FS("readFile", "output.webm");
+    const blob = new Blob([data.buffer]);
+
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.src = url;
+    document.body.append(img);
+
+    const video = document.createElement("video");
+    video.src = url;
+    document.body.append(video);
+
+    return blob;
+  }
 }
-
-main();

@@ -1,10 +1,7 @@
 import { Media } from "./../modules/Media";
 import fs from "../modules/filesystem";
-
-import { log } from "../log";
-
-import * as FFMPEG from "@ffmpeg/ffmpeg";
-import exrSeqToWebm from "../modules/ffmpeg/configs/exrSeqToWebm";
+import { convertFiles } from "../modules/ffmpeg/ffmpeg";
+import { State } from "@luckydye/app-state";
 
 function getNameTemplate(name, template = "####") {
   return name.replace(/[0-9]+/, template);
@@ -30,56 +27,6 @@ function frameRangeOfSeq(seq: string[]): [number, number] {
   }
 
   return [min, max];
-}
-
-async function convertFiles(media) {
-  const item: Media = media[0];
-
-  const files = item.files;
-  const fileEntry = item.template;
-  const frameRange = item.frames;
-
-  const ffmpeg = FFMPEG.createFFmpeg({
-    corePath: "/ffmpeg-core.js",
-    log: __IS_DEBUG__,
-    logger: ({ message }) => {
-      log(message);
-    },
-  });
-
-  if (fileEntry && frameRange && frameRange.length > 1 && frameRange[0]) {
-    const firstFrame = frameRange[0].toString();
-
-    const fps = item.framerate || 24;
-    const args = exrSeqToWebm(fileEntry, firstFrame, fps, true);
-
-    await ffmpeg.load();
-
-    console.log("Buffer files");
-
-    for (let file of files) {
-      const buffer = await file.arrayBuffer();
-      ffmpeg.FS("writeFile", file.name, new Uint8Array(buffer));
-    }
-
-    console.log("Run ffmpeg");
-
-    await ffmpeg.run(...args);
-    const data = ffmpeg.FS("readFile", "output.webm");
-    const blob = new Blob([data.buffer]);
-
-    const url = URL.createObjectURL(blob);
-
-    const img = new Image();
-    img.src = url;
-    document.body.append(img);
-
-    const video = document.createElement("video");
-    video.src = url;
-    document.body.append(video);
-
-    return blob;
-  }
 }
 
 export default async function (files: FileList) {
@@ -131,6 +78,7 @@ export default async function (files: FileList) {
   }
 
   await fs.add(stackedMedia);
+  State.scope("media", { items: (await fs.list()).map((item) => item.name) });
 
   // organize files
   //  put sequences together into one item
@@ -142,7 +90,7 @@ export default async function (files: FileList) {
     const outputFile = new File([output], "output.webm", {});
     await fs.add([{ name: "output.webm", type: "webm", files: [outputFile] }]);
 
-    console.log("MEDIA", await fs.list());
+    State.scope("media", { items: (await fs.list()).map((item) => item.name) });
   } else {
     throw new Error("Conversion failed");
   }
