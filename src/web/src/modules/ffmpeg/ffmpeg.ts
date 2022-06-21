@@ -22,7 +22,12 @@ export async function convertFiles(media) {
     },
   });
 
-  if (fileEntry && frameRange && frameRange.length > 1 && frameRange[0]) {
+  if (
+    fileEntry &&
+    frameRange &&
+    frameRange.length > 1 &&
+    frameRange[0] != null
+  ) {
     const firstFrame = frameRange[0].toString();
 
     const fps = item.framerate || 24;
