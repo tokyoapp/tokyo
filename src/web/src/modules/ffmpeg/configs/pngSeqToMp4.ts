@@ -1,10 +1,13 @@
+// image sequence to video:
+// ffmpeg -r 1/5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
+
 export default function (
   fileEntry: string,
   firstFrame: string,
   fps: number = 24,
-  loop: false
+  loop: boolean
 ) {
-  const outputFile = "output.webp";
+  const outputFile = "output.webm";
 
   return [
     "-i",
@@ -16,7 +19,7 @@ export default function (
     "-pix_fmt",
     "yuv420p",
     "-vcodec",
-    "libwebp",
+    "libx264",
     "-loop",
     loop === false ? "1" : "0",
     outputFile,

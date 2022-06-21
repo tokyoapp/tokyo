@@ -5,7 +5,7 @@ export default function (
   fileEntry: string,
   firstFrame: string,
   fps: number = 24,
-  loop: false
+  loop: boolean
 ) {
   const outputFile = "output.webm";
 

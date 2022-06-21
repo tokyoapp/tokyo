@@ -1,3 +1,4 @@
+import { Media } from "./../modules/Media";
 import * as Comlink from "comlink";
 import { Ifs } from "fs/interface";
 
@@ -14,7 +15,7 @@ async function init() {
 init();
 
 export default class fs {
-  static async add(files: File[]) {
+  static async add(files: Media[]) {
     if (!thread) throw new Error("fs thread not initialized!");
     await thread.add(files);
 
@@ -23,8 +24,6 @@ export default class fs {
 
   static async list() {
     if (!thread) throw new Error("fs thread not initialized!");
-    const files = await thread.files();
-    console.log("WE GOT DEM FILES YP", files);
-    return files;
+    return await thread.files();
   }
 }

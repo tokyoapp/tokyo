@@ -1,4 +1,4 @@
 export interface Ifs {
-  add(files: File[]): void;
-  files(): File[];
+  add(files: any[]): void;
+  files(): any[];
 }
