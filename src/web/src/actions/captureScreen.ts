@@ -1,10 +1,17 @@
 import fs from "../modules/filesystem";
 
-export async function startCapture() {
-  let captureStream: MediaStream | null = null;
+let captureStream: MediaStream | null = null;
+let mediaRecorder: MediaRecorder | null = null;
 
+export function stopCapture() {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+  }
+}
+
+export async function startCapture() {
   const displayMediaOptions = {
-    video: { width: 1920, height: 1080 },
+    video: { width: 1920, height: 1080, frameRate: 60 },
   };
 
   try {
@@ -24,49 +31,51 @@ export async function startCapture() {
   const chunks: Blob[] = [];
 
   if (captureStream) {
-    const mediaRecorder = new MediaRecorder(captureStream, {
+    mediaRecorder = new MediaRecorder(captureStream, {
       mimeType: "video/webm",
     });
 
     mediaRecorder.start();
 
-    setTimeout(() => {
-      mediaRecorder.stop();
-    }, 5 * 1000);
-
     mediaRecorder.onstop = async () => {
+      video.remove();
+
       const blob = new Blob(chunks);
       const buffer = await blob.arrayBuffer();
       const hash = await fs.saveBuffer(buffer);
       console.log("buffer hash:", hash);
 
-      setTimeout(async () => {
-        fs.list().then(async (list) => {
-          console.log(list);
+      // stop the display capture
+      const tracks = captureStream?.getVideoTracks() || [];
+      for (let track of tracks) {
+        track.stop();
+      }
 
-          for (let [name, file] of list) {
-            if (name === hash) {
-              const f = await file.getFile();
+      fs.list().then(async (list) => {
+        console.log(list);
 
-              console.log(f);
+        for (let [name, file] of list) {
+          if (name === hash) {
+            const f = await file.getFile();
 
-              const buff = await f.arrayBuffer();
+            console.log(f);
 
-              console.log(buff);
+            const buff = await f.arrayBuffer();
 
-              const blob = new Blob([buff], { type: "video/webm" });
+            console.log(buff);
 
-              console.log(blob);
+            const blob = new Blob([buff], { type: "video/webm" });
 
-              const video = document.createElement("video");
-              video.src = URL.createObjectURL(blob);
-              video.oncanplay = video.play;
+            console.log(blob);
 
-              document.body.append(video);
-            }
+            const video = document.createElement("video");
+            video.src = URL.createObjectURL(blob);
+            video.oncanplay = video.play;
+
+            document.body.append(video);
           }
-        });
-      }, 5 * 1000);
+        }
+      });
     };
 
     mediaRecorder.ondataavailable = function (e) {
