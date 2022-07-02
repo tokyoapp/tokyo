@@ -2,8 +2,12 @@ import Greet from "./modules/greet";
 import "./modules/ffmpeg/ffmpeg";
 import { log } from "./log";
 
-import "./components/FileDropzone";
-import "./components/ActionButton";
+const modules = import.meta.glob("./components/*");
+
+for (const path in modules) {
+  // load all components async
+  modules[path]();
+}
 
 declare global {
   const __APP_VERSION__: string;

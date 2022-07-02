@@ -2,14 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
 
-    <link rel="stylesheet" href="./static/main.css" />
+    <title>Project Evolution</title>
 
-    <link rel="manifest" href="./manifest.json" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="description" content="Project Evolution" />
 
-    <script type="module" src="./src/main.ts"></script>
+    <style>
+      :root {
+        background: black;
+        color: #fff;
+
+        font-family: monospace;
+        font-size: 62.5%;
+      }
+    </style>
+
+    <link href="./static/main.css" rel="stylesheet" media="all" />
 
     <script>
       if ("serviceWorker" in navigator) {
@@ -26,6 +35,10 @@
         );
       }
     </script>
+
+    <script type="module" src="./src/main.ts"></script>
+
+    <link rel="manifest" href="./manifest.json" />
   </head>
   <body>
     <div>

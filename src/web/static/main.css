@@ -1,9 +1,6 @@
 body {
   margin: 40px;
-  background: black;
-  color: #fff;
-  font-family: monospace;
-  font-size: 11px;
+  font-size: 1.4rem;
   overscroll-behavior: none;
 }
 
