@@ -3,6 +3,7 @@ import "./modules/ffmpeg/ffmpeg";
 import { log } from "./log";
 
 import "./components/FileDropzone";
+import "./components/ActionButton";
 
 declare global {
   const __APP_VERSION__: string;

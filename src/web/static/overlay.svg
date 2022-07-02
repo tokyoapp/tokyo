@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+     <script type="application/javascript">
+        const animate = (ms = 0) => {
+          const rect = document.querySelector('rect');
+          
+          rect.style.transform = `rotate(${ms / 10}deg)`;
+
+          requestAnimationFrame(animate);
+        }
+        globalThis.onload = animate;
+     </script>
+
+    <rect style="transform-origin: 50% 50%;" x="200" y="200" width="100" height="100" rx="15" />
+</svg>

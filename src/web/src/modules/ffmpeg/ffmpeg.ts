@@ -4,6 +4,7 @@ import * as FFMPEG from "@ffmpeg/ffmpeg";
 import exrSeqToWebm from "./configs/exrSeqToWebm";
 import { log } from "../../log";
 import pngSeqToWebp from "./configs/pngSeqToWebp";
+import exrSeqToWebpSeq from "./configs/exrSeqToWebpSeq";
 
 export async function convertFiles(media) {
   const item: Media = media[0];
@@ -26,7 +27,8 @@ export async function convertFiles(media) {
     fileEntry &&
     frameRange &&
     frameRange.length > 1 &&
-    frameRange[0] != null
+    frameRange[0] != null &&
+    frameRange[1] != null
   ) {
     const firstFrame = frameRange[0].toString();
 
@@ -34,7 +36,7 @@ export async function convertFiles(media) {
 
     const argTypeMap = {
       exr() {
-        return exrSeqToWebm(fileEntry, firstFrame, fps, true);
+        return exrSeqToWebpSeq(fileEntry, firstFrame, fps, true);
       },
       png() {
         return pngSeqToWebp(fileEntry, firstFrame, fps, true);
@@ -56,20 +58,33 @@ export async function convertFiles(media) {
 
     console.log("Run ffmpeg");
 
+    const outputFiles: Blob[] = [];
+
     await ffmpeg.run(...args);
-    const data = ffmpeg.FS("readFile", `output.${format}`);
-    const blob = new Blob([data.buffer]);
 
-    const url = URL.createObjectURL(blob);
+    for (let frame = frameRange[0]; frame < frameRange[1]; frame++) {
+      try {
+        const data = ffmpeg.FS(
+          "readFile",
+          `frame_${frame.toString().padStart(4, "0")}.${format}`
+        );
+        const blob = new Blob([data.buffer]);
+        outputFiles.push(blob);
+      } catch (err) {
+        console.log(err);
+      }
+    }
 
-    const img = new Image();
-    img.src = url;
-    document.body.append(img);
+    // const url = URL.createObjectURL(blob);
 
-    const video = document.createElement("video");
-    video.src = url;
-    document.body.append(video);
+    // const img = new Image();
+    // img.src = url;
+    // document.body.append(img);
 
-    return new File([blob], `output.${format}`, {});
+    // const video = document.createElement("video");
+    // video.src = url;
+    // document.body.append(video);
+
+    return new File(outputFiles, `output.${format}`, {});
   }
 }

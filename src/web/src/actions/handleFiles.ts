@@ -29,7 +29,7 @@ function frameRangeOfSeq(seq: string[]): [number, number] {
   return [min, max];
 }
 
-export default async function (files: FileList) {
+export async function handleFiles(files: FileList) {
   if (files.length == 0 || !files[0]) return;
 
   // check if it contains a sequence and stack those frames

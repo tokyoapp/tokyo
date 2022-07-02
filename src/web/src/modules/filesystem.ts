@@ -26,4 +26,9 @@ export default class fs {
     if (!thread) throw new Error("fs thread not initialized!");
     return await thread.files();
   }
+
+  static async saveBuffer(buffer: ArrayBuffer): Promise<string> {
+    if (!thread) throw new Error("fs thread not initialized!");
+    return await thread.saveBuffer(buffer);
+  }
 }

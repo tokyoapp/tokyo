@@ -1,5 +1,4 @@
-use exr::prelude::*;
-use std::io::*;
+use openexr::*;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -28,38 +27,20 @@ macro_rules! console_log {
 
 #[wasm_bindgen]
 pub fn load_exr(buffer: Vec<u8>) {
-    let _read = read()
-        .no_deep_data()
-        .largest_resolution_level()
-        .rgba_channels(
-            |resolution, _| {
-                let default_pixel = [0.0, 0.0, 0.0, 0.0];
-                let empty_line = vec![default_pixel; resolution.width()];
-                let empty_image = vec![empty_line; resolution.height()];
-                empty_image
-            },
-            |pixel_vector, position, (r, g, b, a): (f32, f32, f32, f32)| {
-                pixel_vector[position.y()][position.x()] = [r, g, b, a]
-            },
-        )
-        .first_valid_layer()
-        .all_attributes();
+    use imath_traits::Zero;
 
-    let mut c = Cursor::new(Vec::new());
+    let mut file = RgbaInputFile::new(path, 1).unwrap();
+    // Note that windows in OpenEXR are ***inclusive*** bounds, so a
+    // 1920x1080 image has window [0, 0, 1919, 1079].
+    let data_window: [i32; 4] = *file.header().data_window();
+    let width = data_window.width() + 1;
+    let height = data_window.height() + 1;
 
-    // Write into the "file" and seek to the beginning
-    c.write_all(&buffer).unwrap();
-    c.seek(SeekFrom::Start(0)).unwrap();
-
-    console_log!("{:?}", c);
-
-    let chunks = exr::block::read(c, false);
-
-    match chunks {
-        Ok(chnks) => {
-            console_log!("Loading exr chunks");
-            let _image = _read.from_chunks(chnks);
-        }
-        Err(e) => console_log!("error parsing header, {:?}", e),
+    let mut pixels = vec![Rgba::zero(); (width * height) as usize];
+    file.set_frame_buffer(&mut pixels, 1, width as usize)?;
+    unsafe {
+        file.read_pixels(0, height - 1)?;
     }
+
+    Ok(())
 }
