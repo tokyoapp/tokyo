@@ -1,4 +1,7 @@
+import { MediaFile } from "./MediaFile";
+
 export class Storage {
-  static save() {}
+  static save(file: MediaFile) {}
+
   static load() {}
 }

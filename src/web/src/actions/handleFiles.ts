@@ -1,33 +1,8 @@
+import { getNameTemplate, MediaFile } from "./../modules/storage/MediaFile";
 import { Media } from "../modules/storage/Media";
 import fs from "../modules/filesystem";
 import { convertFiles } from "../modules/ffmpeg/ffmpeg";
 import { State } from "@luckydye/app-state";
-
-function getNameTemplate(name, template = "####") {
-  return name.replace(/[0-9]+/, template);
-}
-
-function frameRangeOfSeq(seq: string[]): [number, number] {
-  let min = Infinity;
-  let max = -Infinity;
-
-  for (const file of seq) {
-    try {
-      if (file) {
-        const f = file.match(/[0-9]+/g);
-        if (f) {
-          const n = parseInt(f.toString());
-          min = Math.min(n, min);
-          max = Math.max(n, max);
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  return [min, max];
-}
 
 export async function handleFiles(files: FileList) {
   if (files.length == 0 || !files[0]) return;
@@ -58,23 +33,14 @@ export async function handleFiles(files: FileList) {
   // organize into stacks with metadata
   for (let name in stacks) {
     const stack = stacks[name];
-    const frameRange = frameRangeOfSeq(stack.map((file) => file.name));
-    const firstFrame = frameRange[0].toString();
-    const lastFrame = frameRange[1].toString();
 
-    const itemName = name.replace(
-      stack.template,
-      `[${firstFrame}..${lastFrame}]`
-    );
+    console.log(stack);
 
-    stackedMedia.push({
-      name: itemName,
-      template: name,
-      frames: frameRange,
-      framerate: 24,
-      type: itemName.split(".").reverse()[0] || "",
-      files: [...stack],
-    });
+    const mediaFile = new MediaFile([...stack]);
+    mediaFile.template = stack.template;
+    console.log(mediaFile);
+
+    stackedMedia.push(mediaFile);
   }
 
   await fs.add(stackedMedia);
