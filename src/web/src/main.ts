@@ -1,6 +1,8 @@
+import { State } from "@luckydye/app-state";
 import Greet from "./modules/greet";
 import "./modules/ffmpeg/ffmpeg";
 import { log } from "./log";
+import fs from "./modules/filesystem";
 
 const modules = import.meta.glob("./components/*");
 
@@ -25,6 +27,8 @@ async function main() {
 
   log("Test greet module");
   Greet.greet("js");
+
+  State.scope("media", { items: (await fs.list()).map((item) => item) });
 
   // log("Load example EXR file");
   // const exrFile = await (await fetch("./powder.exr")).arrayBuffer();

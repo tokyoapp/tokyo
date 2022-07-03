@@ -1,4 +1,4 @@
-import { Media } from "./../modules/Media";
+import { Media } from "./storage/Media";
 import * as Comlink from "comlink";
 import { Ifs } from "fs/interface";
 
@@ -12,13 +12,13 @@ async function init() {
   thread = Comlink.wrap(worker);
   console.log(thread);
 }
+
 init();
 
 export default class fs {
   static async add(files: Media[]) {
     if (!thread) throw new Error("fs thread not initialized!");
     await thread.add(files);
-
     this.list();
   }
 

@@ -1,4 +1,4 @@
-import { Media } from "./../Media";
+import { Media } from "../storage/Media";
 // https://github.com/ffmpegwasm/ffmpeg.wasm
 import * as FFMPEG from "@ffmpeg/ffmpeg";
 import exrSeqToWebm from "./configs/exrSeqToWebm";

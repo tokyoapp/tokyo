@@ -1,4 +1,4 @@
-import { Media } from "./../modules/Media";
+import { Media } from "../modules/storage/Media";
 import fs from "../modules/filesystem";
 import { convertFiles } from "../modules/ffmpeg/ffmpeg";
 import { State } from "@luckydye/app-state";
@@ -78,7 +78,7 @@ export async function handleFiles(files: FileList) {
   }
 
   await fs.add(stackedMedia);
-  State.scope("media", { items: (await fs.list()).map((item) => item.name) });
+  State.scope("media", { items: (await fs.list()).map((item) => item) });
 
   // organize files
   //  put sequences together into one item
@@ -91,7 +91,7 @@ export async function handleFiles(files: FileList) {
       { name: outputFile.name, type: "webm", files: [outputFile] },
     ]);
 
-    State.scope("media", { items: (await fs.list()).map((item) => item.name) });
+    State.scope("media", { items: (await fs.list()).map((item) => item) });
   } else {
     throw new Error("Conversion failed");
   }
