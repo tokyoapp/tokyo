@@ -12,8 +12,18 @@ const fs: Ifs = {
       const { name, size, type } = file;
       const blob: Blob = file;
 
+      // convert MediaFile into blobs
+
       console.log("adding", name, blob);
       media.push(blob);
+    }
+  },
+  async readHeader(fileName: string): Promise<string | undefined> {
+    const files = await this.files();
+    for (let file of files) {
+      if (file.name === fileName) {
+        return file.slice(0, 256).text();
+      }
     }
   },
   async files(): Promise<Array<[string, FileSystemFileHandle]>> {

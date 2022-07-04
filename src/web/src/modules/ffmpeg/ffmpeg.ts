@@ -62,18 +62,22 @@ export async function convertFiles(media) {
 
     await ffmpeg.run(...args);
 
-    for (let frame = frameRange[0]; frame < frameRange[1]; frame++) {
-      try {
-        const data = ffmpeg.FS(
-          "readFile",
-          `frame_${frame.toString().padStart(4, "0")}.${format}`
-        );
-        const blob = new Blob([data.buffer]);
-        outputFiles.push(blob);
-      } catch (err) {
-        console.log(err);
-      }
-    }
+    const data = ffmpeg.FS("readFile", `output.${conv.format}`);
+    const blob = new Blob([data.buffer]);
+    outputFiles.push(blob);
+
+    // for (let frame = frameRange[0]; frame < frameRange[1]; frame++) {
+    //   try {
+    //     const data = ffmpeg.FS(
+    //       "readFile",
+    //       `frame_${frame.toString().padStart(4, "0")}.${format}`
+    //     );
+    //     const blob = new Blob([data.buffer]);
+    //     outputFiles.push(blob);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // }
 
     // const url = URL.createObjectURL(blob);
 

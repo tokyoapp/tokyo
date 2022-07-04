@@ -1,4 +1,4 @@
-const media_types = ["png", "jpeg", "mp4", "mov", "webm"] as const;
+const media_types = ["png", "jpeg", "mp4", "mov", "webm", "webp"] as const;
 type MediaTuple = typeof media_types;
 export type MediaType = MediaTuple[number];
 

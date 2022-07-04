@@ -9,7 +9,6 @@ export async function handleFiles(files: FileList) {
 
   // check if it contains a sequence and stack those frames
   const stacks = {};
-  const stackedMedia: Media[] = [];
 
   // ittereate and sort all files
   for (let file of files) {
@@ -30,14 +29,16 @@ export async function handleFiles(files: FileList) {
     stacks[seqNeutralFileName].template = frameTemplate;
   }
 
+  const stackedMedia: Media[] = [];
+
   // organize into stacks with metadata
   for (let name in stacks) {
     const stack = stacks[name];
 
-    console.log(stack);
+    console.log(name);
 
     const mediaFile = new MediaFile([...stack]);
-    mediaFile.template = stack.template;
+    mediaFile.template = name;
     console.log(mediaFile);
 
     stackedMedia.push(mediaFile);
@@ -54,9 +55,8 @@ export async function handleFiles(files: FileList) {
 
   if (outputFile) {
     await fs.add([
-      { name: outputFile.name, type: "webm", files: [outputFile] },
+      { name: outputFile.name, type: "webp", files: [outputFile] },
     ]);
-
     State.scope("media", { items: (await fs.list()).map((item) => item) });
   } else {
     throw new Error("Conversion failed");

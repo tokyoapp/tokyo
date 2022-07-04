@@ -1,3 +1,4 @@
+import { MediaFile } from "./../modules/storage/MediaFile";
 import fs from "../modules/filesystem";
 
 let captureStream: MediaStream | null = null;
@@ -54,9 +55,10 @@ export async function startCapture() {
       fs.list().then(async (list) => {
         console.log(list);
 
-        for (let [name, file] of list) {
+        for (let entry of list) {
+          const name = entry[0];
           if (name === hash) {
-            const f = await file.getFile();
+            const f = await entry[1].getFile();
 
             console.log(f);
 
@@ -66,7 +68,14 @@ export async function startCapture() {
 
             const blob = new Blob([buff], { type: "video/webm" });
 
-            console.log(blob);
+            const file = new File([blob], "cap.webm");
+            const mediaFile = new MediaFile([file]);
+            const mediaBlob = await mediaFile.blob();
+
+            console.log("screen cap cache", mediaBlob);
+
+            const header = await MediaFile.readFileHeader(mediaBlob);
+            console.log(header);
 
             const video = document.createElement("video");
             video.src = URL.createObjectURL(blob);

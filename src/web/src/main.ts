@@ -28,7 +28,8 @@ async function main() {
   log("Test greet module");
   Greet.greet("js");
 
-  State.scope("media", { items: (await fs.list()).map((item) => item) });
+  const items = (await fs.list()).map((item) => item);
+  State.scope("media", { items });
 
   // log("Load example EXR file");
   // const exrFile = await (await fetch("./powder.exr")).arrayBuffer();

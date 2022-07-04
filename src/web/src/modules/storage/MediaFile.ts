@@ -66,15 +66,23 @@ function frameRangeOfSeq(seq: string[]): [number, number] {
 }
 
 export class MediaFile implements Media {
-  name!: string;
+  static async readFileHeader(file: Blob) {
+    const headerString = new TextDecoder()
+      .decode(await file.slice(0, 256).arrayBuffer())
+      .replace(/\x00/g, "");
 
-  type!: MediaType;
+    return JSON.parse(headerString);
+  }
 
-  files: File[] = [];
+  public name!: string;
 
-  frames: number[] = [];
+  public type!: MediaType;
 
-  framerate: number = 24;
+  public files: File[] = [];
+
+  public frames: number[] = [];
+
+  public framerate: number = 24;
 
   constructor(files: File[]) {
     const mainFile = files[0];
@@ -98,5 +106,28 @@ export class MediaFile implements Media {
     } else {
       throw new Error("Unsopperted file type, " + mainFile?.name);
     }
+  }
+
+  public async blob(): Promise<Blob> {
+    const headerData = {
+      ...MediaFile,
+      fileOffsets: [0, 1, 2, 3],
+    };
+
+    const headerArray: number[] = new Array(256);
+    const headerString = JSON.stringify(headerData);
+    const headerEncoded = new TextEncoder().encode(headerString);
+
+    let index = 0;
+    for (let n of headerEncoded) {
+      headerArray[index] = n;
+      index++;
+    }
+
+    const header = new Uint8Array(headerArray);
+
+    console.log("Header length", header.byteLength);
+
+    return new Blob([header.buffer, ...this.files]);
   }
 }
