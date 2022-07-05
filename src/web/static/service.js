@@ -2,8 +2,8 @@ function log(...str) {
   console.log("[Cache]", ...str);
 }
 
-const CACHE_NAME = "e2e-dashboard-artifacts";
-const cached_routes = ["/artifacts"];
+const CACHE_NAME = "artifacts";
+const cached_routes = ["/"];
 
 // @ts-ignore
 self.addEventListener("fetch", (event) => {

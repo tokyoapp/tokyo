@@ -1,21 +1,12 @@
 import * as Comlink from "comlink";
 import { Ifs } from "fs/interface";
-import { listFiles, writeBuffer } from "./storage";
-
-const media: any[] = [];
+import { listFiles, writeBuffer, writeFile } from "./storage";
 
 const fs: Ifs = {
-  add(files: File[]): void {
-    console.log("called add");
-
+  async add(files: File[]) {
     for (let file of files) {
       const { name, size, type } = file;
-      const blob: Blob = file;
-
-      // convert MediaFile into blobs
-
-      console.log("adding", name, blob);
-      media.push(blob);
+      await writeFile(name, file);
     }
   },
   async readHeader(fileName: string): Promise<string | undefined> {

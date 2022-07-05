@@ -7,7 +7,7 @@ async function hashBuffer(buffer): Promise<string> {
   return hashHex;
 }
 
-async function writeFile(name, data) {
+export async function writeFile(name, data) {
   const root = await navigator.storage.getDirectory();
 
   const fileHandle = await root.getFileHandle(name, {

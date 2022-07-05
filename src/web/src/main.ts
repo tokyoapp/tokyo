@@ -28,8 +28,20 @@ async function main() {
   log("Test greet module");
   Greet.greet("js");
 
-  const items = (await fs.list()).map((item) => item);
-  State.scope("media", { items });
+  const items = (await fs.list()).map((item) => item[1].name);
+  State.scope("media", { items: JSON.stringify(items, null, "\t") });
+
+  fs.get("cap.webm").then(async (file) => {
+    const f = await file?.getFile();
+    const uri = URL.createObjectURL(f);
+
+    const video = document.createElement("video");
+    video.src = uri;
+    video.controls = true;
+    video.loop = true;
+
+    document.body.append(video);
+  });
 
   // log("Load example EXR file");
   // const exrFile = await (await fetch("./powder.exr")).arrayBuffer();

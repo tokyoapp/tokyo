@@ -65,7 +65,7 @@ function frameRangeOfSeq(seq: string[]): [number, number] {
   return [min, max];
 }
 
-export class MediaFile implements Media {
+export class MediaFile extends File implements Media {
   static async readFileHeader(file: Blob) {
     const headerString = new TextDecoder()
       .decode(await file.slice(0, 256).arrayBuffer())
@@ -89,18 +89,19 @@ export class MediaFile implements Media {
     const ext = mainFile?.name.split(".").reverse()[0];
 
     if (ext && isSuppotedMediaType(ext)) {
-      this.files.push(...files);
-      this.type = ext;
-
       if (files.length > 1) {
         const seq = getSequence(files);
 
         if (!seq) throw new Error("Sequence is corupt, " + mainFile?.name);
 
-        this.name = seq.name;
+        super(files, seq.name, { type: ext });
+
+        this.files.push(...files);
         this.frames = seq.frames;
       } else {
-        this.name = getName(mainFile.name);
+        super(files, getName(mainFile.name), { type: ext });
+
+        this.files.push(...files);
         this.frames = [0];
       }
     } else {

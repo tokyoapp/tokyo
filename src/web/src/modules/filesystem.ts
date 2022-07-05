@@ -16,10 +16,19 @@ async function init() {
 init();
 
 export default class fs {
-  static async add(files: Media[]) {
+  static async add(files: File[]) {
     if (!thread) throw new Error("fs thread not initialized!");
     await thread.add(files);
-    this.list();
+    return true;
+  }
+
+  static async get(fileName: string) {
+    if (!thread) throw new Error("fs thread not initialized!");
+
+    const files = await thread.files();
+    for (let [name, file] of files) {
+      if (name === fileName) return file;
+    }
   }
 
   static async list() {

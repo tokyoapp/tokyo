@@ -70,6 +70,11 @@ export async function startCapture() {
 
             const file = new File([blob], "cap.webm");
             const mediaFile = new MediaFile([file]);
+
+            console.log(mediaFile);
+
+            await fs.add([new File([mediaFile], mediaFile.name)]);
+
             const mediaBlob = await mediaFile.blob();
 
             console.log("screen cap cache", mediaBlob);
