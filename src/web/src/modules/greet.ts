@@ -1,15 +1,22 @@
-import init, { greet, InitOutput } from "hello-wasm/pkg/hello_wasm";
+// import init, {
+//   greet,
+//   InitOutput,
+// } from "../../../../packages/ffmpeg/pkg/ffmpeg";
 
-let worker: InitOutput | null = null;
+// let worker: InitOutput | null = null;
 
 export default class Greet {
   static async creatWorker() {
-    worker = await init();
+    // worker = await init();
   }
 
   static async greet(string: string) {
-    if (!worker) await this.creatWorker();
+    // if (!worker) await this.creatWorker();
+    // greet(string);
+  }
 
-    greet(string);
+  static async test(string: string) {
+    // if (!worker) await this.creatWorker();
+    // greet(string);
   }
 }

@@ -66,9 +66,9 @@ export async function startCapture() {
 
             console.log(buff);
 
-            const blob = new Blob([buff], { type: "video/webm" });
+            const blob = new Blob([buff], { type: "video/mp4" });
 
-            const file = new File([blob], "cap.webm");
+            const file = new File([blob], "cap.mp4");
             const mediaFile = new MediaFile([file]);
 
             console.log(mediaFile);

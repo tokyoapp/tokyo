@@ -9,7 +9,7 @@ import exrSeqToWebpSeq from "./configs/exrSeqToWebpSeq";
 export async function convertFiles(media) {
   const item: Media = media[0];
 
-  const type = item.type;
+  const type = item.mediaType;
 
   const files = item.files;
   const fileEntry = item.template;

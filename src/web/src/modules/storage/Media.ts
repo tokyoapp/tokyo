@@ -8,7 +8,7 @@ export function isSuppotedMediaType(type: string): type is MediaType {
 
 export interface Media {
   name: string; // custom item name
-  type: MediaType;
+  mediaType: MediaType;
   files: File[];
   frames?: number[]; // contains frame ranges eg. [1, 25]
   framerate?: number;

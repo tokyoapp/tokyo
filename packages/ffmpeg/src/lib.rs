@@ -1,3 +1,5 @@
+// extern crate ffmpeg_next as ffmpeg;
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -25,11 +27,11 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
-extern {
+extern "C" {
     pub fn alert(s: &str);
 }
 
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    console_log!("Hello from hello-wasm, {}!", name);
+pub fn test() {
+    console_log!("Hello from ffmpeg, {}!", "test");
 }

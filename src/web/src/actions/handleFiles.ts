@@ -54,9 +54,7 @@ export async function handleFiles(files: FileList) {
   const outputFile = await convertFiles(stackedMedia);
 
   if (outputFile) {
-    await fs.add([
-      { name: outputFile.name, type: "webp", files: [outputFile] },
-    ]);
+    await fs.add([outputFile]);
     State.scope("media", { items: (await fs.list()).map((item) => item) });
   } else {
     throw new Error("Conversion failed");

@@ -1,6 +1,6 @@
 import { State } from "@luckydye/app-state";
-import Greet from "./modules/greet";
-import "./modules/ffmpeg/ffmpeg";
+import FFmpeg from "./modules/greet";
+// import "./modules/ffmpeg/ffmpeg";
 import { log } from "./log";
 import fs from "./modules/filesystem";
 
@@ -25,13 +25,13 @@ async function main() {
   log("Web Image Creator");
   log(`Version ${__APP_VERSION__}`);
 
-  log("Test greet module");
-  Greet.greet("js");
+  log("Test ffmpeg module");
+  FFmpeg.test();
 
   const items = (await fs.list()).map((item) => item[1].name);
   State.scope("media", { items: JSON.stringify(items, null, "\t") });
 
-  fs.get("cap.webm").then(async (file) => {
+  fs.get("cap.mp%01d").then(async (file) => {
     const f = await file?.getFile();
     const uri = URL.createObjectURL(f);
 
@@ -42,6 +42,16 @@ async function main() {
 
     document.body.append(video);
   });
+
+  // fs.get("output.webp").then(async (file) => {
+  //   const f = await file?.getFile();
+  //   const uri = URL.createObjectURL(f);
+
+  //   const img = new Image();
+  //   img.src = uri;
+
+  //   document.body.append(img);
+  // });
 
   // log("Load example EXR file");
   // const exrFile = await (await fetch("./powder.exr")).arrayBuffer();

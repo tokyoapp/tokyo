@@ -76,7 +76,7 @@ export class MediaFile extends File implements Media {
 
   public name!: string;
 
-  public type!: MediaType;
+  public mediaType!: MediaType;
 
   public files: File[] = [];
 
@@ -94,13 +94,15 @@ export class MediaFile extends File implements Media {
 
         if (!seq) throw new Error("Sequence is corupt, " + mainFile?.name);
 
-        super(files, seq.name, { type: ext });
+        super(files, seq.name, {});
 
+        this.mediaType = ext;
         this.files.push(...files);
         this.frames = seq.frames;
       } else {
-        super(files, getName(mainFile.name), { type: ext });
+        super(files, getName(mainFile.name), {});
 
+        this.mediaType = ext;
         this.files.push(...files);
         this.frames = [0];
       }
