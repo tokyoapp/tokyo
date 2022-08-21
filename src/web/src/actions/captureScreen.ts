@@ -1,16 +1,51 @@
 import { MediaFile } from "./../modules/storage/MediaFile";
 import fs from "../modules/filesystem";
 
+import { GIFEncoder, quantize, applyPalette } from "gifenc";
+
 let captureStream: MediaStream | null = null;
-let mediaRecorder: MediaRecorder | null = null;
+let recording: boolean = false;
+
+let chunks: ImageData[] = [];
 
 export function stopCapture() {
-  if (mediaRecorder) {
-    mediaRecorder.stop();
+  recording = false;
+  console.log(chunks);
+
+  const cnvs = document.createElement("canvas");
+  const ctx = cnvs.getContext("2d");
+  if (!ctx) throw new Error("no ctx");
+
+  const gif = GIFEncoder();
+
+  if (chunks[0]) {
+    const palette = quantize(chunks[0].data, 256);
+
+    for (let frame of chunks) {
+      const index = applyPalette(frame.data, palette);
+      gif.writeFrame(index, frame.width, frame.height, { palette });
+    }
+
+    gif.finish();
+    const output = gif.bytes();
+
+    console.log(output);
+
+    const blob = new Blob([output], { type: "image/gif" });
+    console.log("output", blob);
+
+    //download blob
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cap.gif";
+    a.click();
   }
 }
 
 export async function startCapture() {
+  recording = true;
+
   const displayMediaOptions = {
     video: { width: 1920, height: 1080, frameRate: 60 },
   };
@@ -29,75 +64,32 @@ export async function startCapture() {
   };
   video.srcObject = captureStream;
 
-  const chunks: Blob[] = [];
+  const canvas = document.createElement("canvas");
 
-  if (captureStream) {
-    mediaRecorder = new MediaRecorder(captureStream, {
-      mimeType: "video/webm",
-    });
+  const captureFrame = async () => {
+    const ar = video.videoWidth / video.videoHeight;
+    canvas.width = 680 * ar;
+    canvas.height = 680;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      chunks.push(data);
+    }
+  };
 
-    mediaRecorder.start();
+  const loop = () => {
+    captureFrame();
 
-    mediaRecorder.onstop = async () => {
-      video.remove();
+    if (recording) {
+      setTimeout(loop, 1000 / 30);
+    }
 
-      const blob = new Blob(chunks);
-      const buffer = await blob.arrayBuffer();
-      const hash = await fs.saveBuffer(buffer);
-      console.log("buffer hash:", hash);
+    console.log(chunks.length);
+  };
+  loop();
 
-      // stop the display capture
-      const tracks = captureStream?.getVideoTracks() || [];
-      for (let track of tracks) {
-        track.stop();
-      }
-
-      fs.list().then(async (list) => {
-        console.log(list);
-
-        for (let entry of list) {
-          const name = entry[0];
-          if (name === hash) {
-            const f = await entry[1].getFile();
-
-            console.log(f);
-
-            const buff = await f.arrayBuffer();
-
-            console.log(buff);
-
-            const blob = new Blob([buff], { type: "video/mp4" });
-
-            const file = new File([blob], "cap.mp4");
-            const mediaFile = new MediaFile([file]);
-
-            console.log(mediaFile);
-
-            await fs.add([new File([mediaFile], mediaFile.name)]);
-
-            const mediaBlob = await mediaFile.blob();
-
-            console.log("screen cap cache", mediaBlob);
-
-            const header = await MediaFile.readFileHeader(mediaBlob);
-            console.log(header);
-
-            const video = document.createElement("video");
-            video.src = URL.createObjectURL(blob);
-            video.oncanplay = video.play;
-
-            document.body.append(video);
-          }
-        }
-      });
-    };
-
-    mediaRecorder.ondataavailable = function (e) {
-      chunks.push(e.data);
-    };
-  }
-
-  document.body.append(video);
+  document.body.append(canvas);
 
   return captureStream;
 }

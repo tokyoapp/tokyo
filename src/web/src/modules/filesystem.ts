@@ -40,4 +40,9 @@ export default class fs {
     if (!thread) throw new Error("fs thread not initialized!");
     return await thread.saveBuffer(buffer);
   }
+
+  static async clear() {
+    if (!thread) throw new Error("fs thread not initialized!");
+    return thread.clear();
+  }
 }

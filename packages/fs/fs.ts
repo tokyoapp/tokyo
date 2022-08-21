@@ -24,6 +24,13 @@ const fs: Ifs = {
   async saveBuffer(buffer: ArrayBuffer): Promise<string> {
     return writeBuffer(buffer);
   },
+  async clear() {
+    const root = await navigator.storage.getDirectory();
+    const files = await listFiles(root);
+    for (let [name, file] of files) {
+      await root.removeEntry(name);
+    }
+  },
 };
 
 Comlink.expose(fs);

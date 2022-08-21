@@ -1,12 +1,14 @@
 import { startCapture, stopCapture } from "./actions/captureScreen";
 import { handleFiles } from "./actions/handleFiles";
 import { convert } from "./actions/convertToFrames";
+import { saveAs } from "./actions/saveAs";
 
 const actions = {
   handleFiles: handleFiles,
   captureScreen: startCapture,
   stopCapture: stopCapture,
   convert: convert,
+  saveAs: saveAs,
 };
 
 export default class Actions {

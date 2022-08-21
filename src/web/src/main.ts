@@ -33,14 +33,16 @@ async function main() {
 
   fs.get("cap.mp%01d").then(async (file) => {
     const f = await file?.getFile();
-    const uri = URL.createObjectURL(f);
+    if (f) {
+      const uri = URL.createObjectURL(f);
 
-    const video = document.createElement("video");
-    video.src = uri;
-    video.controls = true;
-    video.loop = true;
+      const video = document.createElement("video");
+      video.src = uri;
+      video.controls = true;
+      video.loop = true;
 
-    document.body.append(video);
+      document.body.append(video);
+    }
   });
 
   // fs.get("output.webp").then(async (file) => {
