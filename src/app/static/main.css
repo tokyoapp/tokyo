@@ -1,0 +1,23 @@
+body {
+  margin: 40px;
+  font-size: 1.4rem;
+  overscroll-behavior: none;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+pre {
+  text-shadow: 0 0 20px rgb(255 255 255 / 75%);
+}
+
+file-dropzone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
