@@ -2,7 +2,7 @@ import type { Component } from "solid-js";
 
 import styles from "./App.module.css";
 
-const App: Component = () => {
+const Evolution: Component = () => {
   return (
     <div class={styles.App}>
       <div state-key="innerHTML:items"></div>
@@ -21,4 +21,4 @@ const App: Component = () => {
   );
 };
 
-export default App;
+export default Evolution;

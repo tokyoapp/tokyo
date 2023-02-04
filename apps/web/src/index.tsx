@@ -1,13 +1,14 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 
-import "../assets/index.scss";
-import App from "ui/components/App";
+import "../assets/styles/main.scss";
+
+import Evolution from "ui/components/App";
 
 import { log } from "./log";
 import fs from "./modules/filesystem";
 
-render(() => <App />, document.getElementById("root") as HTMLElement);
+render(() => <Evolution />, document.getElementById("root") as HTMLElement);
 
 async function main() {
   log("Web Image Creator");

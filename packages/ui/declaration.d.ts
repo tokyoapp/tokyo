@@ -28,5 +28,6 @@ declare module "solid-js" {
 declare global {
   interface HTMLElementTagNameMap {
     "action-button": any;
+    "file-dropzone": any;
   }
 }

@@ -1,21 +1,16 @@
 {
-  "name": "project-evolution",
+  "name": "evolution",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
-  "workspaces": [
-    "src/*",
-    "packages/*"
-  ],
   "scripts": {
-    "start": "turbo run start",
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "web": "pnpm --filter=web --",
     "format": "prettier --write **/*.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.luckydye.de:apps/project-evolution.git"
+    "url": "git@gitlab.luckydye.de:apps/evolution.git"
   },
   "dependencies": {
     "prettier": "^2.7.0",
