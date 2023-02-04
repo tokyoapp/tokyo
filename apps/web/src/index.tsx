@@ -1,27 +1,20 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 
-import "./index.css";
-import App from "./App";
+import "../assets/index.scss";
+import App from "ui/components/App";
 
-import { State } from "@luckydye/app-state";
-import { log } from "../../app/src/log";
+import { log } from "./log";
 import fs from "./modules/filesystem";
 
-const modules = import.meta.glob("./components/*");
-
 render(() => <App />, document.getElementById("root") as HTMLElement);
-
-for (const path in modules) {
-  // load all components async
-  modules[path]();
-}
 
 async function main() {
   log("Web Image Creator");
 
   const items = (await fs.list()).map((item) => item[1].name);
-  State.scope("media", { items: JSON.stringify(items, null, "\t") });
+
+  const media = { items: JSON.stringify(items, null, "\t") };
 
   fs.get("cap.mp%01d").then(async (file) => {
     const f = await file?.getFile();

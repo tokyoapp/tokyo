@@ -10,11 +10,12 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^4.9.4",
     "vite": "^4.0.3",
-    "vite-plugin-solid": "^2.5.0"
+    "vite-plugin-solid": "^2.5.0",
+    "sass": "^1.58.0",
+    "solid-js": "^1.6.6"
   },
   "dependencies": {
-    "solid-js": "^1.6.6"
+    "ui": "workspace:"
   }
 }

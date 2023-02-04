@@ -5,9 +5,7 @@ import styles from "./App.module.css";
 const App: Component = () => {
   return (
     <div class={styles.App}>
-      <app-state scope="media">
-        <div state-key="innerHTML:items"></div>
-      </app-state>
+      <div state-key="innerHTML:items"></div>
       <br />
       <div>
         <action-button action="captureScreen">Start Capture</action-button>
