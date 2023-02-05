@@ -2,6 +2,8 @@ import type { Component } from "solid-js";
 
 import styles from "./Evolution.module.css";
 
+import "./Button";
+import "./ActionButton";
 import "./FileDropzone";
 
 const Evolution: Component = () => {

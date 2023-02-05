@@ -67,3 +67,9 @@ export default class FileDropzone extends LitElement {
 }
 
 customElements.define("file-dropzone", FileDropzone);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "file-dropzone": FileDropzone;
+  }
+}

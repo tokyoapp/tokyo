@@ -1,26 +1,29 @@
-import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import Actions from "core/actions";
+import Button from "./Button";
 
-export default class ActionButton extends LitElement {
-  static get styles() {
-    return css`
-      :host {
-        display: inline-block;
-      }
-    `;
-  }
-
-  @property({ type: String, reflect: true })
-  public action!: string;
+export default class ActionButton extends Button {
+  @property()
+  public action?: string;
 
   onClick() {
-    Actions.run(this.action);
+    this.action && Actions.run(this.action);
   }
 
-  render() {
-    return html` <button @click=${this.onClick}><slot></slot></button> `;
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener("click", this.onClick);
+  }
+
+  disconnectedCallback(): void {
+    this.removeEventListener("click", this.onClick);
   }
 }
 
 customElements.define("action-button", ActionButton);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "action-button": ActionButton;
+  }
+}

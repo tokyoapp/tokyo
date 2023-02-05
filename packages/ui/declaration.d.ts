@@ -24,10 +24,3 @@ declare module "solid-js" {
     interface IntrinsicElements extends CustomElements {}
   }
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "action-button": any;
-    "file-dropzone": any;
-  }
-}
