@@ -6,18 +6,18 @@
   height: 100%;
   text-align: center;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr auto auto;
   align-items: center;
   justify-items: center;
 
   :global {
     .toolbar {
       width: 100%;
-      padding: 10px;
       background: #0c0c0c;
       border-bottom: 1px solid black;
       display: flex;
       gap: 10px;
+      box-sizing: border-box;
     }
 
     canvas {

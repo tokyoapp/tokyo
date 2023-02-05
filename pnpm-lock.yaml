@@ -65,9 +65,6 @@ importers:
     dependencies:
       comlink: 4.4.1
 
-  packages/timeline:
-    specifiers: {}
-
   packages/ui:
     specifiers:
       core: 'workspace:'
