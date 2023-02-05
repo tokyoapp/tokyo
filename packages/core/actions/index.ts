@@ -14,7 +14,7 @@ const actions = {
 export default class Actions {
   static run(action: string, args = []) {
     if (actions[action]) {
-      actions[action](...args);
+      return actions[action](...args);
     } else {
       throw new Error(`Action not found: ${action}`);
     }

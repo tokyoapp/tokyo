@@ -84,7 +84,5 @@ export async function startCapture() {
   };
   loop();
 
-  document.body.append(canvas);
-
-  return captureStream;
+  return canvas;
 }
