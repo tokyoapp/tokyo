@@ -5,14 +5,14 @@ import svgSprites from "svg-sprites/vite";
 import path from "node:path";
 
 export default defineConfig({
-  base: "",
+  publicDir: "static",
   server: {
     port: 3000,
   },
-  resolve: {
-    alias: {
-      "~": path.resolve("./"),
-    },
-  },
+  // resolve: {
+  //   alias: {
+  //     "~": path.resolve("./"),
+  //   },
+  // },
   plugins: [solidPlugin(), wrapWorker(), svgSprites()],
 });

@@ -43,3 +43,13 @@ async function main() {
 }
 
 window.addEventListener("DOMContentLoaded", main);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("./service.js", {
+      scope: "/",
+    })
+    .then(() => {
+      console.log("Service worker registered!");
+    });
+}
