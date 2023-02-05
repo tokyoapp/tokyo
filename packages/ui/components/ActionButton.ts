@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import Actions from "../Actions";
+import Actions from "core/actions";
 
 export default class ActionButton extends LitElement {
   static get styles() {

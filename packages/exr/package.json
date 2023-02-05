@@ -1,7 +1,0 @@
-{
-  "name": "exr",
-  "version": "1.0.0",
-  "scripts": {
-    "_build": "wasm-pack build --target web"
-  }
-}

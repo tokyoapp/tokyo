@@ -1,0 +1,8 @@
+{
+  "name": "compositor",
+  "version": "0.1.0",
+  "main": "./pkg/compositor.js",
+  "scripts": {
+    "build": "wasm-pack build --target web"
+  }
+}

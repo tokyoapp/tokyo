@@ -1,9 +1,0 @@
-{
-  "name": "fs",
-  "version": "1.0.0",
-  "main": "./fs.ts",
-  "scripts": {},
-  "dependencies": {
-    "comlink": "^4.3.1"
-  }
-}

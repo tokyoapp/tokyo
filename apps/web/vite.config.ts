@@ -1,8 +1,11 @@
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import wrapWorker from "vite-plugin-wrap-worker";
+import svgSprites from "svg-sprites/vite";
 import path from "node:path";
 
 export default defineConfig({
+  base: "",
   server: {
     port: 3000,
   },
@@ -11,5 +14,5 @@ export default defineConfig({
       "~": path.resolve("./"),
     },
   },
-  plugins: [solidPlugin()],
+  plugins: [solidPlugin(), wrapWorker(), svgSprites()],
 });
