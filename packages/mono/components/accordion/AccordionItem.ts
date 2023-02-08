@@ -1,4 +1,4 @@
-import "@sv-components/mono/components/collapsable";
+import "mono/components/collapsable";
 import { html, css, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
