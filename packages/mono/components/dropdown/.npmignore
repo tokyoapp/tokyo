@@ -1,0 +1,18 @@
+# git
+.git
+.gitignore
+
+# logs
+npm-debug.log
+
+# configs
+rollup.config.js
+.eslintrc
+.editorconfig
+.gitlab-ci.yml
+.prettierrc
+.npmrc
+
+# other
+.DS_Store
+.storybook

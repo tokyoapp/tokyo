@@ -1,0 +1,23 @@
+sv-dropdown button {
+}
+
+button,
+input {
+  padding: 8px 12px;
+  width: 250px;
+  box-sizing: border-box;
+}
+sv-option {
+  display: block;
+  background: #eee;
+  border: 2px solid lightgrey;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+sv-option:hover {
+  border-color: grey;
+}
+sv-option[selected] {
+  border-color: black;
+}

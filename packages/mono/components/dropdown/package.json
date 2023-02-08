@@ -1,0 +1,23 @@
+{
+  "name": "@sv-components/dropdown",
+  "version": "0.3.7",
+  "description": "",
+  "main": "dist/dropdown.cjs.js",
+  "module": "dist/dropdown.es.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "dev": "histoire dev",
+    "build": "vite build",
+    "lint": "eslint --ext .ts .",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sv-components/mono": "workspace:^",
+    "lit": "^2.5.0"
+  },
+  "devDependencies": {
+    "vite": "^2.9.15"
+  }
+}

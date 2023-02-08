@@ -1,0 +1,37 @@
+{
+  "name": "@sv-components/accordion",
+  "version": "1.4.0",
+  "description": "",
+  "main": "dist/accordion.js",
+  "module": "dist/accordion.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "histoire dev",
+    "build": "tsup --format esm,cjs --dts src/index.ts",
+    "test": "tsc --noEmit",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sv-components/mono": "workspace:^",
+    "lit": "^2.2.7"
+  },
+  "devDependencies": {
+    "@histoire/plugin-vue": "^0.11.9",
+    "@vitejs/plugin-vue": "^3.0.0",
+    "histoire": "^0.11.9",
+    "tsup": "^6.5.0",
+    "txtgen": "^3.0.4"
+  },
+  "files": [
+    "dist"
+  ],
+  "tsup": {
+    "entry": {
+      "accordion": "src/index.ts"
+    },
+    "sourcemap": true,
+    "clean": true
+  }
+}
