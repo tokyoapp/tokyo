@@ -5,15 +5,15 @@
   "main": "index.js",
   "scripts": {
     "build": "turbo run build",
-    "web": "pnpm --filter=web --",
-    "format": "prettier --write **/*.ts"
+    "emote-editor": "pnpm --filter=emote-editor --",
+    "evo": "pnpm --filter=evo --",
+    "audio-recorder": "pnpm --filter=audio-recorder --"
   },
   "repository": {
     "type": "git",
     "url": "git@gitlab.luckydye.de:apps/evolution.git"
   },
   "dependencies": {
-    "prettier": "^2.7.0",
     "turbo": "^1.2.14",
     "typescript": "5.0.0-dev.20230204"
   },
