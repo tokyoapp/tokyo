@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "emote-editor": "pnpm --filter=emote-editor --",
     "evo": "pnpm --filter=evo --",
+    "desktop": "pnpm --filter=desktop --",
     "audio-recorder": "pnpm --filter=audio-recorder --",
     "clean": "git clean -fX ."
   },

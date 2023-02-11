@@ -5,5 +5,3 @@ import "./style.css";
 import App from "./App";
 
 render(() => <App />, document.getElementById("root") as HTMLElement);
-
-document.addEventListener("click", console.log);

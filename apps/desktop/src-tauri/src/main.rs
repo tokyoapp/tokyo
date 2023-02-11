@@ -3,10 +3,16 @@
     windows_subsystem = "windows"
 )]
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+use tauri::Manager;
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+#[tauri::command]
+fn show_main_window(window: tauri::Window) {
+    window.get_window("main").unwrap().show().unwrap();
 }
 
 fn main() {
