@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="manifest" href="manifest.json" />
+
+    <title>Audio Recorder</title>
+    <script src="./main.js" type="module"></script>
+
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <main>
+      <div class="controls">
+        <div id="controlsElement"></div>
+      </div>
+      <div class="track-canvas">
+        <div id="tracksEle"></div>
+        <div class="timeline">
+          <audio-timeline></audio-timeline>
+        </div>
+      </div>
+      <div id="headerElement"></div>
+      <div id="mixerContainer"></div>
+    </main>
+
+    <debug id="debug"></debug>
+  </body>
+</html>
