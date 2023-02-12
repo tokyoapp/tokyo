@@ -1,0 +1,23 @@
+{
+  "name": "whiteboard",
+  "version": "1.0.0",
+  "description": "Use to collect or organsie concept pieces.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "serve ./public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luckydye/whiteboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luckydye/whiteboard/issues"
+  },
+  "homepage": "https://github.com/luckydye/whiteboard#readme",
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
