@@ -1,0 +1,1 @@
+# Emote Editor component for Atrium
