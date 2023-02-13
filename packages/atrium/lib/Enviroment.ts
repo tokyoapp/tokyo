@@ -1,1 +1,1 @@
-export default __PACKAGE__;
+export default "__PACKAGE__";
