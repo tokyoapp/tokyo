@@ -6,6 +6,7 @@ import actions from "./actions";
 import TwitchChat from "ui/components/chat/TwitchChat";
 import EmoteEditorEle from "./components/emote-editor/EmoteEditor";
 import "ui/components/THColorPicker";
+import "tree-explorer/components/tree-explorer";
 
 import atrium from "atrium";
 

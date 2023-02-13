@@ -34,6 +34,7 @@ importers:
       solid-js: ^1.6.6
       svg-sprites: ^0.0.5
       tailwindcss: ^3.2.4
+      tree-explorer: workspace:^
       ui: workspace:^
       vite: ^4.0.3
       vite-plugin-solid: ^2.5.0
@@ -44,6 +45,7 @@ importers:
       lit: 2.6.1
       lit-element: 2.5.1
       solid-js: 1.6.10
+      tree-explorer: link:../../packages/tree-explorer
       ui: link:../../packages/ui
     devDependencies:
       autoprefixer: 10.4.13_postcss@8.4.21
