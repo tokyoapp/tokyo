@@ -24,7 +24,8 @@
     "solid-js": "^1.6.6",
     "gl-matrix": "^3.3.0",
     "lit-element": "^2.5.1",
-    "tree-explorer": "workspace:^",
+    "filesystem": "workspace:^",
+    "renderer": "workspace:^",
     "atrium": "workspace:^",
     "ui": "workspace:^"
   }

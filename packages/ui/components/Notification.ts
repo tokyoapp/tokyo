@@ -1,54 +1,53 @@
 // ported from common-components
 
 export default class Notification {
+  static get TEXT() {
+    return 0;
+  }
 
-    static get TEXT() { return 0; }
+  constructor({ text = "", time = 2000, onclick = () => {}, type = Notification.TEXT } = {}) {
+    this.text = text;
+    this.time = time;
+    this.type = type;
+    this.onclick = onclick;
+  }
 
-    constructor({
-        text = "",
-        time = 2000,
-        onclick = () => {},
-        type = Notification.TEXT
-    } = {}) {
-        this.text = text;
-        this.time = time;
-        this.type = type;
-        this.onclick = onclick;
+  show() {
+    const text = this.text;
+    const time = this.time;
+
+    const container =
+      document.querySelector("notifications") || document.createElement("notifications");
+
+    if (!container.parentNode) {
+      document.body.appendChild(container);
     }
 
-    show() {
-        const text = this.text;
-        const time = this.time;
+    const note = document.createElement("notification");
 
-        const container = document.querySelector('notifications') || document.createElement('notifications');
+    switch (this.type) {
+      case Notification.TEXT:
+        note.innerHTML = text;
+        break;
+    }
 
-        if (!container.parentNode) {
-            document.body.appendChild(container);
-        }
+    function close() {
+      note.style.setProperty("animation", "fade-out .25s ease");
+      setTimeout(() => {
+        note.remove();
+      }, 200);
+    }
 
-        const note = document.createElement("notification");
+    const timer = setTimeout(() => close(), time);
 
-        switch (this.type) {
-            case Notification.TEXT:
-                note.innerHTML = text;
-                break;
-        }
+    note.onclick = () => {
+      clearTimeout(timer);
+      this.onclick && this.onclick(note);
+      close();
+    };
 
-        function close() {
-            note.style.setProperty("animation", "fade-out .25s ease");
-            setTimeout(() => { note.remove(); }, 200);
-        }
-
-        const timer = setTimeout(() => close(), time);
-
-        note.onclick = () => {
-            clearTimeout(timer);
-            this.onclick && this.onclick(note);
-            close();
-        }
-
-        const style = document.createElement('style');
-        style.innerHTML = `
+    const style = document.createElement("style");
+    style.innerHTML = `
             notification {
                 padding: 10px 20px;
                 background: #1c1c1c;
@@ -86,10 +85,10 @@ export default class Notification {
                 to { opacity: 0; }
             }
         `;
-        note.appendChild(style);
+    note.appendChild(style);
 
-        container.appendChild(note);
+    container.appendChild(note);
 
-        return note;
-    }
+    return note;
+  }
 }

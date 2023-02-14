@@ -1,14 +1,13 @@
-import Column from './Column';
+import Column from "./Column";
 
 export default class Group extends Column {
+  static get observedAttributes() {
+    return ["active-tab", "show-tabs"];
+  }
 
-	static get observedAttributes() {
-		return ['active-tab', 'show-tabs'];
-	}
-
-	static get template() {
-		const groupTemplate = document.createElement("template");
-		groupTemplate.innerHTML = `
+  static get template() {
+    const groupTemplate = document.createElement("template");
+    groupTemplate.innerHTML = `
 			<style>
 				:host {
 					position: relative;
@@ -122,283 +121,279 @@ export default class Group extends Column {
 			</style>
 			<div class="tabs"></div>
 		`;
-		return groupTemplate.content;
-	}
+    return groupTemplate.content;
+  }
 
-	get activeTab() {
-		if(this.hasAttribute('active-tab')) {
-			return +(this.getAttribute("active-tab") || 0);
-		} else {
-			return -1;
-		}
-	}
+  get activeTab() {
+    if (this.hasAttribute("active-tab")) {
+      return +(this.getAttribute("active-tab") || 0);
+    } else {
+      return -1;
+    }
+  }
 
-	set activeTab(index: number) {
-		this.setActiveTab(index);
-	}
+  set activeTab(index: number) {
+    this.setActiveTab(index);
+  }
 
-	get tabs() {
-		if(!this.shadowRoot) {
-			return this.attachShadow({ mode: 'open' });
-		}
-		return this.shadowRoot.querySelectorAll(".tabs .tab[data-groupid]");
-	}
+  get tabs() {
+    if (!this.shadowRoot) {
+      return this.attachShadow({ mode: "open" });
+    }
+    return this.shadowRoot.querySelectorAll(".tabs .tab[data-groupid]");
+  }
 
-	get components() {
-		return [...this.children].filter(ele => ele.hasAttribute('tab'));
-	}
+  get components() {
+    return [...this.children].filter((ele) => ele.hasAttribute("tab"));
+  }
 
-	constructor() {
-		super();
+  constructor() {
+    super();
 
-		this.shadowRoot?.appendChild(Group.template);
-		this.shadowRoot?.appendChild(this.shadowSlot);
+    this.shadowRoot?.appendChild(Group.template);
+    this.shadowRoot?.appendChild(this.shadowSlot);
 
-		this.initializeDragAndDropHandlers();
-	}
+    this.initializeDragAndDropHandlers();
+  }
 
-	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-		if(oldValue === newValue) return;
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    if (oldValue === newValue) return;
 
-		if(name === 'active-tab') {
-			this.activeTab = +newValue;
-		}
+    if (name === "active-tab") {
+      this.activeTab = +newValue;
+    }
 
-		this.renderTabs();
-	}
+    this.renderTabs();
+  }
 
-	connectedCallback() {
-		// override default
-	}
+  connectedCallback() {
+    // override default
+  }
 
-	slotChangeCallback(e: Event) {
-		super.slotChangeCallback(e);
+  slotChangeCallback(e: Event) {
+    super.slotChangeCallback(e);
 
-		this.renderTabs();
-		this.setActiveTab(this.components.length-1);
-	}
+    this.renderTabs();
+    this.setActiveTab(this.components.length - 1);
+  }
 
-	initializeDragAndDropHandlers() {
+  initializeDragAndDropHandlers() {
+    let insertPosition = 0;
 
-		let insertPosition = 0;
+    const dragOverHandler = (e: DragEvent) => {
+      if (!document.body.hasAttribute("layout-drag")) return;
 
-		const dragOverHandler = (e: DragEvent) => {
-			if(!document.body.hasAttribute('layout-drag')) return;
+      e.preventDefault();
 
-			e.preventDefault();
+      const bounds = this.getBoundingClientRect();
 
-			const bounds = this.getBoundingClientRect();
+      const x = e.x;
+      const y = e.y;
 
-			const x = e.x;
-			const y = e.y;
+      const area = Math.min(bounds.height / 8, bounds.width / 8);
 
-			const area = Math.min(bounds.height / 8, bounds.width / 8);
-			
-			this.removeAttribute('style');
-			insertPosition = 0;
+      this.removeAttribute("style");
+      insertPosition = 0;
 
-			if(y < bounds.top + area) {
-				this.style.setProperty('--height', area + 'px');
+      if (y < bounds.top + area) {
+        this.style.setProperty("--height", area + "px");
 
-				insertPosition = -1;
-			} else if(y > bounds.bottom - area) {
-				this.style.setProperty('--height', area + 'px');
-				this.style.setProperty('--top', bounds.height - area + 'px');
+        insertPosition = -1;
+      } else if (y > bounds.bottom - area) {
+        this.style.setProperty("--height", area + "px");
+        this.style.setProperty("--top", bounds.height - area + "px");
 
-				insertPosition = 1;
-			} else if(x < bounds.left + area) {
-				this.style.setProperty('--width', area + 'px');
+        insertPosition = 1;
+      } else if (x < bounds.left + area) {
+        this.style.setProperty("--width", area + "px");
 
-				insertPosition = -2;
-			} else if(x > bounds.right - area) {
-				this.style.setProperty('--width', area + 'px');
-				this.style.setProperty('--left', bounds.width - area + 'px');
+        insertPosition = -2;
+      } else if (x > bounds.right - area) {
+        this.style.setProperty("--width", area + "px");
+        this.style.setProperty("--left", bounds.width - area + "px");
 
-				insertPosition = 2;
-			}
-			
-			this.setAttribute('drag-over', '');
+        insertPosition = 2;
+      }
 
-			if(e.dataTransfer) {
-				e.dataTransfer.dropEffect = "move";
-			}
-		}
+      this.setAttribute("drag-over", "");
 
-		const dragEndHandler = (e: Event) => {
-			dragLeaveHandler(e);
-			
-			if(document.body.hasAttribute('layout-drag')) {
-				document.body.removeAttribute('layout-drag');
-			}
-		}
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "move";
+      }
+    };
 
-		const dragLeaveHandler = (e: Event) => {
-			this.removeAttribute('drag-over');
-			this.removeAttribute('style');
-		}
+    const dragEndHandler = (e: Event) => {
+      dragLeaveHandler(e);
 
-		const dragDropHandler = (e: DragEvent) => {
-			e.preventDefault();
+      if (document.body.hasAttribute("layout-drag")) {
+        document.body.removeAttribute("layout-drag");
+      }
+    };
 
-			dragEndHandler(e);
+    const dragLeaveHandler = (e: Event) => {
+      this.removeAttribute("drag-over");
+      this.removeAttribute("style");
+    };
 
-			const targetId = e.dataTransfer?.getData("tab");
+    const dragDropHandler = (e: DragEvent) => {
+      e.preventDefault();
 
-			if(!targetId)
-				return;
+      dragEndHandler(e);
 
-			const component = document.querySelector('['+targetId+']');
+      const targetId = e.dataTransfer?.getData("tab");
 
-			if(!component)
-				return;
+      if (!targetId) return;
 
-			if(insertPosition === 0 && component.parentNode === this) 
-				return;
+      const component = document.querySelector("[" + targetId + "]");
 
-			component.parentNode?.removeChild(component);
+      if (!component) return;
 
-			// apend inside
-			if(insertPosition === 0) {
-				this.appendChild(component);
-			}
+      if (insertPosition === 0 && component.parentNode === this) return;
 
-			// vertical
-			if(Math.abs(insertPosition) === 1) {
-				const oldHeight = this.height;
-				const newGroup = this.cloneNode();
+      component.parentNode?.removeChild(component);
 
-				newGroup.appendChild(component);
+      // apend inside
+      if (insertPosition === 0) {
+        this.appendChild(component);
+      }
 
-				// apend above
-				if(insertPosition < 0) {
-					newGroup.height = oldHeight / 2;
-					this.height -= oldHeight / 2;
-					this.parentNode.insertBefore(newGroup, this);
-				}
-	
-				// apend below
-				if(insertPosition > 0) {
-					newGroup.height = oldHeight / 2;
-					this.height -= oldHeight / 2;
-					this.parentNode.insertBefore(newGroup, this.nextSibling);
-				}
-			}
+      // vertical
+      if (Math.abs(insertPosition) === 1) {
+        const oldHeight = this.height;
+        const newGroup = this.cloneNode();
 
-			// horizontal
-			if(Math.abs(insertPosition) === 2) {
-				const oldWidth = this.parentNode.width;
-				const newColumn = this.parentNode.cloneNode();
-				const newGroup = this.cloneNode();
+        newGroup.appendChild(component);
 
-				newGroup.appendChild(component);
-				newColumn.appendChild(newGroup);
+        // apend above
+        if (insertPosition < 0) {
+          newGroup.height = oldHeight / 2;
+          this.height -= oldHeight / 2;
+          this.parentNode.insertBefore(newGroup, this);
+        }
 
-				// apend to the left
-				if(insertPosition < 0) {
-					this.parentNode.width -= oldWidth / 2;
-					newColumn.width = oldWidth / 2;
-					this.parentNode.parentNode.insertBefore(newColumn, this.parentNode);
-				}
+        // apend below
+        if (insertPosition > 0) {
+          newGroup.height = oldHeight / 2;
+          this.height -= oldHeight / 2;
+          this.parentNode.insertBefore(newGroup, this.nextSibling);
+        }
+      }
 
-				// apend to the right
-				if(insertPosition > 0) {
-					this.parentNode.width -= oldWidth / 2;
-					newColumn.width = oldWidth / 2;
-					this.parentNode.parentNode.insertBefore(newColumn, this.parentNode.nextSibling);
-				}
-			}
-		}
+      // horizontal
+      if (Math.abs(insertPosition) === 2) {
+        const oldWidth = this.parentNode.width;
+        const newColumn = this.parentNode.cloneNode();
+        const newGroup = this.cloneNode();
 
-		this.addEventListener('dragover', dragOverHandler);
-		this.addEventListener('dragleave', dragLeaveHandler);
-		this.addEventListener('dragend', dragEndHandler);
-		this.addEventListener('drop', dragDropHandler);
-	}
+        newGroup.appendChild(component);
+        newColumn.appendChild(newGroup);
 
-	// updates tabs bar if components have changed
-	renderTabs() {
-		const tabs = this.shadowRoot.querySelector(".tabs");
-		tabs.innerHTML = "";
+        // apend to the left
+        if (insertPosition < 0) {
+          this.parentNode.width -= oldWidth / 2;
+          newColumn.width = oldWidth / 2;
+          this.parentNode.parentNode.insertBefore(newColumn, this.parentNode);
+        }
 
-		// creates tab ele for component
-		const createTab = component => {
-			const tab = document.createElement("span");
-			tab.setAttribute('draggable', 'true');
-			tab.className = "tab";
+        // apend to the right
+        if (insertPosition > 0) {
+          this.parentNode.width -= oldWidth / 2;
+          newColumn.width = oldWidth / 2;
+          this.parentNode.parentNode.insertBefore(newColumn, this.parentNode.nextSibling);
+        }
+      }
+    };
 
-			if(component) {
-				const groupid = component.getAttribute("tab");
+    this.addEventListener("dragover", dragOverHandler);
+    this.addEventListener("dragleave", dragLeaveHandler);
+    this.addEventListener("dragend", dragEndHandler);
+    this.addEventListener("drop", dragDropHandler);
+  }
 
-				if(groupid) {
-					tab.innerText = component.name || groupid;
-					tab.dataset.groupid = groupid;
-				}
-	
-				tab.onmousedown = e => {
-					const index = [...tab.parentNode.children].indexOf(tab);
-					this.activeTab = index;
-				}
-	
-				tab.ondragstart = e => {
-					document.body.setAttribute('layout-drag', '');
-					e.dataTransfer.setData("tab", 'drag-target');
-					component.setAttribute('drag-target', '');
-				}
-	
-				tab.ondragend = e => {
-					setTimeout(() => {
-						component.removeAttribute('drag-target');
-					}, 10);
-				}
-			}
+  // updates tabs bar if components have changed
+  renderTabs() {
+    const tabs = this.shadowRoot.querySelector(".tabs");
+    tabs.innerHTML = "";
 
-			return tab;
-		}
+    // creates tab ele for component
+    const createTab = (component) => {
+      const tab = document.createElement("span");
+      tab.setAttribute("draggable", "true");
+      tab.className = "tab";
 
-		const components = this.components;
+      if (component) {
+        const groupid = component.getAttribute("tab");
 
-		if (components.length > 1 || this.hasAttribute('show-tabs')) {
-			for (let i = 0; i < components.length; i++) {
-				const tab = createTab(components[i]);
-				tabs.appendChild(tab);
-			}
-		}
+        if (groupid) {
+          tab.innerText = component.name || groupid;
+          tab.dataset.groupid = groupid;
+        }
 
-		// set active tab if undefined
-		if(this.activeTab == undefined) {
-			this.activeTab = 0;
-		}
+        tab.onmousedown = (e) => {
+          const index = [...tab.parentNode.children].indexOf(tab);
+          this.activeTab = index;
+        };
 
-		if(this.activeTab > this.tabs.length-1) {
-			this.activeTab = Math.max(this.tabs.length-1, 0);
-		}
-	}
+        tab.ondragstart = (e) => {
+          document.body.setAttribute("layout-drag", "");
+          e.dataTransfer.setData("tab", "drag-target");
+          component.setAttribute("drag-target", "");
+        };
 
-	// updates components and tab bar if active tab changed
-	setActiveTab(index: number) {
-		const tabs = this.tabs;
-		const components = this.components;
+        tab.ondragend = (e) => {
+          setTimeout(() => {
+            component.removeAttribute("drag-target");
+          }, 10);
+        };
+      }
 
-		for (let i = 0; i < components.length; i++) {
-			const tab = tabs[i];
+      return tab;
+    };
 
-			if(tab) {
-				if (i == index) {
-					tab.setAttribute("active", "");
-				} else {
-					tab.removeAttribute("active");
-				}
-			}
+    const components = this.components;
 
-			if (components[i]) {
-				if (i == index) {
-					components[i].setAttribute("active", "");
-				} else {
-					components[i].removeAttribute("active");
-				}
-			}
-		}
-	}
+    if (components.length > 1 || this.hasAttribute("show-tabs")) {
+      for (let i = 0; i < components.length; i++) {
+        const tab = createTab(components[i]);
+        tabs.appendChild(tab);
+      }
+    }
+
+    // set active tab if undefined
+    if (this.activeTab == undefined) {
+      this.activeTab = 0;
+    }
+
+    if (this.activeTab > this.tabs.length - 1) {
+      this.activeTab = Math.max(this.tabs.length - 1, 0);
+    }
+  }
+
+  // updates components and tab bar if active tab changed
+  setActiveTab(index: number) {
+    const tabs = this.tabs;
+    const components = this.components;
+
+    for (let i = 0; i < components.length; i++) {
+      const tab = tabs[i];
+
+      if (tab) {
+        if (i == index) {
+          tab.setAttribute("active", "");
+        } else {
+          tab.removeAttribute("active");
+        }
+      }
+
+      if (components[i]) {
+        if (i == index) {
+          components[i].setAttribute("active", "");
+        } else {
+          components[i].removeAttribute("active");
+        }
+      }
+    }
+  }
 }
 
 customElements.define("gyro-group", Group);

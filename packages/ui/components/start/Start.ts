@@ -1,41 +1,39 @@
-import { css, html, LitElement } from 'lit-element';
+import { css, html, LitElement } from "lit-element";
 
 export default class StartComponent extends LitElement {
+  static get styles() {
+    return css`
+      :host {
+        display: flex;
+        justify-content: center;
+        padding: 40px;
+      }
+      .container {
+        max-width: 800px;
+        width: 100%;
+      }
+      h2 {
+        font-weight: 400;
+        font-size: 32px;
+      }
+    `;
+  }
 
-    static get styles() {
-        return css`
-            :host {
-                display: flex;
-                justify-content: center;
-                padding: 40px;
-            }
-            .container {
-                max-width: 800px;
-                width: 100%;
-            }
-            h2 {
-                font-weight: 400;
-                font-size: 32px;
-            }
-        `;
-    }
+  constructor() {
+    super();
+  }
 
-    constructor() {
-        super();
+  connectedCallback() {
+    super.connectedCallback();
+  }
 
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-    }
-
-    render() {
-        return html`
-            <div class="container">
-                <h2>Start</h2>
-            </div>
-        `;
-    }
+  render() {
+    return html`
+      <div class="container">
+        <h2>Start</h2>
+      </div>
+    `;
+  }
 }
 
-customElements.define('atrium-start', StartComponent);
+customElements.define("atrium-start", StartComponent);

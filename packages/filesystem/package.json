@@ -1,10 +1,8 @@
 {
-  "name": "file-system-lib",
+  "name": "filesystem",
   "version": "1.0.0",
   "description": "",
-  "scripts": {
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC"
-
 }

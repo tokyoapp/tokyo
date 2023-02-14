@@ -1,3 +1,0 @@
-interface AudioSource {
-  stop(): void;
-}
