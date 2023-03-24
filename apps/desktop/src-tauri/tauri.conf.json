@@ -61,6 +61,8 @@
     },
     "windows": [
       {
+        "label": "editor",
+        "title": "Editor",
         "width": 800,
         "height": 600,
         "resizable": true,

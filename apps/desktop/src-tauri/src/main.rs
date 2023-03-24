@@ -6,18 +6,19 @@
 use tauri::Manager;
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-#[tauri::command]
-fn show_main_window(window: tauri::Window) {
-    window.get_window("main").unwrap().show().unwrap();
+async fn open_viewer(handle: tauri::AppHandle) {
+    let docs_window = tauri::WindowBuilder::new(
+        &handle,
+        "external", /* the unique window label */
+        tauri::WindowUrl::External("https://tauri.app/".parse().unwrap()),
+    )
+    .build()
+    .unwrap();
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![open_viewer])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
