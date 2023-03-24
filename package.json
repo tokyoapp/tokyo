@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "build": "turbo run build",
-    "app": "pnpm --filter=3d-editor --",
+    "app": "pnpm --filter=oveng --",
     "clean": "git clean -fX ."
   },
   "repository": {
@@ -21,7 +21,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.1",
-    "turbo": "^1.2.14",
+    "turbo": "^1.8.5",
     "typescript": "5.0.0-dev.20230204"
   }
 }
