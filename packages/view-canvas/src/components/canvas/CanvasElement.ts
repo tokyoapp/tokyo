@@ -1,5 +1,5 @@
 import { css, html, LitElement } from "lit";
-import Notification from "../Notification";
+import { property } from "lit/decorators.js";
 import {
   bitmapToBlob,
   debounce,
@@ -32,8 +32,17 @@ const TOOLS = [
   Select,
 ];
 
+let save;
+
+try {
+  const data = JSON.parse(localStorage.getItem("canvas") || "");
+  save = data;
+} catch (err) {
+  console.error(err);
+}
+
 export default class CanvasElement extends LitElement {
-  canvas = new Canvas();
+  canvas = new Canvas(save);
   canvasElement = document.createElement("canvas");
   context = this.canvasElement.getContext("2d");
   selection = [];
@@ -63,7 +72,7 @@ export default class CanvasElement extends LitElement {
 
   currentScale = 0.1;
   scaleCornerSize = 30;
-  gridSize = 100;
+  gridSize = 1920 / 10;
   colors = {
     line_color: "#eee",
     grid_1: "#171717",
@@ -74,6 +83,9 @@ export default class CanvasElement extends LitElement {
   uiElements = {};
 
   tabIndex = 0;
+
+  @property({})
+  controls: Boolean = false;
 
   get width() {
     return this.canvasElement.width;
@@ -112,10 +124,7 @@ export default class CanvasElement extends LitElement {
     document.body.appendChild(menu);
 
     this.canvasElement.oncontextmenu = (e) => {
-      if (
-        ctxtMenuStartPos[0] == Math.floor(e.x) &&
-        ctxtMenuStartPos[1] == Math.floor(e.y)
-      ) {
+      if (ctxtMenuStartPos[0] == Math.floor(e.x) && ctxtMenuStartPos[1] == Math.floor(e.y)) {
         menu.setPosition(e.x, e.y);
         e.preventDefault();
       } else {
@@ -127,9 +136,7 @@ export default class CanvasElement extends LitElement {
     window.addEventListener("resize", this.resize.bind(this));
 
     this.canvasElement.addEventListener("wheel", (e) => {
-      this.setScale(
-        this.canvas.canvas.scale - e.deltaY * this.canvas.canvas.scale * 0.001
-      );
+      this.setScale(this.canvas.canvas.scale - e.deltaY * this.canvas.canvas.scale * 0.001);
     });
 
     // input actions
@@ -218,9 +225,7 @@ export default class CanvasElement extends LitElement {
       shortcut: "Pinch",
       onAction: (args, event, action) => {
         const delta = -action.state.pinch;
-        this.setScale(
-          this.canvas.canvas.scale - delta * this.canvas.canvas.scale * 0.001
-        );
+        this.setScale(this.canvas.canvas.scale - delta * this.canvas.canvas.scale * 0.001);
       },
     });
     Action.register({
@@ -295,7 +300,6 @@ export default class CanvasElement extends LitElement {
       if (this.pointer.colorPicker && this.pointer.color) {
         const hex = rgbToHex(...this.pointer.color);
         navigator.clipboard.writeText(hex);
-        new Notification({ text: "Color copied." }).show();
       }
     });
 
@@ -418,10 +422,7 @@ export default class CanvasElement extends LitElement {
     for (let node of [...this.canvas.nodes]) {
       const p1 = [node.position[0], node.position[1]];
       const p2 = [node.position[0] + node.size[0], node.position[1]];
-      const p3 = [
-        node.position[0] + node.size[0],
-        node.position[1] + node.size[1],
-      ];
+      const p3 = [node.position[0] + node.size[0], node.position[1] + node.size[1]];
       const p4 = [node.position[0], node.position[1] + node.size[1]];
 
       const selection = this.pointer.selection;
@@ -450,10 +451,7 @@ export default class CanvasElement extends LitElement {
   }
 
   bringNodeToFront(node) {
-    const tempNode = this.canvas.nodes.splice(
-      this.canvas.nodes.indexOf(node),
-      1
-    );
+    const tempNode = this.canvas.nodes.splice(this.canvas.nodes.indexOf(node), 1);
     this.canvas.nodes.push(...tempNode);
   }
 
@@ -474,10 +472,7 @@ export default class CanvasElement extends LitElement {
       const offset = this.scaleCornerSize / this.currentScale;
       this.pointer.scaleCorner = pointInRect(
         [x, y],
-        [
-          node.position[0] + (node.size[0] - offset),
-          node.position[1] + (node.size[1] - offset),
-        ],
+        [node.position[0] + (node.size[0] - offset), node.position[1] + (node.size[1] - offset)],
         offset,
         offset
       );
@@ -578,23 +573,13 @@ export default class CanvasElement extends LitElement {
       if (node === this.pointer.node) {
         ctxt.strokeStyle = this.colors.line_color;
         ctxt.lineWidth = 1 / this.currentScale;
-        ctxt.strokeRect(
-          node.position[0] - 0.5,
-          node.position[1] - 0.5,
-          node.size[0],
-          node.size[1]
-        );
+        ctxt.strokeRect(node.position[0] - 0.5, node.position[1] - 0.5, node.size[0], node.size[1]);
       }
 
       if (this.pointer.focusedElement === node) {
         ctxt.strokeStyle = this.colors.line_color;
         ctxt.lineWidth = 1 / this.currentScale;
-        ctxt.strokeRect(
-          node.position[0] - 0.5,
-          node.position[1] - 0.5,
-          node.size[0],
-          node.size[1]
-        );
+        ctxt.strokeRect(node.position[0] - 0.5, node.position[1] - 0.5, node.size[0], node.size[1]);
 
         // scale corner
         const csize = this.scaleCornerSize / this.currentScale;
@@ -652,13 +637,7 @@ export default class CanvasElement extends LitElement {
     ctxt.closePath();
     ctxt.stroke();
     ctxt.beginPath();
-    ctxt.arc(
-      bounds.originX,
-      bounds.originY,
-      5 / this.currentScale,
-      0,
-      Math.PI * 180
-    );
+    ctxt.arc(bounds.originX, bounds.originY, 5 / this.currentScale, 0, Math.PI * 180);
     ctxt.stroke();
 
     ctxt.strokeStyle = this.colors.line_color;
@@ -686,9 +665,7 @@ export default class CanvasElement extends LitElement {
           if (NodeUIElement) {
             this.uiElements[uiNodeId] = new NodeUIElement(this);
             this.uiElements[uiNodeId].setAttribute("node-id", id);
-            this.shadowRoot
-              .querySelector("#canvasOverlay")
-              .appendChild(this.uiElements[uiNodeId]);
+            this.shadowRoot.querySelector("#canvasOverlay").appendChild(this.uiElements[uiNodeId]);
 
             this.uiElements[uiNodeId].addEventListener("change", (e) => {
               node.extras[e.key] = e.value;
@@ -719,9 +696,7 @@ export default class CanvasElement extends LitElement {
           if (OverlayElement) {
             this.uiElements[id] = new OverlayElement();
             this.uiElements[id].setAttribute("node-id", id);
-            this.shadowRoot
-              .querySelector("#canvasOverlay")
-              .appendChild(this.uiElements[id]);
+            this.shadowRoot.querySelector("#canvasOverlay").appendChild(this.uiElements[id]);
 
             this.uiElements[id].addEventListener("change", (e) => {
               node.extras[e.key] = e.value;
@@ -751,22 +726,10 @@ export default class CanvasElement extends LitElement {
     ctxt.fillStyle = this.colors.selection_background;
     ctxt.lineWidth = 1;
     ctxt.beginPath();
-    ctxt.moveTo(
-      this.pointer.selection[0][0] - 0.5,
-      this.pointer.selection[0][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[1][0] - 0.5,
-      this.pointer.selection[0][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[1][0] - 0.5,
-      this.pointer.selection[1][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[0][0] - 0.5,
-      this.pointer.selection[1][1]
-    );
+    ctxt.moveTo(this.pointer.selection[0][0] - 0.5, this.pointer.selection[0][1]);
+    ctxt.lineTo(this.pointer.selection[1][0] - 0.5, this.pointer.selection[0][1]);
+    ctxt.lineTo(this.pointer.selection[1][0] - 0.5, this.pointer.selection[1][1]);
+    ctxt.lineTo(this.pointer.selection[0][0] - 0.5, this.pointer.selection[1][1]);
     ctxt.closePath();
     ctxt.stroke();
     ctxt.fill();
@@ -779,7 +742,7 @@ export default class CanvasElement extends LitElement {
     ctxt.lineWidth = 1 / this.currentScale;
     const w = 1920;
     const h = 1080;
-    ctxt.fillRect(-w / 2 - 0.5, -h / 2 - 0.5, w, h);
+    // ctxt.fillRect(-w / 2 - 0.5, -h / 2 - 0.5, w, h);
     ctxt.strokeRect(-w / 2 - 0.5, -h / 2 - 0.5, w, h);
     ctxt.globalAlpha = 1;
   }
@@ -797,14 +760,18 @@ export default class CanvasElement extends LitElement {
     ctxt.lineWidth = 1 / this.currentScale;
 
     const drawChain = [
-      this._drawGrid.bind(this),
+      () => {
+        this.controls !== false && this._drawGrid(ctxt);
+      },
       (ctxt) => {
-        this._drawResolutionPreview(ctxt);
+        this.controls !== false && this._drawResolutionPreview(ctxt);
       },
       () => {
         renderer.render(ctxt, this.canvas);
       },
-      this._drawUI.bind(this),
+      () => {
+        this.controls !== false && this._drawUI(ctxt);
+      },
     ];
 
     for (let f of drawChain) {
@@ -861,20 +828,24 @@ export default class CanvasElement extends LitElement {
   }
 
   updateCanvas() {
-    this.draw(this.context);
+    if (this.shadowRoot.querySelector("#canvasOverlay")) {
+      this.draw(this.context);
 
-    if (!this.pointer.selecting) {
-      const node = this.hitTestNode(this.pointer.x, this.pointer.y);
-      this.pointer.node = node;
+      if (!this.pointer.selecting) {
+        const node = this.hitTestNode(this.pointer.x, this.pointer.y);
+        this.pointer.node = node;
 
-      if (node) {
-        this.pointer.lastNode = node;
+        if (node) {
+          this.pointer.lastNode = node;
+        }
       }
+
+      this.currentScale += (this.canvas.canvas.scale - this.currentScale) * 0.2;
     }
 
-    this.currentScale += (this.canvas.canvas.scale - this.currentScale) * 0.2;
-
     requestAnimationFrame(this.updateCanvas.bind(this));
+
+    localStorage.setItem("canvas", this.canvas.toJsonString());
   }
 
   connectedCallback() {
@@ -1069,18 +1040,11 @@ function makeColorPickerCursor(color = [0, 0, 0]) {
   ctxt.shadowOffsetX = 0;
   ctxt.shadowOffsetY = 0;
 
-  return `url(${cursorCanvas.toDataURL()}) ${size / 2 + padding} ${
-    size / 2 + padding
-  }, auto`;
+  return `url(${cursorCanvas.toDataURL()}) ${size / 2 + padding} ${size / 2 + padding}, auto`;
 }
 
 function pointInRect(p, p2, width, height) {
-  return (
-    p[0] > p2[0] &&
-    p[0] < p2[0] + width &&
-    p[1] > p2[1] &&
-    p[1] < p2[1] + height
-  );
+  return p[0] > p2[0] && p[0] < p2[0] + width && p[1] > p2[1] && p[1] < p2[1] + height;
 }
 
 function pointsInRect(points, verts) {

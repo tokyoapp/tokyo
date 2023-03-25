@@ -9,8 +9,8 @@ use tauri::Manager;
 async fn open_viewer(handle: tauri::AppHandle) {
     let docs_window = tauri::WindowBuilder::new(
         &handle,
-        "external", /* the unique window label */
-        tauri::WindowUrl::External("https://tauri.app/".parse().unwrap()),
+        "local",
+        tauri::WindowUrl::App("viewer.html".into())
     )
     .build()
     .unwrap();

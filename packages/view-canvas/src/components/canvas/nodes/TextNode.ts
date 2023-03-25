@@ -2,8 +2,8 @@ import { OverlayElement } from "../OverlayElement";
 import { NodeElement } from "../NodeElement";
 import Node from "./Node";
 
-import DropdownButton from "../../DropdownButton";
-import FluidInput from "../../FluidInput";
+import DropdownButton from "ui/components/DropdownButton";
+import FluidInput from "ui/components/FluidInput";
 
 class TextNodeElement extends NodeElement {}
 
@@ -24,7 +24,7 @@ class TextOverlay extends OverlayElement {
     this.data = {
       "font-family": "Roboto",
       "font-size": "69px",
-      color: "grey",
+      "color": "grey",
     };
 
     this.fontDropDown = new DropdownButton({

@@ -2,10 +2,12 @@
   "name": "view-canvas",
   "version": "0.0.0",
   "description": "",
+  "main": "src/index.ts",
   "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lit": "^2.3.1"
+    "lit": "^2.3.1",
+    "ui": "workspace:^"
   }
 }

@@ -2,35 +2,27 @@ import { createSignal } from "solid-js";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 
+import "view-canvas";
+
 function App() {
   const [greetMsg, setGreetMsg] = createSignal("");
   const [name, setName] = createSignal("");
 
-  async function greet() {
+  async function openViewer() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     setGreetMsg(await invoke("open_viewer"));
   }
 
   return (
-    <div class="container">
-      <h1>Welcome to Tauri!</h1>
-
-      <p>Click on the Tauri, Vite, and Solid logos to learn more.</p>
-
-      <div class="row">
-        <div>
-          <input
-            id="greet-input"
-            onChange={(e) => setName(e.currentTarget.value)}
-            placeholder="Enter a name..."
-          />
-          <button type="button" onClick={() => greet()}>
-            Greet
-          </button>
+    <div class="app">
+      <div class="panel">
+        <canvas-element controls></canvas-element>
+      </div>
+      <div class="panel">
+        <div class="properties">
+          <button onclick={openViewer}>Open Viewer</button>
         </div>
       </div>
-
-      <p>{greetMsg}</p>
     </div>
   );
 }

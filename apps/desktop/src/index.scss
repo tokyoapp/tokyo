@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  background-color: #333;
+  color: white;
+}
+
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+canvas-element {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.panel {
+  width: 100%;
+  height: 100%;
+  background-color: #1c1c1c;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 4px;
+}
+
+.properties {
+  padding: 20px;
+}

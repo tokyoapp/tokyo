@@ -1,11 +1,15 @@
-import Notification from "./components/Notification";
 import { donwloadToDataUri } from "./utils";
 
 export default class Canvas {
   constructor(saveData) {
     if (saveData) {
       this.asset = saveData.asset;
-      this.canvas = saveData.canvas;
+      // this.canvas = saveData.canvas;
+      this.canvas = {
+        title: "",
+        view: [0, 0],
+        scale: 0.5,
+      };
       this.nodes = saveData.nodes || [];
       this.elements = saveData.elements || [];
       this.lines = saveData.lines || [];
@@ -61,7 +65,7 @@ export default class Canvas {
     };
     element.image.onerror = (e) => {
       console.error(e);
-      new Notification({ text: "Could not load image." }).show();
+      // new Notification({ text: "Could not load image." }).show();
     };
 
     if (dataUrl.match("http")) {
@@ -88,7 +92,7 @@ export default class Canvas {
       extras: {
         "font-family": "Roboto",
         "font-size": "69px",
-        color: "#eee",
+        "color": "#eee",
       },
     };
     this.nodes.push(node);
@@ -117,14 +121,8 @@ export default class Canvas {
       globalMinMaxX[0] = Math.min(globalMinMaxX[0], node.position[0]);
       globalMinMaxY[0] = Math.min(globalMinMaxY[0], node.position[1]);
 
-      globalMinMaxX[1] = Math.max(
-        globalMinMaxX[1],
-        node.position[0] + node.size[0]
-      );
-      globalMinMaxY[1] = Math.max(
-        globalMinMaxY[1],
-        node.position[1] + node.size[1]
-      );
+      globalMinMaxX[1] = Math.max(globalMinMaxX[1], node.position[0] + node.size[0]);
+      globalMinMaxY[1] = Math.max(globalMinMaxY[1], node.position[1] + node.size[1]);
     }
 
     return {
