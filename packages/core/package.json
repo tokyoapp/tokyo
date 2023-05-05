@@ -1,8 +1,0 @@
-{
-  "name": "core",
-  "dependencies": {
-    "filestorage": "workspace:^",
-    "gifenc": "^1.0.3",
-    "mp4box": "^0.5.2"
-  }
-}

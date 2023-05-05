@@ -1,51 +1,50 @@
 let iconFile = "./gyro-icons.svg";
 
 export class Icon extends HTMLElement {
+  static getIconFile() {
+    return iconFile;
+  }
 
-    static getIconFile() {
-        return iconFile;
-    }
+  static setIconFile(filePath: string) {
+    iconFile = filePath;
+  }
 
-    static setIconFile(filePath: string) {
-        iconFile = filePath;
-    }
+  static get observedAttributes() {
+    return ["icon", "size"];
+  }
 
-    static get observedAttributes() {
-        return ['icon', 'size'];
-    }
+  get icon() {
+    return this.getAttribute("icon");
+  }
 
-    get icon() {
-        return this.getAttribute('icon');
-    }
+  set icon(value: string | null) {
+    this.setAttribute("icon", value || "");
+  }
 
-    set icon(value: string | null) {
-        this.setAttribute('icon', value || "");
-    }
+  get size() {
+    return +(this.getAttribute("size") || 0);
+  }
 
-    get size() {
-        return +(this.getAttribute('size') || 0);
-    }
+  set size(value: number) {
+    this.setAttribute("size", value.toString());
+  }
 
-    set size(value: number) {
-        this.setAttribute('size', value.toString());
-    }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+  connectedCallback() {
+    this.displayIcon();
+  }
 
-    connectedCallback() {
-        this.displayIcon();
-    }
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    this.displayIcon();
+  }
 
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        this.displayIcon();
-    }
-
-    displayIcon() {
-        if (this.icon && this.shadowRoot) {
-            this.shadowRoot.innerHTML = `
+  displayIcon() {
+    if (this.icon && this.shadowRoot) {
+      this.shadowRoot.innerHTML = `
                 <style>
                     :host {
                         width: var(--icon-size, 18px);
@@ -65,9 +64,8 @@ export class Icon extends HTMLElement {
                     <use xlink:href="${Icon.getIconFile()}#${this.icon || "Placeholder"}"></use>
                 </svg>
             `;
-        }
     }
-
+  }
 }
 
-customElements.define('gyro-icon', Icon);
+customElements.define("gyro-icon", Icon);
