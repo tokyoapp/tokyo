@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "build": "turbo run build",
-    "app": "pnpm --filter=3d-editor --",
+    "app": "pnpm --filter=audio-recorder --",
     "clean": "git clean -fX ."
   },
   "repository": {
