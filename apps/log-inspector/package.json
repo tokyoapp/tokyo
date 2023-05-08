@@ -13,6 +13,7 @@
     "lit-element": "^2.5.1",
     "atrium": "workspace:^",
     "ui": "workspace:^",
-    "vite": "^4.1.1"
+    "vite": "^4.1.1",
+    "filesystem": "workspace:^"
   }
 }
