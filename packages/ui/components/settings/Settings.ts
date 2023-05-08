@@ -3,7 +3,6 @@ import componentStyle from "./component.style";
 import KeybindsTemplate from "./KeybindsTemplate";
 import { Action } from "atrium/lib/Actions";
 import "../Switch";
-import Env from "atrium/lib/Enviroment";
 
 let settings = null;
 
@@ -271,7 +270,7 @@ export class SettingsComponent extends LitElement {
           </div>
           <div class="credits">
             <div>
-              <h3>${document.title} <span class="version">${Env.version}</span></h3>
+              <h3>${document.title} <span class="version">{version}</span></h3>
             </div>
             <div>Created by <a target="_blank" href="https://twitter.com/timh4v">luckydye</a></div>
           </div>

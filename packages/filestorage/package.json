@@ -1,9 +1,0 @@
-{
-  "name": "filestorage",
-  "version": "1.0.0",
-  "main": "./src/fs.worker.ts",
-  "scripts": {},
-  "dependencies": {
-    "comlink": "^4.3.1"
-  }
-}

@@ -1,0 +1,18 @@
+{
+  "name": "log-inspector",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gl-matrix": "^3.3.0",
+    "lit-element": "^2.5.1",
+    "atrium": "workspace:^",
+    "ui": "workspace:^",
+    "vite": "^4.1.1"
+  }
+}
