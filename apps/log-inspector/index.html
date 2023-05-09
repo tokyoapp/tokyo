@@ -22,19 +22,30 @@
       <div class="top">
         <gyro-menuitem icon="File" title="Import vpk or bsp" action="file.open"></gyro-menuitem>
         <gyro-menuitem icon="Import" title="Import files" action="files.open"></gyro-menuitem>
+        <gyro-menuitem
+          icon="Save"
+          title="Open last session"
+          action="file.open.last"
+        ></gyro-menuitem>
       </div>
     </gyro-menubar>
-    <gyro-layout>
-      <gyro-layout-column>
-        <gyro-group>
-          <gyro-explorer tab="Explorer"></gyro-explorer>
-        </gyro-group>
-        <gyro-group>
-          <log-viewer tab="Log Viewer"></log-viewer>
-        </gyro-group>
-      </gyro-layout-column>
-    </gyro-layout>
 
-    <script type="module" src="./index.ts"></script>
+    <main>
+      <gyro-layout>
+        <gyro-layout-column>
+          <gyro-group>
+            <gyro-explorer tab="Explorer">
+              <last-opened />
+            </gyro-explorer>
+          </gyro-group>
+          <gyro-group>
+            <log-viewer tab="Log Viewer"></log-viewer>
+          </gyro-group>
+        </gyro-layout-column>
+      </gyro-layout>
+    </main>
+
+    <script type="module" src="./src/client.ts"></script>
+    <script type="module" src="./src/App.tsx"></script>
   </body>
 </html>

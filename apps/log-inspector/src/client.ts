@@ -1,6 +1,11 @@
 import "./components/LogViewer.js";
 import { VirtualFileSystem, LokalFilesystem } from "filesystem";
 
+import "atrium/lib/main";
+import "ui/components/tree-explorer";
+
+import { Action } from "atrium/lib/Actions";
+
 const openFilesButton = document.createElement("input");
 openFilesButton.type = "file";
 
@@ -26,6 +31,15 @@ export class Client {
           console.log(await entires.next());
         },
       },
+      {
+        name: "file.open.last",
+        description: "Open last session",
+        async onAction() {
+          const list = await LokalFilesystem.getFileList();
+          const dir = list[0];
+          if (dir) openDir(dir);
+        },
+      },
     ];
     window.addEventListener("DOMContentLoaded", (e) => init());
   }
@@ -33,6 +47,18 @@ export class Client {
 
 let progressbar;
 const filesystem = new VirtualFileSystem();
+
+export async function openDir(dirEntry) {
+  const handle = dirEntry.file;
+  const tree = await LokalFilesystem.getTree(handle);
+
+  const explorer = document.querySelector("gyro-explorer");
+  explorer?.setRoot({
+    type: "root",
+    name: "root",
+    children: tree,
+  });
+}
 
 async function init() {
   showLoading();
@@ -42,13 +68,6 @@ async function init() {
 
   if (!explorer) throw new Error("explorere not initialised");
 
-  async function openDir(dirEntry) {
-    const handle = dirEntry.file;
-    console.log(dirEntry, handle);
-    const tree = LokalFilesystem.getTree(handle);
-    console.log(tree);
-  }
-
   async function openFile(file) {
     if (progressbar) progressbar.remove();
     if (!file) return;
@@ -57,12 +76,9 @@ async function init() {
       file.uncollapsed = !file.uncollapsed;
       explorer?.render();
     } else {
-      const f = await filesystem.getFile(file.name);
-      if (f) {
-        console.log(f);
-        const contentItter = f.itter();
-        console.log(contentItter);
-
+      if (file) {
+        const f = await file.file.getFile();
+        const contentItter = readerItteraotr(f.stream().getReader());
         window.dispatchEvent(new CustomEvent("file", { detail: { itter: contentItter } }));
       }
     }
@@ -117,10 +133,6 @@ async function init() {
   }
 
   hideLoading();
-
-  const list = await LokalFilesystem.getFileList();
-  const dir = list[0];
-  openDir(dir);
 }
 
 function showLoading() {
@@ -133,4 +145,6 @@ function hideLoading() {
 
 const client = new Client();
 
-export const actions = client.actions;
+for (const actn of client.actions) {
+  Action.register(actn);
+}

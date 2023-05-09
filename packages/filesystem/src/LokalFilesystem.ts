@@ -235,8 +235,6 @@ export default class LokalFilesystem {
       let request = transaction.objectStore("filerefs").get(fileId);
       request.onsuccess = async function (e) {
         const data = request.result;
-        console.log(data.file);
-
         if (data) {
           if (data.file instanceof FileSystemFileHandle) {
             data.file = await data.file.getFile();
@@ -258,10 +256,34 @@ export default class LokalFilesystem {
   }
 
   static async getTree(directoryHandle) {
-    console.log("tree this", directoryHandle);
+    await directoryHandle.requestPermission();
 
-    // const files = await this.getFileList();
-    // console.log(files);
+    const getChildren = async (dir, root) => {
+      const itter = dir.entries();
+      for await (const [name, file] of itter) {
+        if (file.kind === "file") {
+          // file
+          root.push({
+            children: [],
+            name,
+            file,
+            type: "file",
+          });
+        } else {
+          // dir
+          root.push({
+            // children should be a async function
+            children: await getChildren(file, []),
+            name,
+            type: "directory",
+          });
+        }
+      }
+
+      return root;
+    };
+
+    return getChildren(directoryHandle, []);
   }
 
   static async getFileList(): Promise<Array<FileRefPreview>> {

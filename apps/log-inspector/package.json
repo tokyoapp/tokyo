@@ -13,8 +13,10 @@
     "filesystem": "workspace:^",
     "gl-matrix": "^3.3.0",
     "lit": "^2.7.4",
-    "lit-element": "^2.5.1",
+    "solid-js": "^1.6.6",
     "ui": "workspace:^",
-    "vite": "^4.1.1"
+    "vite": "^4.1.1",
+    "vite-plugin-solid": "^2.7.0",
+    "vite-plugin-wasm": "^3.2.2"
   }
 }
