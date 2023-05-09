@@ -17,7 +17,7 @@ export default class Group extends Column {
 					flex-direction: column;
 					background: var(--panel-background);
 					color: var(--tab-font-color);
-					
+
 					--tab-height: 22px;
 					--tab-width: auto;
 					--tab-font-size: 11px;
@@ -25,7 +25,7 @@ export default class Group extends Column {
 					--tab-padding: 3px 20px;
 					--tab-border: none;
 				}
-				
+
 				.tabs {
 					display: flex;
 					background: var(--tabs-background);
@@ -35,9 +35,9 @@ export default class Group extends Column {
 					pointer-events: all;
 					user-select: none;
 					font-size: var(--tab-font-size);
-					padding: 3px 3px 0 3px;
+					padding: 0;
 				}
-				
+
 				.tab {
 					display: inline-flex;
 					align-items: center;
@@ -60,13 +60,13 @@ export default class Group extends Column {
 				.tab[data-groupid] {
 					-webkit-user-drag: element;
 				}
-				
+
 				.tab[active] {
 					background: var(--tab-active-background);
 					border-bottom: var(--tab-active-bottom-border);
 					opacity: 1;
 				}
-				
+
 				.tab::before {
 					content: "";
 					position: absolute;
@@ -76,7 +76,7 @@ export default class Group extends Column {
 					width: 100%;
 					height: 100%;
 				}
-				
+
 				.tab:hover {
 					background: var(--tab-hover-background);
 				}

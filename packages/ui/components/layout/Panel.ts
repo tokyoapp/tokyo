@@ -11,7 +11,7 @@ export default class Panel extends HTMLElement {
 					--tab-font-color: #eeeeee;
 					--split-bar-color: white;
 					--split-bar-color-hover: rgba(255, 255, 255, 0.2);
-					--layout-grid-gap: 2px;
+					--layout-grid-gap: 3px;
 
 					position: relative;
 					overflow: hidden;
@@ -363,8 +363,8 @@ export default class Panel extends HTMLElement {
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (child instanceof Panel) {
-          this.columns[i] = (child.width / this.width) * children.length;
-          this.rows[i] = (child.height / this.height) * children.length;
+          this.columns[i] = (child.width / this.width) * children.length || 1;
+          this.rows[i] = (child.height / this.height) * children.length || 1;
         }
       }
     }
@@ -386,7 +386,7 @@ export default class Panel extends HTMLElement {
 
 // append required styles to head
 const requiredStyles = `
-	
+
 	/* hidden tab content */
 	gyro-group > [tab]:not([active]) {
 		display: none;

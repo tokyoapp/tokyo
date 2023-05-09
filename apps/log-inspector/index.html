@@ -23,18 +23,15 @@
         <gyro-menuitem icon="File" title="Import vpk or bsp" action="file.open"></gyro-menuitem>
         <gyro-menuitem icon="Import" title="Import files" action="files.open"></gyro-menuitem>
       </div>
-      <div>
-        <gyro-menuitem icon="Cogwheel" title="Settings" action="settings.open"></gyro-menuitem>
-      </div>
     </gyro-menubar>
     <gyro-layout>
       <gyro-layout-column>
-        <gyro-group show-tabs>
+        <gyro-group>
           <gyro-explorer tab="Explorer"></gyro-explorer>
         </gyro-group>
-      </gyro-layout-column>
-      <gyro-layout-column>
-        <gyro-group show-tabs> </gyro-group>
+        <gyro-group>
+          <log-viewer tab="Log Viewer"></log-viewer>
+        </gyro-group>
       </gyro-layout-column>
     </gyro-layout>
 

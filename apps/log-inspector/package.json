@@ -9,11 +9,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "gl-matrix": "^3.3.0",
-    "lit-element": "^2.5.1",
     "atrium": "workspace:^",
+    "filesystem": "workspace:^",
+    "gl-matrix": "^3.3.0",
+    "lit": "^2.7.4",
+    "lit-element": "^2.5.1",
     "ui": "workspace:^",
-    "vite": "^4.1.1",
-    "filesystem": "workspace:^"
+    "vite": "^4.1.1"
   }
 }

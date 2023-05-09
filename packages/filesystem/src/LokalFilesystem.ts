@@ -235,12 +235,15 @@ export default class LokalFilesystem {
       let request = transaction.objectStore("filerefs").get(fileId);
       request.onsuccess = async function (e) {
         const data = request.result;
+        console.log(data.file);
+
         if (data) {
           if (data.file instanceof FileSystemFileHandle) {
             data.file = await data.file.getFile();
           } else {
-            const entries = data.file.entries();
-            console.log([...entries]);
+            // console.log(data.file.getDirectoryHandle());
+            // const entries = data.file.entries();
+            // console.log([...entries]);
           }
           console.log(data);
           resolve(data);
@@ -254,9 +257,11 @@ export default class LokalFilesystem {
     });
   }
 
-  static async getFileTree() {
-    const files = await this.getFileList();
-    console.log(files);
+  static async getTree(directoryHandle) {
+    console.log("tree this", directoryHandle);
+
+    // const files = await this.getFileList();
+    // console.log(files);
   }
 
   static async getFileList(): Promise<Array<FileRefPreview>> {

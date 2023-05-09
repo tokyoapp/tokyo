@@ -1,33 +1,12 @@
-// import '@uncut/gyro/components/CookieDisclaimer';
-
-import { VirtualFileSystem } from "filesystem";
-import { ProgressBar } from "./components/Progressbar";
-
-window.log = (...str) => {
-  new Gyro.Notification({ text: str.join(" "), time: 2000 }).show();
-  console.log(...str);
-};
-
-window.warn = window.log;
-window.error = window.log;
+import "./components/LogViewer.js";
+import { VirtualFileSystem, LokalFilesystem } from "filesystem";
 
 const openFilesButton = document.createElement("input");
 openFilesButton.type = "file";
 
-const openButton = document.createElement("input");
-openButton.type = "file";
-
 export class Client {
   constructor() {
     this.actions = [
-      {
-        name: "file.open",
-        description: "Import Archives",
-        shortcut: "Ctrl+I",
-        onAction() {
-          openButton.click();
-        },
-      },
       {
         name: "files.open",
         description: "Import model files",
@@ -36,20 +15,39 @@ export class Client {
           openFilesButton.click();
         },
       },
+      {
+        name: "file.open",
+        description: "Open Folder",
+        shortcut: "Ctrl+Shift+O",
+        async onAction() {
+          const dirs = await LokalFilesystem.openDirectoryChooser();
+          const dir = dirs[0];
+          const entires = dir.entries();
+          console.log(await entires.next());
+        },
+      },
     ];
     window.addEventListener("DOMContentLoaded", (e) => init());
   }
 }
 
-let scene;
 let progressbar;
 const filesystem = new VirtualFileSystem();
 
-function init() {
+async function init() {
   showLoading();
 
   const explorer = document.querySelector("gyro-explorer");
   // explorer.setFilter("name", /\.mdl|\.bsp|\.gltf|\.wav/g);
+
+  if (!explorer) throw new Error("explorere not initialised");
+
+  async function openDir(dirEntry) {
+    const handle = dirEntry.file;
+    console.log(dirEntry, handle);
+    const tree = LokalFilesystem.getTree(handle);
+    console.log(tree);
+  }
 
   async function openFile(file) {
     if (progressbar) progressbar.remove();
@@ -57,61 +55,50 @@ function init() {
 
     if (file.type == "folder") {
       file.uncollapsed = !file.uncollapsed;
-      explorer.render();
+      explorer?.render();
     } else {
-      scene.clear();
+      const f = await filesystem.getFile(file.name);
+      if (f) {
+        console.log(f);
+        const contentItter = f.itter();
+        console.log(contentItter);
 
-      window.log = (...str) => {
-        progressbar.log(str.join(" "));
-      };
-
-      importModelFile(file)
-        .catch((err) => {
-          console.error(err);
-          progressbar.log(err.message);
-          progressbar.log("Error loading file.");
-          new Gyro.Notification({ text: "Error loading file.", time: 5000 }).show();
-        })
-        .finally(() => {
-          setTimeout(() => progressbar.remove(), 1000);
-
-          window.log = (...str) => {
-            new Gyro.Notification({ text: str.join(" "), time: 2000 }).show();
-            console.log(...str);
-          };
-        });
+        window.dispatchEvent(new CustomEvent("file", { detail: { itter: contentItter } }));
+      }
     }
   }
 
-  explorer.addEventListener("addfile", (e) => importModelFile(e.file));
   explorer.addEventListener("openfile", (e) => openFile(e.file));
 
-  openButton.addEventListener("change", async (e) => {
-    const file = openButton.files[0];
-
-    if (file && file.name.match(/\.bsp$/g)) {
-      importBSPPakfile(file);
-    }
-
-    if (file && file.name.match(/\.vpk$/g)) {
-      importVPKArchives(openButton.files);
-    }
-  });
-
   openFilesButton.addEventListener("change", async (e) => {
-    console.log(e);
-
-    importValidFiles(openFilesButton.files);
+    importValidFiles(e.target.files);
   });
 
-  async function importValidFiles(filesArray) {
-    for (let file of filesArray) {
+  const decoder = new TextDecoder();
+
+  async function* readerItteraotr(reader) {
+    let finished = false;
+    while (!finished) {
+      const res = await reader.read();
+      const value = decoder.decode(res.value);
+      finished = res.done;
+      const arg = yield value;
+      // arg is the arguemnt passed to next function
+    }
+  }
+
+  async function importValidFiles(filesArray: File[]) {
+    for (const file of filesArray) {
       if (file.name.match(/[\.vvd$|\.mdl$|\.vtx$|\.vmt$|\.bsp$|\.gltf$]/g)) {
         const entry = file.webkitRelativePath || file.name;
         filesystem.fileRegistry[entry.toLocaleLowerCase()] = {
           file: entry,
           async arrayBuffer() {
             return file.arrayBuffer();
+          },
+
+          itter() {
+            return readerItteraotr(file.stream().getReader());
           },
         };
 
@@ -130,6 +117,10 @@ function init() {
   }
 
   hideLoading();
+
+  const list = await LokalFilesystem.getFileList();
+  const dir = list[0];
+  openDir(dir);
 }
 
 function showLoading() {
@@ -140,9 +131,6 @@ function hideLoading() {
   document.body.removeAttribute("loading");
 }
 
-function downloadBlob(blob, name) {
-  const a = document.createElement("a");
-  a.href = window.URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-}
+const client = new Client();
+
+export const actions = client.actions;

@@ -1,9 +1,5 @@
 import "atrium/lib/main";
-
-// index.js
-// import { html } from "lit-element";
-// import settings from './src/settings';
-import actions from "./src/actions";
+import { actions } from "./src/client.js";
 import "ui/components/tree-explorer";
 
 import { Action } from "atrium/lib/Actions";
