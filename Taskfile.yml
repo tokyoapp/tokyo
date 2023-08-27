@@ -4,8 +4,17 @@ version: "3"
 
 silent: true
 
+dotenv: [".env"]
+
+includes:
+  library:
+    aliases: [lib]
+    dir: apps/library
+    taskfile: apps/library/Taskfile.yml
+
 tasks:
   dev:
+    desc: Run desktop app
     dir: apps/desktop
     cmds:
       - pnpm tauri dev
