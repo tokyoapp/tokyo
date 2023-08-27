@@ -13,3 +13,5 @@ dist
 .firebase
 
 .DS_Store
+
+!.rtx.toml

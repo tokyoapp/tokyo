@@ -1,0 +1,4 @@
+[tools]
+node = "20"
+pnpm = "8"
+task = "3"
