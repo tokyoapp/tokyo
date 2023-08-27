@@ -18,3 +18,9 @@ tasks:
     dir: apps/desktop
     cmds:
       - pnpm tauri dev
+
+  f:dev:
+    desc: Run desktop app
+    dir: apps/desktop
+    cmds:
+      - pnpm dev

@@ -38,6 +38,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^1.4.0
         version: 1.4.0
+      image-editor:
+        specifier: 'workspace:'
+        version: link:../../packages/image-editor
       solid-js:
         specifier: ^1.7.8
         version: 1.7.8
@@ -65,6 +68,15 @@ importers:
         version: link:../ui
 
   packages/filesystem: {}
+
+  packages/image-editor:
+    devDependencies:
+      solid-js:
+        specifier: ^1.7.8
+        version: 1.7.8
+      ui:
+        specifier: 'workspace:'
+        version: link:../ui
 
   packages/renderer: {}
 

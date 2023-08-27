@@ -1,0 +1,9 @@
+{
+  "name": "image-editor",
+  "main": "index.tsx",
+  "version": "0.1.0",
+  "devDependencies": {
+    "ui": "workspace:",
+    "solid-js": "^1.7.8"
+  }
+}
