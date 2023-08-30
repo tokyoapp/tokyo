@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#222" />
 
     <title>app/photo-library</title>
 
@@ -13,9 +13,35 @@
       import { render } from "solid-js/web";
       import App from "./App";
 
-      render(App, document.body);
+      render(App, main);
     </script>
   </head>
 
-  <body></body>
+  <body>
+    <main id="main">
+      <div data-tauri-drag-region class="titlebar">
+        <!-- <div class="titlebar-button" id="titlebar-minimize">
+          <img src="https://api.iconify.design/mdi:window-minimize.svg" alt="minimize" />
+        </div>
+        <div class="titlebar-button" id="titlebar-maximize">
+          <img src="https://api.iconify.design/mdi:window-maximize.svg" alt="maximize" />
+        </div>
+        <div class="titlebar-button" id="titlebar-close">
+          <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
+        </div> -->
+      </div>
+      <script type="module">
+        import { appWindow } from "@tauri-apps/api/window";
+        // document
+        //   .getElementById("titlebar-minimize")
+        //   .addEventListener("click", () => appWindow.minimize());
+        // document
+        //   .getElementById("titlebar-maximize")
+        //   .addEventListener("click", () => appWindow.toggleMaximize());
+        // document
+        //   .getElementById("titlebar-close")
+        //   .addEventListener("click", () => appWindow.close());
+      </script>
+    </main>
+  </body>
 </html>

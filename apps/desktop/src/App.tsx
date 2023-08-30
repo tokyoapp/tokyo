@@ -1,18 +1,24 @@
 import { createSignal } from "solid-js";
 import { invoke } from "@tauri-apps/api/tauri";
 import { ImageEditor } from "image-editor";
+import Library from "./Library.tsx";
+import { createStore } from "solid-js/store";
+import Action from "./actions";
+
+const [items, setItems] = createStore<any[]>([]);
 
 const [name, setName] = createSignal("");
 
-function photoToCanvas(img: Array<number>) {
+function photoToCanvas(img: Uint8Array) {
   const canvas = document.createElement("canvas");
   const ctxt = canvas.getContext("2d");
 
   const data = new ImageData(5472, 3648, { colorSpace: "srgb" });
+
   for (let i = 0; i < data.data.length / 4; i++) {
-    data.data[i * 4 + 0] = img[i * 3 + 0] / 256;
-    data.data[i * 4 + 1] = img[i * 3 + 1] / 256;
-    data.data[i * 4 + 2] = img[i * 3 + 2] / 256;
+    data.data[i * 4 + 0] = img[i * 3 + 0];
+    data.data[i * 4 + 1] = img[i * 3 + 1];
+    data.data[i * 4 + 2] = img[i * 3 + 2];
     data.data[i * 4 + 3] = 256;
   }
 
@@ -23,19 +29,10 @@ function photoToCanvas(img: Array<number>) {
   return canvas;
 }
 
-async function open() {
-  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  const meta: {
-    width: number;
-    height: number;
-    orientation: number;
-  } = await invoke("metadata", { path: name() });
-  console.log(meta);
+const canvas = document.createElement("canvas");
+canvas.style.width = "500px";
 
-  const img: Array<number> = await invoke("open", { path: name() });
-  const photo = photoToCanvas(img);
-
-  const canvas = document.createElement("canvas");
+function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
   const ctxt = canvas.getContext("2d");
 
   switch (meta.orientation) {
@@ -51,13 +48,57 @@ async function open() {
       canvas.height = photo.height;
       ctxt?.drawImage(photo, 0, 0);
   }
-
-  canvas.style.width = "100%";
-  document.body.append(canvas);
 }
 
+async function open() {
+  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+  const meta: {
+    width: number;
+    height: number;
+    orientation: number;
+    preview: Array<number>;
+  } = await fetch("http://localhost:8000/metadata").then((res) => res.json());
+  console.log(meta);
+
+  const preview = new Uint8Array(meta.preview);
+  const previewUrl = URL.createObjectURL(new Blob([preview], { type: "image/jpeg" }));
+
+  const prevImg = new Image();
+  prevImg.onload = () => {
+    drawToCanvas(prevImg, meta);
+  };
+  prevImg.src = previewUrl;
+
+  const img: Uint8Array = await fetch("http://localhost:8000/open").then(
+    async (res) => new Uint8Array(await res.arrayBuffer())
+  );
+  const photo = photoToCanvas(img);
+  drawToCanvas(photo, meta);
+}
+
+fetch("http://localhost:8000/").then(async (res) => {
+  const list = await res.json();
+  setItems(list);
+});
+
 function App() {
-  return <ImageEditor onOpen={open} />;
+  return (
+    <div class="app">
+      <Library items={items} />
+      <ImageEditor onOpen={() => open()} />
+      {canvas}
+    </div>
+  );
 }
 
 export default App;
+
+const shortcuts: Record<string, () => void> = {
+  r: Action.map("reload"),
+};
+
+window.addEventListener("keyup", (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key in shortcuts) shortcuts[e.key]();
+  }
+});

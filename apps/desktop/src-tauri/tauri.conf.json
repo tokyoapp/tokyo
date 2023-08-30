@@ -16,6 +16,17 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -35,12 +46,15 @@
     },
     "windows": [
       {
+        "transparent": true,
+        "titleBarStyle": "Overlay",
         "fullscreen": false,
         "resizable": true,
         "title": "desktop",
-        "width": 800,
-        "height": 600
+        "width": 1280,
+        "height": 960
       }
-    ]
+    ],
+    "macOSPrivateApi": true
   }
 }

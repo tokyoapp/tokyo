@@ -27,13 +27,13 @@ fn process_entry(entry: walkdir::DirEntry) -> Option<String> {
     // if metadata.is_file() && metadata.file_type()
 
     match ext.to_lowercase().as_str() {
-        "cr3" => return Some(entry.file_name().to_str().unwrap().to_owned()),
-        "jpg" => return Some(entry.file_name().to_str().unwrap().to_owned()),
-        "png" => return Some(entry.file_name().to_str().unwrap().to_owned()),
+        "cr3" => return Some(entry.path().to_str().unwrap().to_owned()),
+        "jpg" => return Some(entry.path().to_str().unwrap().to_owned()),
+        "png" => return Some(entry.path().to_str().unwrap().to_owned()),
         &_ => return None,
     }
 }
 
-pub fn list(dir: String) -> String {
-    walk(dir).join(", ")
+pub fn list(dir: String) -> Vec<String> {
+    walk(dir)
 }

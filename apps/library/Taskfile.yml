@@ -11,3 +11,17 @@ tasks:
       - "src/**/*.rs"
     cmds:
       - cargo run
+
+  build:
+    desc: Build library
+    sources:
+      - "src/**/*.rs"
+    cmds:
+      - cargo build -Z unstable-options --out-dir dist
+      - chmod +x dist/library
+
+  start:
+    desc: Start compiled library
+    deps: [build]
+    cmds:
+      - ./dist/library
