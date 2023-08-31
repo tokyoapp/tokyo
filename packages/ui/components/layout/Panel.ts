@@ -214,10 +214,10 @@ export default class Panel extends HTMLElement {
 
         if (pointerDownEvent) {
           if (resizeX) {
-            this.onResize([delta[0], 0], index);
+            this.onResize([delta[0] * 4, 0], index);
           }
           if (resizeY) {
-            this.onResize([0, delta[1]], index);
+            this.onResize([0, delta[1] * 4], index);
           }
         }
 
@@ -386,7 +386,7 @@ export default class Panel extends HTMLElement {
 
 // append required styles to head
 const requiredStyles = `
-	
+
 	/* hidden tab content */
 	gyro-group > [tab]:not([active]) {
 		display: none;

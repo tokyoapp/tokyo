@@ -30,7 +30,7 @@ function photoToCanvas(img: Uint8Array) {
 }
 
 const canvas = document.createElement("canvas");
-canvas.style.width = "500px";
+canvas.style.width = "100%";
 
 function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
   const ctxt = canvas.getContext("2d");
@@ -41,7 +41,7 @@ function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
       canvas.width = photo.height;
       ctxt?.translate(canvas.width / 2, canvas.height / 2);
       ctxt?.rotate((Math.PI / 180) * 270);
-      ctxt?.drawImage(photo, -canvas.width / 2, -canvas.height / 2);
+      ctxt?.drawImage(photo, -canvas.height / 2, -canvas.width / 2);
       break;
     default:
       canvas.width = photo.width;
@@ -80,18 +80,29 @@ fetch("http://localhost:8000/").then(async (res) => {
 
 function App() {
   return (
-    <div class="app">
-      <Library
-        items={items}
-        onOpen={(item) => {
-          open(item);
-        }}
-      />
-      <div class="flex justify-center items-center">
-        {/* <ImageEditor onOpen={() => open()} /> */}
-        {canvas}
-      </div>
-    </div>
+    <gyro-layout class="app">
+      <gyro-layout-column>
+        <gyro-group show-tabs>
+          <div tab="Explorer" class="p-1">
+            <Library
+              items={items}
+              onOpen={(item) => {
+                open(item);
+              }}
+            />
+          </div>
+        </gyro-group>
+      </gyro-layout-column>
+
+      <gyro-layout-column>
+        <gyro-group show-tabs>
+          <div tab="Viewer" class="flex justify-center items-center">
+            {/* <ImageEditor onOpen={() => open()} /> */}
+            {canvas}
+          </div>
+        </gyro-group>
+      </gyro-layout-column>
+    </gyro-layout>
   );
 }
 

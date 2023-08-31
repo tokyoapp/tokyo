@@ -29,7 +29,7 @@ main {
   border-radius: 10px;
   border: 1px solid rgb(51, 51, 51);
   border-bottom: 1px solid rgb(29, 29, 29);
-  background: #333;
+  background: #222;
   position: absolute;
   top: 0;
   left: 0;
@@ -94,12 +94,15 @@ button:active {
 
 .app {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.25fr;
   position: absolute;
   top: 30px;
   bottom: 0;
+  left: 0;
+  right: 0;
   height: auto;
-  width: 100%;
+  width: auto;
+  --layout-grid-gap: 6px;
 }
 
 /* Titlebar */
@@ -123,4 +126,14 @@ button:active {
 }
 .titlebar-button:hover {
   background: #5bbec3;
+}
+
+[data-orientation="7"],
+[data-orientation="8"] {
+  transform: rotate(270deg);
+}
+
+[data-orientation="5"],
+[data-orientation="6"] {
+  transform: rotate(90deg);
 }

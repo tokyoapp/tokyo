@@ -44,6 +44,9 @@ importers:
       solid-js:
         specifier: ^1.7.8
         version: 1.7.8
+      ui:
+        specifier: 'workspace:'
+        version: link:../../packages/ui
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^1.4.0
