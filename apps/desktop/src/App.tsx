@@ -50,14 +50,16 @@ function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
   }
 }
 
-async function open() {
+async function open(p: string) {
   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
   const meta: {
     width: number;
     height: number;
     orientation: number;
     preview: Array<number>;
-  } = await fetch("http://localhost:8000/metadata").then((res) => res.json());
+  } = await fetch(`http://localhost:8000/metadata?file=${encodeURIComponent(p)}`).then((res) =>
+    res.json()
+  );
   console.log(meta);
 
   const preview = new Uint8Array(meta.preview);
@@ -69,9 +71,9 @@ async function open() {
   };
   prevImg.src = previewUrl;
 
-  const img: Uint8Array = await fetch("http://localhost:8000/open").then(
-    async (res) => new Uint8Array(await res.arrayBuffer())
-  );
+  const img: Uint8Array = await fetch(
+    `http://localhost:8000/open?file=${encodeURIComponent(p)}`
+  ).then(async (res) => new Uint8Array(await res.arrayBuffer()));
   const photo = photoToCanvas(img);
   drawToCanvas(photo, meta);
 }
@@ -84,9 +86,16 @@ fetch("http://localhost:8000/").then(async (res) => {
 function App() {
   return (
     <div class="app">
-      <Library items={items} />
-      <ImageEditor onOpen={() => open()} />
-      {canvas}
+      <Library
+        items={items}
+        onOpen={(item) => {
+          open(item);
+        }}
+      />
+      <div class="flex justify-center items-center">
+        {/* <ImageEditor onOpen={() => open()} /> */}
+        {canvas}
+      </div>
     </div>
   );
 }

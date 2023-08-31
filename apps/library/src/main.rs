@@ -1,11 +1,11 @@
 mod images;
-
 use actix_web::{
-    get, http::header::ContentType, web::Bytes, App, HttpRequest, HttpResponse, HttpServer,
+    get, http::header::ContentType, web, web::Bytes, App, HttpRequest, HttpResponse, HttpServer,
     Responder,
 };
-use phl_image::DynamicImage;
+use serde::Deserialize;
 use std::env;
+use urlencoding::decode;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -17,9 +17,14 @@ async fn hello() -> impl Responder {
         .body(serde_json::to_string(&list).unwrap())
 }
 
+#[derive(Deserialize)]
+struct Info {
+    file: String,
+}
+
 #[get("/open")]
-async fn open(req: HttpRequest) -> HttpResponse {
-    let p = "/Users/tihav/Pictures/Footage/Korea/_MGC3321.CR3";
+async fn open(info: web::Query<Info>) -> HttpResponse {
+    let p = decode(&info.file).expect("UTF-8");
     let n = phl_image::open(p.to_string());
 
     println!("{} x {}", n.width(), n.height());
@@ -36,8 +41,9 @@ async fn open(req: HttpRequest) -> HttpResponse {
 }
 
 #[get("/metadata")]
-async fn metadata() -> impl Responder {
-    let p = "/Users/tihav/Pictures/Footage/Korea/_MGC3321.CR3";
+async fn metadata(info: web::Query<Info>) -> impl Responder {
+    let p = decode(&info.file).expect("UTF-8");
+    println!("PP {}", p);
     let m = phl_image::metadat(p.to_string());
 
     HttpResponse::Ok()
@@ -46,12 +52,35 @@ async fn metadata() -> impl Responder {
         .body(serde_json::to_string(&m).unwrap())
 }
 
+#[get("/thumbnail")]
+async fn thumbnail(info: web::Query<Info>) -> impl Responder {
+    let p = decode(&info.file).expect("UTF-8");
+    println!("PP {}", p);
+    let m = phl_image::metadat(p.to_string());
+
+    // TODO: thumbnail caching using content hashes
+
+    let body = Bytes::from(m.preview);
+
+    HttpResponse::Ok()
+        .content_type(ContentType::octet_stream())
+        .insert_header(("Access-Control-Allow-Origin", "*"))
+        .insert_header(("Content-Type", "image/jpg"))
+        .body(body)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Start server on 127.0.0.1:8000");
 
-    HttpServer::new(|| App::new().service(hello).service(metadata).service(open))
-        .bind(("127.0.0.1", 8000))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(metadata)
+            .service(open)
+            .service(thumbnail)
+    })
+    .bind(("127.0.0.1", 8000))?
+    .run()
+    .await
 }

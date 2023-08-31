@@ -12,10 +12,10 @@ use std::{io::Cursor, time::Instant};
 
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
-    width: u32,
-    height: u32,
-    orientation: u16,
-    preview: Vec<u8>,
+    pub width: u32,
+    pub height: u32,
+    pub orientation: u16,
+    pub preview: Vec<u8>,
 }
 
 pub fn metadat(path: String) -> Metadata {
