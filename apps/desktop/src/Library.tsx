@@ -14,7 +14,7 @@ export default function Library({
             class="h-52 overflow-hidden flex items-center justify-center bg-transparent bg-zinc-900 focus:bg-zinc-800 shadow-none"
             onClick={() => onOpen(item)}
           >
-            <img src={`http://localhost:8000/thumbnail?file=${encodeURIComponent(item)}`} />
+            <img decoding="async" loading="lazy" src={`http://localhost:8000/thumbnail?file=${encodeURIComponent(item)}`} />
           </div>
         );
       })}

@@ -5,6 +5,8 @@ use actix_web::{
 };
 use serde::Deserialize;
 use std::env;
+use std::fs;
+use std::path::Path;
 use urlencoding::decode;
 
 #[get("/")]
@@ -43,7 +45,6 @@ async fn open(info: web::Query<Info>) -> HttpResponse {
 #[get("/metadata")]
 async fn metadata(info: web::Query<Info>) -> impl Responder {
     let p = decode(&info.file).expect("UTF-8");
-    println!("PP {}", p);
     let m = phl_image::metadat(p.to_string());
 
     HttpResponse::Ok()
@@ -55,18 +56,59 @@ async fn metadata(info: web::Query<Info>) -> impl Responder {
 #[get("/thumbnail")]
 async fn thumbnail(info: web::Query<Info>) -> impl Responder {
     let p = decode(&info.file).expect("UTF-8");
-    println!("PP {}", p);
-    let m = phl_image::metadat(p.to_string());
+
+    let bytes = std::fs::read(p.to_string()).unwrap(); // Vec<u8>
+
+    let ext = Path::new(&info.file).extension().unwrap().to_str().unwrap();
+    match ext {
+        "jpg" => {
+            return HttpResponse::Ok()
+                .content_type(ContentType::jpeg())
+                .insert_header(("Access-Control-Allow-Origin", "*"))
+                .body(bytes);
+        }
+        "png" => {
+            return HttpResponse::Ok()
+                .content_type(ContentType::png())
+                .insert_header(("Access-Control-Allow-Origin", "*"))
+                .body(bytes);
+        }
+        &_ => {}
+    }
+
+    // content id
+    let hash = sha256::digest(&bytes);
+
+    println!("hash of {}: {}", p, hash);
+
+    let cache_dir = "./tmp";
+
+    let thumbnail_path = cache_dir.to_owned() + "/" + &hash + ".jpg";
+
+    if Path::new(&thumbnail_path).exists() {
+        println!("thumb exists {}", thumbnail_path);
+
+        return HttpResponse::Ok()
+            .content_type(ContentType::jpeg())
+            .insert_header(("Access-Control-Allow-Origin", "*"))
+            .body(fs::read(&thumbnail_path).unwrap());
+    } else {
+        println!("PP {}", p);
+        let thumb = phl_image::thumbnail(p.to_string());
+        let body = Bytes::from(thumb);
+
+        fs::create_dir_all(cache_dir);
+        fs::write(thumbnail_path, &body);
+
+        return HttpResponse::Ok()
+            .content_type(ContentType::jpeg())
+            .insert_header(("Access-Control-Allow-Origin", "*"))
+            .body(body);
+    }
 
     // TODO: thumbnail caching using content hashes
 
-    let body = Bytes::from(m.preview);
-
-    HttpResponse::Ok()
-        .content_type(ContentType::octet_stream())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .insert_header(("Content-Type", "image/jpg"))
-        .body(body)
+    // image::save_buffer(&Path::new("image.png"), buffer, 800, 600, image::RGBA(8))
 }
 
 #[actix_web::main]

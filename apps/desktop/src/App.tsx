@@ -56,20 +56,15 @@ async function open(p: string) {
     width: number;
     height: number;
     orientation: number;
-    preview: Array<number>;
   } = await fetch(`http://localhost:8000/metadata?file=${encodeURIComponent(p)}`).then((res) =>
     res.json()
   );
-  console.log(meta);
-
-  const preview = new Uint8Array(meta.preview);
-  const previewUrl = URL.createObjectURL(new Blob([preview], { type: "image/jpeg" }));
 
   const prevImg = new Image();
   prevImg.onload = () => {
     drawToCanvas(prevImg, meta);
   };
-  prevImg.src = previewUrl;
+  prevImg.src = `http://localhost:8000/thumbnail?file=${encodeURIComponent(p)}`;
 
   const img: Uint8Array = await fetch(
     `http://localhost:8000/open?file=${encodeURIComponent(p)}`

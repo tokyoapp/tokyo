@@ -15,23 +15,38 @@ pub struct Metadata {
     pub width: u32,
     pub height: u32,
     pub orientation: u16,
-    pub preview: Vec<u8>,
 }
 
 pub fn metadat(path: String) -> Metadata {
-    let start = SystemTime::now();
-    println!("open raw file");
+    println!("collect metadata");
     let raw_file = File::open(&path).unwrap();
     let mut rawfile = RawFile::new(PathBuf::from(path.clone()), BufReader::new(raw_file));
 
     let decoder = get_decoder(&mut rawfile).unwrap();
 
+    let metadata = decoder
+        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+        .unwrap();
+
+    // let rawimage = decoder
+    //     .raw_image(&mut rawfile, RawDecodeParams { image_index: 0 }, false)
+    //     .unwrap();
+
+    return Metadata {
+        width: 0,
+        height: 0,
+        orientation: metadata.exif.orientation.unwrap(),
+    };
+}
+
+pub fn thumbnail(path: String) -> Vec<u8> {
+    let start = SystemTime::now();
+    println!("open raw file");
+
     let mut thumb = extract_thumbnail_pixels(path, RawDecodeParams { image_index: 0 }).unwrap();
     thumb = thumb.resize(thumb.width() / 3, thumb.height() / 3, FilterType::Nearest);
 
     println!("write thumbnail {}", start.elapsed().unwrap().as_millis());
-
-    let metadata = decoder.raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 });
 
     let mut bytes: Vec<u8> = Vec::new();
     thumb
@@ -41,16 +56,7 @@ pub fn metadat(path: String) -> Metadata {
         )
         .unwrap();
 
-    let rawimage = decoder
-        .raw_image(&mut rawfile, RawDecodeParams { image_index: 0 }, false)
-        .unwrap();
-
-    return Metadata {
-        width: rawimage.width as u32,
-        height: rawimage.height as u32,
-        orientation: metadata.unwrap().exif.orientation.unwrap(),
-        preview: bytes,
-    };
+    return bytes;
 }
 
 pub fn open(path: String) -> DynamicImage {

@@ -18,3 +18,5 @@ dist
 .DS_Store
 
 !.rtx.toml
+
+tmp
