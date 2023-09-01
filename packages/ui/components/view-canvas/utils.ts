@@ -1,4 +1,4 @@
-import { bytesToBase64 } from '../lib/base64';
+import { bytesToBase64 } from './lib/base64.js';
 
 export function dragElement(ele, callback) {
   let lastEvent = null;

@@ -1,4 +1,4 @@
-import Notification from './components/Notification';
+import Notification from '../Notification';
 import { donwloadToDataUri } from './utils';
 
 export default class Canvas {

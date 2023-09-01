@@ -1,18 +1,10 @@
-import { css, html, LitElement } from 'lit';
-import Notification from '../Notification';
-import {
-  bitmapToBlob,
-  debounce,
-  donwloadToDataUri,
-  dragElement,
-  multiplyByMatrix,
-  rgbToHex,
-  rgbToHsl,
-} from '../../utils';
-import Canvas from '../../Canvas';
+import { LitElement, css, html } from 'lit';
+import Notification from '../../Notification';
+import { Action } from '../Actions';
+import Canvas from '../Canvas';
+import CanvasRenderer from '../CanvasRenderer';
+import { bitmapToBlob, debounce, dragElement, rgbToHex, rgbToHsl } from '../utils';
 import { ContextMenu } from './ContextMenu';
-import { Action } from '../../Actions';
-import CanvasRenderer from '../../CanvasRenderer';
 
 import TextNode from './nodes/TextNode';
 import Select from './tools/Select';

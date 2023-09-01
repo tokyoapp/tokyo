@@ -2,8 +2,6 @@
 
 version: "3"
 
-silent: true
-
 dotenv: [".env"]
 
 includes:
@@ -19,6 +17,12 @@ includes:
     taskfile: apps/desktop/Taskfile.yml
 
 tasks:
+
+  reset:
+    desc: Reset repository files
+    prompt: Do you really want to reset the repository?
+    cmds:
+      - git clean -xdf .
 
   dev:
     desc: Run desktop app with library

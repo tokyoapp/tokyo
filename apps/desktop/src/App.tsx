@@ -29,6 +29,8 @@ function photoToCanvas(img: Uint8Array) {
 
 const canvas = document.createElement('canvas');
 canvas.style.width = '100%';
+canvas.style.maxHeight = '100vh';
+canvas.style.objectFit = 'contain';
 
 function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
   const ctxt = canvas.getContext('2d');
@@ -81,7 +83,8 @@ function App() {
     <gyro-layout class="app">
       <gyro-layout-column>
         <gyro-group show-tabs>
-          <div tab="Explorer" class="p-1">
+          <div tab="Explorer" class="p-1 flex">
+            <gyro-explorer class="w-64 flex-none" />
             <Library
               items={items}
               onOpen={(item) => {

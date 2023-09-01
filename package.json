@@ -5,17 +5,11 @@
   "author": "luckydye (Tim Havlicek)",
   "license": "ISC",
   "main": "index.js",
-  "scripts": {
-    "build": "turbo run build",
-    "app": "pnpm --filter=3d-editor --",
-    "clean": "git clean -fX ."
-  },
   "repository": {
     "type": "git",
     "url": "git@gitlab.luckydye.de:apps/evolution.git"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.0.0",
-    "turbo": "^1.2.14"
+    "@biomejs/biome": "^1.0.0"
   }
 }

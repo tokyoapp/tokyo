@@ -1,9 +1,9 @@
-import { OverlayElement } from '../OverlayElement';
 import { NodeElement } from '../NodeElement';
+import { OverlayElement } from '../OverlayElement';
 import Node from './Node';
 
-import DropdownButton from '../../DropdownButton';
-import FluidInput from '../../FluidInput';
+import DropdownButton from '../../../DropdownButton';
+import FluidInput from '../../../FluidInput';
 
 class TextNodeElement extends NodeElement {}
 
