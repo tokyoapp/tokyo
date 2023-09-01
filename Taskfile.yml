@@ -7,26 +7,30 @@ silent: true
 dotenv: [".env"]
 
 includes:
+
   library:
     aliases: [lib]
     dir: apps/library
     taskfile: apps/library/Taskfile.yml
 
-tasks:
-  dev:
-    desc: Run desktop app
+  desktop:
+    aliases: [app]
     dir: apps/desktop
-    cmds:
-      - pnpm tauri dev
+    taskfile: apps/desktop/Taskfile.yml
+
+tasks:
+
+  dev:
+    desc: Run desktop app with library
+    deps: [library:dev, desktop:dev]
+
+  build:
+    desc: Build app
+    deps: [library:build, desktop:build]
 
   check:
-    desc: Lint files
+    desc: Check files
     dir: ./
     cmds:
+      - cargo check
       - npx biome check ./ {{.CLI_ARGS}}
-
-  f:dev:
-    desc: Run desktop app
-    dir: apps/desktop
-    cmds:
-      - pnpm dev

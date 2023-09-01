@@ -1,0 +1,18 @@
+# https://taskfile.dev
+
+version: "3"
+
+silent: true
+
+tasks:
+  dev:
+    desc: Run app
+    dir: ./
+    cmds:
+      - npx tauri dev
+
+  build:
+    desc: Build app
+    dir: ./
+    cmds:
+      - npx vite build
