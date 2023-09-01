@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit-element";
+import { html, css, LitElement } from 'lit-element';
 
 export default class DropdownButton extends LitElement {
   static get properties() {
@@ -71,7 +71,7 @@ export default class DropdownButton extends LitElement {
   render() {
     const options = this.props.options || [];
     const onSelect = this.props.onSelect;
-    const value = this.props.value ? this.props.value.name : options[0] ? options[0].name : "none";
+    const value = this.props.value ? this.props.value.name : options[0] ? options[0].name : 'none';
 
     return html`
       <div class="value">${value}</div>
@@ -107,7 +107,7 @@ export default class DropdownButton extends LitElement {
     this.props.onSelect = (opt) => {
       this.value = opt;
 
-      this.dispatchEvent(new Event("change"));
+      this.dispatchEvent(new Event('change'));
       this.update();
       this.blur();
     };
@@ -118,20 +118,20 @@ export default class DropdownButton extends LitElement {
 
     this.tabIndex = 0;
 
-    this.addEventListener("focus", (e) => {
-      this.setAttribute("active", "");
+    this.addEventListener('focus', (e) => {
+      this.setAttribute('active', '');
     });
 
-    this.addEventListener("blur", (e) => {
-      this.removeAttribute("active");
+    this.addEventListener('blur', (e) => {
+      this.removeAttribute('active');
     });
 
     if (this.options && this.options.length < 1) {
       const childOptions = [];
       for (let child of this.children) {
         childOptions.push({
-          name: child.getAttribute("name"),
-          value: child.getAttribute("value"),
+          name: child.getAttribute('name'),
+          value: child.getAttribute('value'),
         });
       }
       this.options = childOptions;
@@ -139,4 +139,4 @@ export default class DropdownButton extends LitElement {
   }
 }
 
-customElements.define("dropdown-button", DropdownButton);
+customElements.define('dropdown-button', DropdownButton);

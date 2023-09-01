@@ -1,5 +1,5 @@
-import { LitElement, html, css } from "lit";
-import { property } from "lit/decorators.js";
+import { LitElement, html, css } from 'lit';
+import { property } from 'lit/decorators.js';
 
 // declare global {
 //   namespace JSX {
@@ -54,13 +54,13 @@ export class ProgressCircle extends LitElement {
   }
 
   @property({ type: Number, reflect: true })
-  public size: number = 30;
+  public size = 30;
 
   @property({ type: Number, reflect: true })
-  public thickness: number = 2;
+  public thickness = 2;
 
   @property({ type: Number, reflect: true })
-  public progress: number = 0;
+  public progress = 0;
 
   get loadProgress() {
     return (this.progress / 100) * (2 * Math.PI * (this.size / 2 - this.thickness));
@@ -80,8 +80,8 @@ export class ProgressCircle extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "progress-circle": ProgressCircle;
+    'progress-circle': ProgressCircle;
   }
 }
 
-customElements.define("progress-circle", ProgressCircle);
+customElements.define('progress-circle', ProgressCircle);

@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement } from 'lit';
 
 export default class Button extends LitElement {
   static get styles() {
@@ -32,10 +32,10 @@ export default class Button extends LitElement {
   }
 }
 
-customElements.define("evo-button", Button);
+customElements.define('evo-button', Button);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "evo-button": Button;
+    'evo-button': Button;
   }
 }

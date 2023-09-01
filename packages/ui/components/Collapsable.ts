@@ -1,5 +1,5 @@
-import { html, css, HTMLTemplateResult, LitElement } from "lit";
-import { property, query } from "lit/decorators.js";
+import { html, css, HTMLTemplateResult, LitElement } from 'lit';
+import { property, query } from 'lit/decorators.js';
 
 export class Collapsable extends LitElement {
   public static get styles() {
@@ -40,7 +40,7 @@ export class Collapsable extends LitElement {
   @property({ type: Number })
   public scrollOffsetY?: number;
 
-  private currentAnimation: number = -1;
+  private currentAnimation = -1;
 
   public close(): void {
     this.opened = false;
@@ -78,14 +78,14 @@ export class Collapsable extends LitElement {
         this.onAnimationFrame();
 
         if (currentHeight >= targetHeight - 1 && currentHeight <= targetHeight) {
-          this.container.style.height = "auto";
+          this.container.style.height = 'auto';
           resolve();
         } else {
           this.currentAnimation = requestAnimationFrame(animateFrame);
         }
       };
 
-      this.container.style.height = targetHeight > 0 ? "0px" : `${contentHeight}px`;
+      this.container.style.height = targetHeight > 0 ? '0px' : `${contentHeight}px`;
       this.container.style.height = `${this.container.offsetHeight}px`; // offsetHeight call forces relayout early
 
       requestAnimationFrame(() => {
@@ -95,10 +95,10 @@ export class Collapsable extends LitElement {
     });
   }
 
-  @query("slot")
+  @query('slot')
   slot;
 
-  @query(".container")
+  @query('.container')
   container;
 
   protected render(): HTMLTemplateResult {
@@ -112,8 +112,8 @@ export class Collapsable extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sv-collapsable": Collapsable;
+    'sv-collapsable': Collapsable;
   }
 }
 
-customElements.define("sv-collapsable", Collapsable);
+customElements.define('sv-collapsable', Collapsable);

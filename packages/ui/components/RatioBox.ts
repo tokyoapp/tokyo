@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement } from 'lit';
 
 export default class RatioBox extends LitElement {
   static get styles() {
@@ -32,10 +32,10 @@ export default class RatioBox extends LitElement {
   }
 }
 
-customElements.define("ratio-box", RatioBox);
+customElements.define('ratio-box', RatioBox);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "ratio-box": RatioBox;
+    'ratio-box': RatioBox;
   }
 }

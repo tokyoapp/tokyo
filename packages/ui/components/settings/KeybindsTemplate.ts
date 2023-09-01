@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit-element";
-import { Action } from "atrium/lib/Actions";
-import "../Input";
+import { html, css, LitElement } from 'lit-element';
+import { Action } from 'atrium/lib/Actions';
+import '../Input';
 
 class SettingsKeybindsComponent extends LitElement {
   static get styles() {
@@ -53,11 +53,7 @@ class SettingsKeybindsComponent extends LitElement {
     `;
   }
 
-  filter = "";
-
-  constructor() {
-    super();
-  }
+  filter = '';
 
   getKeybindList() {
     const binds = Action.getMap();
@@ -83,8 +79,8 @@ class SettingsKeybindsComponent extends LitElement {
 
     targetEle.tabIndex = 0;
     targetEle.focus();
-    targetEle.innerText = "Press a key";
-    targetEle.setAttribute("active", "");
+    targetEle.innerText = 'Press a key';
+    targetEle.setAttribute('active', '');
 
     let shift = false;
     let ctrl = false;
@@ -93,7 +89,7 @@ class SettingsKeybindsComponent extends LitElement {
     const changeBind = (newShortcut) => {
       Action.mapShortcut(keybind.bind, newShortcut);
 
-      targetEle.removeAttribute("active");
+      targetEle.removeAttribute('active');
       targetEle.innerText = Action.getMap()[keybind.bind];
     };
 
@@ -107,7 +103,7 @@ class SettingsKeybindsComponent extends LitElement {
 
   render() {
     const keybinds = this.getKeybindList();
-    const filter = this.filter || "";
+    const filter = this.filter || '';
 
     return html`
       <gyro-input
@@ -141,7 +137,7 @@ class SettingsKeybindsComponent extends LitElement {
   }
 }
 
-customElements.define("gyro-keybinds", SettingsKeybindsComponent);
+customElements.define('gyro-keybinds', SettingsKeybindsComponent);
 
 export default () => {
   return html` <gyro-keybinds></gyro-keybinds> `;

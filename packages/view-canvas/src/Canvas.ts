@@ -1,5 +1,5 @@
-import Notification from "./components/Notification";
-import { donwloadToDataUri } from "./utils";
+import Notification from './components/Notification';
+import { donwloadToDataUri } from './utils';
 
 export default class Canvas {
   constructor(saveData) {
@@ -11,12 +11,12 @@ export default class Canvas {
       this.lines = saveData.lines || [];
     } else {
       this.asset = {
-        version: "1.0",
-        generator: "whiteboard",
-        copyright: "2020 (c) Tim Havlicek",
+        version: '1.0',
+        generator: 'whiteboard',
+        copyright: '2020 (c) Tim Havlicek',
       };
       this.canvas = {
-        title: "",
+        title: '',
         view: [0, 0],
         scale: 0.5,
       };
@@ -27,7 +27,7 @@ export default class Canvas {
 
     for (let element of this.elements) {
       element.image = new Image();
-      if (element.data.match("http")) {
+      if (element.data.match('http')) {
         donwloadToDataUri(element.data).then((uri) => {
           element.image.src = uri;
         });
@@ -45,7 +45,7 @@ export default class Canvas {
     const element = {
       data: dataUrl,
       image: new Image(),
-      type: "image/jpg",
+      type: 'image/jpg',
     };
     const node = {
       element: this.elements.push(element) - 1,
@@ -61,10 +61,10 @@ export default class Canvas {
     };
     element.image.onerror = (e) => {
       console.error(e);
-      new Notification({ text: "Could not load image." }).show();
+      new Notification({ text: 'Could not load image.' }).show();
     };
 
-    if (dataUrl.match("http")) {
+    if (dataUrl.match('http')) {
       donwloadToDataUri(dataUrl).then((uri) => {
         element.image.src = uri;
       });
@@ -78,7 +78,7 @@ export default class Canvas {
   createTextNode(text) {
     const element = {
       data: text,
-      type: "text/plain",
+      type: 'text/plain',
     };
     const node = {
       element: this.elements.push(element) - 1,
@@ -86,9 +86,9 @@ export default class Canvas {
       size: [1000, 500],
       scale: 1,
       extras: {
-        "font-family": "Roboto",
-        "font-size": "69px",
-        color: "#eee",
+        'font-family': 'Roboto',
+        'font-size': '69px',
+        color: '#eee',
       },
     };
     this.nodes.push(node);
@@ -117,14 +117,8 @@ export default class Canvas {
       globalMinMaxX[0] = Math.min(globalMinMaxX[0], node.position[0]);
       globalMinMaxY[0] = Math.min(globalMinMaxY[0], node.position[1]);
 
-      globalMinMaxX[1] = Math.max(
-        globalMinMaxX[1],
-        node.position[0] + node.size[0]
-      );
-      globalMinMaxY[1] = Math.max(
-        globalMinMaxY[1],
-        node.position[1] + node.size[1]
-      );
+      globalMinMaxX[1] = Math.max(globalMinMaxX[1], node.position[0] + node.size[0]);
+      globalMinMaxY[1] = Math.max(globalMinMaxY[1], node.position[1] + node.size[1]);
     }
 
     return {

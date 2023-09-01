@@ -1,17 +1,17 @@
-import { OverlayElement } from "../OverlayElement";
-import { NodeElement } from "../NodeElement";
-import Node from "./Node";
+import { OverlayElement } from '../OverlayElement';
+import { NodeElement } from '../NodeElement';
+import Node from './Node';
 
-import DropdownButton from "../../DropdownButton";
-import FluidInput from "../../FluidInput";
+import DropdownButton from '../../DropdownButton';
+import FluidInput from '../../FluidInput';
 
 class TextNodeElement extends NodeElement {}
 
-customElements.define("text-node-element", TextNodeElement);
+customElements.define('text-node-element', TextNodeElement);
 
 class DataChangeEvent extends Event {
   constructor(key, value) {
-    super("change");
+    super('change');
     this.key = key;
     this.value = value;
   }
@@ -22,28 +22,28 @@ class TextOverlay extends OverlayElement {
     super();
 
     this.data = {
-      "font-family": "Roboto",
-      "font-size": "69px",
-      color: "grey",
+      'font-family': 'Roboto',
+      'font-size': '69px',
+      color: 'grey',
     };
 
     this.fontDropDown = new DropdownButton({
       options: [
-        { name: "Roboto", value: "Roboto" },
-        { name: "Open Sans", value: "Open Sans" },
-        { name: "Monospace", value: "Monospace" },
+        { name: 'Roboto', value: 'Roboto' },
+        { name: 'Open Sans', value: 'Open Sans' },
+        { name: 'Monospace', value: 'Monospace' },
       ],
     });
-    this.fontDropDown.addEventListener("change", (e) => {
-      this.setData("font-family", this.fontDropDown.value.value);
+    this.fontDropDown.addEventListener('change', (e) => {
+      this.setData('font-family', this.fontDropDown.value.value);
     });
     this.sizeInput = new FluidInput();
     this.sizeInput.steps = 2;
     this.sizeInput.max = 200;
     this.sizeInput.min = 12;
     this.sizeInput.value = 42;
-    this.sizeInput.addEventListener("change", (e) => {
-      this.setData("font-size", this.sizeInput.value + "px");
+    this.sizeInput.addEventListener('change', (e) => {
+      this.setData('font-size', this.sizeInput.value + 'px');
     });
   }
 
@@ -64,7 +64,7 @@ class TextOverlay extends OverlayElement {
   }
 }
 
-customElements.define("text-overlay-element", TextOverlay);
+customElements.define('text-overlay-element', TextOverlay);
 
 export default class TextNode extends Node {
   static get OverlayElement() {

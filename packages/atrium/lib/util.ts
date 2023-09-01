@@ -25,7 +25,7 @@ export function dragElement(ele: HTMLElement, callback: Function) {
 
   let currPointer: number | null;
 
-  ele.addEventListener("pointerdown", (e) => {
+  ele.addEventListener('pointerdown', (e) => {
     pointers[e.pointerId] = e;
 
     if (!currPointer) {
@@ -46,14 +46,14 @@ export function dragElement(ele: HTMLElement, callback: Function) {
         shiftKey: e.shiftKey,
         pressure: 1.0,
         pointerId: null,
-        type: "",
+        type: '',
       };
     }
 
     callback(state);
   });
 
-  window.addEventListener("pointerup", (e) => {
+  window.addEventListener('pointerup', (e) => {
     currPointer = null;
     downEvent = null;
     lastEvent = null;
@@ -72,10 +72,10 @@ export function dragElement(ele: HTMLElement, callback: Function) {
 
     delete pointers[e.pointerId];
 
-    console.log("pointer up");
+    console.log('pointer up');
   });
 
-  window.addEventListener("pointermove", (e) => {
+  window.addEventListener('pointermove', (e) => {
     if (e.pointerId == currPointer) {
       if (dragging && downEvent && lastEvent) {
         state.x = e.x;

@@ -1,4 +1,4 @@
-import Tool from "./Tool";
+import Tool from './Tool';
 
 export default class Select extends Tool {
   static onMouseDown(cnvs, data) {
@@ -59,7 +59,7 @@ export default class Select extends Tool {
       let wStep = stepX;
       let hStep = stepX / ar;
 
-      if (cnvs.canvas.getNodeElement(node).type == "text/plain") {
+      if (cnvs.canvas.getNodeElement(node).type == 'text/plain') {
         if (node.size[0] > 100 && node.size[0] > 100) {
           node.size[0] += stepX;
           node.size[1] += stepY;

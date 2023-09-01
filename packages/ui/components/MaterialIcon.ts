@@ -1,7 +1,7 @@
-import { css, html, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { css, html, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
-const TAG = "material-icon";
+const TAG = 'material-icon';
 
 document.head.innerHTML += `<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">`;
 

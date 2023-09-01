@@ -1,1 +1,1 @@
-import "./components/canvas/CanvasElement";
+import './components/canvas/CanvasElement';

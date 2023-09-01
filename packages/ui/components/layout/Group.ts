@@ -1,12 +1,12 @@
-import Column from "./Column";
+import Column from './Column';
 
 export default class Group extends Column {
   static get observedAttributes() {
-    return ["active-tab", "show-tabs"];
+    return ['active-tab', 'show-tabs'];
   }
 
   static get template() {
-    const groupTemplate = document.createElement("template");
+    const groupTemplate = document.createElement('template');
     groupTemplate.innerHTML = `
 			<style>
 				:host {
@@ -125,8 +125,8 @@ export default class Group extends Column {
   }
 
   get activeTab() {
-    if (this.hasAttribute("active-tab")) {
-      return +(this.getAttribute("active-tab") || 0);
+    if (this.hasAttribute('active-tab')) {
+      return +(this.getAttribute('active-tab') || 0);
     } else {
       return -1;
     }
@@ -138,13 +138,13 @@ export default class Group extends Column {
 
   get tabs() {
     if (!this.shadowRoot) {
-      return this.attachShadow({ mode: "open" });
+      return this.attachShadow({ mode: 'open' });
     }
-    return this.shadowRoot.querySelectorAll(".tabs .tab[data-groupid]");
+    return this.shadowRoot.querySelectorAll('.tabs .tab[data-groupid]');
   }
 
   get components() {
-    return [...this.children].filter((ele) => ele.hasAttribute("tab"));
+    return [...this.children].filter((ele) => ele.hasAttribute('tab'));
   }
 
   constructor() {
@@ -159,7 +159,7 @@ export default class Group extends Column {
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     if (oldValue === newValue) return;
 
-    if (name === "active-tab") {
+    if (name === 'active-tab') {
       this.activeTab = +newValue;
     }
 
@@ -181,7 +181,7 @@ export default class Group extends Column {
     let insertPosition = 0;
 
     const dragOverHandler = (e: DragEvent) => {
-      if (!document.body.hasAttribute("layout-drag")) return;
+      if (!document.body.hasAttribute('layout-drag')) return;
 
       e.preventDefault();
 
@@ -192,47 +192,47 @@ export default class Group extends Column {
 
       const area = Math.min(bounds.height / 8, bounds.width / 8);
 
-      this.removeAttribute("style");
+      this.removeAttribute('style');
       insertPosition = 0;
 
       if (y < bounds.top + area) {
-        this.style.setProperty("--height", area + "px");
+        this.style.setProperty('--height', area + 'px');
 
         insertPosition = -1;
       } else if (y > bounds.bottom - area) {
-        this.style.setProperty("--height", area + "px");
-        this.style.setProperty("--top", bounds.height - area + "px");
+        this.style.setProperty('--height', area + 'px');
+        this.style.setProperty('--top', bounds.height - area + 'px');
 
         insertPosition = 1;
       } else if (x < bounds.left + area) {
-        this.style.setProperty("--width", area + "px");
+        this.style.setProperty('--width', area + 'px');
 
         insertPosition = -2;
       } else if (x > bounds.right - area) {
-        this.style.setProperty("--width", area + "px");
-        this.style.setProperty("--left", bounds.width - area + "px");
+        this.style.setProperty('--width', area + 'px');
+        this.style.setProperty('--left', bounds.width - area + 'px');
 
         insertPosition = 2;
       }
 
-      this.setAttribute("drag-over", "");
+      this.setAttribute('drag-over', '');
 
       if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = "move";
+        e.dataTransfer.dropEffect = 'move';
       }
     };
 
     const dragEndHandler = (e: Event) => {
       dragLeaveHandler(e);
 
-      if (document.body.hasAttribute("layout-drag")) {
-        document.body.removeAttribute("layout-drag");
+      if (document.body.hasAttribute('layout-drag')) {
+        document.body.removeAttribute('layout-drag');
       }
     };
 
     const dragLeaveHandler = (e: Event) => {
-      this.removeAttribute("drag-over");
-      this.removeAttribute("style");
+      this.removeAttribute('drag-over');
+      this.removeAttribute('style');
     };
 
     const dragDropHandler = (e: DragEvent) => {
@@ -240,11 +240,11 @@ export default class Group extends Column {
 
       dragEndHandler(e);
 
-      const targetId = e.dataTransfer?.getData("tab");
+      const targetId = e.dataTransfer?.getData('tab');
 
       if (!targetId) return;
 
-      const component = document.querySelector("[" + targetId + "]");
+      const component = document.querySelector('[' + targetId + ']');
 
       if (!component) return;
 
@@ -304,25 +304,25 @@ export default class Group extends Column {
       }
     };
 
-    this.addEventListener("dragover", dragOverHandler);
-    this.addEventListener("dragleave", dragLeaveHandler);
-    this.addEventListener("dragend", dragEndHandler);
-    this.addEventListener("drop", dragDropHandler);
+    this.addEventListener('dragover', dragOverHandler);
+    this.addEventListener('dragleave', dragLeaveHandler);
+    this.addEventListener('dragend', dragEndHandler);
+    this.addEventListener('drop', dragDropHandler);
   }
 
   // updates tabs bar if components have changed
   renderTabs() {
-    const tabs = this.shadowRoot.querySelector(".tabs");
-    tabs.innerHTML = "";
+    const tabs = this.shadowRoot.querySelector('.tabs');
+    tabs.innerHTML = '';
 
     // creates tab ele for component
     const createTab = (component) => {
-      const tab = document.createElement("span");
-      tab.setAttribute("draggable", "true");
-      tab.className = "tab";
+      const tab = document.createElement('span');
+      tab.setAttribute('draggable', 'true');
+      tab.className = 'tab';
 
       if (component) {
-        const groupid = component.getAttribute("tab");
+        const groupid = component.getAttribute('tab');
 
         if (groupid) {
           tab.innerText = component.name || groupid;
@@ -335,14 +335,14 @@ export default class Group extends Column {
         };
 
         tab.ondragstart = (e) => {
-          document.body.setAttribute("layout-drag", "");
-          e.dataTransfer.setData("tab", "drag-target");
-          component.setAttribute("drag-target", "");
+          document.body.setAttribute('layout-drag', '');
+          e.dataTransfer.setData('tab', 'drag-target');
+          component.setAttribute('drag-target', '');
         };
 
         tab.ondragend = (e) => {
           setTimeout(() => {
-            component.removeAttribute("drag-target");
+            component.removeAttribute('drag-target');
           }, 10);
         };
       }
@@ -352,7 +352,7 @@ export default class Group extends Column {
 
     const components = this.components;
 
-    if (components.length > 1 || this.hasAttribute("show-tabs")) {
+    if (components.length > 1 || this.hasAttribute('show-tabs')) {
       for (let i = 0; i < components.length; i++) {
         const tab = createTab(components[i]);
         tabs.appendChild(tab);
@@ -379,21 +379,21 @@ export default class Group extends Column {
 
       if (tab) {
         if (i == index) {
-          tab.setAttribute("active", "");
+          tab.setAttribute('active', '');
         } else {
-          tab.removeAttribute("active");
+          tab.removeAttribute('active');
         }
       }
 
       if (components[i]) {
         if (i == index) {
-          components[i].setAttribute("active", "");
+          components[i].setAttribute('active', '');
         } else {
-          components[i].removeAttribute("active");
+          components[i].removeAttribute('active');
         }
       }
     }
   }
 }
 
-customElements.define("gyro-group", Group);
+customElements.define('gyro-group', Group);

@@ -1,6 +1,6 @@
-import { Action } from "atrium/lib/Actions";
-import "../Icon";
-import { html, css, LitElement } from "lit-element";
+import { Action } from 'atrium/lib/Actions';
+import '../Icon';
+import { html, css, LitElement } from 'lit-element';
 
 export class MenuItem extends LitElement {
   static get styles() {
@@ -82,43 +82,45 @@ export class MenuItem extends LitElement {
   }
 
   render() {
-    const icon = this.props ? this.props.icon : "";
-    const title = this.props ? this.props.title : "";
+    const icon = this.props ? this.props.icon : '';
+    const title = this.props ? this.props.title : '';
 
     return html`
       <div class="menu">
         <slot></slot>
-        ${this.item?.options?.map((optn) => {
-          const optionEle = new MenuOption();
-          optionEle.setAttribute("title", optn.title);
-          if (optn.seperator) {
-            optionEle.setAttribute("seperator", "");
-          }
-          if (optn.action) {
-            if (typeof optn.action == "string") {
-              optionEle.setAttribute("action", optn.action);
-            } else if (optn.action instanceof Object) {
-              optionEle.setAttribute("action", optn.action.name);
-              optionEle.options = optn.action.args;
+        ${
+          this.item?.options?.map((optn) => {
+            const optionEle = new MenuOption();
+            optionEle.setAttribute('title', optn.title);
+            if (optn.seperator) {
+              optionEle.setAttribute('seperator', '');
             }
-          }
+            if (optn.action) {
+              if (typeof optn.action == 'string') {
+                optionEle.setAttribute('action', optn.action);
+              } else if (optn.action instanceof Object) {
+                optionEle.setAttribute('action', optn.action.name);
+                optionEle.options = optn.action.args;
+              }
+            }
 
-          return html`${optionEle}`;
-        }) || ""}
+            return html`${optionEle}`;
+          }) || ''
+        }
       </div>
       <div class="button">
         ${icon ? html`<gyro-icon icon="${icon}"></gyro-icon>` : html` <slot name="icon"></slot> `}
-        ${title ? html`<span class="tooltip" title="${title}"></span>` : ""}
+        ${title ? html`<span class="tooltip" title="${title}"></span>` : ''}
       </div>
     `;
   }
 
   get action() {
-    return this.getAttribute("action");
+    return this.getAttribute('action');
   }
 
   get require() {
-    return this.getAttribute("require");
+    return this.getAttribute('require');
   }
 
   item: Array<any> | undefined;
@@ -132,21 +134,21 @@ export class MenuItem extends LitElement {
       if (this.action || this.require) {
         this.blur();
       } else {
-        const menu = this.shadowRoot?.querySelector(".menu");
+        const menu = this.shadowRoot?.querySelector('.menu');
 
         const container = this.parentNode.parentNode;
         const height = container.clientHeight - this.parentNode.offsetHeight - 10;
 
-        menu.style.maxHeight = height + "px";
+        menu.style.maxHeight = height + 'px';
       }
     };
 
     this.onclick = (e) => {
-      const action = this.action ? this.action.split(":") : null;
-      const require = this.require ? this.require.split(":") : null;
+      const action = this.action ? this.action.split(':') : null;
+      const require = this.require ? this.require.split(':') : null;
 
       if (action) {
-        const action = this.action.split(":");
+        const action = this.action.split(':');
         Action.execute(action[0], [...action.slice(1)]);
       }
 
@@ -164,12 +166,12 @@ export class MenuItem extends LitElement {
     super.connectedCallback();
 
     this.props = {
-      icon: this.getAttribute("icon"),
-      title: this.getAttribute("title"),
+      icon: this.getAttribute('icon'),
+      title: this.getAttribute('title'),
     };
 
     if (this.props.icon) {
-      this.removeAttribute("title");
+      this.removeAttribute('title');
     }
 
     this.render();
@@ -225,11 +227,11 @@ export class MenuOption extends LitElement {
   }
 
   get action() {
-    return this.getAttribute("action");
+    return this.getAttribute('action');
   }
 
   get require() {
-    return this.getAttribute("require");
+    return this.getAttribute('require');
   }
 
   options: Object;
@@ -239,28 +241,28 @@ export class MenuOption extends LitElement {
 
     this.options = {};
 
-    this.addEventListener("click", this.onClick);
+    this.addEventListener('click', this.onClick);
   }
 
   attributeChangedCallback() {
     super.attributeChangedCallback();
 
     if (!this.action && !this.require) {
-      this.className = "disabled";
+      this.className = 'disabled';
     } else {
-      this.classList.remove("disabled");
+      this.classList.remove('disabled');
     }
 
     this.update({});
   }
 
   render() {
-    return html` ${this.getAttribute("title")} `;
+    return html` ${this.getAttribute('title')} `;
   }
 
   onClick(e) {
     // const actionParts = this.action ? this.action.split(":") : null;
-    const require = this.require ? this.require.split(":") : null;
+    const require = this.require ? this.require.split(':') : null;
 
     // if (actionParts) {
     // const options = [...actionParts.slice(1)];
@@ -284,7 +286,7 @@ export class Menubar extends LitElement {
   update() {
     super.update();
 
-    const items = document.querySelectorAll("gyro-menuitem");
+    const items = document.querySelectorAll('gyro-menuitem');
     for (let child of items) {
       child.update();
     }
@@ -295,6 +297,6 @@ export class Menubar extends LitElement {
   }
 }
 
-customElements.define("gyro-menubar", Menubar);
-customElements.define("gyro-menuitem", MenuItem);
-customElements.define("gyro-menuoption", MenuOption);
+customElements.define('gyro-menubar', Menubar);
+customElements.define('gyro-menuitem', MenuItem);
+customElements.define('gyro-menuoption', MenuOption);

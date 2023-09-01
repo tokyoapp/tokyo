@@ -1,10 +1,10 @@
-import { css, CSSResultGroup, html, LitElement } from "lit";
+import { css, CSSResultGroup, html, LitElement } from 'lit';
 
 export class FileDropEvent extends Event {
   file: File;
 
   constructor(file: File) {
-    super("drop-file-event");
+    super('drop-file-event');
 
     this.file = file;
   }
@@ -14,16 +14,16 @@ export default class FileDrop extends LitElement {
   constructor() {
     super();
 
-    this.addEventListener("dragover", (e) => {
+    this.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
 
-    this.addEventListener("drop", (e) => {
+    this.addEventListener('drop', (e) => {
       const files = e.dataTransfer?.files;
 
       if (files) {
         for (let file of files) {
-          if (file.type.match("video")) {
+          if (file.type.match('video')) {
             this.dispatchEvent(new FileDropEvent(file));
           }
         }
@@ -61,4 +61,4 @@ export default class FileDrop extends LitElement {
   }
 }
 
-customElements.define("file-drop", FileDrop);
+customElements.define('file-drop', FileDrop);

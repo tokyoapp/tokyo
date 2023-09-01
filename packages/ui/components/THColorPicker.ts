@@ -1,12 +1,12 @@
-import { css, html, LitElement } from "lit-element";
+import { css, html, LitElement } from 'lit-element';
 
 function componentToHex(c) {
   const hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length == 1 ? '0' + hex : hex;
 }
 
 function rgbToHex(r, g, b) {
-  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 // http://hsl2rgb.nichabi.com/javascript-function.php
@@ -310,7 +310,7 @@ export default class ColorPicker extends LitElement {
 
   set hue(hue) {
     this._hue = Math.max(Math.min(hue, 100), 0);
-    this.style.setProperty("--hue", this._hue);
+    this.style.setProperty('--hue', this._hue);
     this.drawHueScale();
   }
   get hue() {
@@ -319,7 +319,7 @@ export default class ColorPicker extends LitElement {
 
   set saturation(saturation) {
     this._saturation = Math.max(Math.min(saturation, 100), 0);
-    this.style.setProperty("--saturation", this._saturation);
+    this.style.setProperty('--saturation', this._saturation);
     this.drawHueScale();
   }
   get saturation() {
@@ -328,7 +328,7 @@ export default class ColorPicker extends LitElement {
 
   set lightness(lightness) {
     this._lightness = Math.max(Math.min(lightness, 100), 0);
-    this.style.setProperty("--lightness", this._lightness);
+    this.style.setProperty('--lightness', this._lightness);
     this.drawHueScale();
   }
   get lightness() {
@@ -337,7 +337,7 @@ export default class ColorPicker extends LitElement {
 
   set alpha(alpha) {
     this._alpha = Math.max(Math.min(alpha, 100), 0);
-    this.style.setProperty("--alpha", this._alpha);
+    this.style.setProperty('--alpha', this._alpha);
     this.drawHueScale();
   }
   get alpha() {
@@ -361,11 +361,11 @@ export default class ColorPicker extends LitElement {
     this.moving = false;
     this.selected = null;
 
-    const hue = this.shadowRoot.querySelector(".color-bar.hue");
-    const sat = this.shadowRoot.querySelector(".color-bar.saturation");
-    const light = this.shadowRoot.querySelector(".color-bar.lightness");
-    const alpha = this.shadowRoot.querySelector(".color-bar.alpha");
-    const color = this.shadowRoot.querySelector(".color-bar.color");
+    const hue = this.shadowRoot.querySelector('.color-bar.hue');
+    const sat = this.shadowRoot.querySelector('.color-bar.saturation');
+    const light = this.shadowRoot.querySelector('.color-bar.lightness');
+    const alpha = this.shadowRoot.querySelector('.color-bar.alpha');
+    const color = this.shadowRoot.querySelector('.color-bar.color');
 
     const mousemove = (e) => {
       const box = hue.getBoundingClientRect();
@@ -373,66 +373,66 @@ export default class ColorPicker extends LitElement {
 
       this[this.selected] = x;
 
-      this.dispatchEvent(new Event("input"));
+      this.dispatchEvent(new Event('input'));
     };
 
-    this.addEventListener("mousedown", () => {
+    this.addEventListener('mousedown', () => {
       this.moving = true;
-      window.addEventListener("mousemove", mousemove);
+      window.addEventListener('mousemove', mousemove);
     });
 
-    window.addEventListener("mouseup", () => {
+    window.addEventListener('mouseup', () => {
       this.moving = false;
-      window.removeEventListener("mousemove", mousemove);
+      window.removeEventListener('mousemove', mousemove);
 
-      this.dispatchEvent(new Event("change"));
+      this.dispatchEvent(new Event('change'));
     });
 
-    this.addEventListener("wheel", (e) => {
+    this.addEventListener('wheel', (e) => {
       const dir = Math.sign(e.deltaY);
       this[this.selected] = this[this.selected] + dir * 1;
 
-      this.dispatchEvent(new Event("change"));
+      this.dispatchEvent(new Event('change'));
     });
 
-    hue.addEventListener("mousemove", () => {
-      if (!this.moving) this.selected = "hue";
+    hue.addEventListener('mousemove', () => {
+      if (!this.moving) this.selected = 'hue';
     });
-    sat.addEventListener("mousemove", () => {
-      if (!this.moving) this.selected = "saturation";
+    sat.addEventListener('mousemove', () => {
+      if (!this.moving) this.selected = 'saturation';
     });
-    light.addEventListener("mousemove", () => {
-      if (!this.moving) this.selected = "lightness";
+    light.addEventListener('mousemove', () => {
+      if (!this.moving) this.selected = 'lightness';
     });
-    alpha.addEventListener("mousemove", () => {
-      if (!this.moving) this.selected = "alpha";
+    alpha.addEventListener('mousemove', () => {
+      if (!this.moving) this.selected = 'alpha';
     });
-    color.addEventListener("mousemove", () => {
+    color.addEventListener('mousemove', () => {
       this.selected = null;
     });
 
     this.drawHueScale();
 
-    this.shadowRoot.querySelector("#red").oninput = (e) => {
+    this.shadowRoot.querySelector('#red').oninput = (e) => {
       const rgba = this.rgba;
       this.setRGBA([e.target.value, rgba[1], rgba[2], rgba[3]]);
     };
-    this.shadowRoot.querySelector("#green").oninput = (e) => {
+    this.shadowRoot.querySelector('#green').oninput = (e) => {
       const rgba = this.rgba;
       this.setRGBA([rgba[0], e.target.value, rgba[2], rgba[3]]);
     };
-    this.shadowRoot.querySelector("#blue").oninput = (e) => {
+    this.shadowRoot.querySelector('#blue').oninput = (e) => {
       const rgba = this.rgba;
       this.setRGBA([rgba[0], rgba[1], e.target.value, rgba[3]]);
     };
-    this.shadowRoot.querySelector("#alpha").oninput = (e) => {
+    this.shadowRoot.querySelector('#alpha').oninput = (e) => {
       const rgba = this.rgba;
       this.setRGBA([rgba[0], rgba[1], rgba[2], e.target.value]);
     };
   }
 
   setHSLA(hsla) {
-    this.shadowRoot.querySelector(".color-picker").classList.add("transition");
+    this.shadowRoot.querySelector('.color-picker').classList.add('transition');
 
     this.hue = hsla[0] / 3.6;
     this.saturation = hsla[1];
@@ -440,7 +440,7 @@ export default class ColorPicker extends LitElement {
     this.alpha = hsla[3] * 100;
 
     setTimeout(() => {
-      this.shadowRoot.querySelector(".color-picker").classList.remove("transition");
+      this.shadowRoot.querySelector('.color-picker').classList.remove('transition');
     }, 15);
   }
 
@@ -450,8 +450,8 @@ export default class ColorPicker extends LitElement {
   }
 
   drawHueScale() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
 
     canvas.width = 360;
     canvas.height = 1;
@@ -461,17 +461,17 @@ export default class ColorPicker extends LitElement {
       context.fillRect(x, 0, 1, canvas.height);
     }
 
-    const hueCanvas = this.shadowRoot.querySelector(".color-bar.hue canvas");
-    const hueContext = hueCanvas.getContext("2d");
+    const hueCanvas = this.shadowRoot.querySelector('.color-bar.hue canvas');
+    const hueContext = hueCanvas.getContext('2d');
     hueContext.drawImage(canvas, 0, 0, hueCanvas.width, hueCanvas.height);
 
     const rgba = this.rgba;
 
-    this.shadowRoot.querySelector("#red").value = rgba[0];
-    this.shadowRoot.querySelector("#green").value = rgba[1];
-    this.shadowRoot.querySelector("#blue").value = rgba[2];
-    this.shadowRoot.querySelector("#alpha").value = rgba[3];
+    this.shadowRoot.querySelector('#red').value = rgba[0];
+    this.shadowRoot.querySelector('#green').value = rgba[1];
+    this.shadowRoot.querySelector('#blue').value = rgba[2];
+    this.shadowRoot.querySelector('#alpha').value = rgba[3];
   }
 }
 
-customElements.define("th-color-picker", ColorPicker);
+customElements.define('th-color-picker', ColorPicker);

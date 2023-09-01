@@ -19,6 +19,12 @@ tasks:
     cmds:
       - pnpm tauri dev
 
+  check:
+    desc: Lint files
+    dir: ./
+    cmds:
+      - npx biome check ./ {{.CLI_ARGS}}
+
   f:dev:
     desc: Run desktop app
     dir: apps/desktop

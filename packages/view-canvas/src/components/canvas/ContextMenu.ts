@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { html, LitElement } from 'lit';
 
 export class ContextMenu extends LitElement {
   constructor(optns) {
@@ -7,20 +7,20 @@ export class ContextMenu extends LitElement {
 
     this.tabIndex = 0;
 
-    this.addEventListener("blur", (e) => {
+    this.addEventListener('blur', (e) => {
       this.hide();
     });
   }
 
   hide() {
-    this.style.display = "none";
+    this.style.display = 'none';
   }
 
   setPosition(x, y) {
-    this.style.display = "block";
+    this.style.display = 'block';
     this.focus();
-    this.style.setProperty("--x", x);
-    this.style.setProperty("--y", y);
+    this.style.setProperty('--x', x);
+    this.style.setProperty('--y', y);
   }
 
   render() {
@@ -88,4 +88,4 @@ export class ContextMenu extends LitElement {
   }
 }
 
-customElements.define("context-menu", ContextMenu);
+customElements.define('context-menu', ContextMenu);

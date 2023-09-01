@@ -1,6 +1,6 @@
-import "mono/components/collapsable";
-import { html, css, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import 'mono/components/collapsable';
+import { html, css, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
 export class AccordionItem extends LitElement {
   public static get styles() {
@@ -46,8 +46,8 @@ export class AccordionItem extends LitElement {
     super.connectedCallback();
 
     this.tabIndex = 0;
-    this.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === " ") {
+    this.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === ' ') {
         this.toggleItem();
       }
     });
@@ -59,7 +59,7 @@ export class AccordionItem extends LitElement {
     } else {
       this.open();
     }
-    this.dispatchEvent(new Event("item-opened-change", { bubbles: true }));
+    this.dispatchEvent(new Event('item-opened-change', { bubbles: true }));
   }
 
   public close() {
@@ -89,10 +89,10 @@ export class AccordionItem extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sv-accordion-item": AccordionItem;
+    'sv-accordion-item': AccordionItem;
   }
 }
 
-if (typeof window !== "undefined") {
-  window.customElements.define("sv-accordion-item", AccordionItem);
+if (typeof window !== 'undefined') {
+  window.customElements.define('sv-accordion-item', AccordionItem);
 }

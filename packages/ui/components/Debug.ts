@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit-element";
+import { css, html, LitElement } from 'lit-element';
 
 export default class DebugElement extends LitElement {
   static get styles() {
@@ -42,4 +42,4 @@ export default class DebugElement extends LitElement {
   }
 }
 
-customElements.define("debug-log", DebugElement);
+customElements.define('debug-log', DebugElement);

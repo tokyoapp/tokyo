@@ -1,4 +1,4 @@
-import Panel from "./Panel";
+import Panel from './Panel';
 
 export default class Column extends Panel {
   constructor() {
@@ -10,4 +10,4 @@ export default class Column extends Panel {
   }
 }
 
-customElements.define("gyro-layout-column", Column);
+customElements.define('gyro-layout-column', Column);

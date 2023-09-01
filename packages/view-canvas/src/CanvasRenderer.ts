@@ -1,9 +1,9 @@
 export default class CanvasRenderer {
   constructor() {
     this.colors = {
-      line_color: "#eee",
-      grid_1: "#171717",
-      grid_2: "#101010",
+      line_color: '#eee',
+      grid_1: '#171717',
+      grid_2: '#101010',
     };
   }
 
@@ -23,7 +23,7 @@ export default class CanvasRenderer {
           node.size[0] + 2,
           node.size[1] + 2
         );
-      } else if (element.type == "text/plain") {
+      } else if (element.type == 'text/plain') {
         // draw text nodes
         this.drawText(ctxt, element.data, node);
       }
@@ -46,22 +46,21 @@ export default class CanvasRenderer {
   }
 
   drawText(ctxt, text, node, snapshot = false, canvasInstance, scaler) {
-    const buffer = text.split("\n");
+    const buffer = text.split('\n');
     const extras = node.extras || {
-      "font-family": "Roboto",
-      "font-size": "69px",
-      color: "grey",
+      'font-family': 'Roboto',
+      'font-size': '69px',
+      color: 'grey',
     };
 
     const BORDER_PADDING = [15, 15];
-    const FONT_SIZE = +extras["font-size"].replace("px", "");
+    const FONT_SIZE = +extras['font-size'].replace('px', '');
     const CHAR_HEIGHT = 1 * FONT_SIZE;
     const LINE_PADDING = 3;
     let LINE_WRAPPING = true;
     let CHAR_WIDTH = 40;
 
-    const max_line_px_length =
-      node.size[0] / (FONT_SIZE * 0.0125) - BORDER_PADDING[0] * 2;
+    const max_line_px_length = node.size[0] / (FONT_SIZE * 0.0125) - BORDER_PADDING[0] * 2;
 
     let x = node.position[0] + BORDER_PADDING[0];
     let y = node.position[1] + BORDER_PADDING[1];
@@ -74,10 +73,10 @@ export default class CanvasRenderer {
 
     const initY = y;
 
-    ctxt.fillStyle = extras["color"];
-    ctxt.font = `${extras["font-size"]} ${extras["font-family"]}`;
-    ctxt.textAlign = "left";
-    ctxt.textBaseline = "top";
+    ctxt.fillStyle = extras['color'];
+    ctxt.font = `${extras['font-size']} ${extras['font-family']}`;
+    ctxt.textAlign = 'left';
+    ctxt.textBaseline = 'top';
 
     const drawLine = (line) => {
       if (y - initY + CHAR_HEIGHT + LINE_PADDING < node.size[1]) {
@@ -102,8 +101,8 @@ export default class CanvasRenderer {
   renderSnapshot(canvasInstance) {
     const MAX_SNAPSHOT_SIZE = 5000;
 
-    const canvas = document.createElement("canvas");
-    const ctxt = canvas.getContext("2d");
+    const canvas = document.createElement('canvas');
+    const ctxt = canvas.getContext('2d');
 
     const bounds = canvasInstance.getNodeBounds(canvasInstance.nodes);
     canvas.width = bounds.width;
@@ -135,7 +134,7 @@ export default class CanvasRenderer {
           (node.size[0] + 2) / scaler,
           (node.size[1] + 2) / scaler
         );
-      } else if (element.type == "text/plain") {
+      } else if (element.type == 'text/plain') {
         // draw text nodes
         this.drawText(ctxt, element.data, node, true, canvasInstance, scaler);
       }
@@ -165,13 +164,13 @@ export default class CanvasRenderer {
 function sliceLine(line, maxLength) {
   const parts = [];
 
-  line = line.split("");
+  line = line.split('');
 
   while (line.length > maxLength) {
     const temp = line.splice(0, maxLength);
-    parts.push(temp.join(""));
+    parts.push(temp.join(''));
   }
-  parts.push(line.join(""));
+  parts.push(line.join(''));
 
   return parts;
 }

@@ -1,5 +1,5 @@
-import { html, css, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { html, css, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
 export default class ToolTip extends LitElement {
   static get styles() {
@@ -59,4 +59,4 @@ export default class ToolTip extends LitElement {
   }
 }
 
-customElements.define("tool-tip", ToolTip);
+customElements.define('tool-tip', ToolTip);

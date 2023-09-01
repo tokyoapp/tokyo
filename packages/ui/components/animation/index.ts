@@ -1,17 +1,17 @@
-import { RiveCanvas, File, Artboard } from "@rive-app/canvas-advanced-single";
-import { css, html, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import { Animations, registerListeners, Alignments } from "./rive.js";
+import { RiveCanvas, File, Artboard } from '@rive-app/canvas-advanced-single';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { Animations, registerListeners, Alignments } from './rive.js';
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      "sv-animation": Animation;
+      'sv-animation': Animation;
     }
   }
 }
 
-export type RiveEvents = "load";
+export type RiveEvents = 'load';
 
 class RiveEvent extends Event {
   constructor(event: RiveEvents, data: any) {
@@ -21,7 +21,7 @@ class RiveEvent extends Event {
   }
 }
 
-@customElement("sv-animation")
+@customElement('sv-animation')
 export class Animation extends LitElement {
   static get styles() {
     return css`
@@ -40,14 +40,14 @@ export class Animation extends LitElement {
   @property() height?: number;
   @property() paused?: boolean;
 
-  public loaded: boolean = false;
+  public loaded = false;
 
   private currentArtboard?: Artboard;
   private currentAnimation;
   private currentStateMachine;
-  private currentTick: number = 0;
+  private currentTick = 0;
   private frame?: number;
-  private frameCount: number = 0;
+  private frameCount = 0;
   private listeners;
   private rive?: RiveCanvas;
   private riveCanvas: HTMLCanvasElement;
@@ -67,7 +67,7 @@ export class Animation extends LitElement {
   constructor() {
     super();
 
-    this.riveCanvas = document.createElement("canvas");
+    this.riveCanvas = document.createElement('canvas');
 
     return this;
   }
@@ -130,7 +130,7 @@ export class Animation extends LitElement {
       this.riveCanvas.height = h;
     }
 
-    this.dispatchEvent(new Event("resize"));
+    this.dispatchEvent(new Event('resize'));
     // TODO: sideeffect: clears canvas on resize
   }
 
@@ -139,7 +139,7 @@ export class Animation extends LitElement {
     canvas.width = this.width || 128;
     canvas.height = this.height || 128;
 
-    if (!file) throw new Error("Animations file not compatible.");
+    if (!file) throw new Error('Animations file not compatible.');
 
     this.currentArtboard = this.artboard
       ? file.artboardByName(this.artboard)
@@ -246,7 +246,7 @@ export class Animation extends LitElement {
 
     this.loaded = true;
 
-    this.dispatchEvent(new RiveEvent("load", { animation: this.currentAnimation }));
+    this.dispatchEvent(new RiveEvent('load', { animation: this.currentAnimation }));
   }
 
   public animationShouldUpdate() {

@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit-element";
+import { html, css, LitElement } from 'lit-element';
 
 export default class GyroInput extends LitElement {
   static get styles() {
@@ -33,11 +33,11 @@ export default class GyroInput extends LitElement {
   }
 
   onInputChange() {
-    this.dispatchEvent(new Event("change"));
+    this.dispatchEvent(new Event('change'));
   }
 
   onInputInput() {
-    this.dispatchEvent(new Event("input"));
+    this.dispatchEvent(new Event('input'));
   }
 
   get value() {
@@ -49,7 +49,7 @@ export default class GyroInput extends LitElement {
   constructor() {
     super();
 
-    this.input = document.createElement("input");
+    this.input = document.createElement('input');
     this.input.onchange = (e) => this.onInputChange(e);
     this.input.oninput = (e) => this.onInputInput(e);
   }
@@ -80,4 +80,4 @@ export default class GyroInput extends LitElement {
   }
 }
 
-customElements.define("gyro-input", GyroInput);
+customElements.define('gyro-input', GyroInput);

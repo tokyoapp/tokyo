@@ -1,7 +1,7 @@
-import { createSignal } from "solid-js";
-import { Viewer } from "./src/Viewer";
+import { createSignal } from 'solid-js';
+import { Viewer } from './src/Viewer';
 
-const [greetMsg, setGreetMsg] = createSignal("");
+const [greetMsg, setGreetMsg] = createSignal('');
 
 export function ImageEditor({ onOpen }: { onOpen: () => void }) {
   return (

@@ -1,7 +1,7 @@
-import { LitElement, html, css } from "lit";
-import { customElement } from "lit/decorators";
+import { LitElement, html, css } from 'lit';
+import { customElement } from 'lit/decorators';
 
-@customElement("input-switch")
+@customElement('input-switch')
 export default class Switch extends LitElement {
   static get styles() {
     return css`
@@ -65,14 +65,14 @@ export default class Switch extends LitElement {
   }
 
   get checked() {
-    return this.hasAttribute("checked") && this.getAttribute("checked") != "false";
+    return this.hasAttribute('checked') && this.getAttribute('checked') != 'false';
   }
 
   set checked(value) {
     if (value === false) {
-      this.removeAttribute("checked");
+      this.removeAttribute('checked');
     } else if (value === true) {
-      this.setAttribute("checked", "");
+      this.setAttribute('checked', '');
     }
   }
 
@@ -87,7 +87,7 @@ export default class Switch extends LitElement {
   render() {
     const clickHandler = () => {
       this.checked = !this.checked;
-      this.dispatchEvent(new Event("change", { bubbles: true }));
+      this.dispatchEvent(new Event('change', { bubbles: true }));
     };
 
     return html`

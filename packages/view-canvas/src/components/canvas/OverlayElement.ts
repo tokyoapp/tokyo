@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { html, LitElement } from 'lit';
 
 export class OverlayElement extends LitElement {
   render() {
@@ -85,4 +85,4 @@ export class OverlayElement extends LitElement {
   }
 }
 
-customElements.define("canvas-overlay-element", OverlayElement);
+customElements.define('canvas-overlay-element', OverlayElement);

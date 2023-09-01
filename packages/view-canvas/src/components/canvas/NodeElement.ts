@@ -1,5 +1,5 @@
-import { html, LitElement } from "lit";
-import CanvasElement from "./CanvasElement";
+import { html, LitElement } from 'lit';
+import CanvasElement from './CanvasElement';
 
 export class NodeElement extends LitElement {
   canvas: CanvasElement;

@@ -1,5 +1,5 @@
-import { LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
 export class Select extends LitElement {
   protected createRenderRoot(): Element | ShadowRoot {
@@ -7,11 +7,11 @@ export class Select extends LitElement {
   }
 
   @property({ type: String })
-  public activeAttribute: string = "selected";
+  public activeAttribute = 'selected';
 
   // select multiple options
   @property({ type: Boolean, reflect: false })
-  public multiple: boolean = false;
+  public multiple = false;
 
   public activeChildren: string[] = [];
 
@@ -53,7 +53,7 @@ export class Select extends LitElement {
           this.activeChildren.push(value);
         }
 
-        child.setAttribute(this.activeAttribute, "");
+        child.setAttribute(this.activeAttribute, '');
       }
 
       i++;
@@ -61,12 +61,12 @@ export class Select extends LitElement {
 
     this.updateChildren();
 
-    this.dispatchEvent(new Event("change", { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
     e.stopPropagation();
   }
 
   static getChildValue(child: HTMLElement) {
-    return child.getAttribute("value") || child.dataset.value;
+    return child.getAttribute('value') || child.dataset.value;
   }
 
   private updateChildren() {
@@ -75,7 +75,7 @@ export class Select extends LitElement {
       const value = Select.getChildValue(child as HTMLElement) || index.toString();
 
       if (this.activeChildren.indexOf(value) !== -1) {
-        child.setAttribute(this.activeAttribute, "");
+        child.setAttribute(this.activeAttribute, '');
       } else {
         child.removeAttribute(this.activeAttribute);
       }
@@ -84,7 +84,7 @@ export class Select extends LitElement {
     }
   }
 
-  public selected: number = -1;
+  public selected = -1;
 
   public selectNext() {
     this.selected = Math.min(this.selected + 1, this.children.length - 1);
@@ -107,7 +107,7 @@ export class Select extends LitElement {
     const selected = document.activeElement;
     if (selected != null) {
       let nextChild = selected.nextElementSibling;
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         nextChild = selected.previousElementSibling;
       }
 
@@ -119,17 +119,17 @@ export class Select extends LitElement {
         const yd = Math.abs(nextRect.y - currentRect.y);
 
         if (xd > yd) {
-          if (e.key === "ArrowLeft") {
+          if (e.key === 'ArrowLeft') {
             this.selectPrev();
           }
-          if (e.key === "ArrowRight") {
+          if (e.key === 'ArrowRight') {
             this.selectNext();
           }
         } else {
-          if (e.key === "ArrowUp") {
+          if (e.key === 'ArrowUp') {
             this.selectPrev();
           }
-          if (e.key === "ArrowDown") {
+          if (e.key === 'ArrowDown') {
             this.selectNext();
           }
         }
@@ -152,26 +152,26 @@ export class Select extends LitElement {
 
     this.tabIndex = 0;
 
-    this.addEventListener("keydown", this.onKeyDown);
+    this.addEventListener('keydown', this.onKeyDown);
 
-    this.addEventListener("click", this.clickCallback);
-    this.addEventListener("focusin", this.focusCallback);
+    this.addEventListener('click', this.clickCallback);
+    this.addEventListener('focusin', this.focusCallback);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
 
-    this.removeEventListener("keydown", this.onKeyDown);
+    this.removeEventListener('keydown', this.onKeyDown);
 
-    this.removeEventListener("click", this.clickCallback);
-    this.removeEventListener("focusin", this.focusCallback);
+    this.removeEventListener('click', this.clickCallback);
+    this.removeEventListener('focusin', this.focusCallback);
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sv-select": Select;
+    'sv-select': Select;
   }
 }
 
-customElements.define("sv-select", Select);
+customElements.define('sv-select', Select);

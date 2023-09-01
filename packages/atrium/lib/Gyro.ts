@@ -1,10 +1,10 @@
-import { Action, ActionOptions } from "./Actions";
-import DebugElement from "ui/components/Debug";
-import { dragElement } from "./util";
-import { LitElement } from "lit-element";
-import { MenuItem, MenuOption } from "ui/components/menubar/Menubar";
-import { SettingsComponent } from "ui/components/settings/Settings";
-import Notification from "ui/components/Notification";
+import { Action, ActionOptions } from './Actions';
+import DebugElement from 'ui/components/Debug';
+import { dragElement } from './util';
+import { LitElement } from 'lit-element';
+import { MenuItem, MenuOption } from 'ui/components/menubar/Menubar';
+import { SettingsComponent } from 'ui/components/settings/Settings';
+import Notification from 'ui/components/Notification';
 
 const componentTypes = [];
 
@@ -26,14 +26,14 @@ export default class Gyro {
   }
 
   static log(...str: Array<string>) {
-    if (localStorage.getItem("debug") == "true") {
-      debugElement.appendLine(str.join(" "));
+    if (localStorage.getItem('debug') == 'true') {
+      debugElement.appendLine(str.join(' '));
     }
     console.log(...str);
   }
 
   static registerComponent(component: Component) {
-    this.log("register componnent", component.title);
+    this.log('register componnent', component.title);
 
     const menu = component.menu;
 
@@ -69,13 +69,13 @@ export default class Gyro {
 
   static addMenuItem(item) {
     const itemEle = new MenuItem(item);
-    itemEle.setAttribute("icon", item.icon);
+    itemEle.setAttribute('icon', item.icon);
     itemEle.title = item.title;
     if (item.action) {
-      itemEle.setAttribute("action", item.action);
+      itemEle.setAttribute('action', item.action);
     }
 
-    const menuEle = document.querySelector("gyro-menubar .top");
+    const menuEle = document.querySelector('gyro-menubar .top');
     menuEle?.append(itemEle);
   }
 
@@ -85,7 +85,7 @@ export default class Gyro {
 }
 
 const debugElement = new DebugElement();
-window.addEventListener("DOMContentLoaded", (e) => {
+window.addEventListener('DOMContentLoaded', (e) => {
   document.body.append(debugElement);
 });
 

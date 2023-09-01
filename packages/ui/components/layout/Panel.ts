@@ -82,16 +82,16 @@ export default class Panel extends HTMLElement {
 
   shadowSlot;
 
-  width: number = 0;
-  height: number = 0;
+  width = 0;
+  height = 0;
   boundingBox: ClientRect | null = null;
 
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
 
-    const slot = document.createElement("slot");
+    const slot = document.createElement('slot');
     this.shadowSlot = slot;
 
     if (this.shadowRoot) {
@@ -108,9 +108,9 @@ export default class Panel extends HTMLElement {
 
     this.boundsInvalid = true;
 
-    slot.addEventListener("slotchange", (e) => this.slotChangeCallback(e));
+    slot.addEventListener('slotchange', (e) => this.slotChangeCallback(e));
 
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       this.boundsInvalid = true;
     });
   }
@@ -119,20 +119,20 @@ export default class Panel extends HTMLElement {
     this.resizable();
 
     // ignore components on drag over
-    this.addEventListener("dragstart", (e) => {
-      if (e.dataTransfer?.getData("tab")) {
-        this.setAttribute("drag-over", "");
+    this.addEventListener('dragstart', (e) => {
+      if (e.dataTransfer?.getData('tab')) {
+        this.setAttribute('drag-over', '');
       }
     });
 
     const dragEndHandler = () => {
-      this.removeAttribute("drag-over");
+      this.removeAttribute('drag-over');
     };
 
-    this.addEventListener("dragend", dragEndHandler);
-    this.addEventListener("dragcancel", dragEndHandler);
-    this.addEventListener("dragleave", dragEndHandler);
-    this.addEventListener("drop", dragEndHandler);
+    this.addEventListener('dragend', dragEndHandler);
+    this.addEventListener('dragcancel', dragEndHandler);
+    this.addEventListener('dragleave', dragEndHandler);
+    this.addEventListener('drop', dragEndHandler);
   }
 
   slotChangeCallback(e: Event) {
@@ -145,10 +145,10 @@ export default class Panel extends HTMLElement {
   }
 
   resizable() {
-    const splitBar = document.createElement("div");
-    splitBar.className = "split-bar";
+    const splitBar = document.createElement('div');
+    splitBar.className = 'split-bar';
 
-    const borderSizeVar = getComputedStyle(this).getPropertyValue("--layout-grid-gap");
+    const borderSizeVar = getComputedStyle(this).getPropertyValue('--layout-grid-gap');
     const borderSize = parseInt(borderSizeVar);
 
     let pointerDownEvent: PointerEvent | null;
@@ -233,25 +233,25 @@ export default class Panel extends HTMLElement {
           }
 
           if (pointerDownEvent) {
-            splitBar.setAttribute("active", "");
+            splitBar.setAttribute('active', '');
           } else {
-            splitBar.removeAttribute("active");
+            splitBar.removeAttribute('active');
           }
 
           if (resizeX) {
-            splitBar.className = "split-bar vertical";
-            splitBar.style.setProperty("--size", borderSize);
-            splitBar.style.setProperty("--x", pointerDownEvent ? borderX + delta[0] : borderX);
-            splitBar.style.setProperty("--y", column.boundingBox?.top);
-            splitBar.style.height = column.height + "px";
+            splitBar.className = 'split-bar vertical';
+            splitBar.style.setProperty('--size', borderSize);
+            splitBar.style.setProperty('--x', pointerDownEvent ? borderX + delta[0] : borderX);
+            splitBar.style.setProperty('--y', column.boundingBox?.top);
+            splitBar.style.height = column.height + 'px';
           }
 
           if (resizeY) {
-            splitBar.className = "split-bar horizontal";
-            splitBar.style.setProperty("--size", borderSize);
-            splitBar.style.setProperty("--y", pointerDownEvent ? borderY + delta[1] : borderY);
-            splitBar.style.setProperty("--x", column.boundingBox?.left);
-            splitBar.style.width = column.width + "px";
+            splitBar.className = 'split-bar horizontal';
+            splitBar.style.setProperty('--size', borderSize);
+            splitBar.style.setProperty('--y', pointerDownEvent ? borderY + delta[1] : borderY);
+            splitBar.style.setProperty('--x', column.boundingBox?.left);
+            splitBar.style.width = column.width + 'px';
           }
         }
 
@@ -270,19 +270,19 @@ export default class Panel extends HTMLElement {
       }
 
       pointerDownEvent = null;
-      splitBar.removeAttribute("active");
+      splitBar.removeAttribute('active');
     };
 
     const pointerDownHandler = (e: PointerEvent) => {
       if (resizeAvailable[0] || resizeAvailable[1]) {
         pointerDownEvent = e;
-        splitBar.setAttribute("active", "");
+        splitBar.setAttribute('active', '');
       }
     };
 
-    let activeChild: number = -1;
+    let activeChild = -1;
 
-    window.addEventListener("pointermove", (e) => {
+    window.addEventListener('pointermove', (e) => {
       if (resizeAvailable[0] || resizeAvailable[1]) {
         pointerMoveHandler(e, activeChild);
         e.preventDefault();
@@ -297,9 +297,9 @@ export default class Panel extends HTMLElement {
       }
     });
 
-    window.addEventListener("pointerdown", pointerDownHandler);
-    window.addEventListener("pointerup", cancelPointerHandler);
-    window.addEventListener("pointercancel", cancelPointerHandler);
+    window.addEventListener('pointerdown', pointerDownHandler);
+    window.addEventListener('pointerup', cancelPointerHandler);
+    window.addEventListener('pointercancel', cancelPointerHandler);
 
     if (this.boundsInvalid) {
       this.updateBounds();
@@ -307,7 +307,7 @@ export default class Panel extends HTMLElement {
   }
 
   onLayoutChange() {
-    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new Event('resize'));
   }
 
   updateBounds() {
@@ -374,13 +374,13 @@ export default class Panel extends HTMLElement {
 
   setLayoutTempalte(columnTemplate = [1, 1], rowTemplate = [1, 1]) {
     if (this.resizableColumn) {
-      this.style.gridTemplateColumns = columnTemplate.map((n) => n.toFixed(4) + "fr").join(" ");
+      this.style.gridTemplateColumns = columnTemplate.map((n) => n.toFixed(4) + 'fr').join(' ');
     }
     if (this.resizableRow) {
-      this.style.gridTemplateRows = rowTemplate.map((n) => n.toFixed(4) + "fr").join(" ");
+      this.style.gridTemplateRows = rowTemplate.map((n) => n.toFixed(4) + 'fr').join(' ');
     }
 
-    window.dispatchEvent(new Event("layout"));
+    window.dispatchEvent(new Event('layout'));
   }
 }
 
@@ -411,8 +411,8 @@ const requiredStyles = `
 
 `;
 
-const layoutStyle = document.createElement("style");
+const layoutStyle = document.createElement('style');
 layoutStyle.innerHTML = requiredStyles;
 document.head.appendChild(layoutStyle);
 
-customElements.define("gyro-layout", Panel);
+customElements.define('gyro-layout', Panel);
