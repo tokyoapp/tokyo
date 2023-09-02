@@ -282,7 +282,7 @@ button:active {
 
 .holo {
     border: 1px solid transparent;
-    border-color: var(--gyro-pallate-panel-header); 
+    border-color: var(--gyro-pallate-panel-header);
     background: var(--gyro-pallate-btn-bg);
     border-radius: 4px;
 }
@@ -293,7 +293,7 @@ button:active {
 
 .holo:active {
     background: var(--explorer-item-selected);
-    border-color: transparent; 
+    border-color: transparent;
 }
 
 /* Solid Button */
@@ -438,7 +438,7 @@ check-box {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 0 0 15px;
+    padding: 0 0 0 8px;
     box-sizing: border-box;
     flex: 0;
     position: relative;
@@ -503,7 +503,7 @@ check-box {
 }
 
 .children {
-    margin-left: 18px;
+    margin-left: 8px;
     padding-left: 5px;
     box-sizing: border-box;
     border-left: 1px solid rgba(255, 255, 255, 0.1);

@@ -9,8 +9,8 @@
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
     "image-editor": "workspace:",
-    "view-canvas": "workspace:",
     "ui": "workspace:",
+    "components": "workspace:",
     "solid-js": "^1.7.8"
   },
   "devDependencies": {

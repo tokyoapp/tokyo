@@ -7,15 +7,10 @@
 
     <title>app/photo-library</title>
 
-    <link rel="stylesheet" href="./index.css" />
-
     <script type="module">
-      import "ui/components/layout/Group";
-      import "ui/components/tree-explorer";
-      import "ui/components/view-canvas"
-
+      import "ui/index.css";
       import { render } from "solid-js/web";
-      import App from "./App";
+      import App from "ui";
       render(App, main);
     </script>
   </head>
@@ -33,18 +28,18 @@
           <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
         </div> -->
       </div>
-      <script type="module">
+      <!-- <script type="module">
         import { appWindow } from "@tauri-apps/api/window";
-        // document
-        //   .getElementById("titlebar-minimize")
-        //   .addEventListener("click", () => appWindow.minimize());
-        // document
-        //   .getElementById("titlebar-maximize")
-        //   .addEventListener("click", () => appWindow.toggleMaximize());
-        // document
-        //   .getElementById("titlebar-close")
-        //   .addEventListener("click", () => appWindow.close());
-      </script>
+        document
+          .getElementById("titlebar-minimize")
+          .addEventListener("click", () => appWindow.minimize());
+        document
+          .getElementById("titlebar-maximize")
+          .addEventListener("click", () => appWindow.toggleMaximize());
+        document
+          .getElementById("titlebar-close")
+          .addEventListener("click", () => appWindow.close());
+      </script> -->
     </main>
   </body>
 </html>

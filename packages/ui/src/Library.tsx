@@ -40,9 +40,9 @@ export default function Library({
   onOpen: (item: string) => void;
 }) {
   return (
-    <div class="overflow-auto grid grid-cols-4 break-all gap-2 overscroll-none h-full">
+    <div class="overflow-auto grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none h-full">
       {items.map((item) => {
-        return <Thumb onClick={() => onOpen(item)} src={item}></Thumb>;
+        return <Thumb onClick={() => onOpen(item)} src={item} />;
       })}
     </div>
   );
