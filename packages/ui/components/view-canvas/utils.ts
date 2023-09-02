@@ -1,4 +1,4 @@
-import { bytesToBase64 } from "../lib/base64";
+import { bytesToBase64 } from './lib/base64.js';
 
 export function dragElement(ele, callback) {
   let lastEvent = null;
@@ -9,7 +9,7 @@ export function dragElement(ele, callback) {
   let state = null;
   let pointers = {};
 
-  ele.addEventListener("pointerdown", (e) => {
+  ele.addEventListener('pointerdown', (e) => {
     dragging = true;
     lastEvent = e;
     prevEvent = e;
@@ -36,7 +36,7 @@ export function dragElement(ele, callback) {
     callback(state);
   });
 
-  window.addEventListener("pointerup", (e) => {
+  window.addEventListener('pointerup', (e) => {
     if (dragging) {
       dragging = false;
       lastEvent = null;
@@ -55,7 +55,7 @@ export function dragElement(ele, callback) {
     delete pointers[e.pointerId];
   });
 
-  window.addEventListener("pointermove", (e) => {
+  window.addEventListener('pointermove', (e) => {
     if (dragging && lastEvent && prevEvent) {
       state.x = e.x - bounds.x;
       state.y = e.y - bounds.y;
@@ -98,11 +98,11 @@ export async function blobToUri(blob) {
   const buffer = await blob.arrayBuffer();
   const view = new Uint8Array(buffer);
   if (view.byteLength == 0) {
-    console.log("CORS Error");
+    console.log('CORS Error');
     return null;
   }
   const base64 = bytesToBase64(view);
-  const uri = "data:image/jpg;base64," + base64;
+  const uri = 'data:image/jpg;base64,' + base64;
   return uri;
 }
 
@@ -110,13 +110,13 @@ export async function fileToUri(file) {
   const buffer = await file.arrayBuffer();
   const view = new Uint8Array(buffer);
   const base64 = bytesToBase64(view);
-  const uri = "data:image/jpg;base64," + base64;
+  const uri = 'data:image/jpg;base64,' + base64;
   return uri;
 }
 
 export async function downloadCanvas(canvas, filename) {
-  const a = document.createElement("a");
-  a.download = filename || "Image.png";
+  const a = document.createElement('a');
+  a.download = filename || 'Image.png';
   a.href = canvas.toDataURL();
   a.click();
 }
@@ -143,7 +143,7 @@ export function debounce(callback = () => {}, rate = 500) {
 }
 
 export function resizeCanvas(canvas, newWidth, newHeight) {
-  const tempCanvas = document.createElement("canvas");
+  const tempCanvas = document.createElement('canvas');
   if (newHeight) {
     tempCanvas.width = newWidth;
     tempCanvas.height = newHeight;
@@ -153,7 +153,7 @@ export function resizeCanvas(canvas, newWidth, newHeight) {
     tempCanvas.height = newWidth / ar;
   }
 
-  const ctxt = tempCanvas.getContext("2d");
+  const ctxt = tempCanvas.getContext('2d');
   ctxt.drawImage(
     canvas,
     0,
@@ -171,10 +171,10 @@ export function resizeCanvas(canvas, newWidth, newHeight) {
 
 export function bitmapToBlob(bitmap) {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
-    const ctxt = canvas.getContext("2d");
+    const ctxt = canvas.getContext('2d');
     ctxt.drawImage(bitmap, 0, 0);
     canvas.toBlob((blob) => {
       resolve(blob);
@@ -184,10 +184,10 @@ export function bitmapToBlob(bitmap) {
 
 export function bitmapToURI(bitmap) {
   return new Promise(async (resolve, reject) => {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
-    const ctxt = canvas.getContext("2d");
+    const ctxt = canvas.getContext('2d');
     ctxt.drawImage(bitmap, 0, 0);
     resolve(await canvas.toDataURL());
   });
@@ -202,11 +202,11 @@ export function formatDateTimeString(time) {
 
 function componentToHex(c) {
   const hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length == 1 ? '0' + hex : hex;
 }
 
 export function rgbToHex(r, g, b) {
-  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 // https://gist.github.com/mjackson/5311256

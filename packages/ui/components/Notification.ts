@@ -5,7 +5,7 @@ export default class Notification {
     return 0;
   }
 
-  constructor({ text = "", time = 2000, onclick = () => {}, type = Notification.TEXT } = {}) {
+  constructor({ text = '', time = 2000, onclick = () => {}, type = Notification.TEXT } = {}) {
     this.text = text;
     this.time = time;
     this.type = type;
@@ -17,13 +17,13 @@ export default class Notification {
     const time = this.time;
 
     const container =
-      document.querySelector("notifications") || document.createElement("notifications");
+      document.querySelector('notifications') || document.createElement('notifications');
 
     if (!container.parentNode) {
       document.body.appendChild(container);
     }
 
-    const note = document.createElement("notification");
+    const note = document.createElement('notification');
 
     switch (this.type) {
       case Notification.TEXT:
@@ -32,7 +32,7 @@ export default class Notification {
     }
 
     function close() {
-      note.style.setProperty("animation", "fade-out .25s ease");
+      note.style.setProperty('animation', 'fade-out .25s ease');
       setTimeout(() => {
         note.remove();
       }, 200);
@@ -46,7 +46,7 @@ export default class Notification {
       close();
     };
 
-    const style = document.createElement("style");
+    const style = document.createElement('style');
     style.innerHTML = `
             notification {
                 padding: 10px 20px;

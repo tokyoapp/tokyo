@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit-element";
+import { LitElement, css, html } from 'lit-element';
 
 function hslToRgb(h, s, l) {
   var r, g, b;
@@ -156,9 +156,9 @@ export default class ColorPicker extends LitElement {
   update(...args) {
     super.update(...args);
 
-    const wheel = this.shadowRoot.querySelector("canvas.wheel");
+    const wheel = this.shadowRoot.querySelector('canvas.wheel');
 
-    const context = wheel.getContext("2d");
+    const context = wheel.getContext('2d');
 
     const width = wheel.width;
     const height = wheel.height;
@@ -193,10 +193,10 @@ export default class ColorPicker extends LitElement {
     const y = center[1];
 
     context.lineWidth = 2;
-    context.strokeStyle = "white";
+    context.strokeStyle = 'white';
     context.arc(x, y, 6.5, 0, 2 * Math.PI);
     context.stroke();
   }
 }
 
-customElements.define("gyro-color-picker", ColorPicker);
+customElements.define('gyro-color-picker', ColorPicker);

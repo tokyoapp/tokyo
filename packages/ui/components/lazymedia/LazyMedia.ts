@@ -1,7 +1,7 @@
-import { css, html, LitElement, PropertyValueMap } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { css, html, LitElement, PropertyValueMap } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
-@customElement("aui-lazymedia")
+@customElement('aui-lazymedia')
 export class LazyMedia extends LitElement {
   static get styles() {
     return css`
@@ -57,32 +57,32 @@ export class LazyMedia extends LitElement {
   protected async updated(
     _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
   ): Promise<void> {
-    if (_changedProperties.has("playing") && this.type && this.type[0] === "video") {
+    if (_changedProperties.has('playing') && this.type && this.type[0] === 'video') {
       if (this.playing) {
         this.media?.play();
       } else {
         this.media?.pause();
       }
     }
-    if (_changedProperties.has("src")) {
-      const req = await fetch(this.src, { method: "HEAD" });
+    if (_changedProperties.has('src')) {
+      const req = await fetch(this.src, { method: 'HEAD' });
       const headers = new Map(req.headers);
-      const type = headers.get("content-type")?.split("/");
+      const type = headers.get('content-type')?.split('/');
       this.type = type;
 
       let media;
 
       if (type) {
         switch (type[0]) {
-          case "image":
+          case 'image':
             media = new Image();
 
-            media.addEventListener("load", () => {
-              setTimeout(() => media.classList.remove("hidden"), 10);
+            media.addEventListener('load', () => {
+              setTimeout(() => media.classList.remove('hidden'), 10);
             });
             break;
-          case "video":
-            media = document.createElement("video");
+          case 'video':
+            media = document.createElement('video');
             media.controls = this.controls;
             media.loop = this.loop;
 
@@ -92,25 +92,25 @@ export class LazyMedia extends LitElement {
               media.playsinline = true;
             }
 
-            media.addEventListener("canplay", () => {
-              setTimeout(() => media.classList.remove("hidden"), 10);
+            media.addEventListener('canplay', () => {
+              setTimeout(() => media.classList.remove('hidden'), 10);
             });
             break;
         }
       } else {
-        console.warn("No HEAD request supported on media request.");
+        console.warn('No HEAD request supported on media request.');
 
         media = new Image();
 
-        media.addEventListener("load", () => {
-          setTimeout(() => media.classList.remove("hidden"), 10);
+        media.addEventListener('load', () => {
+          setTimeout(() => media.classList.remove('hidden'), 10);
         });
       }
 
       media.src = this.src;
-      media.loading = "lazy";
-      media.alt = this.alt || "";
-      media.classList.add("hidden");
+      media.loading = 'lazy';
+      media.alt = this.alt || '';
+      media.classList.add('hidden');
 
       this.media = media;
       this.requestUpdate();

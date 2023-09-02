@@ -7,8 +7,6 @@ silent: true
 tasks:
   dev:
     desc: Run library in dev
-    sources:
-      - "src/**/*.rs"
     cmds:
       - cargo run
 

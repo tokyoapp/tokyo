@@ -1,4 +1,4 @@
-let iconFile = "./gyro-icons.svg";
+let iconFile = './gyro-icons.svg';
 
 export class Icon extends HTMLElement {
   static getIconFile() {
@@ -10,28 +10,28 @@ export class Icon extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["icon", "size"];
+    return ['icon', 'size'];
   }
 
   get icon() {
-    return this.getAttribute("icon");
+    return this.getAttribute('icon');
   }
 
   set icon(value: string | null) {
-    this.setAttribute("icon", value || "");
+    this.setAttribute('icon', value || '');
   }
 
   get size() {
-    return +(this.getAttribute("size") || 0);
+    return +(this.getAttribute('size') || 0);
   }
 
   set size(value: number) {
-    this.setAttribute("size", value.toString());
+    this.setAttribute('size', value.toString());
   }
 
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
@@ -61,11 +61,11 @@ export class Icon extends HTMLElement {
                     }
                 </style>
                 <svg>
-                    <use xlink:href="${Icon.getIconFile()}#${this.icon || "Placeholder"}"></use>
+                    <use xlink:href="${Icon.getIconFile()}#${this.icon || 'Placeholder'}"></use>
                 </svg>
             `;
     }
   }
 }
 
-customElements.define("gyro-icon", Icon);
+customElements.define('gyro-icon', Icon);

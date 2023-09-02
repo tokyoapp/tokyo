@@ -1,17 +1,17 @@
-import chatStyles from "./Chat.style";
-import Config from "atrium/lib/Config";
-import { LitElement, html, css } from "lit-element";
+import chatStyles from './Chat.style';
+import Config from 'atrium/lib/Config';
+import { LitElement, html, css } from 'lit-element';
 
 const placeholderEmote = new Image();
-placeholderEmote.src = "https://static-cdn.jtvnw.net/emoticons/v1/1/5.0";
+placeholderEmote.src = 'https://static-cdn.jtvnw.net/emoticons/v1/1/5.0';
 
 export default class TwitchChat extends LitElement {
   render() {
     const toggleLight = () => {
-      if (this.hasAttribute("light")) {
-        this.removeAttribute("light");
+      if (this.hasAttribute('light')) {
+        this.removeAttribute('light');
       } else {
-        this.setAttribute("light", "");
+        this.setAttribute('light', '');
       }
     };
 
@@ -153,23 +153,23 @@ export default class TwitchChat extends LitElement {
   }
 
   updateEmotes(croppedImage) {
-    const canvases = this.shadowRoot.querySelectorAll("canvas[pewview]");
+    const canvases = this.shadowRoot.querySelectorAll('canvas[pewview]');
 
     for (let canvas of canvases) {
       let ar = canvas.width / canvas.height;
       const center = [canvas.width / 2, canvas.height / 2];
 
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (!Config.global.getValue("rendering.smooth")) {
-        canvas.style.imageRendering = "pixelated";
+      if (!Config.global.getValue('rendering.smooth')) {
+        canvas.style.imageRendering = 'pixelated';
         context.mozImageSmoothingEnabled = false;
         context.webkitImageSmoothingEnabled = false;
         context.msImageSmoothingEnabled = false;
         context.imageSmoothingEnabled = false;
       } else {
-        canvas.style.imageRendering = "optimizequality";
+        canvas.style.imageRendering = 'optimizequality';
         context.mozImageSmoothingEnabled = true;
         context.webkitImageSmoothingEnabled = true;
         context.msImageSmoothingEnabled = true;
@@ -197,4 +197,4 @@ export default class TwitchChat extends LitElement {
   }
 }
 
-customElements.define("twitch-chat", TwitchChat);
+customElements.define('twitch-chat', TwitchChat);

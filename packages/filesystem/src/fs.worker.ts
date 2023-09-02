@@ -1,4 +1,4 @@
-import { listFiles, writeBuffer, writeFile } from "./storage";
+import { listFiles, writeBuffer, writeFile } from './storage';
 
 export default {
   async add(files: File[]) {

@@ -50,14 +50,7 @@ export class Action {
    *
    * @param {object} options action options
    */
-  static register({
-    onAction = () => {},
-    name,
-    description,
-    shortcut,
-    onkeydown,
-    hold,
-  }) {
+  static register({ onAction = () => {}, name, description, shortcut, onkeydown, hold }) {
     const action = new Action({
       onAction,
       name,
@@ -119,7 +112,7 @@ export class Action {
   static captureInput() {
     return new Promise((resolve) => {
       const cancel = () => {
-        window.removeEventListener("keydown", handleKeypress);
+        window.removeEventListener('keydown', handleKeypress);
         clearInterval(gamepadInterval);
       };
 
@@ -149,25 +142,21 @@ export class Action {
       const handleKeypress = (e) => {
         e.preventDefault();
 
-        if (e.key == "Alt") {
+        if (e.key == 'Alt') {
           alt = true;
-        } else if (e.key == "Control") {
+        } else if (e.key == 'Control') {
           ctrl = true;
-        } else if (e.key == "Shift") {
+        } else if (e.key == 'Shift') {
           shift = true;
         } else {
           const key = e.key.toLocaleUpperCase();
-          resolve(
-            `${ctrl ? "Ctrl+" : ""}${shift ? "Shift+" : ""}${
-              shift ? "Shift+" : ""
-            }${key}`
-          );
+          resolve(`${ctrl ? 'Ctrl+' : ''}${shift ? 'Shift+' : ''}${shift ? 'Shift+' : ''}${key}`);
         }
 
         cancel();
       };
 
-      window.addEventListener("keydown", handleKeypress);
+      window.addEventListener('keydown', handleKeypress);
     });
   }
 
@@ -239,7 +228,7 @@ export class Action {
     if (connected) {
       // gamepad connected
       if (gamepad.vibrationActuator) {
-        gamepad.vibrationActuator.playEffect("dual-rumble", {
+        gamepad.vibrationActuator.playEffect('dual-rumble', {
           startDelay: 0,
           duration: 20,
           weakMagnitude: 0.2,
@@ -270,7 +259,7 @@ export class Action {
       for (let axis of axes) {
         axisIndex++;
 
-        const id = "Axis" + axisIndex;
+        const id = 'Axis' + axisIndex;
         const action = this.getActionForButton(id);
 
         if (action) {
@@ -291,7 +280,7 @@ export class Action {
       const buttons = gamepad.buttons;
 
       for (let button of buttons) {
-        const id = "Button" + buttons.indexOf(button);
+        const id = 'Button' + buttons.indexOf(button);
         const action = this.getActionForButton(id);
 
         if (action) {
@@ -301,10 +290,7 @@ export class Action {
               actionInstance.setGamepad(gamepad.index);
             }
 
-            if (
-              actionInstance.state !== button.value &&
-              actionInstance.gamepad == gamepad.index
-            ) {
+            if (actionInstance.state !== button.value && actionInstance.gamepad == gamepad.index) {
               if (button.value) {
                 actionInstance.press();
               } else {
@@ -368,20 +354,20 @@ export class Action {
       alt: event.altKey,
     };
 
-    if (event.type.match("key")) {
+    if (event.type.match('key')) {
       pressed[event.key.toLocaleLowerCase()] = true;
       pressed[event.code.toLocaleLowerCase()] = true;
     } else {
       const mbtn = state.button;
       if (mbtn !== -1) {
-        pressed["mouse" + (mbtn + 1)] = true;
+        pressed['mouse' + (mbtn + 1)] = true;
       }
 
       if (state.pinching) {
-        pressed["pinch"] = true;
+        pressed['pinch'] = true;
       }
       if (state.panning) {
-        pressed["pan"] = true;
+        pressed['pan'] = true;
       }
     }
 
@@ -398,19 +384,19 @@ export class Action {
 
       // populate mappedShortcut object
       const shortcut = map[action];
-      const keys = shortcut.toLocaleLowerCase().split("+");
+      const keys = shortcut.toLocaleLowerCase().split('+');
 
       for (let k of keys) {
         const lowerKey = k.toLocaleLowerCase();
 
         switch (lowerKey) {
-          case "ctrl":
+          case 'ctrl':
             mappedShortcut.ctrl = true;
             break;
-          case "shift":
+          case 'shift':
             mappedShortcut.shift = true;
             break;
-          case "alt":
+          case 'alt':
             mappedShortcut.alt = true;
             break;
           default:
@@ -434,7 +420,7 @@ export class Action {
    */
   static handlePointerInput(e) {
     switch (e.type) {
-      case "pointerdown":
+      case 'pointerdown':
         dragging = true;
         lastEvent = e;
 
@@ -458,7 +444,7 @@ export class Action {
           pressure: 1.0,
         };
         break;
-      case "pointerup":
+      case 'pointerup':
         if (dragging) {
           dragging = false;
           lastEvent = null;
@@ -472,7 +458,7 @@ export class Action {
 
         delete pointers[e.pointerId];
         break;
-      case "pointermove":
+      case 'pointermove':
         pointers[e.pointerId] = e;
 
         const keys = Object.keys(pointers);
@@ -484,9 +470,7 @@ export class Action {
           const p2 = [pointer2.x, pointer2.y];
 
           // pinch
-          const distance = Math.sqrt(
-            Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2)
-          );
+          const distance = Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
 
           if (state.initialDistnace == null) {
             state.initialDistnace = distance;
@@ -502,10 +486,7 @@ export class Action {
           state.lastDisntace = distance;
 
           // pan
-          if (
-            Math.abs(state.absolute[0]) > 50 ||
-            Math.abs(state.absolute[1]) > 50
-          ) {
+          if (Math.abs(state.absolute[0]) > 50 || Math.abs(state.absolute[1]) > 50) {
             state.panning = true;
           }
         }
@@ -599,24 +580,14 @@ Action.actions = new Map();
 Action.keymap = {};
 Action.runInputLoop = true;
 
-window.addEventListener("load", (e) =>
-  Action.runInputLoop ? Action.inputLoop() : null
-);
+window.addEventListener('load', (e) => (Action.runInputLoop ? Action.inputLoop() : null));
 
-window.addEventListener("keydown", (e) => Action.handleKey(e, true));
-window.addEventListener("keyup", (e) => Action.handleKey(e, false));
+window.addEventListener('keydown', (e) => Action.handleKey(e, true));
+window.addEventListener('keyup', (e) => Action.handleKey(e, false));
 
-window.addEventListener("gamepadconnected", (e) =>
-  Action.handleGamepad(e, true)
-);
-window.addEventListener("gamepaddisconnected", (e) =>
-  Action.handleGamepad(e, false)
-);
+window.addEventListener('gamepadconnected', (e) => Action.handleGamepad(e, true));
+window.addEventListener('gamepaddisconnected', (e) => Action.handleGamepad(e, false));
 
-window.addEventListener("pointerdown", (e) =>
-  Action.handlePointerInput(e, true)
-);
-window.addEventListener("pointerup", (e) => Action.handlePointerInput(e, true));
-window.addEventListener("pointermove", (e) =>
-  Action.handlePointerInput(e, true)
-);
+window.addEventListener('pointerdown', (e) => Action.handlePointerInput(e, true));
+window.addEventListener('pointerup', (e) => Action.handlePointerInput(e, true));
+window.addEventListener('pointermove', (e) => Action.handlePointerInput(e, true));

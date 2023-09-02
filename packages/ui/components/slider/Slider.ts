@@ -1,5 +1,5 @@
-import { css, html, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { css, html, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
 export class Slider extends LitElement {
   static get styles() {
@@ -58,7 +58,7 @@ export class Slider extends LitElement {
   public transitionDuration = 0.5;
 
   @property({ type: String, reflect: true })
-  public pointerControls: "none" | "all" = "all";
+  public pointerControls: 'none' | 'all' = 'all';
 
   public current = 0;
 
@@ -77,27 +77,27 @@ export class Slider extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
 
-    window.addEventListener("load", () => {
+    window.addEventListener('load', () => {
       this.updateSlides();
     });
 
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       this.updateSlides();
     });
 
-    this.addEventListener("contextmenu", (e) => e.preventDefault());
+    this.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    this.addEventListener("touchstart", this._touchstart.bind(this));
-    window.addEventListener("touchend", this._touchend.bind(this));
-    this.addEventListener("touchcancel", this._touchend.bind(this));
-    window.addEventListener("touchmove", this._touchmove.bind(this));
+    this.addEventListener('touchstart', this._touchstart.bind(this));
+    window.addEventListener('touchend', this._touchend.bind(this));
+    this.addEventListener('touchcancel', this._touchend.bind(this));
+    window.addEventListener('touchmove', this._touchmove.bind(this));
 
-    this.addEventListener("mousedown", (e: MouseEvent) => {
+    this.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
       this._touchstart(e);
     });
-    window.addEventListener("mouseup", this._touchend.bind(this));
-    window.addEventListener("mousemove", this._touchmove.bind(this));
+    window.addEventListener('mouseup', this._touchend.bind(this));
+    window.addEventListener('mousemove', this._touchmove.bind(this));
   }
 
   _touchmove(e: TouchEvent | MouseEvent) {
@@ -121,7 +121,7 @@ export class Slider extends LitElement {
       e.stopImmediatePropagation();
 
       if (window.innerWidth < 1500) {
-        document.body.style.overflow = "hidden";
+        document.body.style.overflow = 'hidden';
       }
 
       this.moveView(deltaX);
@@ -134,8 +134,8 @@ export class Slider extends LitElement {
   }
 
   _touchstart(e: TouchEvent | MouseEvent) {
-    const enabled = this.getAttribute("pointer-controls");
-    if (enabled === "none") return;
+    const enabled = this.getAttribute('pointer-controls');
+    if (enabled === 'none') return;
 
     this.viewWidth = this.clientWidth;
     this.swipe = 0;
@@ -156,17 +156,17 @@ export class Slider extends LitElement {
     this.current += this.nextStep || 0;
     this.nextStep = 0;
     this.updateSlides();
-    this.dispatchEvent(new Event("change", { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
 
-    document.body.style.overflow = "";
+    document.body.style.overflow = '';
   }
 
   setTransitionDuration(timeInSeconds: number) {
-    this.style.setProperty("--transitionDuration", `${timeInSeconds}s`);
+    this.style.setProperty('--transitionDuration', `${timeInSeconds}s`);
   }
 
   setViewPosition(px: number) {
-    this.style.setProperty("--view-x", px.toString());
+    this.style.setProperty('--view-x', px.toString());
   }
 
   moveView(deltaPx: number) {
@@ -176,23 +176,23 @@ export class Slider extends LitElement {
   prev() {
     this.current--;
     this.updateSlides();
-    this.dispatchEvent(new Event("change", { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   next() {
     this.current++;
     this.updateSlides();
-    this.dispatchEvent(new Event("change", { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   toSlide(index: number): void {
     this.current = index;
     this.updateSlides();
-    this.dispatchEvent(new Event("change", { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   getSlides() {
-    return [...this.children].filter((child) => !child.hasAttribute("slot"));
+    return [...this.children].filter((child) => !child.hasAttribute('slot'));
   }
 
   updateSlides() {
@@ -212,15 +212,15 @@ export class Slider extends LitElement {
     }
 
     // center item
-    if (this.hasAttribute("centered")) {
+    if (this.hasAttribute('centered')) {
       const xOffset = -this.clientWidth / 2 + slides[this.current].clientWidth / 2;
       this._viewPosition += xOffset;
     }
 
     for (const child of slides) {
-      child.removeAttribute("current");
+      child.removeAttribute('current');
     }
-    slides[this.current].setAttribute("current", "");
+    slides[this.current].setAttribute('current', '');
 
     this.setViewPosition(this._viewPosition);
 
@@ -286,8 +286,8 @@ export class Slider extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sv-slider": Slider;
+    'sv-slider': Slider;
   }
 }
 
-customElements.define("sv-slider", Slider);
+customElements.define('sv-slider', Slider);

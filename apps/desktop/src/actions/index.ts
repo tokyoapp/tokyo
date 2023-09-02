@@ -1,4 +1,4 @@
-import reload from "./reload.ts";
+import reload from './reload.ts';
 
 export default class Action {
   static actions: Record<string, () => void> = {

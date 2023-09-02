@@ -94,7 +94,7 @@ button:active {
 
 .app {
   display: grid;
-  grid-template-columns: 1fr 1.25fr;
+  grid-template-columns: 1fr 1fr;
   position: absolute;
   top: 30px;
   bottom: 0;
@@ -108,7 +108,7 @@ button:active {
 /* Titlebar */
 .titlebar {
   height: 30px;
-  background: #222;
+  background: #212121;
   user-select: none;
   display: flex;
   justify-content: flex-end;

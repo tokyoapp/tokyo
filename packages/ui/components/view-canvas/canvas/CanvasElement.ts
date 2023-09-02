@@ -1,26 +1,18 @@
-import { css, html, LitElement } from "lit";
-import Notification from "../Notification";
-import {
-  bitmapToBlob,
-  debounce,
-  donwloadToDataUri,
-  dragElement,
-  multiplyByMatrix,
-  rgbToHex,
-  rgbToHsl,
-} from "../../utils";
-import Canvas from "../../Canvas";
-import { ContextMenu } from "./ContextMenu";
-import { Action } from "../../Actions";
-import CanvasRenderer from "../../CanvasRenderer";
+import { LitElement, css, html } from 'lit';
+import Notification from '../../Notification';
+import { Action } from '../Actions';
+import Canvas from '../Canvas';
+import CanvasRenderer from '../CanvasRenderer';
+import { bitmapToBlob, debounce, dragElement, rgbToHex, rgbToHsl } from '../utils';
+import { ContextMenu } from './ContextMenu';
 
-import TextNode from "./nodes/TextNode";
-import Select from "./tools/Select";
+import TextNode from './nodes/TextNode';
+import Select from './tools/Select';
 
 const renderer = new CanvasRenderer();
 
 const NODE_TYPES = {
-  "text/plain": TextNode,
+  'text/plain': TextNode,
   // "image/jpg": ImageNode,
   // "image/png": ImageNode,
   // "image/webp": ImageNode,
@@ -28,14 +20,12 @@ const NODE_TYPES = {
 };
 
 // prettier-ignore
-const TOOLS = [
-  Select,
-];
+const TOOLS = [Select];
 
 export default class CanvasElement extends LitElement {
   canvas = new Canvas();
-  canvasElement = document.createElement("canvas");
-  context = this.canvasElement.getContext("2d");
+  canvasElement = document.createElement('canvas');
+  context = this.canvasElement.getContext('2d');
   selection = [];
   pointer = {
     x: 0,
@@ -65,11 +55,11 @@ export default class CanvasElement extends LitElement {
   scaleCornerSize = 30;
   gridSize = 100;
   colors = {
-    line_color: "#eee",
-    grid_1: "#171717",
-    grid_2: "#101010",
-    selection_border: "#333",
-    selection_background: "#33333333",
+    line_color: '#eee',
+    grid_1: '#171717',
+    grid_2: '#101010',
+    selection_border: '#333',
+    selection_background: '#33333333',
   };
   uiElements = {};
 
@@ -92,7 +82,7 @@ export default class CanvasElement extends LitElement {
 
     // contextMenu
     let ctxtMenuStartPos = [0, 0];
-    this.canvasElement.addEventListener("mousedown", (e) => {
+    this.canvasElement.addEventListener('mousedown', (e) => {
       ctxtMenuStartPos[0] = e.x;
       ctxtMenuStartPos[1] = e.y;
     });
@@ -100,9 +90,9 @@ export default class CanvasElement extends LitElement {
     const menu = new ContextMenu({
       items: [
         {
-          title: "Create Text Element",
+          title: 'Create Text Element',
           action: () => {
-            const node = this.canvas.createTextNode("Text");
+            const node = this.canvas.createTextNode('Text');
             node.position[0] = this.pointer.canvasX;
             node.position[1] = this.pointer.canvasY;
           },
@@ -112,10 +102,7 @@ export default class CanvasElement extends LitElement {
     document.body.appendChild(menu);
 
     this.canvasElement.oncontextmenu = (e) => {
-      if (
-        ctxtMenuStartPos[0] == Math.floor(e.x) &&
-        ctxtMenuStartPos[1] == Math.floor(e.y)
-      ) {
+      if (ctxtMenuStartPos[0] == Math.floor(e.x) && ctxtMenuStartPos[1] == Math.floor(e.y)) {
         menu.setPosition(e.x, e.y);
         e.preventDefault();
       } else {
@@ -124,19 +111,17 @@ export default class CanvasElement extends LitElement {
     };
     // contextMenu end
 
-    window.addEventListener("resize", this.resize.bind(this));
+    window.addEventListener('resize', this.resize.bind(this));
 
-    this.canvasElement.addEventListener("wheel", (e) => {
-      this.setScale(
-        this.canvas.canvas.scale - e.deltaY * this.canvas.canvas.scale * 0.001
-      );
+    this.canvasElement.addEventListener('wheel', (e) => {
+      this.setScale(this.canvas.canvas.scale - e.deltaY * this.canvas.canvas.scale * 0.001);
     });
 
     // input actions
     Action.register({
-      name: "Delete",
-      description: "Delete Nodes",
-      shortcut: "Delete",
+      name: 'Delete',
+      description: 'Delete Nodes',
+      shortcut: 'Delete',
       onAction: (args, event, action) => {
         for (let node of this.lastLastSelection) {
           this.deleteNode(node);
@@ -144,24 +129,24 @@ export default class CanvasElement extends LitElement {
       },
     });
     Action.register({
-      name: "Select All",
-      description: "Select all nodes",
-      shortcut: "Ctrl+A",
+      name: 'Select All',
+      description: 'Select all nodes',
+      shortcut: 'Ctrl+A',
       onAction: (args, event, action) => {
         this.selection = [...this.canvas.nodes];
       },
     });
     Action.register({
-      name: "Copy",
-      description: "Copy Image",
-      shortcut: "Ctrl+C",
+      name: 'Copy',
+      description: 'Copy Image',
+      shortcut: 'Ctrl+C',
       onAction: (args, event, action) => {
         const exec = async () => {
           const items = [];
           for (let node of this.lastLastSelection) {
             const element = this.canvas.getNodeElement(node);
             const blob = await bitmapToBlob(element.image);
-            items.push(new ClipboardItem({ "image/png": blob }));
+            items.push(new ClipboardItem({ 'image/png': blob }));
           }
 
           navigator.clipboard.write(items);
@@ -171,32 +156,32 @@ export default class CanvasElement extends LitElement {
       },
     });
     Action.register({
-      name: "FullsizeImage",
-      description: "Show image but bigger",
-      shortcut: "F",
+      name: 'FullsizeImage',
+      description: 'Show image but bigger',
+      shortcut: 'F',
       hold: true,
       onAction: (args, event, action) => {
         this.pointer.zoomImage = action.state;
       },
     });
     Action.register({
-      name: "MoveCanvas",
-      description: "Use hand tool",
-      shortcut: " ",
+      name: 'MoveCanvas',
+      description: 'Use hand tool',
+      shortcut: ' ',
       hold: true,
       onAction: (args, event, action) => {
         this.pointer.moveCanvas = action.state;
         if (action.state) {
-          this.canvasElement.style.cursor = "grab";
+          this.canvasElement.style.cursor = 'grab';
         } else {
-          this.canvasElement.style.cursor = "";
+          this.canvasElement.style.cursor = '';
         }
       },
     });
     Action.register({
-      name: "ColorPickerTool",
-      description: "Use color picker tool",
-      shortcut: "C",
+      name: 'ColorPickerTool',
+      description: 'Use color picker tool',
+      shortcut: 'C',
       hold: true,
       onAction: (args, event, action) => {
         this.pointer.colorPicker = action.state;
@@ -209,37 +194,35 @@ export default class CanvasElement extends LitElement {
           }, 1000 / 24);
         } else {
           clearInterval(this.colorPickerInterval);
-          this.canvasElement.style.cursor = "";
+          this.canvasElement.style.cursor = '';
         }
       },
     });
     Action.register({
-      name: "TouchZoom",
-      shortcut: "Pinch",
+      name: 'TouchZoom',
+      shortcut: 'Pinch',
       onAction: (args, event, action) => {
         const delta = -action.state.pinch;
-        this.setScale(
-          this.canvas.canvas.scale - delta * this.canvas.canvas.scale * 0.001
-        );
+        this.setScale(this.canvas.canvas.scale - delta * this.canvas.canvas.scale * 0.001);
       },
     });
     Action.register({
-      name: "TouchMove",
-      shortcut: "Pan",
+      name: 'TouchMove',
+      shortcut: 'Pan',
       onAction: (args, event, action) => {
         this.moveCanvas(action.state.delta);
       },
     });
 
     // Arrowkey node movement
-    this.addEventListener("keydown", (e) => {
+    this.addEventListener('keydown', (e) => {
       // input for text elements
       if (this.pointer.focusedElement) {
         const element = this.canvas.getNodeElement(this.pointer.focusedElement);
-        if (element && element.type == "text/plain") {
+        if (element && element.type == 'text/plain') {
           if (e.key.length > 1) {
             switch (e.key) {
-              case "Backspace":
+              case 'Backspace':
                 element.data = element.data.slice(0, element.data.length - 1);
                 break;
               default:
@@ -256,21 +239,21 @@ export default class CanvasElement extends LitElement {
       let index = 1;
       let dir = 1;
 
-      const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+      const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
       switch (e.key) {
-        case "ArrowUp":
+        case 'ArrowUp':
           index = 1;
           dir = -1;
           break;
-        case "ArrowDown":
+        case 'ArrowDown':
           index = 1;
           dir = 1;
           break;
-        case "ArrowLeft":
+        case 'ArrowLeft':
           index = 0;
           dir = -1;
           break;
-        case "ArrowRight":
+        case 'ArrowRight':
           index = 0;
           dir = 1;
           break;
@@ -286,7 +269,7 @@ export default class CanvasElement extends LitElement {
         }
       }
     });
-    window.addEventListener("pointerup", (e) => {
+    window.addEventListener('pointerup', (e) => {
       if (this.pointer.deleteCorner) {
         for (let node of this.selection) {
           this.deleteNode(node);
@@ -295,21 +278,21 @@ export default class CanvasElement extends LitElement {
       if (this.pointer.colorPicker && this.pointer.color) {
         const hex = rgbToHex(...this.pointer.color);
         navigator.clipboard.writeText(hex);
-        new Notification({ text: "Color copied." }).show();
+        new Notification({ text: 'Color copied.' }).show();
       }
     });
 
     const pickColorDebounced = debounce((e) => {
       this.pointer.color = this.pickColor(this.pointer.x, this.pointer.y);
       this.style.setProperty(
-        "--colorPicker-color",
+        '--colorPicker-color',
         `
                 rgb(${this.pointer.color[0]}, ${this.pointer.color[1]}, ${this.pointer.color[2]})
             `
       );
     }, 200);
 
-    this.canvasElement.addEventListener("pointermove", (e) => {
+    this.canvasElement.addEventListener('pointermove', (e) => {
       this.pointer.x = e.x;
       this.pointer.y = e.y;
       const conv = this.viewToCanvas(e.x, e.y);
@@ -321,13 +304,13 @@ export default class CanvasElement extends LitElement {
       }
     });
 
-    this.canvasElement.addEventListener("dragover", (e) => {
+    this.canvasElement.addEventListener('dragover', (e) => {
       const conv = this.viewToCanvas(e.x, e.y);
       this.pointer.canvasX = conv[0];
       this.pointer.canvasY = conv[1];
     });
 
-    this.canvasElement.addEventListener("dblclick", (e) => {
+    this.canvasElement.addEventListener('dblclick', (e) => {
       const node = this.hitTestNode(e.x, e.y);
       if (node) {
         this.bringNodeToFront(node);
@@ -380,7 +363,7 @@ export default class CanvasElement extends LitElement {
           tool.onMouseDrag(this, data);
         }
       } else {
-        console.error("No tool selected");
+        console.error('No tool selected');
       }
     }
 
@@ -418,10 +401,7 @@ export default class CanvasElement extends LitElement {
     for (let node of [...this.canvas.nodes]) {
       const p1 = [node.position[0], node.position[1]];
       const p2 = [node.position[0] + node.size[0], node.position[1]];
-      const p3 = [
-        node.position[0] + node.size[0],
-        node.position[1] + node.size[1],
-      ];
+      const p3 = [node.position[0] + node.size[0], node.position[1] + node.size[1]];
       const p4 = [node.position[0], node.position[1] + node.size[1]];
 
       const selection = this.pointer.selection;
@@ -450,10 +430,7 @@ export default class CanvasElement extends LitElement {
   }
 
   bringNodeToFront(node) {
-    const tempNode = this.canvas.nodes.splice(
-      this.canvas.nodes.indexOf(node),
-      1
-    );
+    const tempNode = this.canvas.nodes.splice(this.canvas.nodes.indexOf(node), 1);
     this.canvas.nodes.push(...tempNode);
   }
 
@@ -474,10 +451,7 @@ export default class CanvasElement extends LitElement {
       const offset = this.scaleCornerSize / this.currentScale;
       this.pointer.scaleCorner = pointInRect(
         [x, y],
-        [
-          node.position[0] + (node.size[0] - offset),
-          node.position[1] + (node.size[1] - offset),
-        ],
+        [node.position[0] + (node.size[0] - offset), node.position[1] + (node.size[1] - offset)],
         offset,
         offset
       );
@@ -578,23 +552,13 @@ export default class CanvasElement extends LitElement {
       if (node === this.pointer.node) {
         ctxt.strokeStyle = this.colors.line_color;
         ctxt.lineWidth = 1 / this.currentScale;
-        ctxt.strokeRect(
-          node.position[0] - 0.5,
-          node.position[1] - 0.5,
-          node.size[0],
-          node.size[1]
-        );
+        ctxt.strokeRect(node.position[0] - 0.5, node.position[1] - 0.5, node.size[0], node.size[1]);
       }
 
       if (this.pointer.focusedElement === node) {
         ctxt.strokeStyle = this.colors.line_color;
         ctxt.lineWidth = 1 / this.currentScale;
-        ctxt.strokeRect(
-          node.position[0] - 0.5,
-          node.position[1] - 0.5,
-          node.size[0],
-          node.size[1]
-        );
+        ctxt.strokeRect(node.position[0] - 0.5, node.position[1] - 0.5, node.size[0], node.size[1]);
 
         // scale corner
         const csize = this.scaleCornerSize / this.currentScale;
@@ -652,13 +616,7 @@ export default class CanvasElement extends LitElement {
     ctxt.closePath();
     ctxt.stroke();
     ctxt.beginPath();
-    ctxt.arc(
-      bounds.originX,
-      bounds.originY,
-      5 / this.currentScale,
-      0,
-      Math.PI * 180
-    );
+    ctxt.arc(bounds.originX, bounds.originY, 5 / this.currentScale, 0, Math.PI * 180);
     ctxt.stroke();
 
     ctxt.strokeStyle = this.colors.line_color;
@@ -672,25 +630,23 @@ export default class CanvasElement extends LitElement {
       if (this.uiElements[id]) {
         // is text node by default
         if (this.pointer.focusedElement == node) {
-          this.uiElements[id].removeAttribute("invisible");
+          this.uiElements[id].removeAttribute('invisible');
         } else {
-          this.uiElements[id].setAttribute("invisible", "");
+          this.uiElements[id].setAttribute('invisible', '');
         }
       }
 
       // draw ui nodes
-      const uiNodeId = "node_" + id;
+      const uiNodeId = 'node_' + id;
       if (!this.uiElements[uiNodeId]) {
         if (element.type in NODE_TYPES) {
           const NodeUIElement = NODE_TYPES[element.type].NodeUIElement;
           if (NodeUIElement) {
             this.uiElements[uiNodeId] = new NodeUIElement(this);
-            this.uiElements[uiNodeId].setAttribute("node-id", id);
-            this.shadowRoot
-              .querySelector("#canvasOverlay")
-              .appendChild(this.uiElements[uiNodeId]);
+            this.uiElements[uiNodeId].setAttribute('node-id', id);
+            this.shadowRoot.querySelector('#canvasOverlay').appendChild(this.uiElements[uiNodeId]);
 
-            this.uiElements[uiNodeId].addEventListener("change", (e) => {
+            this.uiElements[uiNodeId].addEventListener('change', (e) => {
               node.extras[e.key] = e.value;
             });
           }
@@ -698,11 +654,11 @@ export default class CanvasElement extends LitElement {
       } else {
         const ele = this.uiElements[uiNodeId];
         const pos = this.canvasToView(...node.position);
-        ele.style.setProperty("--x", pos[0]);
-        ele.style.setProperty("--y", pos[1]);
-        ele.style.setProperty("--w", node.size[0] * this.currentScale);
-        ele.style.setProperty("--h", node.size[1] * this.currentScale);
-        ele.style.setProperty("--s", this.currentScale);
+        ele.style.setProperty('--x', pos[0]);
+        ele.style.setProperty('--y', pos[1]);
+        ele.style.setProperty('--w', node.size[0] * this.currentScale);
+        ele.style.setProperty('--h', node.size[1] * this.currentScale);
+        ele.style.setProperty('--s', this.currentScale);
 
         ele.onDraw(node, element);
       }
@@ -718,12 +674,10 @@ export default class CanvasElement extends LitElement {
           const OverlayElement = NODE_TYPES[element.type].OverlayElement;
           if (OverlayElement) {
             this.uiElements[id] = new OverlayElement();
-            this.uiElements[id].setAttribute("node-id", id);
-            this.shadowRoot
-              .querySelector("#canvasOverlay")
-              .appendChild(this.uiElements[id]);
+            this.uiElements[id].setAttribute('node-id', id);
+            this.shadowRoot.querySelector('#canvasOverlay').appendChild(this.uiElements[id]);
 
-            this.uiElements[id].addEventListener("change", (e) => {
+            this.uiElements[id].addEventListener('change', (e) => {
               node.extras[e.key] = e.value;
             });
           }
@@ -731,18 +685,18 @@ export default class CanvasElement extends LitElement {
       } else {
         const ele = this.uiElements[id];
         const pos = this.canvasToView(...node.position);
-        ele.style.setProperty("--x", pos[0]);
-        ele.style.setProperty("--y", pos[1]);
-        ele.style.setProperty("--w", node.size[0] * this.currentScale);
-        ele.style.setProperty("--h", node.size[1] * this.currentScale);
-        ele.style.setProperty("--s", this.currentScale);
+        ele.style.setProperty('--x', pos[0]);
+        ele.style.setProperty('--y', pos[1]);
+        ele.style.setProperty('--w', node.size[0] * this.currentScale);
+        ele.style.setProperty('--h', node.size[1] * this.currentScale);
+        ele.style.setProperty('--s', this.currentScale);
       }
     }
   }
 
   getNodeUiElement(node) {
     const id = node.element;
-    const uiNodeId = "node_" + id;
+    const uiNodeId = 'node_' + id;
     return this.uiElements[uiNodeId];
   }
 
@@ -751,22 +705,10 @@ export default class CanvasElement extends LitElement {
     ctxt.fillStyle = this.colors.selection_background;
     ctxt.lineWidth = 1;
     ctxt.beginPath();
-    ctxt.moveTo(
-      this.pointer.selection[0][0] - 0.5,
-      this.pointer.selection[0][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[1][0] - 0.5,
-      this.pointer.selection[0][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[1][0] - 0.5,
-      this.pointer.selection[1][1]
-    );
-    ctxt.lineTo(
-      this.pointer.selection[0][0] - 0.5,
-      this.pointer.selection[1][1]
-    );
+    ctxt.moveTo(this.pointer.selection[0][0] - 0.5, this.pointer.selection[0][1]);
+    ctxt.lineTo(this.pointer.selection[1][0] - 0.5, this.pointer.selection[0][1]);
+    ctxt.lineTo(this.pointer.selection[1][0] - 0.5, this.pointer.selection[1][1]);
+    ctxt.lineTo(this.pointer.selection[0][0] - 0.5, this.pointer.selection[1][1]);
     ctxt.closePath();
     ctxt.stroke();
     ctxt.fill();
@@ -774,8 +716,8 @@ export default class CanvasElement extends LitElement {
 
   _drawResolutionPreview(ctxt) {
     ctxt.globalAlpha = 0.25;
-    ctxt.strokeStyle = "white";
-    ctxt.fillStyle = "rgb(238 238 238 / 0.5)";
+    ctxt.strokeStyle = 'white';
+    ctxt.fillStyle = 'rgb(238 238 238 / 0.5)';
     ctxt.lineWidth = 1 / this.currentScale;
     const w = 1920;
     const h = 1080;
@@ -1009,16 +951,16 @@ host {
 }
 
 // util functions
-const cursorCanvas = document.createElement("canvas");
+const cursorCanvas = document.createElement('canvas');
 function makeBrushCursor(r = 10) {
   const size = r * 2 + 2;
   cursorCanvas.width = size;
   cursorCanvas.height = size;
-  const ctxt = cursorCanvas.getContext("2d");
+  const ctxt = cursorCanvas.getContext('2d');
   ctxt.arc(size / 2, size / 2, r, 0, Math.PI * 180);
-  ctxt.shadowColor = "black";
+  ctxt.shadowColor = 'black';
   ctxt.shadowBlur = 1.5;
-  ctxt.strokeStyle = "#eee";
+  ctxt.strokeStyle = '#eee';
   ctxt.lineWidth = 1.5;
   ctxt.stroke();
   return `url(${cursorCanvas.toDataURL()}) ${size / 2} ${size / 2}, auto`;
@@ -1030,13 +972,13 @@ function makeColorPickerCursor(color = [0, 0, 0]) {
   const padding = 5;
   cursorCanvas.width = 125;
   cursorCanvas.height = 69;
-  const ctxt = cursorCanvas.getContext("2d");
-  ctxt.shadowColor = "rgba(0, 0, 0, 0.25)";
+  const ctxt = cursorCanvas.getContext('2d');
+  ctxt.shadowColor = 'rgba(0, 0, 0, 0.25)';
   ctxt.shadowBlur = 12;
 
   ctxt.fillStyle = cssColor;
   ctxt.lineWidth = 1.5;
-  ctxt.strokeStyle = "#eee";
+  ctxt.strokeStyle = '#eee';
 
   const size = r * 2 + 2;
   ctxt.arc(padding + size / 2, padding + size / 2, r, 0, Math.PI * 180);
@@ -1045,42 +987,35 @@ function makeColorPickerCursor(color = [0, 0, 0]) {
 
   ctxt.shadowBlur = 0;
 
-  ctxt.fillStyle = "#fff";
-  ctxt.shadowColor = "rgba(0, 0, 0, 1)";
+  ctxt.fillStyle = '#fff';
+  ctxt.shadowColor = 'rgba(0, 0, 0, 1)';
   ctxt.shadowBlur = 1;
   ctxt.shadowOffsetX = 1;
   ctxt.shadowOffsetY = 1;
 
-  ctxt.font = "12px Roboto";
+  ctxt.font = '12px Roboto';
   const lineHeight = 14;
   const x = r * 2 + 10 + padding;
-  ctxt.fillText("R " + color[0], x, 10 + padding);
-  ctxt.fillText("G " + color[1], x, 10 + padding + lineHeight);
-  ctxt.fillText("B " + color[2], x, 10 + padding + lineHeight * 2);
+  ctxt.fillText('R ' + color[0], x, 10 + padding);
+  ctxt.fillText('G ' + color[1], x, 10 + padding + lineHeight);
+  ctxt.fillText('B ' + color[2], x, 10 + padding + lineHeight * 2);
 
   const hsl = rgbToHsl(...color);
-  ctxt.fillText("H " + hsl[0], x + 40, 10 + padding);
-  ctxt.fillText("S " + hsl[1], x + 40, 10 + padding + lineHeight);
-  ctxt.fillText("L " + hsl[2], x + 40, 10 + padding + lineHeight * 2);
+  ctxt.fillText('H ' + hsl[0], x + 40, 10 + padding);
+  ctxt.fillText('S ' + hsl[1], x + 40, 10 + padding + lineHeight);
+  ctxt.fillText('L ' + hsl[2], x + 40, 10 + padding + lineHeight * 2);
 
-  ctxt.font = "14px sans-serif";
+  ctxt.font = '14px sans-serif';
   ctxt.fillText(rgbToHex(...color).toLocaleUpperCase(), x, padding + 55);
 
   ctxt.shadowOffsetX = 0;
   ctxt.shadowOffsetY = 0;
 
-  return `url(${cursorCanvas.toDataURL()}) ${size / 2 + padding} ${
-    size / 2 + padding
-  }, auto`;
+  return `url(${cursorCanvas.toDataURL()}) ${size / 2 + padding} ${size / 2 + padding}, auto`;
 }
 
 function pointInRect(p, p2, width, height) {
-  return (
-    p[0] > p2[0] &&
-    p[0] < p2[0] + width &&
-    p[1] > p2[1] &&
-    p[1] < p2[1] + height
-  );
+  return p[0] > p2[0] && p[0] < p2[0] + width && p[1] > p2[1] && p[1] < p2[1] + height;
 }
 
 function pointsInRect(points, verts) {
@@ -1099,4 +1034,4 @@ function pointsInRect(points, verts) {
   return result;
 }
 
-customElements.define("canvas-element", CanvasElement);
+customElements.define('canvas-element', CanvasElement);

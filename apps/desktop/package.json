@@ -2,17 +2,14 @@
   "name": "desktop",
   "version": "0.0.0",
   "description": "",
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "tauri": "tauri"
-  },
   "license": "MIT",
+  "scripts": {
+    "dev": "vite"
+  },
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
     "image-editor": "workspace:",
+    "view-canvas": "workspace:",
     "ui": "workspace:",
     "solid-js": "^1.7.8"
   },

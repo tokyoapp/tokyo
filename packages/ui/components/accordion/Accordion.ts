@@ -1,6 +1,6 @@
-import { html, HTMLTemplateResult, LitElement } from "lit";
-import { property } from "lit/decorators.js";
-import { AccordionItem } from "./AccordionItem.js";
+import { html, HTMLTemplateResult, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
+import { AccordionItem } from './AccordionItem.js';
 
 // TODO: Maybe generalize this element with like a child-selector?
 
@@ -33,8 +33,8 @@ export class Accordion extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sv-accordion": Accordion;
+    'sv-accordion': Accordion;
   }
 }
 
-customElements.define("sv-accordion", Accordion);
+customElements.define('sv-accordion', Accordion);

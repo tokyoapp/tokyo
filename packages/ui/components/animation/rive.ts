@@ -1,11 +1,11 @@
-import type { File } from "@rive-app/canvas-advanced-single";
+import type { File } from '@rive-app/canvas-advanced-single';
 import {
   Fit,
   Alignment,
   AABB,
   RiveCanvas,
   default as Rive,
-} from "@rive-app/canvas-advanced-single";
+} from '@rive-app/canvas-advanced-single';
 
 export type Alignments = [Fit, Alignment, any, AABB];
 
@@ -30,7 +30,7 @@ export class Animations {
 
     const buffer = cache.get(src);
     if (!buffer) {
-      throw new Error("Source does not exist in cache.");
+      throw new Error('Source does not exist in cache.');
     }
     return buffer;
   }
@@ -48,7 +48,7 @@ export const registerListeners = ({
   alignments: Alignments;
 }) => {
   if (!canvas || !stateMachines.length) {
-    throw new Error("Failed to register listeners.");
+    throw new Error('Failed to register listeners.');
   }
 
   const mouseCallback = (event) => {
@@ -66,21 +66,21 @@ export const registerListeners = ({
 
     switch (event.type) {
       // Pointer moving/hovering on the canvas
-      case "mousemove": {
+      case 'mousemove': {
         for (const stateMachine of stateMachines) {
           stateMachine.pointerMove(transformedX, transformedY);
         }
         break;
       }
       // Pointer click initiated but not released yet on the canvas
-      case "mousedown": {
+      case 'mousedown': {
         for (const stateMachine of stateMachines) {
           stateMachine.pointerDown(transformedX, transformedY);
         }
         break;
       }
       // Pointer click released on the canvas
-      case "mouseup": {
+      case 'mouseup': {
         for (const stateMachine of stateMachines) {
           stateMachine.pointerUp(transformedX, transformedY);
         }
@@ -92,13 +92,13 @@ export const registerListeners = ({
 
   const callback = mouseCallback.bind(this);
 
-  canvas.addEventListener("mousemove", callback);
-  canvas.addEventListener("mousedown", callback);
-  canvas.addEventListener("mouseup", callback);
+  canvas.addEventListener('mousemove', callback);
+  canvas.addEventListener('mousedown', callback);
+  canvas.addEventListener('mouseup', callback);
 
   return () => {
-    canvas.removeEventListener("mousemove", callback);
-    canvas.removeEventListener("mousedown", callback);
-    canvas.removeEventListener("mouseup", callback);
+    canvas.removeEventListener('mousemove', callback);
+    canvas.removeEventListener('mousedown', callback);
+    canvas.removeEventListener('mouseup', callback);
   };
 };

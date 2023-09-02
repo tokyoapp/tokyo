@@ -1,15 +1,15 @@
-import { html, css, LitElement } from "lit-element";
-import componentStyle from "./component.style";
-import KeybindsTemplate from "./KeybindsTemplate";
-import { Action } from "atrium/lib/Actions";
-import "../Switch";
+import { html, css, LitElement } from 'lit-element';
+import componentStyle from './component.style';
+import KeybindsTemplate from './KeybindsTemplate';
+import { Action } from 'atrium/lib/Actions';
+import '../Switch';
 
 let settings = null;
 
 Action.register({
-  name: "settings.open",
-  description: "Open Settings",
-  shortcut: "Escape",
+  name: 'settings.open',
+  description: 'Open Settings',
+  shortcut: 'Escape',
   onAction() {
     if (!settings || settings.clientWidth == 0) {
       settings = new SettingsComponent();
@@ -23,8 +23,8 @@ Action.register({
 
 const settingsTabs = [
   {
-    title: "Keybindings",
-    icon: "Keyboard",
+    title: 'Keybindings',
+    icon: 'Keyboard',
     content: KeybindsTemplate,
   },
 ];
@@ -213,7 +213,7 @@ export class SettingsComponent extends LitElement {
   }
 
   close() {
-    const settings = this.shadowRoot.querySelector(".settings");
+    const settings = this.shadowRoot.querySelector('.settings');
     settings.onanimationend = () => {
       this.remove();
       settings.onanimationend = null;
@@ -229,8 +229,8 @@ export class SettingsComponent extends LitElement {
   render() {
     if (!settingsTabs) return html``;
 
-    const contentEle = document.createElement("div");
-    contentEle.className = "content";
+    const contentEle = document.createElement('div');
+    contentEle.className = 'content';
 
     let content = null;
     if (this.activeTab) {
@@ -239,7 +239,7 @@ export class SettingsComponent extends LitElement {
       let strings = [content];
       let args = [];
 
-      if (content.type == "html") {
+      if (content.type == 'html') {
         strings = content.strings.raw;
         args = content.values;
       }
@@ -281,4 +281,4 @@ export class SettingsComponent extends LitElement {
   }
 }
 
-customElements.define("gyro-settings", SettingsComponent);
+customElements.define('gyro-settings', SettingsComponent);

@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit-element";
+import { css, html, LitElement } from 'lit-element';
 
 export default class StartComponent extends LitElement {
   static get styles() {
@@ -19,10 +19,6 @@ export default class StartComponent extends LitElement {
     `;
   }
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     super.connectedCallback();
   }
@@ -36,4 +32,4 @@ export default class StartComponent extends LitElement {
   }
 }
 
-customElements.define("atrium-start", StartComponent);
+customElements.define('atrium-start', StartComponent);

@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit-element";
+import { css, html, LitElement } from 'lit-element';
 
 function map(value, in_min, in_max, out_min, out_max) {
   return ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
@@ -132,7 +132,7 @@ export default class FluidInput extends LitElement {
                 </span>
                 <span class="value-container">
                     <input class="input-value"></input>
-                    ${this.suffix ? html` <span class="value-suffix">${this.suffix}</span> ` : ""}
+                    ${this.suffix ? html` <span class="value-suffix">${this.suffix}</span> ` : ''}
                 </span>
                 <span class="arrow right-arrow">
                     <svg x="0px" y="0px" width="7.3px" height="11px" viewBox="0 0 7.3 12.5">
@@ -185,7 +185,7 @@ export default class FluidInput extends LitElement {
   }
 
   get suffix() {
-    return this.getAttribute("suffix");
+    return this.getAttribute('suffix');
   }
 
   get isRange() {
@@ -202,11 +202,11 @@ export default class FluidInput extends LitElement {
 
     this.update();
 
-    this.input = this.shadowRoot.querySelector(".input-container");
-    this.inputValue = this.shadowRoot.querySelector(".input-value");
+    this.input = this.shadowRoot.querySelector('.input-container');
+    this.inputValue = this.shadowRoot.querySelector('.input-value');
 
-    this.leftArrow = this.shadowRoot.querySelector(".left-arrow");
-    this.rightArrow = this.shadowRoot.querySelector(".right-arrow");
+    this.leftArrow = this.shadowRoot.querySelector('.left-arrow');
+    this.rightArrow = this.shadowRoot.querySelector('.right-arrow');
 
     this.registerHandlers();
   }
@@ -220,7 +220,7 @@ export default class FluidInput extends LitElement {
     const cancel = () => {
       startPos = null;
       startMovePos = null;
-      this.input.removeAttribute("active");
+      this.input.removeAttribute('active');
     };
     const up = (e) => {
       if (startPos && !startMovePos) {
@@ -235,7 +235,7 @@ export default class FluidInput extends LitElement {
       if (!focused) {
         startPos = [e.x, e.y];
         startValue = this.value;
-        this.input.setAttribute("active", "");
+        this.input.setAttribute('active', '');
         e.preventDefault();
       }
     };
@@ -287,33 +287,33 @@ export default class FluidInput extends LitElement {
     };
 
     const input = (e) => {
-      if (e.key == "Enter") {
+      if (e.key == 'Enter') {
         submit();
-      } else if (e.key == "Escape") {
+      } else if (e.key == 'Escape') {
         cancelInput();
       }
     };
 
-    this.inputValue.addEventListener("blur", submit);
-    this.inputValue.addEventListener("keydown", input);
+    this.inputValue.addEventListener('blur', submit);
+    this.inputValue.addEventListener('keydown', input);
 
-    this.input.addEventListener("mousedown", start);
-    window.addEventListener("mousemove", move);
+    this.input.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
 
-    window.addEventListener("mouseup", up);
-    window.addEventListener("mousecancel", cancel);
-    window.addEventListener("mouseleave", cancel);
+    window.addEventListener('mouseup', up);
+    window.addEventListener('mousecancel', cancel);
+    window.addEventListener('mouseleave', cancel);
 
-    this.leftArrow.addEventListener("click", (e) => {
+    this.leftArrow.addEventListener('click', (e) => {
       this.setValue(this.value - this.steps);
       e.preventDefault();
     });
-    this.rightArrow.addEventListener("click", (e) => {
+    this.rightArrow.addEventListener('click', (e) => {
       this.setValue(this.value + this.steps);
       e.preventDefault();
     });
 
-    this.addEventListener("mousedown", (e) => {
+    this.addEventListener('mousedown', (e) => {
       if (!startPos && !focused) {
         e.preventDefault();
       }
@@ -323,16 +323,16 @@ export default class FluidInput extends LitElement {
   attributeChangedCallback(name, oldValue, newValue) {
     super.attributeChangedCallback(name, oldValue, newValue);
 
-    if (name == "value") {
+    if (name == 'value') {
       this.setValue(newValue);
     }
-    if (name == "min") {
+    if (name == 'min') {
       this.min = +newValue;
     }
-    if (name == "max") {
+    if (name == 'max') {
       this.max = +newValue;
     }
-    if (name == "steps") {
+    if (name == 'steps') {
       this.steps = +newValue;
     }
   }
@@ -345,15 +345,15 @@ export default class FluidInput extends LitElement {
     }
 
     if (this.isRange) {
-      this.input.style.setProperty("--value", map(this.value, this.min, this.max, 0, 1));
+      this.input.style.setProperty('--value', map(this.value, this.min, this.max, 0, 1));
     }
 
     const getPrecision = (n) => {
-      const precParts = n.toString().split(".");
+      const precParts = n.toString().split('.');
       const size = precParts[1] ? precParts[1].length : 0;
 
       // return 0 if precision is smaller then .000
-      if (precParts[1] && precParts[1].substring(0, 3) == "000") {
+      if (precParts[1] && precParts[1].substring(0, 3) == '000') {
         return 0;
       }
 
@@ -384,10 +384,10 @@ export default class FluidInput extends LitElement {
 
 class InputChangeEvent extends Event {
   constructor(delta, value) {
-    super("change");
+    super('change');
     this.delta = delta;
     this.value = value;
   }
 }
 
-customElements.define("gyro-fluid-input", FluidInput);
+customElements.define('gyro-fluid-input', FluidInput);

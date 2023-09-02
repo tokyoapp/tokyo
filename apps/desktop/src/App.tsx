@@ -1,19 +1,17 @@
-import { createSignal } from "solid-js";
-import { invoke } from "@tauri-apps/api/tauri";
-import { ImageEditor } from "image-editor";
-import Library from "./Library.tsx";
-import { createStore } from "solid-js/store";
-import Action from "./actions";
+import { createSignal } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import Library from './Library.tsx';
+import Action from './actions';
 
 const [items, setItems] = createStore<any[]>([]);
 
-const [name, setName] = createSignal("");
+const [name, setName] = createSignal('');
 
 function photoToCanvas(img: Uint8Array) {
-  const canvas = document.createElement("canvas");
-  const ctxt = canvas.getContext("2d");
+  const canvas = document.createElement('canvas');
+  const ctxt = canvas.getContext('2d');
 
-  const data = new ImageData(5472, 3648, { colorSpace: "srgb" });
+  const data = new ImageData(5472, 3648, { colorSpace: 'srgb' });
 
   for (let i = 0; i < data.data.length / 4; i++) {
     data.data[i * 4 + 0] = img[i * 3 + 0];
@@ -29,11 +27,13 @@ function photoToCanvas(img: Uint8Array) {
   return canvas;
 }
 
-const canvas = document.createElement("canvas");
-canvas.style.width = "100%";
+const canvas = document.createElement('canvas');
+canvas.style.width = '100%';
+canvas.style.maxHeight = '100vh';
+canvas.style.objectFit = 'contain';
 
 function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement, meta: any) {
-  const ctxt = canvas.getContext("2d");
+  const ctxt = canvas.getContext('2d');
 
   switch (meta.orientation) {
     case 8:
@@ -73,7 +73,7 @@ async function open(p: string) {
   drawToCanvas(photo, meta);
 }
 
-fetch("http://localhost:8000/").then(async (res) => {
+fetch('http://localhost:8000/').then(async (res) => {
   const list = await res.json();
   setItems(list);
 });
@@ -83,7 +83,8 @@ function App() {
     <gyro-layout class="app">
       <gyro-layout-column>
         <gyro-group show-tabs>
-          <div tab="Explorer" class="p-1">
+          <div tab="Explorer" class="p-1 flex">
+            <gyro-explorer class="w-64 flex-none" />
             <Library
               items={items}
               onOpen={(item) => {
@@ -109,10 +110,10 @@ function App() {
 export default App;
 
 const shortcuts: Record<string, () => void> = {
-  r: Action.map("reload"),
+  r: Action.map('reload'),
 };
 
-window.addEventListener("keyup", (e) => {
+window.addEventListener('keyup', (e) => {
   if (e.ctrlKey || e.metaKey) {
     if (e.key in shortcuts) shortcuts[e.key]();
   }

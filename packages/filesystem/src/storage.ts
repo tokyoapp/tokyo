@@ -1,9 +1,7 @@
 async function hashBuffer(buffer): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest("SHA-1", buffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join(""); // convert bytes to hex string
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
   return hashHex;
 }
 
@@ -14,7 +12,7 @@ export async function writeFile(name, data) {
     create: true,
   });
 
-  console.log("Write file", name, data);
+  console.log('Write file', name, data);
 
   const writeable = await fileHandle.createWritable();
   await writeable.write(data);
@@ -65,7 +63,7 @@ async function clearDirectory(dir: FileSystemDirectoryHandle) {
       const name = value[1].name;
 
       dir.removeEntry(name);
-      console.log("Deleted file", name);
+      console.log('Deleted file', name);
     }
   }
 }
