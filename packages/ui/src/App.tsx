@@ -5,6 +5,7 @@ import 'components/components/view-canvas';
 import { createStore } from 'solid-js/store';
 
 import Library from './Library';
+import { Loader } from './Loader';
 import Action from './actions/Action';
 import { file } from './actions/open.ts';
 import { canvas } from './viewer.ts';
@@ -91,14 +92,16 @@ function App() {
             <div tab="Viewer" class="flex flex-col justify-center items-center">
               {/* <ImageEditor onOpen={() => open()} /> */}
               {canvas}
-              <span class="mt-1 text-xs">{file.name}</span>
             </div>
           </gyro-group>
         </gyro-layout-column>
       </gyro-layout>
 
-      <div class="statusbar grid-flow-col items-center grid gap-3 px-2 text-sm">
-        <div>Jobs: {Action.runningJobCount()}</div>
+      <div class="statusbar grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
+        <div></div>
+        <span class="mt-1 text-xs">{file.name}</span>
+        <div class="w-7">{Action.runningJobCount() > 0 ? <Loader /> : null}</div>
+        {/* <div>Jobs: {Action.runningJobCount()}</div> */}
       </div>
     </>
   );

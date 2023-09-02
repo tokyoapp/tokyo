@@ -53,6 +53,11 @@ export class DynamicImage {
     if (meta) {
       if (meta.orientation)
         switch (meta.orientation) {
+          case 5:
+          case 6:
+            this.rotate90();
+            break;
+          case 7:
           case 8:
             this.rotate270();
             break;
@@ -65,11 +70,21 @@ export class DynamicImage {
   }
 
   rotate90() {
-    // todo
+    const { canvas, context } = createCanvas(this.#canvas.height, this.#canvas.width);
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.rotate((Math.PI / 180) * 90);
+    context.drawImage(this.#canvas, -canvas.height / 2, -canvas.width / 2);
+    this.#canvas = canvas;
+    return this;
   }
 
   rotate180() {
-    // todo
+    const { canvas, context } = createCanvas(this.#canvas.width, this.#canvas.height);
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.rotate((Math.PI / 180) * 180);
+    context.drawImage(this.#canvas, -canvas.height / 2, -canvas.width / 2);
+    this.#canvas = canvas;
+    return this;
   }
 
   rotate270() {

@@ -2,9 +2,10 @@
   "name": "ui",
   "main": "./src/App.tsx",
   "dependencies": {
+    "@rive-app/webgl-single": "^2.3.0",
+    "components": "workspace:",
     "lit": "^2.5.0",
     "solid-js": "^1.6.6",
-    "components": "workspace:",
     "ui": "workspace:"
   }
 }
