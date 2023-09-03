@@ -5,11 +5,12 @@ use rawler::{
     decoders::RawDecodeParams,
     get_decoder,
     imgop::{raw, rescale_f32_to_u8},
-    RawFile, RawImageData,
+    RawFile, RawImageData, formats::tiff::file,
 };
-use std::{fs::File, io::BufReader, path::{PathBuf, Path}, time::SystemTime};
+use std::{fs::File, io::{BufReader, Read}, path::{PathBuf, Path}, time::SystemTime};
 use std::fs;
 use std::{io::Cursor, time::Instant};
+use roxmltree::Document;
 
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
@@ -23,11 +24,34 @@ pub struct Metadata {
     pub orientation: u16,
 }
 
+pub fn get_rating(path: String) -> String {
+    let p = PathBuf::from(path.clone());
+    let filename = p.file_stem().unwrap().to_str().unwrap();
+    let xmp_file_path = PathBuf::from(p.parent().unwrap().to_str().unwrap().to_owned() + "/" + filename + ".xmp");
+
+    if xmp_file_path.exists() {
+        let mut xmp_file = File::open(&xmp_file_path).unwrap();
+        let mut buffer = String::new();
+        let _ = xmp_file.read_to_string(&mut buffer);
+
+        let data = buffer.to_string();
+        let d = &data;
+        let doc = roxmltree::Document::parse(d).unwrap();
+        let elem = doc.descendants().find(|n| n.has_tag_name("Description")).unwrap();
+        return elem.attribute(("http://ns.adobe.com/xap/1.0/", "Rating")).unwrap().to_string();
+    } else {
+        return String::from("0")
+    }
+}
+
 pub fn metadat(path: String) -> Metadata {
     println!("collect metadata");
     let raw_file = File::open(&path).unwrap();
     let reader = BufReader::new(raw_file);
-    let mut rawfile = RawFile::new(PathBuf::from(path.clone()), reader);
+    let p = PathBuf::from(path.clone());
+    let mut rawfile = RawFile::new(&p, reader);
+
+    let rating = get_rating(path);
 
     // let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
     // let hash = sha256::digest(&bytes);
@@ -46,7 +70,7 @@ pub fn metadat(path: String) -> Metadata {
         width: 0,
         height: 0,
         exif: metadata.exif.clone(),
-        rating: metadata.rating.clone().get_or_insert(0).to_owned(),
+        rating: metadata.rating.clone().get_or_insert(rating.parse::<u32>().unwrap()).to_owned(),
         make: metadata.make,
         create_date: metadata.exif.create_date.unwrap(),
         orientation: metadata.exif.orientation.unwrap(),

@@ -2,6 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import storage from './ClientStorage.worker';
 import { DynamicImage } from './DynamicImage.ts';
 import { location } from './Location.ts';
+import Rating from './Rating.tsx';
 import Action from './actions/Action.ts';
 
 export default function Library() {
@@ -106,11 +107,15 @@ function Thumb({ src, meta, onClick }: { src: string; meta: any; onClick: () => 
   return (
     <div
       tabIndex={0}
-      class="h-52 overflow-hidden flex items-center justify-center bg-transparent bg-zinc-900 focus:bg-zinc-800 shadow-none"
+      class="h-52 p-3 relative overflow-hidden flex items-center justify-center bg-transparent bg-zinc-900 focus:bg-zinc-800 shadow-none"
       onClick={() => onClick()}
       ref={ele}
     >
       {img()}
+
+      <div class="absolute bottom-2 left-2">
+        <Rating rating={meta.rating} />
+      </div>
     </div>
   );
 }
