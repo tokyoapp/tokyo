@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
+import uiConfig from 'ui/vite.config.cjs';
+import { mergeConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 
-export default defineConfig(async () => ({
+export default mergeConfig(uiConfig, {
   clearScreen: false,
   server: {
     port: 1420,
@@ -9,4 +10,4 @@ export default defineConfig(async () => ({
   },
   envPrefix: ['VITE_', 'TAURI_'],
   plugins: [solidPlugin()],
-}));
+});

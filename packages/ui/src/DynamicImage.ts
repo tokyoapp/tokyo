@@ -65,7 +65,21 @@ export class DynamicImage {
     }
   }
 
-  toCanvas() {
+  // resize(width: number, height: number) {
+  //   const { canvas, context } = createCanvas(height, width);
+
+  // }
+
+  // /**
+  //  * Resize image by the long side of the image.
+  //  * @param width
+  //  * @param height
+  //  */
+  // resizeContain(size: number) {
+
+  // }
+
+  canvas() {
     return this.#canvas;
   }
 

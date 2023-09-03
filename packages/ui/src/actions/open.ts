@@ -31,7 +31,7 @@ export default async function open(p: string, metadata: any) {
   const prevImg = new Image();
   prevImg.onload = () => {
     const img = new DynamicImage(prevImg, meta);
-    drawToCanvas(img.toCanvas());
+    drawToCanvas(img.canvas());
   };
   prevImg.src = `http://localhost:8000/thumbnail?file=${encodeURIComponent(p)}`;
 
@@ -41,6 +41,6 @@ export default async function open(p: string, metadata: any) {
     .then(async (res) => new Uint8Array(await res.arrayBuffer()))
     .then((img: Uint8Array) => {
       const photo = DynamicImage.from(img, 5472, 3648, meta);
-      drawToCanvas(photo.toCanvas());
+      drawToCanvas(photo.canvas());
     });
 }

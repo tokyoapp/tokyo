@@ -1,11 +1,14 @@
 {
   "name": "ui",
   "main": "./src/App.tsx",
+  "type": "module",
   "dependencies": {
     "@rive-app/webgl-single": "^2.3.0",
+    "comlink": "^4.4.1",
     "components": "workspace:",
     "lit": "^2.5.0",
     "solid-js": "^1.6.6",
-    "ui": "workspace:"
+    "ui": "workspace:",
+    "vite-plugin-wrap-worker": "^0.2.0"
   }
 }

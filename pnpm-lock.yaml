@@ -94,6 +94,9 @@ importers:
       '@rive-app/webgl-single':
         specifier: ^2.3.0
         version: 2.3.0
+      comlink:
+        specifier: ^4.4.1
+        version: 4.4.1
       components:
         specifier: 'workspace:'
         version: link:../components
@@ -106,6 +109,9 @@ importers:
       ui:
         specifier: 'workspace:'
         version: 'link:'
+      vite-plugin-wrap-worker:
+        specifier: ^0.2.0
+        version: 0.2.0
 
 packages:
 
@@ -1096,6 +1102,10 @@ packages:
     resolution: {integrity: sha512-72fSenhMw2HZMTVHeCA9KCmpEIbzWiQsjN+BHcBbS9vr1mtt+vJjPdksIBNUmKAW8TFUDPJK5SUU3QhE9NEXDw==}
     dev: true
 
+  /comlink@4.4.1:
+    resolution: {integrity: sha512-+1dlx0aY5Jo1vHy/tSsIGpSkN4tS9rZSW8FIhG0JH/crs9wwweswIo/POr451r7bZww3hFbPAKnTpimzL/mm4Q==}
+    dev: false
+
   /commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
@@ -1790,6 +1800,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /vite-plugin-wrap-worker@0.2.0:
+    resolution: {integrity: sha512-4Buvbt7bl41JGm84JvI9Vp3eQdUsmT/g3wAWG+nkHfqDzSqlZehGVl6kntUgXbrIGA2aUbr/wCWwTdTNkcJNHg==}
+    dependencies:
+      comlink: 4.4.1
+    dev: false
 
   /vite@4.4.4:
     resolution: {integrity: sha512-4mvsTxjkveWrKDJI70QmelfVqTm+ihFAb6+xf4sjEU2TmUCTlVX87tmg/QooPEMQb/lM9qGHT99ebqPziEd3wg==}

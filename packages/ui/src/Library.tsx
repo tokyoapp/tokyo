@@ -1,8 +1,10 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
+import storage from './ClientStorage.worker';
+import { DynamicImage } from './DynamicImage.ts';
 import { location } from './Location.ts';
 import Action from './actions/Action.ts';
 
-export default function Library({}) {
+export default function Library() {
   const items = () =>
     [...location.entries].sort((a, b) => {
       const dateASlice = a.meta.create_date.split(' ');
@@ -34,25 +36,57 @@ export default function Library({}) {
 }
 
 function Thumb({ src, meta, onClick }: { src: string; meta: any; onClick: () => void }) {
-  const [url, setUrl] = createSignal<string>();
+  const [img, setImg] = createSignal<HTMLCanvasElement>();
 
   let ele: HTMLDivElement;
 
-  const onView = () => {
-    fetch(`http://localhost:8000/thumbnail?file=${encodeURIComponent(src)}`).then(async (res) => {
-      const buffer = await res.arrayBuffer();
-      const url = URL.createObjectURL(new Blob([buffer]));
-      setUrl(url);
-    });
+  let controller: AbortController;
+
+  const useThumb = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = () => {
+      const dynimg = new DynamicImage(image, meta);
+      const canvas = dynimg.canvas();
+      canvas.style.width = '100%';
+      canvas.style.maxHeight = '100%';
+      canvas.style.objectFit = 'contain';
+      setImg(canvas);
+    };
+    image.src = url;
+  };
+
+  const onView = async () => {
+    controller = new AbortController();
+
+    const id = encodeURIComponent(src);
+    const tmp = await storage.readTemp(id);
+
+    if (tmp && tmp.size > 0) {
+      useThumb(tmp);
+    } else {
+      fetch(`http://localhost:8000/thumbnail?file=${id}`, {
+        signal: controller.signal,
+      }).then(async (res) => {
+        const buffer = await res.arrayBuffer();
+        const blob = new Blob([buffer]);
+        storage.writeTemp(id, await blob.arrayBuffer());
+        useThumb(blob);
+      });
+    }
   };
 
   onMount(() => {
     const observer = new IntersectionObserver(
       (entires) => {
-        if (!url()) {
+        if (!img()) {
           entires.forEach((entry) => {
             if (entry.isIntersecting) {
               onView();
+            } else {
+              if (controller) {
+                controller.abort();
+              }
             }
           });
         }
@@ -76,7 +110,7 @@ function Thumb({ src, meta, onClick }: { src: string; meta: any; onClick: () => 
       onClick={() => onClick()}
       ref={ele}
     >
-      <img alt={url()} data-orientation={meta.orientation} decoding="async" src={url()} />
+      {img()}
     </div>
   );
 }
