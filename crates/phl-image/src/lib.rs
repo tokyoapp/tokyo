@@ -1,13 +1,14 @@
-use image::{codecs::jpeg::JpegEncoder, imageops::FilterType};
+use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
 use rawler::{
     analyze::extract_thumbnail_pixels,
     decoders::RawDecodeParams,
     get_decoder,
-    imgop::{raw, rescale_f32_to_u16, rescale_f32_to_u8},
+    imgop::{raw, rescale_f32_to_u8},
     RawFile, RawImageData,
 };
-use std::{fs::File, io::BufReader, path::PathBuf, time::SystemTime};
+use std::{fs::File, io::BufReader, path::{PathBuf, Path}, time::SystemTime};
+use std::fs;
 use std::{io::Cursor, time::Instant};
 
 #[derive(serde::Serialize, Debug)]
@@ -64,6 +65,45 @@ pub fn thumbnail(path: String) -> Vec<u8> {
         .unwrap();
 
     return bytes;
+}
+
+pub fn cached_thumb(p: String) -> Vec<u8> {
+    let bytes = std::fs::read(p.to_string()).unwrap(); // Vec<u8>
+
+    let ext = Path::new(&p).extension().unwrap().to_str().unwrap();
+    match ext {
+        "jpg" => {
+            return bytes;
+        }
+        "png" => {
+            return bytes;
+        }
+        &_ => {}
+    }
+
+    // content id
+    let hash = sha256::digest(&bytes);
+
+    println!("hash of {}: {}", p, hash);
+
+    let cache_dir = "./tmp";
+
+    let thumbnail_path = cache_dir.to_owned() + "/" + &hash + ".jpg";
+
+    if Path::new(&thumbnail_path).exists() {
+        println!("thumb exists {}", thumbnail_path);
+
+        return fs::read(&thumbnail_path).unwrap();
+    } else {
+        println!("PP {}", p);
+        let thumb = thumbnail(p.to_string());
+
+        let _ = fs::create_dir_all(cache_dir);
+        let _ = fs::write(thumbnail_path, &thumb);
+
+        return thumb;
+    }
+
 }
 
 pub fn open(path: String) -> DynamicImage {
