@@ -8,27 +8,6 @@ export default css`
     --display-toolbar: grid;
 }
 
-::-webkit-scrollbar {
-    width: 8px;
-    margin: 5px 0;
-}
-::-webkit-scrollbar-button {
-    display: none;
-}
-::-webkit-scrollbar-track-piece  {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: var(--color-scrollbar-thumb, #1c1c1c);
-    border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-scrollbar-thumb-hover, #333333);
-}
-::-webkit-scrollbar-corner {
-    background: transparent;
-}
-
 a[href] {
     color: inherit;
     text-decoration: none;

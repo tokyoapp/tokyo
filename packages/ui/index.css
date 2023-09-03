@@ -29,7 +29,7 @@ main {
   border-radius: 10px;
   border: 1px solid rgb(51, 51, 51);
   border-bottom: 1px solid rgb(29, 29, 29);
-  background: #222;
+  background: #111;
   position: absolute;
   top: 0;
   left: 0;
@@ -106,7 +106,7 @@ button:active {
 .titlebar {
   position: relative;
   z-index: 1000;
-  background: #212121;
+  background: #111;
   user-select: none;
   display: flex;
   justify-content: flex-end;

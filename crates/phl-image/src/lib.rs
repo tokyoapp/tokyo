@@ -12,6 +12,7 @@ use std::{io::Cursor, time::Instant};
 
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
+    pub hash: String,
     pub width: u32,
     pub height: u32,
     pub orientation: u16,
@@ -20,7 +21,12 @@ pub struct Metadata {
 pub fn metadat(path: String) -> Metadata {
     println!("collect metadata");
     let raw_file = File::open(&path).unwrap();
-    let mut rawfile = RawFile::new(PathBuf::from(path.clone()), BufReader::new(raw_file));
+    let reader = BufReader::new(raw_file);
+
+    // let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
+    // let hash = sha256::digest(&bytes);
+
+    let mut rawfile = RawFile::new(PathBuf::from(path.clone()), reader);
 
     let decoder = get_decoder(&mut rawfile).unwrap();
 
@@ -33,6 +39,7 @@ pub fn metadat(path: String) -> Metadata {
     //     .unwrap();
 
     return Metadata {
+        hash: "none".to_owned(),
         width: 0,
         height: 0,
         orientation: metadata.exif.orientation.unwrap(),

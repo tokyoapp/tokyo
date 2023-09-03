@@ -2,12 +2,13 @@ import 'components/components/layout/Group';
 import 'components/components/tree-explorer';
 import 'components/components/view-canvas';
 
-import { createStore } from 'solid-js/store';
-
+import { createEffect } from 'solid-js';
 import Library from './Library';
 import { Loader } from './Loader';
+import { location } from './Location.ts';
 import Action from './actions/Action';
 import { file } from './actions/open.ts';
+import { listToTree } from './utils.ts';
 import { canvas } from './viewer.ts';
 
 const shortcuts: Record<string, () => void> = {
@@ -21,53 +22,18 @@ window.addEventListener('keyup', (e) => {
 });
 
 const explorer = document.createElement('gyro-explorer');
-explorer.className = 'w-64 flex-none';
-
-const [items, setItems] = createStore<string[]>([]);
-
-type Child = {
-  name: string;
-  path: string;
-  children: Child[];
-};
-
-function listToTree(list: Array<string>) {
-  const children: Array<Child> = [];
-  for (const item of list) {
-    let cwd = children;
-
-    const path = item.split('/').slice(1);
-
-    for (const slice of path) {
-      const dir = cwd.find((item) => item.name === slice);
-      if (dir) {
-        cwd = dir.children;
-      } else {
-        cwd.push({
-          path: `/${path.join('/')}`,
-          name: slice,
-          uncollapsed: true,
-          children: [],
-        });
-        break;
-      }
-    }
-  }
-  return children;
-}
-
-fetch('http://localhost:8000/').then(async (res) => {
-  const list = await res.json();
-
-  explorer.setRoot({
-    name: 'Explorer',
-    children: listToTree(list),
-  });
-
-  setItems(list);
-});
+explorer.className = 'w-52 flex-none';
 
 function App() {
+  createEffect(() => {
+    explorer.setRoot({
+      name: 'Explorer',
+      children: listToTree(location.index),
+    });
+  });
+
+  const itemCount = () => location.index.length;
+
   return (
     <>
       <div data-tauri-drag-region class="titlebar" />
@@ -78,7 +44,6 @@ function App() {
             <div tab="Explorer" class="p-1 flex">
               {explorer}
               <Library
-                items={items}
                 onOpen={(item) => {
                   Action.run('open', [item]);
                 }}
@@ -97,8 +62,10 @@ function App() {
         </gyro-layout-column>
       </gyro-layout>
 
-      <div class="statusbar grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
-        <div></div>
+      <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
+        <div>
+          <span>{itemCount()} items</span>
+        </div>
         <span class="mt-1 text-xs">{file.name}</span>
         <div class="w-7">{Action.runningJobCount() > 0 ? <Loader /> : null}</div>
         {/* <div>Jobs: {Action.runningJobCount()}</div> */}

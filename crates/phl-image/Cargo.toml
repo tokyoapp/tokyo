@@ -8,3 +8,4 @@ image = "0.24.7"
 serde = { version = "1.0", features = ["derive"] }
 rawloader = "0.37.1"
 rawler = { git = "https://github.com/dnglab/dnglab" }
+sha256 = "1.4.0"

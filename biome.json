@@ -22,5 +22,12 @@
   "files": {
     "ignoreUnknown": true
   },
-  "linter": {}
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      }
+    }
+  }
 }
