@@ -14,8 +14,12 @@ use std::{io::Cursor, time::Instant};
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
     pub hash: String,
+    pub create_date: String,
+    pub rating: u32,
     pub width: u32,
     pub height: u32,
+    pub make: String,
+    pub exif: rawler::exif::Exif,
     pub orientation: u16,
 }
 
@@ -23,11 +27,10 @@ pub fn metadat(path: String) -> Metadata {
     println!("collect metadata");
     let raw_file = File::open(&path).unwrap();
     let reader = BufReader::new(raw_file);
+    let mut rawfile = RawFile::new(PathBuf::from(path.clone()), reader);
 
     // let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
     // let hash = sha256::digest(&bytes);
-
-    let mut rawfile = RawFile::new(PathBuf::from(path.clone()), reader);
 
     let decoder = get_decoder(&mut rawfile).unwrap();
 
@@ -38,11 +41,14 @@ pub fn metadat(path: String) -> Metadata {
     // let rawimage = decoder
     //     .raw_image(&mut rawfile, RawDecodeParams { image_index: 0 }, false)
     //     .unwrap();
-
     return Metadata {
         hash: "none".to_owned(),
         width: 0,
         height: 0,
+        exif: metadata.exif.clone(),
+        rating: metadata.rating.clone().get_or_insert(0).to_owned(),
+        make: metadata.make,
+        create_date: metadata.exif.create_date.unwrap(),
         orientation: metadata.exif.orientation.unwrap(),
     };
 }

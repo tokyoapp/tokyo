@@ -1,24 +1,44 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { location } from './Location.ts';
+import Action from './actions/Action.ts';
 
-type Meta = {
-  hash: string;
-  width: number;
-  height: number;
-  orientation: number;
-};
+export default function Library({}) {
+  const items = () =>
+    [...location.entries].sort((a, b) => {
+      const dateASlice = a.meta.create_date.split(' ');
+      dateASlice[0] = dateASlice[0].replaceAll(':', '-');
+      const dateA = new Date(dateASlice.join(' '));
 
-function Thumb({ src, onClick }: { src: string; onClick: () => void }) {
+      const dateBSlice = b.meta.create_date.split(' ');
+      dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
+      const dateB = new Date(dateBSlice.join(' '));
+
+      return dateA.valueOf() - dateB.valueOf();
+    });
+
+  return (
+    <div class="overflow-auto w-full grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none h-full">
+      {items().map(({ path, meta }) => {
+        return (
+          <Thumb
+            onClick={() => {
+              Action.run('open', [path, meta]);
+            }}
+            src={path}
+            meta={meta}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function Thumb({ src, meta, onClick }: { src: string; meta: any; onClick: () => void }) {
   const [url, setUrl] = createSignal<string>();
-  const [meta, setMeta] = createSignal<Meta>();
 
   let ele: HTMLDivElement;
 
   const onView = () => {
-    fetch(`http://localhost:8000/metadata?file=${encodeURIComponent(src)}`).then(async (res) => {
-      const m = (await res.json()) as Meta;
-      setMeta(m);
-    });
     fetch(`http://localhost:8000/thumbnail?file=${encodeURIComponent(src)}`).then(async (res) => {
       const buffer = await res.arrayBuffer();
       const url = URL.createObjectURL(new Blob([buffer]));
@@ -56,23 +76,7 @@ function Thumb({ src, onClick }: { src: string; onClick: () => void }) {
       onClick={() => onClick()}
       ref={ele}
     >
-      <img alt={url()} data-orientation={meta()?.orientation} decoding="async" src={url()} />
-    </div>
-  );
-}
-
-export default function Library({
-  onOpen,
-}: {
-  onOpen: (item: string) => void;
-}) {
-  const items = () => location.index;
-
-  return (
-    <div class="overflow-auto w-full grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none h-full">
-      {items().map((item) => {
-        return <Thumb onClick={() => onOpen(item)} src={item} />;
-      })}
+      <img alt={url()} data-orientation={meta.orientation} decoding="async" src={url()} />
     </div>
   );
 }

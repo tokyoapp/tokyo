@@ -43,11 +43,7 @@ function App() {
           <gyro-group show-tabs>
             <div tab="Explorer" class="p-1 flex">
               {explorer}
-              <Library
-                onOpen={(item) => {
-                  Action.run('open', [item]);
-                }}
-              />
+              <Library />
             </div>
           </gyro-group>
         </gyro-layout-column>
@@ -64,9 +60,19 @@ function App() {
 
       <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
         <div>
-          <span>{itemCount()} items</span>
+          <span>{itemCount()} items </span>
         </div>
-        <span class="mt-1 text-xs">{file.name}</span>
+
+        <div>
+          <span class="mt-1 text-xs">{file.name} </span>
+
+          <span>Rating {file.metadata.rating} </span>
+          <span>Exposure {file.metadata?.exif?.exposure_time} </span>
+          <span>F {file.metadata?.exif?.fnumber} </span>
+          <span>iso {file.metadata?.exif?.iso_speed_ratings} </span>
+          <span>Focal length {file.metadata?.exif?.focal_length} </span>
+        </div>
+
         <div class="w-7">{Action.runningJobCount() > 0 ? <Loader /> : null}</div>
         {/* <div>Jobs: {Action.runningJobCount()}</div> */}
       </div>

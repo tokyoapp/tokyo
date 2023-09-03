@@ -6,15 +6,17 @@ let controller: AbortController;
 
 export const [file, setFile] = createStore({
   name: '',
+  metadata: {},
 });
 
-export default async function open(p: string) {
+export default async function open(p: string, metadata: any) {
   if (controller) controller.abort();
 
   controller = new AbortController();
 
   setFile({
     name: p,
+    metadata: metadata,
   });
 
   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
