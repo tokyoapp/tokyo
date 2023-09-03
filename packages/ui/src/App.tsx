@@ -6,10 +6,10 @@ import { createEffect } from 'solid-js';
 import Library from './Library';
 import { Loader } from './Loader';
 import { location } from './Location.ts';
+import Preview from './Viewer';
 import Action from './actions/Action';
 import { file } from './actions/open.ts';
 import { listToTree } from './utils.ts';
-import { canvas } from './viewer.ts';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -51,8 +51,7 @@ function App() {
         <gyro-layout-column>
           <gyro-group show-tabs>
             <div tab="Viewer" class="flex flex-col justify-center items-center">
-              {/* <ImageEditor onOpen={() => open()} /> */}
-              {canvas}
+              <Preview />
             </div>
           </gyro-group>
         </gyro-layout-column>
@@ -65,12 +64,6 @@ function App() {
 
         <div>
           <span class="mt-1 text-xs">{file.name} </span>
-
-          <span>Rating {file.metadata.rating} </span>
-          <span>Exposure {file.metadata?.exif?.exposure_time} </span>
-          <span>F {file.metadata?.exif?.fnumber} </span>
-          <span>iso {file.metadata?.exif?.iso_speed_ratings} </span>
-          <span>Focal length {file.metadata?.exif?.focal_length} </span>
         </div>
 
         <div class="w-7">{Action.runningJobCount() > 0 ? <Loader /> : null}</div>

@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import { DynamicImage } from '../DynamicImage.ts';
-import { drawToCanvas } from '../viewer.ts';
+import { drawToCanvas } from '../Viewer';
 
 let controller: AbortController;
 
