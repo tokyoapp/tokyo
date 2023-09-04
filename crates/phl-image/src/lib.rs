@@ -5,16 +5,16 @@ use rawler::{
     decoders::RawDecodeParams,
     get_decoder,
     imgop::{raw, rescale_f32_to_u8},
-    RawFile, RawImageData, formats::tiff::file,
+    RawFile, RawImageData,
 };
 use std::{fs::File, io::{BufReader, Read}, path::{PathBuf, Path}, time::SystemTime};
 use std::fs;
 use std::{io::Cursor, time::Instant};
-use roxmltree::Document;
 
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
     pub hash: String,
+    pub name: String,
     pub create_date: String,
     pub rating: u32,
     pub width: u32,
@@ -67,6 +67,7 @@ pub fn metadat(path: String) -> Metadata {
     //     .unwrap();
     return Metadata {
         hash: "none".to_owned(),
+        name: String::from(p.file_name().unwrap().to_str().unwrap()),
         width: 0,
         height: 0,
         exif: metadata.exif.clone(),

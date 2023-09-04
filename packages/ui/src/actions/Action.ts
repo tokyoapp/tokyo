@@ -11,17 +11,19 @@ const queue = new Set<Job>();
 
 const [runningJobCount, setRunningJobCount] = createSignal(0);
 
+type ActionFunction = (...args: any[]) => Promise<void>;
+
 export default class Action {
-  static actions: Record<string, (...args: string[]) => Promise<void>> = {
-    reload: reload,
-    open: open,
+  static actions = {
+    reload: reload as ActionFunction,
+    open: open as ActionFunction,
   } as const;
 
   static get runningJobCount() {
     return runningJobCount;
   }
 
-  static run(action: keyof typeof this.actions, args: string[] = []) {
+  static run(action: keyof typeof this.actions, args: any[] = []) {
     const prom: Promise<void> = this.actions[action](...args);
 
     const job = {

@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "main": "./src/App.tsx",
+  "main": "./src/components/App.tsx",
   "type": "module",
   "dependencies": {
     "@atrium-ui/mono": "0.2.0-1",

@@ -127,3 +127,12 @@ button:active {
   transform: rotate(90deg);
 }
 
+.icon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+.icon {
+  display: inline-block;
+}

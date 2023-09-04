@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import { DynamicImage } from '../DynamicImage.ts';
-import { drawToCanvas } from '../Viewer';
+import { drawToCanvas, setLoading } from '../components/Viewer';
 
 let controller: AbortController;
 
@@ -28,6 +28,7 @@ export default async function open(p: string, metadata: any) {
     res.json()
   );
 
+  setLoading(true);
   const prevImg = new Image();
   prevImg.onload = () => {
     const img = new DynamicImage(prevImg, meta);

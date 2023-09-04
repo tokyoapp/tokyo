@@ -5,22 +5,34 @@ type Entry = {
   meta: Meta;
 };
 
-const [location, setLocation] = createStore<{
+export type Location = {
   host?: string;
+  path: string;
   entries: Entry[];
   index: string[];
-}>({
+};
+
+const [location, setLocation] = createStore<Location>({
   entries: [],
+  path: '',
   index: [],
 });
 
 export { location };
 
+type Exif = {
+  exposure_time: string;
+  fnumber: string;
+  iso_speed_ratings: string;
+  focal_length: string;
+};
+
 type Meta = {
   hash: string;
+  name: string;
   width: number;
   height: number;
-  exif: any;
+  exif: Exif;
   rating: number;
   make: string;
   create_date: string;
@@ -46,6 +58,7 @@ fetch('http://localhost:8000/').then(async (res) => {
 
   setLocation({
     host: 'http://localhost:8000',
+    path: '/Users/tihav/Pictures',
     entries: entries.map((res) => res.value).filter(Boolean),
     index: list,
   });

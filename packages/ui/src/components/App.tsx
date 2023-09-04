@@ -2,14 +2,12 @@ import 'components/components/layout/Group';
 import 'components/components/tree-explorer';
 import 'components/components/view-canvas';
 
-import { createEffect } from 'solid-js';
+import { location } from '../Location.ts';
+import Action from '../actions/Action';
+import { file } from '../actions/open.ts';
 import Library from './Library';
 import { Loader } from './Loader';
-import { location } from './Location.ts';
 import Preview from './Viewer';
-import Action from './actions/Action';
-import { file } from './actions/open.ts';
-import { listToTree } from './utils.ts';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -21,16 +19,16 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-const explorer = document.createElement('gyro-explorer');
-explorer.className = 'w-52 flex-none';
+// const explorer = document.createElement('gyro-explorer');
+// explorer.className = 'w-52 flex-none';
 
 function App() {
-  createEffect(() => {
-    explorer.setRoot({
-      name: 'Explorer',
-      children: listToTree(location.index),
-    });
-  });
+  // createEffect(() => {
+  //   explorer.setRoot({
+  //     name: 'Explorer',
+  //     children: listToTree(location.index),
+  //   });
+  // });
 
   const itemCount = () => location.index.length;
 
@@ -41,9 +39,8 @@ function App() {
       <gyro-layout class="app">
         <gyro-layout-column>
           <gyro-group show-tabs>
-            <div tab="Explorer" class="p-1 flex">
-              {explorer}
-              <Library />
+            <div tab="Explorer" class="p-1">
+              <Library location={location} />
             </div>
           </gyro-group>
         </gyro-layout-column>

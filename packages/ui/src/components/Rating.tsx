@@ -1,10 +1,10 @@
-import star from '../assets/star.svg';
+import Icon from './Icon.tsx';
 
 export default function Rating(props: { rating: number }) {
   return (
-    <div class="flex gap-1">
+    <div class="flex gap-1 text-xs">
       {new Array(props.rating).fill(1).map(() => {
-        return <img src={star} width={12} alt="star" />;
+        return <Icon name="star" width={12} />;
       })}
     </div>
   );
