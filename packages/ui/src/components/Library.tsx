@@ -58,8 +58,26 @@ export default function Library(props: { location: Location }) {
     });
   };
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    const parent = (e.target as HTMLElement).parentNode;
+    const children = [...(parent?.children || [])];
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        const prevChild = children[children.indexOf(e.target) - 1];
+        prevChild.focus();
+        prevChild.click();
+        break;
+      case 'ArrowRight':
+        const nextChild = children[children.indexOf(e.target) + 1];
+        nextChild.focus();
+        nextChild.click();
+        break;
+    }
+  };
+
   return (
-    <div class="grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]">
+    <div class="grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]" onKeyDown={onKeyDown}>
       <nav class="pb-2 bg-[#18191B]">
         <div class="px-1 py-2 border-b-zinc-800 border-b text-sm flex justify-between">
           <select class="bg-zinc-700" onChange={(e) => onFilterChange(e.target.value)}>
@@ -93,7 +111,7 @@ export default function Library(props: { location: Location }) {
         {items().map(({ path, meta }, i) => {
           return (
             <Thumb
-              number={i.toString()}
+              number={(i + 1).toString()}
               name={viewSettings.showName}
               settings={viewSettings.showSettings}
               rating={viewSettings.showRating}

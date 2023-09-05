@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { file } from '../actions/open.ts';
-import { Loader } from './Loader.tsx';
+import Icon from './Icon.tsx';
 import Rating from './Rating.tsx';
 
 export const [loading, setLoading] = createSignal(false);
@@ -23,7 +23,7 @@ export default function Preview() {
   return (
     <div class="relative grid grid-rows-[1fr_100px] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
-        {loading() ? <Loader /> : null}
+        {loading() ? <Icon name="loader" /> : null}
       </div>
 
       <div>{canvas}</div>

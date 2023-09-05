@@ -38,6 +38,11 @@ class ClientStorage {
     }
   }
 
+  async reset() {
+    const dir = await navigator.storage.getDirectory();
+    await dir.removeEntry('tmp', { recursive: true });
+  }
+
   async listTemp() {
     const tmp = this.#tmpHandle;
     const files = [];

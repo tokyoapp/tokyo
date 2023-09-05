@@ -79,13 +79,8 @@ pub fn metadat(path: String) -> Metadata {
 }
 
 pub fn thumbnail(path: String) -> Vec<u8> {
-    let start = SystemTime::now();
-    println!("open raw file");
-
     let mut thumb = extract_thumbnail_pixels(path, RawDecodeParams { image_index: 0 }).unwrap();
-    thumb = thumb.resize(thumb.width() / 3, thumb.height() / 3, FilterType::Nearest);
-
-    println!("write thumbnail {}", start.elapsed().unwrap().as_millis());
+    thumb = thumb.resize(thumb.width() / 5, thumb.height() / 5, FilterType::Nearest);
 
     let mut bytes: Vec<u8> = Vec::new();
     thumb
@@ -134,7 +129,6 @@ pub fn cached_thumb(p: String) -> Vec<u8> {
 
         return thumb;
     }
-
 }
 
 pub fn open(path: String) -> DynamicImage {

@@ -5,8 +5,8 @@ import 'components/components/view-canvas';
 import { location } from '../Location.ts';
 import Action from '../actions/Action';
 import { file } from '../actions/open.ts';
+import Icon from './Icon.tsx';
 import Library from './Library';
-import { Loader } from './Loader';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
 
@@ -20,17 +20,7 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-// const explorer = document.createElement('gyro-explorer');
-// explorer.className = 'w-52 flex-none';
-
 function App() {
-  // createEffect(() => {
-  //   explorer.setRoot({
-  //     name: 'Explorer',
-  //     children: listToTree(location.index),
-  //   });
-  // });
-
   const itemCount = () => location.index.length;
 
   return (
@@ -55,7 +45,7 @@ function App() {
           <span class="mt-1 text-xs">{file.name} </span>
         </div>
 
-        <div class="w-7">{Action.runningJobCount() > 0 ? <Loader /> : null}</div>
+        <div class="w-7">{Action.runningJobCount() > 0 ? <Icon name="loader" /> : null}</div>
         {/* <div>Jobs: {Action.runningJobCount()}</div> */}
       </div>
     </>

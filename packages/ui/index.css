@@ -112,6 +112,7 @@ button:active {
   transform: rotate(90deg);
 }
 
+.icon canvas,
 .icon svg {
   width: 1em;
   height: 1em;
