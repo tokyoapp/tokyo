@@ -2,11 +2,13 @@ import 'components/components/layout/Group';
 import 'components/components/tree-explorer';
 import 'components/components/view-canvas';
 
+import { createSignal } from 'solid-js';
 import { location } from '../Location.ts';
 import Action from '../actions/Action';
 import { file } from '../actions/open.ts';
 import Icon from './Icon.tsx';
 import Library from './Library';
+import LocationSettings from './LocationSettings.tsx';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
 
@@ -20,6 +22,8 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
+export const [settingsOpen, setSettingOpen] = createSignal(false);
+
 function App() {
   const itemCount = () => location.index.length;
 
@@ -29,6 +33,11 @@ function App() {
 
       <div class="app">
         <div class="library">
+          {settingsOpen() ? (
+            <div class="absolute top-0 left-0 w-full h-full z-50">
+              <LocationSettings />
+            </div>
+          ) : null}
           <Library location={location} />
         </div>
         <div class="flex flex-col justify-center items-center">

@@ -213,18 +213,18 @@ function Thumb(props: ThumbProps) {
       onClick={() => props.onClick()}
       ref={ele}
     >
-      <div class="relative z-40 w-full h-full flex items-center">{img()}</div>
+      <div class="relative z-30 w-full h-full flex items-center">{img()}</div>
 
-      <div class="z-20 absolute top-1 right-1 opacity-5 text-7xl leading-none">{props.number}</div>
+      <div class="z-10 absolute top-1 right-1 opacity-5 text-7xl leading-none">{props.number}</div>
 
-      <div class="z-50 absolute top-1 left-2 text-xs opacity-70">
+      <div class="z-40 absolute top-1 left-2 text-xs opacity-70">
         {props.settings ? (
           <span>{`${props.meta.exif.focal_length.split('/')[0]}mm F${
             props.meta.exif.fnumber.split('/')[0]
           } ISO${props.meta.exif.iso_speed_ratings} ${props.meta.exif.exposure_time}`}</span>
         ) : null}
       </div>
-      <div class="z-50 absolute bottom-1 left-2 text-xs opacity-70">
+      <div class="z-40 absolute bottom-1 left-2 text-xs opacity-70">
         {props.rating ? <Rating rating={props.meta.rating} /> : null}
         {props.name ? props.meta.name : null}
       </div>

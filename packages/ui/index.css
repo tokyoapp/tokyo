@@ -17,6 +17,10 @@
   overscroll-behavior: none;
 }
 
+* {
+  user-select: none;
+}
+
 body {
   color: #eee;
   background: transparent;
@@ -99,6 +103,7 @@ button:active {
 }
 
 .library {
+  position: relative;
   height: calc(100vh - 78px);
 }
 
@@ -117,8 +122,4 @@ button:active {
   width: 1em;
   height: 1em;
   display: block;
-}
-
-.icon {
-  display: inline-block;
 }
