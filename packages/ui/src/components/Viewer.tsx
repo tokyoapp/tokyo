@@ -21,14 +21,14 @@ export function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement) {
 
 export default function Preview() {
   return (
-    <div class="grid grid-rows-[1fr_100px] w-full h-full items-center">
+    <div class="relative grid grid-rows-[1fr_100px] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
         {loading() ? <Loader /> : null}
       </div>
 
       <div>{canvas}</div>
 
-      <pre class="bg-zinc-900 p-2 w-full h-full box-content">
+      <pre class="bg-zinc-900 p-2 w-full h-full">
         <div class="my-1 mb-2">
           <Rating rating={file.metadata.rating || 0} />
         </div>

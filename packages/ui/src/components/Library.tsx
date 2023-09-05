@@ -59,13 +59,13 @@ export default function Library(props: { location: Location }) {
   };
 
   return (
-    <div class="grid grid-rows-[auto_1fr] overflow-auto h-full">
-      <nav class="pb-2">
-        <div class="px-1 py-2 border-b-zinc-700 border-b text-sm flex justify-between">
-          <div class="flex gap-4 text-zinc-300 ">
-            <div>{props.location.host ? new URL(props.location.host).host : null}</div>
-            <span>{props.location.path}</span>
-          </div>
+    <div class="grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]">
+      <nav class="pb-2 bg-[#18191B]">
+        <div class="px-1 py-2 border-b-zinc-800 border-b text-sm flex justify-between">
+          <select class="bg-zinc-700" onChange={(e) => onFilterChange(e.target.value)}>
+            <option value="created">Sort by created</option>
+            <option value="rating">Sort by rating</option>
+          </select>
           <div class="flex gap-4 text-zinc-300">
             <label>Rating</label>
             <input
@@ -87,18 +87,13 @@ export default function Library(props: { location: Location }) {
             />
           </div>
         </div>
-        <div class="px-1 py-2 border-b-zinc-700 border-b">
-          <select class="bg-zinc-700" onChange={(e) => onFilterChange(e.target.value)}>
-            <option value="created">Sort by created</option>
-            <option value="rating">Sort by rating</option>
-          </select>
-        </div>
       </nav>
 
-      <div class="overflow-auto w-full grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none">
-        {items().map(({ path, meta }) => {
+      <div class="p-1 overflow-auto w-full grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none">
+        {items().map(({ path, meta }, i) => {
           return (
             <Thumb
+              number={i.toString()}
               name={viewSettings.showName}
               settings={viewSettings.showSettings}
               rating={viewSettings.showRating}
@@ -119,6 +114,7 @@ type ThumbProps = {
   name: boolean;
   rating: boolean;
   settings: boolean;
+  number: string;
   src: string;
   meta: Meta;
   onClick: () => void;
@@ -199,16 +195,18 @@ function Thumb(props: ThumbProps) {
       onClick={() => props.onClick()}
       ref={ele}
     >
-      {img()}
+      <div class="relative z-40 w-full h-full flex items-center">{img()}</div>
 
-      <div class="absolute top-1 left-2 text-xs opacity-70">
+      <div class="z-20 absolute top-1 right-1 opacity-5 text-7xl leading-none">{props.number}</div>
+
+      <div class="z-50 absolute top-1 left-2 text-xs opacity-70">
         {props.settings ? (
           <span>{`${props.meta.exif.focal_length.split('/')[0]}mm F${
             props.meta.exif.fnumber.split('/')[0]
           } ISO${props.meta.exif.iso_speed_ratings} ${props.meta.exif.exposure_time}`}</span>
         ) : null}
       </div>
-      <div class="absolute bottom-1 left-2 text-xs opacity-70">
+      <div class="z-50 absolute bottom-1 left-2 text-xs opacity-70">
         {props.rating ? <Rating rating={props.meta.rating} /> : null}
         {props.name ? props.meta.name : null}
       </div>
