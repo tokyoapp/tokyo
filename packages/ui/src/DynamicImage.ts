@@ -43,6 +43,14 @@ export class DynamicImage {
   #canvas: HTMLCanvasElement;
   #context: CanvasRenderingContext2D;
 
+  get width() {
+    return this.#canvas.width;
+  }
+
+  get height() {
+    return this.#canvas.height;
+  }
+
   constructor(image: Drawable, meta?: ImageMeta) {
     const { canvas, context } = createCanvas(image.width, image.height);
     this.#canvas = canvas;
@@ -65,19 +73,31 @@ export class DynamicImage {
     }
   }
 
-  // resize(width: number, height: number) {
-  //   const { canvas, context } = createCanvas(height, width);
+  resize(width: number, height: number) {
+    const { canvas, context } = createCanvas(width, height);
 
-  // }
+    context.drawImage(this.#canvas, 0, 0, width, height);
 
-  // /**
-  //  * Resize image by the long side of the image.
-  //  * @param width
-  //  * @param height
-  //  */
-  // resizeContain(size: number) {
+    return canvas;
+  }
 
-  // }
+  /**
+   * Resize image by the long side of the image.
+   * @param width
+   * @param height
+   */
+  resizeContain(size: number) {
+    const ar = this.height / this.width;
+    const length = Math.max(this.width, this.height);
+
+    if(length === this.width) {
+      this.#canvas = this.resize(size, size * ar);
+    } else {
+      this.#canvas = this.resize(size / ar, size);
+    }
+
+    return this;
+  }
 
   canvas() {
     return this.#canvas;

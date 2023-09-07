@@ -72,7 +72,7 @@ export default function Library(props: { location: Location }) {
                 { id: 'rating', value: 'Rating', checked: sorting() === 'rating' },
               ]}
             >
-              {'Sort by'}
+              {`Sort by ${sorting()}`}
             </Combobox>
           </div>
 
@@ -142,7 +142,7 @@ function Thumb(props: ThumbProps) {
     const image = new Image();
     image.onload = () => {
       const dynimg = new DynamicImage(image, props.meta);
-      const canvas = dynimg.canvas();
+      const canvas = dynimg.resizeContain(256).canvas();
       canvas.style.width = '100%';
       canvas.style.maxHeight = '100%';
       canvas.style.objectFit = 'contain';
@@ -201,7 +201,11 @@ function Thumb(props: ThumbProps) {
   return (
     <div
       tabIndex={0}
-      class="h-52 px-2 py-6 relative overflow-hidden flex items-center justify-center bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600 border border-transparent shadow-none"
+      class={`h-52 px-2 relative overflow-hidden flex items-center justify-center
+            bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
+            border border-transparent shadow-none ${props.name ? 'pb-6' : 'pb-1'} ${
+        props.settings ? 'pt-6' : 'pt-1'
+      }`}
       onClick={() => props.onClick()}
       ref={ele}
     >
@@ -217,7 +221,11 @@ function Thumb(props: ThumbProps) {
         ) : null}
       </div>
       <div class="z-40 absolute bottom-1 left-2 text-xs opacity-70">
-        {props.rating ? <Rating rating={props.meta.rating} /> : null}
+        {props.rating ? (
+          <div class="pb-1">
+            <Rating rating={props.meta.rating} />
+          </div>
+        ) : null}
         {props.name ? props.meta.name : null}
       </div>
     </div>
