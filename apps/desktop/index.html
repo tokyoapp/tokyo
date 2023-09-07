@@ -1,36 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <meta name="theme-color" content="#222" />
 
-    <title>app/photo-library</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#222" />
 
-    <style>
-      body {
-        background: #212121;
-      }
-      main {
-        overflow: hidden;
-        border-radius: 10px;
-        border: 1px solid rgb(51, 51, 51);
-        border-bottom: 1px solid rgb(29, 29, 29);
-        background: #111;
-      }
-    </style>
+  <title>app/photo-library</title>
 
-    <script type="module">
-      import "ui/index.css";
-      import { render } from "solid-js/web";
-      import App from "ui";
-      render(App, main);
-    </script>
-  </head>
+  <style>
+    body {
+      background: #212121;
+    }
 
-  <body>
-    <main id="main">
+    main {
+      overflow: hidden;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border: 1px solid rgb(51, 51, 51);
+      border-bottom: 1px solid rgb(29, 29, 29);
+      background: #111;
+    }
+  </style>
 
-    </main>
-  </body>
+  <script type="module">
+    import "ui/index.css";
+    import { render } from "solid-js/web";
+    import App from "ui";
+    render(App, main);
+  </script>
+</head>
+
+<body>
+  <main id="main">
+
+  </main>
+</body>
+
 </html>

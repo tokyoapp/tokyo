@@ -113,8 +113,8 @@ importers:
         specifier: 'workspace:'
         version: 'link:'
       vite-plugin-wrap-worker:
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
 
 packages:
 
@@ -1837,8 +1837,8 @@ packages:
       - supports-color
     dev: true
 
-  /vite-plugin-wrap-worker@0.2.0:
-    resolution: {integrity: sha512-4Buvbt7bl41JGm84JvI9Vp3eQdUsmT/g3wAWG+nkHfqDzSqlZehGVl6kntUgXbrIGA2aUbr/wCWwTdTNkcJNHg==}
+  /vite-plugin-wrap-worker@0.3.0:
+    resolution: {integrity: sha512-gPO2cs+n/IQi+Xwn2aciUwNEZQTh+mEzn4aM5I1lyQKOFi3zHadLt3pLUNQVfFKfdj062Zb1IH+H50Byb9aeOQ==}
     dependencies:
       comlink: 4.4.1
     dev: false

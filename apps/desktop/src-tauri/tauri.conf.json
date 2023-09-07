@@ -47,11 +47,11 @@
     "windows": [
       {
         "transparent": true,
-        "titleBarStyle": "Overlay",
+        "titleBarStyle": "Visible",
+        "hiddenTitle": true,
         "fullscreen": false,
         "resizable": true,
         "title": "TOKYO",
-        "decorations": false,
         "width": 1920,
         "height": 1080
       }

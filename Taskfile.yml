@@ -18,6 +18,17 @@ includes:
 
 tasks:
 
+  setup:
+    desc: Install dependencies
+    dir: '{{.TASKFILE_DIR}}'
+    sources:
+      - .rtx.toml
+      - pnpm-lock.yaml
+      - '**/package.json'
+    cmds:
+      - rtx install 2> /dev/null || true
+      - pnpm i
+
   reset:
     desc: Reset repository files
     prompt: Do you really want to reset the repository?
@@ -26,10 +37,16 @@ tasks:
 
   dev:
     desc: Run desktop app with library
-    deps: [library:dev, desktop:dev]
+    vars:
+      deps:
+        sh: task setup
+    deps: [setup, library:dev, desktop:dev]
 
   build:
     desc: Build app
+    vars:
+      deps:
+        sh: task setup
     deps: [library:build, desktop:build]
 
   check:
