@@ -45,12 +45,13 @@ export default async function open(p: string, metadata: any) {
     prevImg.src = `http://localhost:8000/thumbnail?file=${id}`;
   }
 
-  await fetch(`http://localhost:8000/open?file=${id}`, {
-    signal: controller.signal,
-  })
-    .then(async (res) => new Uint8Array(await res.arrayBuffer()))
-    .then((img: Uint8Array) => {
-      const photo = DynamicImage.from(img, 5472, 3648, meta);
-      drawToCanvas(photo.canvas());
-    });
+  // TODO: only get full image when needed
+  // await fetch(`http://localhost:8000/open?file=${id}`, {
+  //   signal: controller.signal,
+  // })
+  //   .then(async (res) => new Uint8Array(await res.arrayBuffer()))
+  //   .then((img: Uint8Array) => {
+  //     const photo = DynamicImage.from(img, 5472, 3648, meta);
+  //     drawToCanvas(photo.canvas());
+  //   });
 }

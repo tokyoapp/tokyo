@@ -92,8 +92,8 @@ importers:
   packages/ui:
     dependencies:
       '@atrium-ui/mono':
-        specifier: 0.2.0-3
-        version: 0.2.0-3
+        specifier: 0.2.0-4
+        version: 0.2.0-4
       '@rive-app/webgl-single':
         specifier: ^2.3.0
         version: 2.3.0
@@ -131,8 +131,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.17
     dev: true
 
-  /@atrium-ui/mono@0.2.0-3:
-    resolution: {integrity: sha512-uFL/nnrrbp7FmfO43BaKUgCowySi88zg92nj6BYTSh7gBJstjOg+e1rW4nZ7KXJUF2Q31lQ1w+crlewTG9YtUQ==}
+  /@atrium-ui/mono@0.2.0-4:
+    resolution: {integrity: sha512-jqY89dqLU/vTnWyzVD2RuId4lySe/qqWdsijx/lIKhe00WmIcORzHb+hXtKgGiUHlOWjyO7wYaFiHLe5oAlCeA==}
     hasBin: true
     dependencies:
       lit: 2.8.0

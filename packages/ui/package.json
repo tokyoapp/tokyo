@@ -3,7 +3,7 @@
   "main": "./src/components/App.tsx",
   "type": "module",
   "dependencies": {
-    "@atrium-ui/mono": "0.2.0-3",
+    "@atrium-ui/mono": "0.2.0-4",
     "@rive-app/webgl-single": "^2.3.0",
     "comlink": "^4.4.1",
     "components": "workspace:",

@@ -5,6 +5,8 @@ import { DynamicImage } from '../DynamicImage.ts';
 import type { Location } from '../Location.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
+import Combobox from './Combobox.tsx';
+import Icon from './Icon.tsx';
 
 type Entry = Location['entries'][number];
 type Meta = Location['entries'][number]['meta'];
@@ -36,28 +38,6 @@ export default function Library(props: { location: Location }) {
   const [sorting, setSorting] = createSignal<keyof typeof sort>('created');
   const items = () => [...props.location.entries].sort(sort[sorting()]);
 
-  const onFilterChange = (value: keyof typeof sort) => {
-    if (value in sort) setSorting(value);
-  };
-
-  const onViewStarsChange = (value: boolean) => {
-    setViewSettings({
-      showRating: value,
-    });
-  };
-
-  const onViewSettingsChange = (value: boolean) => {
-    setViewSettings({
-      showSettings: value,
-    });
-  };
-
-  const onViewNameChange = (value: boolean) => {
-    setViewSettings({
-      showName: value,
-    });
-  };
-
   const onKeyDown = (e: KeyboardEvent) => {
     const parent = (e.target as HTMLElement).parentNode;
     const children = [...(parent?.children || [])];
@@ -79,30 +59,42 @@ export default function Library(props: { location: Location }) {
   return (
     <div class="grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]" onKeyDown={onKeyDown}>
       <nav class="pb-2 bg-[#18191B]">
-        <div class="px-1 py-2 border-b-zinc-800 border-b text-sm flex justify-between">
-          <select class="bg-zinc-700" onChange={(e) => onFilterChange(e.target.value)}>
-            <option value="created">Sort by created</option>
-            <option value="rating">Sort by rating</option>
-          </select>
-          <div class="flex gap-4 text-zinc-300">
-            <label>Rating</label>
-            <input
-              type="checkbox"
-              checked={viewSettings.showRating}
-              onChange={(e) => onViewStarsChange(e.target.checked)}
-            />
-            <label>Settings</label>
-            <input
-              type="checkbox"
-              checked={viewSettings.showSettings}
-              onChange={(e) => onViewSettingsChange(e.target.checked)}
-            />
-            <label>Name</label>
-            <input
-              type="checkbox"
-              checked={viewSettings.showName}
-              onChange={(e) => onViewNameChange(e.target.checked)}
-            />
+        <div class="px-1 py-2 border-b-zinc-800 border-b text-sm flex justify-between items-center">
+          <div class="">
+            <Combobox
+              title="Sort"
+              onInput={(values) => {
+                const value = values[0];
+                if (value in sort) setSorting(value);
+              }}
+              items={[
+                { id: 'created', value: 'Created', checked: sorting() === 'created' },
+                { id: 'rating', value: 'Rating', checked: sorting() === 'rating' },
+              ]}
+            >
+              {'Sort by'}
+            </Combobox>
+          </div>
+
+          <div class="view-settings">
+            <Combobox
+              multiple={true}
+              title="View settings"
+              onInput={(value) => {
+                setViewSettings({
+                  showRating: value.includes('showRating'),
+                  showName: value.includes('showName'),
+                  showSettings: value.includes('showSettings'),
+                });
+              }}
+              items={[
+                { id: 'showRating', value: 'Rating', checked: viewSettings.showRating },
+                { id: 'showName', value: 'Filename', checked: viewSettings.showName },
+                { id: 'showSettings', value: 'Settings', checked: viewSettings.showSettings },
+              ]}
+            >
+              <Icon name="more" />
+            </Combobox>
           </div>
         </div>
       </nav>

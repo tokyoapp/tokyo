@@ -123,3 +123,11 @@ button:active {
   height: 1em;
   display: block;
 }
+
+a-dropdown::part(dropdown) {
+  width: auto;
+}
+
+.view-settings a-dropdown::part(dropdown) {
+  right: 0;
+}
