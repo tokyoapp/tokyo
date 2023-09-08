@@ -9,10 +9,10 @@ tasks:
     desc: Run app
     dir: ./
     cmds:
-      - npx tauri dev
+      - cargo tauri dev
 
   build:
     desc: Build app
     dir: ./
     cmds:
-      - npx vite build
+      - cargo tauri build

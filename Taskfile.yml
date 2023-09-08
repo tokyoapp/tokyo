@@ -23,11 +23,15 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     sources:
       - .rtx.toml
-      - pnpm-lock.yaml
+      - bun.lockb
+      - package.json
+      - Cargo.toml
+      - Cargo.lock
       - '**/package.json'
     cmds:
       - rtx install 2> /dev/null || true
-      - pnpm i
+      - bun install
+      - cargo build
 
   reset:
     desc: Reset repository files
@@ -54,4 +58,4 @@ tasks:
     dir: ./
     cmds:
       - cargo check
-      - npx biome check ./ {{.CLI_ARGS}}
+      - bun x biome check ./ {{.CLI_ARGS}}

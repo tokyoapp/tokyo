@@ -4,13 +4,12 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "dev": "vite"
+    "dev": "bunx vite"
   },
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
-    "image-editor": "workspace:",
-    "ui": "workspace:",
-    "components": "workspace:",
+    "ui": "workspace:packages/ui",
+    "components": "workspace:packages/components",
     "solid-js": "^1.7.8"
   },
   "devDependencies": {

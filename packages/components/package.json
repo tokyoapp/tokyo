@@ -2,7 +2,7 @@
   "name": "components",
   "dependencies": {
     "lit": "^2.5.0",
-    "atrium": "workspace:",
+    "atrium": "workspace:../atrium",
     "lit-element": "^2.5.1",
     "solid-js": "^1.6.6"
   }

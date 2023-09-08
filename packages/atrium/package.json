@@ -6,7 +6,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "ui": "workspace:",
     "lit-element": "^2.5.1"
   },
   "description": ""
