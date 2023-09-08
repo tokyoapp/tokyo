@@ -29,12 +29,6 @@ body {
 }
 
 main {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr 28px;
 }
@@ -96,7 +90,7 @@ button:active {
 .app {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.25fr 250px;
   height: 100%;
   width: 100%;
   --layout-grid-gap: 6px;

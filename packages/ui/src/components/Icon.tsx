@@ -19,10 +19,12 @@ const icons = {
 
 type Props = {
   name?: keyof typeof icons;
+  class?: string;
 };
 
 export default function Icon(props: Props) {
   const src = icons[props.name || 'unknown'].default;
+  const className = `icon ${props.class}`;
 
   if (src.includes('.riv')) {
     const canvas = document.createElement('canvas');
@@ -39,8 +41,8 @@ export default function Icon(props: Props) {
       riveInstance.cleanup();
     });
 
-    return <div class="icon">{canvas}</div>;
+    return <div class={className}>{canvas}</div>;
   }
 
-  return <div class="icon" innerHTML={src} />;
+  return <div class={className} innerHTML={src} />;
 }

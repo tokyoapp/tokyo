@@ -1,7 +1,5 @@
 import { createSignal } from 'solid-js';
-import { file } from '../actions/open.ts';
 import Icon from './Icon.tsx';
-import Rating from './Rating.tsx';
 
 export const [loading, setLoading] = createSignal(false);
 
@@ -21,24 +19,12 @@ export function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement) {
 
 export default function Preview() {
   return (
-    <div class="relative grid grid-rows-[1fr_100px] w-full h-full items-center">
+    <div class="relative grid grid-rows-[1fr] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
         {loading() ? <Icon name="loader" /> : null}
       </div>
 
       <div>{canvas}</div>
-
-      <pre class="bg-zinc-900 p-2 w-full h-full">
-        <div class="my-1 mb-2">
-          <Rating rating={file.metadata.rating || 0} />
-        </div>
-        <span>Speed {file.metadata?.exif?.exposure_time} </span>
-        <span>F {file.metadata?.exif?.fnumber} </span>
-        <span>ISO {file.metadata?.exif?.iso_speed_ratings} </span>
-        <div>
-          <span>Focal length {file.metadata?.exif?.focal_length} </span>
-        </div>
-      </pre>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import Library from './Library';
 import LocationSettings from './LocationSettings.tsx';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
+import Info from './Info';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -32,7 +33,7 @@ function App() {
       <Titlebar />
 
       <div class="app">
-        <div class="library">
+        <div class="library relative">
           {settingsOpen() ? (
             <div class="absolute top-0 left-0 w-full h-full z-50">
               <LocationSettings />
@@ -40,8 +41,11 @@ function App() {
           ) : null}
           <Library location={location} />
         </div>
-        <div class="flex flex-col justify-center items-center">
+        <div class="relative flex flex-col justify-center items-center">
           <Preview />
+        </div>
+        <div class="relative">
+          <Info />
         </div>
       </div>
 

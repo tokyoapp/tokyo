@@ -14,6 +14,11 @@
     }
 
     main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       border-bottom-left-radius: 10px;
       border-bottom-right-radius: 10px;
@@ -21,19 +26,21 @@
       border-bottom: 1px solid rgb(29, 29, 29);
       background: #111;
     }
+
+    .shell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
   </style>
 
-  <script type="module">
-    import "ui/index.css";
-    import { render } from "solid-js/web";
-    import App from "ui";
-    render(App, main);
-  </script>
+  <script type="module" src="./index.ts"></script>
 </head>
 
 <body>
   <main id="main">
-
+    <div class="shell"></div>
   </main>
 </body>
 

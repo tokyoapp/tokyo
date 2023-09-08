@@ -1,3 +1,5 @@
+mod db;
+
 use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
 use rawler::{

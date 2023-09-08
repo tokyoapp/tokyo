@@ -6,6 +6,8 @@ import type { Location } from '../Location.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
+import FilterCombobox from './FilterCombobox.tsx';
+import { Stars } from './Stars.tsx';
 import Icon from './Icon.tsx';
 
 type Entry = Location['entries'][number];
@@ -34,6 +36,15 @@ export default function Library(props: { location: Location }) {
     showName: true,
     showSettings: true,
   });
+
+  const [starFilter, setStarFilter] = createSignal(0);
+
+  function itemFilter(item: Entry) {
+    if (starFilter() && item.meta.rating < starFilter()) {
+      return false;
+    }
+    return true;
+  }
 
   const [sorting, setSorting] = createSignal<keyof typeof sort>('created');
   const items = () => [...props.location.entries].sort(sort[sorting()]);
@@ -76,9 +87,15 @@ export default function Library(props: { location: Location }) {
             </Combobox>
           </div>
 
-          <div class="view-settings">
+          <div class="view-settings flex gap-3 items-center">
+            {/* <FilterCombobox multiple title="Filter by Tags">
+                <span>Tags</span>
+            </FilterCombobox> */}
+
+            <Stars value={starFilter()} onChange={(v) => setStarFilter(v)} />
+
             <Combobox
-              multiple={true}
+              multiple
               title="View settings"
               onInput={(value) => {
                 setViewSettings({
@@ -99,22 +116,24 @@ export default function Library(props: { location: Location }) {
         </div>
       </nav>
 
-      <div class="p-1 overflow-auto w-full grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 break-all gap-2 overscroll-none">
-        {items().map(({ path, meta }, i) => {
-          return (
-            <Thumb
-              number={(i + 1).toString()}
-              name={viewSettings.showName}
-              settings={viewSettings.showSettings}
-              rating={viewSettings.showRating}
-              onClick={() => {
-                Action.run('open', [path, meta]);
-              }}
-              src={path}
-              meta={meta}
-            />
-          );
-        })}
+      <div class="p-1 overflow-auto w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 break-all gap-2 overscroll-none">
+        {items()
+          .filter(itemFilter)
+          .map(({ path, meta }, i) => {
+            return (
+              <Thumb
+                number={(i + 1).toString()}
+                name={viewSettings.showName}
+                settings={viewSettings.showSettings}
+                rating={viewSettings.showRating}
+                onClick={() => {
+                  Action.run('open', [path, meta]);
+                }}
+                src={path}
+                meta={meta}
+              />
+            );
+          })}
       </div>
     </div>
   );
