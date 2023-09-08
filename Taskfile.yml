@@ -31,7 +31,6 @@ tasks:
     cmds:
       - rtx install 2> /dev/null || true
       - bun install
-      - cargo build
 
   reset:
     desc: Reset repository files

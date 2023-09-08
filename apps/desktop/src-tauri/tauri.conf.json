@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "bun x vite",
-    "beforeBuildCommand": "bun x vite build",
+    "beforeDevCommand": "bun dev.ts",
+    "beforeBuildCommand": "bun build.ts",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
