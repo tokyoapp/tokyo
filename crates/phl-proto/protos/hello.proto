@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package proto;
+
+message MyMessage {
+  string some_field = 1;
+}
+
+message ComplexMessage {
+  DummyMessage one_dummy = 2;
+  repeated DummyMessage multiple_dummy = 3;
+}
+
+message DummyMessage {
+  int32 message_id = 1;
+  int32 long = 3;
+  int32 lang = 4;
+  string some_name = 2;
+}

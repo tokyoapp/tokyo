@@ -1,5 +1,3 @@
-mod db;
-
 use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
 use rawler::{
@@ -9,8 +7,13 @@ use rawler::{
     imgop::{raw, rescale_f32_to_u8},
     RawFile, RawImageData,
 };
-use std::{fs::File, io::{BufReader, Read}, path::{PathBuf, Path}, time::SystemTime};
 use std::fs;
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    path::{Path, PathBuf},
+    time::SystemTime,
+};
 use std::{io::Cursor, time::Instant};
 
 #[derive(serde::Serialize, Debug)]
@@ -29,7 +32,8 @@ pub struct Metadata {
 pub fn get_rating(path: String) -> String {
     let p = PathBuf::from(path.clone());
     let filename = p.file_stem().unwrap().to_str().unwrap();
-    let xmp_file_path = PathBuf::from(p.parent().unwrap().to_str().unwrap().to_owned() + "/" + filename + ".xmp");
+    let xmp_file_path =
+        PathBuf::from(p.parent().unwrap().to_str().unwrap().to_owned() + "/" + filename + ".xmp");
 
     if xmp_file_path.exists() {
         let mut xmp_file = File::open(&xmp_file_path).unwrap();
@@ -39,10 +43,16 @@ pub fn get_rating(path: String) -> String {
         let data = buffer.to_string();
         let d = &data;
         let doc = roxmltree::Document::parse(d).unwrap();
-        let elem = doc.descendants().find(|n| n.has_tag_name("Description")).unwrap();
-        return elem.attribute(("http://ns.adobe.com/xap/1.0/", "Rating")).unwrap().to_string();
+        let elem = doc
+            .descendants()
+            .find(|n| n.has_tag_name("Description"))
+            .unwrap();
+        return elem
+            .attribute(("http://ns.adobe.com/xap/1.0/", "Rating"))
+            .unwrap()
+            .to_string();
     } else {
-        return String::from("0")
+        return String::from("0");
     }
 }
 
@@ -73,7 +83,11 @@ pub fn metadat(path: String) -> Metadata {
         width: 0,
         height: 0,
         exif: metadata.exif.clone(),
-        rating: metadata.rating.clone().get_or_insert(rating.parse::<u32>().unwrap()).to_owned(),
+        rating: metadata
+            .rating
+            .clone()
+            .get_or_insert(rating.parse::<u32>().unwrap())
+            .to_owned(),
         make: metadata.make,
         create_date: metadata.exif.create_date.unwrap(),
         orientation: metadata.exif.orientation.unwrap(),
@@ -114,7 +128,7 @@ pub fn cached_thumb(p: String) -> Vec<u8> {
 
     println!("hash of {}: {}", p, hash);
 
-    let cache_dir = "./tmp";
+    let cache_dir = "./data/tmp";
 
     let thumbnail_path = cache_dir.to_owned() + "/" + &hash + ".jpg";
 

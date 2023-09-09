@@ -36,7 +36,7 @@ const storage = new ClientStorage();
 class LibraryLocation {
 
   async thumbnail(file: string) {
-    return fetch(`http://localhost:8000/thumbnail?file=${file}`, {
+    return fetch(`http://127.0.0.1:8000/api/thumbnail?file=${file}`, {
       // signal: controller.signal,
     }).then(async (res) => {
       const buffer = await res.arrayBuffer();
@@ -51,18 +51,18 @@ class LibraryLocation {
       width: number;
       height: number;
       orientation: number;
-    } = await fetch(`http://localhost:8000/metadata?file=${file}`).then((res) => res.json());
+    } = await fetch(`http://127.0.0.1:8000/api/metadata?file=${file}`).then((res) => res.json());
 
     return meta;
   }
 
   async open() {
-    return fetch('http://localhost:8000/').then(async (res) => {
+    return fetch('http://127.0.0.1:8000/api/library/index').then(async (res) => {
       const list = await res.json();
 
       const entries = await Promise.allSettled<Entry[]>(
         list.map(async (src: string) => {
-          return fetch(`http://localhost:8000/metadata?file=${encodeURIComponent(src)}`).then(
+          return fetch(`http://127.0.0.1:8000/api/metadata?file=${encodeURIComponent(src)}`).then(
             async (res) => {
               const meta = (await res.json()) as Meta;
               return {
@@ -75,7 +75,7 @@ class LibraryLocation {
       );
 
       return {
-        host: 'http://localhost:8000',
+        host: 'http://127.0.0.1:8000',
         path: '/Users/tihav/Pictures',
         entries: entries.map((res) => res.value).filter(Boolean),
         index: list,

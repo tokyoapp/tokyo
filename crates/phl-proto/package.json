@@ -1,0 +1,16 @@
+{
+  "name": "proto",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "bash ./scripts/build.sh"
+  },
+  "dependencies": {
+    "protobufjs": "^7.2.4"
+  },
+  "devDependencies": {
+    "protobufjs-cli": "^1.1.1"
+  }
+}

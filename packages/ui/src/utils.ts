@@ -20,7 +20,6 @@ export function listToTree(list: Array<string>) {
           cwd.push({
             path: `/${path.join('/')}`,
             name: slice,
-            uncollapsed: true,
             children: [],
           });
         break;
