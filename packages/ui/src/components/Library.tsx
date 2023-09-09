@@ -1,8 +1,8 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import storage from '../ClientStorage.worker';
+import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
-import type { Location } from '../Location.ts';
+import library, { type Location } from '../services/LibraryLocation.worker';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -179,14 +179,9 @@ function Thumb(props: ThumbProps) {
     if (tmp && tmp.size > 0) {
       useThumb(tmp);
     } else {
-      fetch(`http://localhost:8000/thumbnail?file=${id}`, {
-        signal: controller.signal,
-      }).then(async (res) => {
-        const buffer = await res.arrayBuffer();
-        const blob = new Blob([buffer]);
-        storage.writeTemp(id, await blob.arrayBuffer());
-        useThumb(blob);
-      });
+      library.thumbnail(id).then(thumb => {
+        useThumb(thumb);
+      })
     }
   };
 

@@ -1,4 +1,4 @@
-class ClientStorage {
+export class ClientStorage {
   constructor() {
     this.init();
   }
@@ -53,4 +53,3 @@ class ClientStorage {
   }
 }
 
-export default new ClientStorage();

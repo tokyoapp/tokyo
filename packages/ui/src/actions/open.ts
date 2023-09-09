@@ -1,5 +1,6 @@
 import { createStore } from 'solid-js/store';
-import storage from '../ClientStorage.worker';
+import storage from '../services/ClientStorage.worker';
+import library from "../services/LibraryLocation.worker.ts";
 import { DynamicImage } from '../DynamicImage.ts';
 import { drawToCanvas, setLoading } from '../components/Viewer';
 
@@ -22,12 +23,7 @@ export default async function open(p: string, metadata: any) {
 
   const id = encodeURIComponent(p);
 
-  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  const meta: {
-    width: number;
-    height: number;
-    orientation: number;
-  } = await fetch(`http://localhost:8000/metadata?file=${id}`).then((res) => res.json());
+  const meta = await library.metadata(id);
 
   setLoading(true);
 
