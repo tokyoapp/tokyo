@@ -1,7 +1,3 @@
-import 'components/components/layout/Group';
-import 'components/components/tree-explorer';
-import 'components/components/view-canvas';
-
 import { createSignal } from 'solid-js';
 import { location } from '../Location.ts';
 import Action from '../actions/Action';
