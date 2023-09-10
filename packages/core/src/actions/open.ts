@@ -44,8 +44,6 @@ export default async function open(p: string, metadata: Meta) {
   }
 
   timeout = setTimeout(() => {
-    console.log('hgello?');
-
     prevImg.onload = () => {
       drawToCanvas(new DynamicImage(prevImg, meta).canvas());
     };
