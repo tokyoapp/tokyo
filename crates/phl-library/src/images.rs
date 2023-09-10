@@ -24,10 +24,11 @@ fn process_entry(entry: walkdir::DirEntry) -> Option<String> {
     let parts = name.split(".");
     let ext = parts.last().unwrap();
 
-    // if metadata.is_file() && metadata.file_type()
-
     match ext.to_lowercase().as_str() {
         "cr3" => return Some(entry.path().to_str().unwrap().to_owned()),
+        "cr2" => return Some(entry.path().to_str().unwrap().to_owned()),
+        "arw" => return Some(entry.path().to_str().unwrap().to_owned()),
+        "tif" => return Some(entry.path().to_str().unwrap().to_owned()),
         "jpg" => return Some(entry.path().to_str().unwrap().to_owned()),
         "png" => return Some(entry.path().to_str().unwrap().to_owned()),
         &_ => return None,

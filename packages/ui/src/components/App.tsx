@@ -12,6 +12,7 @@ import LocationSettings from './LocationSettings.tsx';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
 import Info from './Info';
+import CreateLibrary from './CreateLibrary.tsx';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -34,11 +35,18 @@ function App() {
 
       <div class="app">
         <div class="library relative">
+          {!location.path ? (
+            <div class="absolute top-0 left-0 w-full h-full z-[999]">
+              <CreateLibrary />
+            </div>
+          ) : null}
+
           {settingsOpen() ? (
-            <div class="absolute top-0 left-0 w-full h-full z-50">
+            <div class="absolute top-0 left-0 w-full h-full z-[999]">
               <LocationSettings />
             </div>
           ) : null}
+
           <Library location={location} />
         </div>
         <div class="relative flex flex-col justify-center items-center">
@@ -59,7 +67,6 @@ function App() {
         </div>
 
         <div class="w-7">{Action.runningJobCount() > 0 ? <Icon name="loader" /> : null}</div>
-        {/* <div>Jobs: {Action.runningJobCount()}</div> */}
       </div>
     </>
   );

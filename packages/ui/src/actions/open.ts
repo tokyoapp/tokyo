@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
-import library from "../services/LibraryLocation.worker.ts";
+import library, { type Meta } from "../services/LibraryLocation.worker.ts";
 import { DynamicImage } from '../DynamicImage.ts';
 import { drawToCanvas, setLoading } from '../components/Viewer';
 
@@ -11,7 +11,11 @@ export const [file, setFile] = createStore({
   metadata: {},
 });
 
-export default async function open(p: string, metadata: any) {
+let timeout: number;
+
+export default async function open(p: string, metadata: Meta) {
+  clearTimeout(timeout);
+
   if (controller) controller.abort();
 
   controller = new AbortController();
@@ -32,14 +36,21 @@ export default async function open(p: string, metadata: any) {
   const prevImg = new Image();
   prevImg.onload = () => {
     const img = new DynamicImage(prevImg, meta);
-    drawToCanvas(img.canvas());
+    drawToCanvas(img.resizeContain(1024).canvas());
   };
 
   if (tmp && tmp.size > 0) {
     prevImg.src = URL.createObjectURL(tmp);
-  } else {
-    prevImg.src = `http://localhost:8000/thumbnail?file=${id}`;
   }
+
+  timeout = setTimeout(() => {
+    console.log("hgello?");
+
+    prevImg.onload = () => {
+      drawToCanvas(new DynamicImage(prevImg, meta).canvas());
+    };
+    prevImg.src = `http://127.0.0.1:8000/api/local/thumbnail?file=${id}`;
+  }, 250);
 
   // TODO: only get full image when needed
   // await fetch(`http://localhost:8000/open?file=${id}`, {

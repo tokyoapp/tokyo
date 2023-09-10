@@ -21,6 +21,14 @@ pub fn default_library() -> Result<Library> {
     return Ok(lib_list()?.first().unwrap().clone());
 }
 
+pub fn find_library(name: &str) -> Result<Library> {
+    return Ok(lib_list()?
+        .iter()
+        .find(|lib| lib.name == name)
+        .expect("Could not find library")
+        .clone());
+}
+
 pub fn create_library(name: &str, path: &str) {
     let con = db();
     con.execute("insert into libraries values (?1, ?2)", (&name, &path))

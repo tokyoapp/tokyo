@@ -1,4 +1,4 @@
-import { ClientStorage } from "./ClientStorage.ts";
+import { ClientStorage } from './ClientStorage.ts';
 
 type Entry = {
   path: string;
@@ -7,6 +7,7 @@ type Entry = {
 
 export type Location = {
   host?: string;
+  name: string;
   path: string;
   entries: Entry[];
   index: string[];
@@ -19,7 +20,7 @@ type Exif = {
   focal_length: string;
 };
 
-type Meta = {
+export type Meta = {
   hash: string;
   name: string;
   width: number;
@@ -34,9 +35,14 @@ type Meta = {
 const storage = new ClientStorage();
 
 class LibraryLocation {
+  async list() {
+    return fetch('http://127.0.0.1:8000/api/library/list', {}).then(async (res) => {
+      return res.json();
+    });
+  }
 
   async thumbnail(file: string) {
-    return fetch(`http://127.0.0.1:8000/api/thumbnail?file=${file}`, {
+    return fetch(`http://127.0.0.1:8000/api/local/thumbnail?file=${file}`, {
       // signal: controller.signal,
     }).then(async (res) => {
       const buffer = await res.arrayBuffer();
@@ -51,38 +57,45 @@ class LibraryLocation {
       width: number;
       height: number;
       orientation: number;
-    } = await fetch(`http://127.0.0.1:8000/api/metadata?file=${file}`).then((res) => res.json());
+    } = await fetch(`http://127.0.0.1:8000/api/local/metadata?file=${file}`).then((res) =>
+      res.json()
+    );
 
     return meta;
   }
 
-  async open() {
-    return fetch('http://127.0.0.1:8000/api/library/index').then(async (res) => {
+  async open(name: string) {
+    const loc: Location = {
+      host: 'http://127.0.0.1:8000',
+      name: name,
+      path: '/Users/tihav/Pictures',
+      entries: [],
+      index: [],
+    };
+
+    return fetch(`http://127.0.0.1:8000/api/library/index?name=${loc.name}`).then(async (res) => {
       const list = await res.json();
 
       const entries = await Promise.allSettled<Entry[]>(
         list.map(async (src: string) => {
-          return fetch(`http://127.0.0.1:8000/api/metadata?file=${encodeURIComponent(src)}`).then(
-            async (res) => {
-              const meta = (await res.json()) as Meta;
-              return {
-                path: src,
-                meta: meta,
-              };
-            }
-          );
+          return fetch(
+            `http://127.0.0.1:8000/api/local/metadata?file=${encodeURIComponent(src)}`
+          ).then(async (res) => {
+            const meta = (await res.json()) as Meta;
+            return {
+              path: src,
+              meta: meta,
+            };
+          });
         })
       );
 
-      return {
-        host: 'http://127.0.0.1:8000',
-        path: '/Users/tihav/Pictures',
-        entries: entries.map((res) => res.value).filter(Boolean),
-        index: list,
-      }
+      loc.index = list;
+      loc.entries = entries.map((res) => res.value).filter(Boolean);
+
+      return loc;
     });
   }
-
 }
 
 export default new LibraryLocation();

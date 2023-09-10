@@ -1,17 +1,22 @@
 use actix_web::{
-    get, http::header::ContentType, web, web::Bytes, App, HttpResponse, HttpServer, Responder,
+    get, http::header::ContentType, post, web, web::Bytes, App, HttpResponse, HttpServer, Responder,
 };
 use serde::Deserialize;
 use std::env;
 use urlencoding::decode;
 
 #[derive(Deserialize)]
-struct Info {
+struct FileInfo {
     file: String,
 }
 
-#[get("/api/open")]
-async fn open(info: web::Query<Info>) -> HttpResponse {
+#[derive(Deserialize)]
+struct LibraryInfo {
+    name: String,
+}
+
+#[get("/api/local/open")]
+async fn open(info: web::Query<FileInfo>) -> HttpResponse {
     let p = decode(&info.file).expect("UTF-8");
     let n = phl_image::open(p.to_string());
 
@@ -25,8 +30,8 @@ async fn open(info: web::Query<Info>) -> HttpResponse {
         .body(body)
 }
 
-#[get("/api/metadata")]
-async fn metadata(info: web::Query<Info>) -> impl Responder {
+#[get("/api/local/metadata")]
+async fn metadata(info: web::Query<FileInfo>) -> impl Responder {
     let p = decode(&info.file).expect("UTF-8");
     let m = phl_image::metadat(p.to_string());
 
@@ -36,26 +41,14 @@ async fn metadata(info: web::Query<Info>) -> impl Responder {
         .body(serde_json::to_string(&m).unwrap())
 }
 
-#[get("/api/thumbnail")]
-async fn thumbnail(info: web::Query<Info>) -> impl Responder {
+#[get("/api/local/thumbnail")]
+async fn thumbnail(info: web::Query<FileInfo>) -> impl Responder {
     let p = decode(&info.file).expect("UTF-8");
 
     return HttpResponse::Ok()
         .content_type(ContentType::jpeg())
         .insert_header(("Access-Control-Allow-Origin", "*"))
         .body(phl_image::cached_thumb(p.to_string()));
-}
-
-#[get("/api/library")]
-async fn library() -> impl Responder {
-    phl_library::create_root_library();
-
-    let lib = phl_library::default_library().unwrap();
-
-    return HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(serde_json::to_string(&lib).unwrap());
 }
 
 #[get("/api/library/list")]
@@ -71,13 +64,23 @@ async fn library_list() -> impl Responder {
 }
 
 #[get("/api/library/index")]
-async fn library_index() -> impl Responder {
-    let dir = phl_library::default_library().unwrap().path;
+async fn library_index(info: web::Query<LibraryInfo>) -> impl Responder {
+    let dir = phl_library::find_library(&info.name).unwrap().path;
     let list = phl_library::list(dir);
     HttpResponse::Ok()
         .content_type(ContentType::json())
         .insert_header(("Access-Control-Allow-Origin", "*"))
         .body(serde_json::to_string(&list).unwrap())
+}
+
+#[post("/api/library")]
+async fn library_create() -> impl Responder {
+    phl_library::create_library("new", "/Users/tihav/Desktop");
+
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .insert_header(("Access-Control-Allow-Origin", "*"))
+        .body("{ \"ok\": true }")
 }
 
 #[actix_web::main]
@@ -91,7 +94,7 @@ async fn main() -> std::io::Result<()> {
             .service(metadata)
             .service(open)
             .service(thumbnail)
-            .service(library)
+            .service(library_create)
     })
     .bind(("127.0.0.1", 8000))?
     .run()
