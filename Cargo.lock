@@ -1915,6 +1915,7 @@ dependencies = [
  "actix-web",
  "phl-image",
  "phl-library",
+ "phl-proto",
  "serde",
  "serde_json",
  "sha256",
@@ -2499,6 +2500,7 @@ dependencies = [
 name = "phl-proto"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "protobuf",
 ]
 
@@ -2634,6 +2636,7 @@ version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b55bad9126f378a853655831eb7363b7b01b81d19f8cb1218861086ca4a1a61e"
 dependencies = [
+ "bytes",
  "once_cell",
  "protobuf-support",
  "thiserror",

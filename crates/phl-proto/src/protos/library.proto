@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package proto;
+
+message Library {
+  string name = 1;
+  string path = 2;
+}
+
+message LibraryList {
+  repeated Library libraries = 1;
+}
+
+message LibraryIndex {
+  repeated string index = 1;
+}
+
+message Metadata {
+  string hash = 1;
+  string name = 2;
+  string create_date = 3;
+  int32 rating = 4;
+  int32 width = 5;
+  int32 height = 6;
+  string make = 7;
+  string exif = 8;
+  int32 orientation = 9;
+}
+
+message Image {
+  Metadata metadata = 1;
+  bytes image = 2;
+}
+
+message Thumbnail {
+  Metadata metadata = 1;
+  bytes image = 2;
+}
+
