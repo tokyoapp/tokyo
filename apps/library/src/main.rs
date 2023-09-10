@@ -1,8 +1,12 @@
+use std::time::{Duration, Instant};
+
 use actix_web::{
     get, http::header::ContentType, post, web, web::Bytes, App, HttpResponse, HttpServer, Responder,
 };
+use phl_proto::generated::library;
+use phl_proto::Message;
+
 use serde::Deserialize;
-use std::env;
 use urlencoding::decode;
 
 #[derive(Deserialize)]
@@ -51,16 +55,31 @@ async fn thumbnail(info: web::Query<FileInfo>) -> impl Responder {
         .body(phl_image::cached_thumb(p.to_string()));
 }
 
-#[get("/api/library/list")]
+#[get("/api/proto")]
 async fn library_list() -> impl Responder {
     phl_library::create_root_library();
 
-    let libs = phl_library::lib_list().unwrap();
+    let mut libs = phl_library::lib_list()
+        .unwrap()
+        .into_iter()
+        .map(|lib| {
+            let mut msg = library::LibraryMessage::new();
+            msg.name = lib.name;
+            msg.path = lib.path;
+            msg
+        })
+        .collect();
+
+    let mut list = library::LibraryListMessage::new();
+    list.libraries.append(&mut libs);
+
+    let mut msg = library::Message::new();
+    msg.set_list(list);
 
     return HttpResponse::Ok()
         .content_type(ContentType::json())
         .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(serde_json::to_string(&libs).unwrap());
+        .body(msg.write_to_bytes().unwrap());
 }
 
 #[get("/api/library/index")]

@@ -1,4 +1,4 @@
-import { Rive } from '@rive-app/webgl-single';
+import { Rive } from '@rive-app/canvas-single';
 import { onCleanup } from 'solid-js';
 
 const icons = {

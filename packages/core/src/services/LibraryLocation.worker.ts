@@ -34,10 +34,13 @@ export type Meta = {
 
 const storage = new ClientStorage();
 
+import library from 'proto';
+
 class LibraryLocation {
   async list() {
-    return fetch('http://127.0.0.1:8000/api/library/list', {}).then(async (res) => {
-      return res.json();
+    return fetch('http://127.0.0.1:8000/api/proto', {}).then(async (res) => {
+      const list = library.Message.decode(new Uint8Array(await res.arrayBuffer()));
+      return list.list?.libraries;
     });
   }
 

@@ -1,7 +1,2 @@
-mod generated;
-
-use generated::library;
-
-pub fn test() {
-    // hello::ComplexMessage::from(value)
-}
+pub mod generated;
+pub use protobuf::Message;

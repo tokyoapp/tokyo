@@ -1,4 +1,3 @@
 export default function () {
-  console.log("create lib");
-
+  console.log('create lib');
 }

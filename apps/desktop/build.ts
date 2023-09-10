@@ -1,11 +1,9 @@
-import { mergeConfig, build } from 'vite'
-import uiConfig from 'ui/vite.config';
-import solidPlugin from 'vite-plugin-solid';
+import { mergeConfig, build } from 'vite';
+import coreConfig from 'core/vite.config';
 
-const config = mergeConfig(uiConfig, {
-  root: "src",
+const config = mergeConfig(coreConfig, {
+  root: 'src',
   envPrefix: ['VITE_', 'TAURI_'],
-  plugins: [solidPlugin()],
 });
 
-await build(config)
+await build(config);

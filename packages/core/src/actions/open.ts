@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
-import library, { type Meta } from "../services/LibraryLocation.worker.ts";
+import library, { type Meta } from '../services/LibraryLocation.worker.ts';
 import { DynamicImage } from '../DynamicImage.ts';
 import { drawToCanvas, setLoading } from '../components/Viewer';
 
@@ -44,7 +44,7 @@ export default async function open(p: string, metadata: Meta) {
   }
 
   timeout = setTimeout(() => {
-    console.log("hgello?");
+    console.log('hgello?');
 
     prevImg.onload = () => {
       drawToCanvas(new DynamicImage(prevImg, meta).canvas());

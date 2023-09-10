@@ -2,20 +2,20 @@ syntax = "proto3";
 
 package proto;
 
-message Library {
+message LibraryMessage {
   string name = 1;
   string path = 2;
 }
 
-message LibraryList {
-  repeated Library libraries = 1;
+message LibraryListMessage {
+  repeated LibraryMessage libraries = 1;
 }
 
-message LibraryIndex {
+message LibraryIndexMessage {
   repeated string index = 1;
 }
 
-message Metadata {
+message MetadataMessage {
   string hash = 1;
   string name = 2;
   string create_date = 3;
@@ -27,13 +27,22 @@ message Metadata {
   int32 orientation = 9;
 }
 
-message Image {
-  Metadata metadata = 1;
+message ImageMessage {
+  MetadataMessage metadata = 1;
   bytes image = 2;
 }
 
-message Thumbnail {
-  Metadata metadata = 1;
+message ThumbnailMessage {
+  MetadataMessage metadata = 1;
   bytes image = 2;
 }
 
+message Message {
+  oneof msg {
+      LibraryListMessage list = 5;
+      LibraryIndexMessage index = 6;
+      MetadataMessage metadata = 7;
+      ImageMessage image = 8;
+      ThumbnailMessage thumbnail = 9;
+  }
+}

@@ -52,4 +52,3 @@ export class ClientStorage {
     console.log(files);
   }
 }
-

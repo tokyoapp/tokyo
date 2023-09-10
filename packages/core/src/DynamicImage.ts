@@ -90,7 +90,7 @@ export class DynamicImage {
     const ar = this.height / this.width;
     const length = Math.max(this.width, this.height);
 
-    if(length === this.width) {
+    if (length === this.width) {
       this.#canvas = this.resize(size, size * ar);
     } else {
       this.#canvas = this.resize(size / ar, size);

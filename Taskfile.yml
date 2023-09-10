@@ -31,6 +31,13 @@ tasks:
     cmds:
       - rtx install 2> /dev/null || true
       - bun install
+      - task: codegen
+
+  codegen:
+    desc: Generate code from protobuf files
+    dir: '{{.TASKFILE_DIR}}/crates/phl-proto'
+    cmds:
+      - bash ./generate.sh
 
   reset:
     desc: Reset repository files

@@ -1,19 +1,17 @@
-import { mergeConfig, createServer } from 'vite'
-import uiConfig from 'ui/vite.config';
-import solidPlugin from 'vite-plugin-solid';
+import { mergeConfig, createServer } from 'vite';
+import coreConfig from 'core/vite.config';
 
-const config = mergeConfig(uiConfig, {
+const config = mergeConfig(coreConfig, {
   clearScreen: false,
   server: {
     port: 1420,
     strictPort: true,
   },
-  root: "src",
+  root: 'src',
   envPrefix: ['VITE_', 'TAURI_'],
-  plugins: [solidPlugin()],
 });
 
 const server = await createServer(config);
-await server.listen()
+await server.listen();
 
-server.printUrls()
+server.printUrls();

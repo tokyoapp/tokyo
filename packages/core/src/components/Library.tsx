@@ -179,9 +179,9 @@ function Thumb(props: ThumbProps) {
     if (tmp && tmp.size > 0) {
       useThumb(tmp);
     } else {
-      library.thumbnail(id).then(thumb => {
+      library.thumbnail(id).then((thumb) => {
         useThumb(thumb);
-      })
+      });
     }
   };
 
