@@ -2,6 +2,8 @@ use actix::{Actor, StreamHandler};
 use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 
+// https://actix.rs/docs/websockets/
+
 /// Define HTTP actor
 struct MyWs;
 
