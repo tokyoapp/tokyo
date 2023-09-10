@@ -38,6 +38,7 @@ message ThumbnailMessage {
 }
 
 message Message {
+  optional int32 id = 1;
   oneof msg {
       LibraryListMessage list = 5;
       LibraryIndexMessage index = 6;

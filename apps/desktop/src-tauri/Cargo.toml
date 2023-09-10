@@ -17,6 +17,8 @@ tauri = { version = "1.4", features = [ "macos-private-api", "window-start-dragg
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 phl-image = { path = "../../../crates/phl-image" }
+phl-proto = { path = "../../../crates/phl-proto" }
+phl-library = { path = "../../../crates/phl-library" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

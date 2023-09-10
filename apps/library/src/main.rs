@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+mod ws;
 
 use actix_web::{
     get, http::header::ContentType, post, web, web::Bytes, App, HttpResponse, HttpServer, Responder,
@@ -57,7 +57,7 @@ async fn thumbnail(info: web::Query<FileInfo>) -> impl Responder {
 
 #[get("/api/proto")]
 async fn library_list() -> impl Responder {
-    phl_library::create_root_library();
+    phl_library::create_root_library().expect("Failed to create root library");
 
     let mut libs = phl_library::lib_list()
         .unwrap()
@@ -77,7 +77,7 @@ async fn library_list() -> impl Responder {
     msg.set_list(list);
 
     return HttpResponse::Ok()
-        .content_type(ContentType::json())
+        .content_type(ContentType::octet_stream())
         .insert_header(("Access-Control-Allow-Origin", "*"))
         .body(msg.write_to_bytes().unwrap());
 }
@@ -108,6 +108,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .route("/ws", web::get().to(ws::index))
             .service(library_index)
             .service(library_list)
             .service(metadata)

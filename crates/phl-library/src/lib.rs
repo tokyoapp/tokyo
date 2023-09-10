@@ -1,6 +1,8 @@
 mod db;
 mod images;
 
+use std::{fs, path::Path};
+
 use rusqlite::{Connection, Result};
 
 #[derive(Debug, serde::Serialize, Clone)]
@@ -14,6 +16,10 @@ pub fn list(dir: String) -> Vec<String> {
 }
 
 fn db() -> Connection {
+    if !Path::exists(&Path::new("./data/")) {
+        fs::create_dir("./data/").expect("Unable to create dir './data/'");
+    }
+
     Connection::open("./data/db.sqlite").expect("Failed to open database")
 }
 

@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js';
-import { location } from '../Location.ts';
+import { location } from '../Library.ts';
 import Action from '../actions/Action';
 import { file } from '../actions/open.ts';
 import Icon from './Icon.tsx';

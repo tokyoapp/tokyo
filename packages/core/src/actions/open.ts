@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
-import library, { type Meta } from '../services/LibraryLocation.worker.ts';
+import { Library } from '../Library.ts';
 import { DynamicImage } from '../DynamicImage.ts';
 import { drawToCanvas, setLoading } from '../components/Viewer';
 
@@ -27,7 +27,7 @@ export default async function open(p: string, metadata: Meta) {
 
   const id = encodeURIComponent(p);
 
-  const meta = await library.metadata(id);
+  const meta = await Library.metadata(id);
 
   setLoading(true);
 

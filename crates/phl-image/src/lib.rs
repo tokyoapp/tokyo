@@ -12,7 +12,6 @@ use std::{
     fs::File,
     io::{BufReader, Read},
     path::{Path, PathBuf},
-    time::SystemTime,
 };
 use std::{io::Cursor, time::Instant};
 

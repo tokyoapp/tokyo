@@ -1,6 +1,5 @@
-// import { appWindow } from '@tauri-apps/api/window';
-
-import { location } from '../Location.ts';
+import { appWindow } from '@tauri-apps/api/window';
+import { location } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from './App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';

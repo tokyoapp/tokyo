@@ -1,4 +1,4 @@
-use phl_image;
+use phl_library;
 use std::env;
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
@@ -18,16 +18,17 @@ use std::env;
 //     // img.write_to(&mut p, ImageOutputFormat::Png).unwrap();
 // }
 
-//
-// #[tauri::command]
-// fn metadata(path: &str) -> phl_image::Metadata {
-//     let p = "/Users/tihav/Pictures/Footage/Korea/_MGC3321.CR3";
-//     return phl_image::metadat(p.to_string());
-// }
+// get local library list
+#[tauri::command]
+fn list() -> Vec<phl_library::Library> {
+    phl_library::create_root_library().expect("Failed to create root library");
+
+    return phl_library::lib_list().unwrap();
+}
 
 fn main() {
     tauri::Builder::default()
-        // .invoke_handler(tauri::generate_handler![metadata, open])
+        .invoke_handler(tauri::generate_handler![list])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
