@@ -3,7 +3,7 @@
   "main": "./src/components/App.tsx",
   "type": "module",
   "dependencies": {
-    "proto": "workspace:crates/phl-proto",
+    "proto": "workspace:packages/phl-proto",
     "@atrium-ui/mono": "0.2.0-4",
     "@rive-app/canvas-single": "^2.3.0",
     "comlink": "^4.4.1",

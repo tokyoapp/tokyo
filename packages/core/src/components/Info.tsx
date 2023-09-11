@@ -15,8 +15,8 @@ function Property(props: { title: string; value: string | string[] }) {
   if (Array.isArray(props.value)) {
     return (
       <div class="px-3 my-4">
-        <div class="text-xs mb-1">{props.title}</div>
-        <div class="text-xs opacity-50 flex gap-2">
+        <div class="text-xs opacity-50 mb-1">{props.title}</div>
+        <div class="text-xs flex gap-2">
           {props.value.map((value) => {
             return <div class="rounded-md bg-zinc-600 p-[2px_6px]">{value}</div>;
           })}
@@ -27,8 +27,8 @@ function Property(props: { title: string; value: string | string[] }) {
 
   return (
     <div class="px-3 my-4">
-      <div class="text-xs mb-1">{props.title}</div>
-      <div class="text-xs opacity-50 select-text">{props.value}</div>
+      <div class="text-xs opacity-50 mb-1">{props.title}</div>
+      <div class="text-xs select-text">{props.value}</div>
     </div>
   );
 }
