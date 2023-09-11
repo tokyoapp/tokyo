@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "",
   "author": "luckydye (Tim Havlicek)",
-  "license": "ISC",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -12,5 +11,5 @@
   "devDependencies": {
     "@biomejs/biome": "^1.0.0"
   },
-  "workspaces": ["packages/*", "apps/*"]
+  "workspaces": ["packages/*", "packages/viewport/*", "apps/*"]
 }

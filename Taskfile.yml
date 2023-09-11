@@ -16,6 +16,11 @@ includes:
     dir: apps/desktop
     taskfile: apps/desktop/Taskfile.yml
 
+  viewport:
+    aliases: [vwp]
+    dir: packages/viewport
+    taskfile: packages/viewport/Taskfile.yml
+
 tasks:
 
   setup:

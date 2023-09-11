@@ -11,6 +11,12 @@ tasks:
     cmds:
       - cargo tauri dev
 
+  dev:web:
+    desc: Run app
+    dir: ./
+    cmds:
+      - bun ./dev.ts
+
   build:
     desc: Build app
     dir: ./

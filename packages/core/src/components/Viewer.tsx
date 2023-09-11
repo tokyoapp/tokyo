@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
 
 export const [loading, setLoading] = createSignal(false);
@@ -18,13 +18,36 @@ export function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement) {
 }
 
 export default function Preview() {
+  const canvas = document.createElement('canvas');
+  canvas.style.width = '100%';
+  canvas.style.position = 'absolute';
+  canvas.id = 'viewport_canvas';
+
+  const resize = () => {
+    const parent = canvas.parentNode as HTMLElement;
+    canvas.width = parent?.clientWidth * 2;
+    canvas.height = parent?.clientHeight * 2;
+  };
+
+  window.addEventListener('resize', resize);
+
+  onMount(() => {
+    resize();
+  });
+
+  import('viewport').then(async (module) => {
+    await module.default();
+
+    module.init(canvas.id);
+  });
+
   return (
     <div class="relative grid grid-rows-[1fr] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
         {loading() ? <Icon name="loader" /> : null}
       </div>
 
-      <div>{canvas}</div>
+      {canvas}
     </div>
   );
 }

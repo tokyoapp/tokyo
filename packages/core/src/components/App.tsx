@@ -48,8 +48,8 @@ function App() {
         <div class="relative flex flex-col justify-center items-center">
           <Preview />
         </div>
-        <div class="relative">
-          <Info />
+        <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
+          <Info name={file.name} file={file} />
         </div>
       </div>
 

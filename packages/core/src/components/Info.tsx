@@ -1,6 +1,5 @@
 import Icon from './Icon.tsx';
 import '@atrium-ui/mono/expandable';
-import { file } from '../actions/open.ts';
 import Rating from './Rating.tsx';
 
 function Seperator() {
@@ -47,48 +46,59 @@ function typeFromFilename(name: string) {
   return 'unknown';
 }
 
-export default function Preview() {
+export default function Info(props: {
+  name: string;
+  file: {
+    name: string;
+    metadata: any;
+  };
+}) {
+  const file = props.file;
+
   return (
     <div class="bg-zinc-900 w-full h-full overflow-auto absolute">
-      <pre class="p-3">
-        <Rating empty rating={file.metadata.rating || 0} />
-      </pre>
+      {!props.name ? (
+        <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
+      ) : (
+        <>
+          <pre class="p-3">
+            <Rating empty rating={file.metadata.rating || 0} />
+          </pre>
 
-      <Seperator />
-      <Title title="File" />
+          <Seperator />
 
-      <Property title="Name" value={file.metadata.name} />
-      <Property title="Date created" value={file.metadata.create_date} />
-      <Property title="Type" value={[typeFromFilename(file.name)]} />
+          <Property title="Name" value={file.metadata.name} />
+          <Property title="Date created" value={file.metadata.create_date} />
+          <Property title="Type" value={[typeFromFilename(file.name)]} />
 
-      <Seperator />
-      <Title title="Camera" />
+          <Seperator />
 
-      <Property title="Camera" value={file.metadata?.make} />
-      <Property
-        title="Lens"
-        value={`${file.metadata?.exif?.lens_make} ${file.metadata?.exif?.lens_model}`}
-      />
+          <Property title="Camera" value={file.metadata?.make} />
+          <Property
+            title="Lens"
+            value={`${file.metadata?.exif?.lens_make} ${file.metadata?.exif?.lens_model}`}
+          />
 
-      <Seperator />
-      <Title title="Shot" />
+          <Seperator />
 
-      <Property title="Aperture" value={`F ${file.metadata?.exif?.fnumber.split('/')[0]}`} />
-      <Property
-        title="Focal length"
-        value={`${file.metadata?.exif?.focal_length.split('/')[0]}mm`}
-      />
-      <Property title="Exposure time" value={file.metadata?.exif?.exposure_time} />
-      <Property title="ISO" value={file.metadata?.exif?.iso_speed_ratings} />
+          <Property title="Aperture" value={`F ${file.metadata?.exif?.fnumber.split('/')[0]}`} />
+          <Property
+            title="Focal length"
+            value={`${file.metadata?.exif?.focal_length.split('/')[0]}mm`}
+          />
+          <Property title="Exposure time" value={file.metadata?.exif?.exposure_time} />
+          <Property title="ISO" value={file.metadata?.exif?.iso_speed_ratings} />
 
-      <Seperator />
+          <Seperator />
 
-      {/* <pre class="p-2 text-xs">
-        <a-expandable>
-          <button slot="toggle">More +</button>
-          <pre>{JSON.stringify(file.metadata, null, '  ')}</pre>
-        </a-expandable>
-      </pre> */}
+          {/* <pre class="p-2 text-xs">
+          <a-expandable>
+            <button slot="toggle">More +</button>
+            <pre>{JSON.stringify(file.metadata, null, '  ')}</pre>
+          </a-expandable>
+        </pre> */}
+        </>
+      )}
     </div>
   );
 }
