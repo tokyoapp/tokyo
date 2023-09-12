@@ -1,65 +1,72 @@
-mod ws;
-
-// lets try axum instead of actix
-// https://docs.rs/axum/latest/axum/
-
-use actix_web::{
-    get, http::header::ContentType, post, web, web::Bytes, App, HttpResponse, HttpServer, Responder,
+use axum::extract::ws;
+use axum::{
+    extract::{
+        ws::{WebSocket, WebSocketUpgrade},
+        Query,
+    },
+    http::HeaderMap,
+    response::{IntoResponse, Response},
+    routing::get,
+    Json, Router,
 };
+
 use phl_proto::generated::library;
 use phl_proto::Message;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use urlencoding::decode;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct FileInfo {
     file: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct LibraryInfo {
     name: String,
 }
 
-#[get("/api/local/open")]
-async fn open(info: web::Query<FileInfo>) -> HttpResponse {
-    let p = decode(&info.file).expect("UTF-8");
-    let n = phl_image::open(p.to_string());
-
-    println!("{} x {}", n.width(), n.height());
-
-    let body = Bytes::from(n.as_rgb8().unwrap().to_vec());
-
-    HttpResponse::Ok()
-        .content_type(ContentType::octet_stream())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(body)
+#[derive(Deserialize, Serialize)]
+struct OkResponse {
+    ok: bool,
 }
 
-#[get("/api/local/metadata")]
-async fn metadata(info: web::Query<FileInfo>) -> impl Responder {
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/ws", get(handler))
+        .route("/api/local/metadata", get(metadata))
+        .route("/api/local/thumbnail", get(thumbnail))
+        .route("/api/library/index", get(library_index))
+        .route("/api/library", get(library_create))
+        .route("/api/proto", get(library_list));
+
+    println!("Running app on http://127.0.0.1:3000");
+
+    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
+async fn metadata(info: Query<FileInfo>) -> impl IntoResponse {
     let p = decode(&info.file).expect("UTF-8");
     let m = phl_image::metadat(p.to_string());
 
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(serde_json::to_string(&m).unwrap())
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, Json(m))
 }
 
-#[get("/api/local/thumbnail")]
-async fn thumbnail(info: web::Query<FileInfo>) -> impl Responder {
+async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
     let p = decode(&info.file).expect("UTF-8");
 
-    return HttpResponse::Ok()
-        .content_type(ContentType::jpeg())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(phl_image::cached_thumb(p.to_string()));
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, phl_image::cached_thumb(p.to_string()))
 }
 
-#[get("/api/proto")]
-async fn library_list() -> impl Responder {
+async fn library_list() -> impl IntoResponse {
     phl_library::create_root_library().expect("Failed to create root library");
 
     let mut libs = phl_library::lib_list()
@@ -79,47 +86,75 @@ async fn library_list() -> impl Responder {
     let mut msg = library::Message::new();
     msg.set_list(list);
 
-    return HttpResponse::Ok()
-        .content_type(ContentType::octet_stream())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(msg.write_to_bytes().unwrap());
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, msg.write_to_bytes().unwrap())
 }
 
-#[get("/api/library/index")]
-async fn library_index(info: web::Query<LibraryInfo>) -> impl Responder {
+async fn library_index(info: Query<LibraryInfo>) -> impl IntoResponse {
     let dir = phl_library::find_library(&info.name).unwrap().path;
     let list = phl_library::list(dir);
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body(serde_json::to_string(&list).unwrap())
+
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, Json(list))
 }
 
-#[post("/api/library")]
-async fn library_create() -> impl Responder {
+async fn library_create() -> impl IntoResponse {
     phl_library::create_library("new", "/Users/tihav/Desktop");
 
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .insert_header(("Access-Control-Allow-Origin", "*"))
-        .body("{ \"ok\": true }")
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, Json("{ \"ok\": true }"))
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    println!("Start server on 127.0.0.1:8000");
+async fn handler(ws: WebSocketUpgrade) -> Response {
+    println!("Socket connected");
 
-    HttpServer::new(|| {
-        App::new()
-            .route("/ws", web::get().to(ws::index))
-            .service(library_index)
-            .service(library_list)
-            .service(metadata)
-            .service(open)
-            .service(thumbnail)
-            .service(library_create)
-    })
-    .bind(("127.0.0.1", 8000))?
-    .run()
-    .await
+    ws.on_upgrade(handle_socket)
+}
+
+async fn handle_socket(mut socket: WebSocket) {
+    while let Some(msg) = socket.recv().await {
+        let msg = if let Ok(msg) = msg {
+            msg
+        } else {
+            // client disconnected
+            return;
+        };
+
+        let data = msg.into_data();
+        let msg = library::Message::parse_from_bytes(&data);
+
+        println!("Rec socket message {:?}", msg);
+
+        if msg.is_err() {
+            let mut error_message = library::Message::new();
+            error_message.error = Some(true);
+            error_message.message = Some("Something went wrong".to_string());
+
+            if socket
+                .send(ws::Message::Binary(
+                    error_message
+                        .write_to_bytes()
+                        .expect("Filed to write error message."),
+                ))
+                .await
+                .is_err()
+            {
+                // client disconnected
+                return;
+            }
+        }
+
+        // send message:
+        if socket
+            .send(ws::Message::Binary(data.clone()))
+            .await
+            .is_err()
+        {
+            // client disconnected
+            return;
+        }
+    }
 }

@@ -1,3 +1,5 @@
+use egui::Color32;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -52,18 +54,6 @@ impl eframe::App for TemplateApp {
         // Tip: a good default choice is to just keep the `CentralPanel`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
-        #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    if ui.button("Quit").clicked() {
-                        _frame.close();
-                    }
-                });
-            });
-        });
-
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Side Panel");
 
@@ -104,13 +94,15 @@ impl eframe::App for TemplateApp {
             egui::warn_if_debug_build(ui);
         });
 
-        if false {
-            egui::Window::new("Window").show(ctx, |ui| {
-                ui.label("Windows can be moved by dragging them.");
-                ui.label("They are automatically sized based on contents.");
-                ui.label("You can turn on resizing and scrolling if you like.");
-                ui.label("You would normally choose either panels OR windows.");
-            });
-        }
+        egui::Window::new("Window").show(ctx, |ui| {
+            let mut style = (*ctx.style()).clone();
+            style.visuals.panel_fill = Color32::from_rgb(24, 24, 27);
+            ui.set_style(style);
+
+            ui.label("Windows can be moved by dragging them.");
+            ui.label("They are automatically sized based on contents.");
+            ui.label("You can turn on resizing and scrolling if you like.");
+            ui.label("You would normally choose either panels OR windows.");
+        });
     }
 }
