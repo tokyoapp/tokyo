@@ -68,6 +68,14 @@ class LibraryLocation {
   }
 
   async open(name: string) {
+    const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+    ws.onopen = () => {
+      console.log('[WS] Connected');
+    };
+    ws.onmessage = (msg) => {
+      console.log(msg);
+    };
+
     const loc: Location = {
       host: 'http://127.0.0.1:8000',
       name: name,

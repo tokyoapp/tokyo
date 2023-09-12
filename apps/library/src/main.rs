@@ -41,9 +41,9 @@ async fn main() {
         .route("/api/library", get(library_create))
         .route("/api/proto", get(library_list));
 
-    println!("Running app on http://127.0.0.1:3000");
+    println!("Running app on http://127.0.0.1:8000");
 
-    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
+    axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
@@ -63,6 +63,7 @@ async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
 
     let mut headers = HeaderMap::new();
     headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    headers.insert("Content-Type", "image/jpeg".parse().unwrap());
     (headers, phl_image::cached_thumb(p.to_string()))
 }
 

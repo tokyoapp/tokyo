@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "proto": "workspace:packages/phl-proto",
+    "viewport": "workspace:packages/viewport/pkg",
     "@atrium-ui/mono": "0.2.0-4",
     "@rive-app/canvas-single": "^2.3.0",
     "comlink": "^4.4.1",

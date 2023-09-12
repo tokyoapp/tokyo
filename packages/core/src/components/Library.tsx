@@ -149,6 +149,7 @@ type ThumbProps = {
   onClick: () => void;
 };
 
+// FIX: These have terrible performance for som reason.
 function Thumb(props: ThumbProps) {
   const [img, setImg] = createSignal<HTMLCanvasElement>();
 

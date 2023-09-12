@@ -37,7 +37,6 @@ export default function Preview() {
 
   import('viewport').then(async (module) => {
     await module.default();
-
     module.init(canvas.id);
   });
 

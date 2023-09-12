@@ -17,5 +17,15 @@ eframe = { version = "0.22.0", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 log = "0.4"
+image = "0.24.7"
 serde = { version = "1", features = ["derive"] }
-
+web-sys = { version = "0.3.64", features = [
+    'Navigator',
+    'StorageManager',
+    'Window',
+    'FileSystem',
+    'FileSystemDirectoryEntry',
+] }
+egui_extras = { version = "0.22.0", features = ["image"] }
+ehttp = "0.3.0"
+poll-promise = "0.3.0"
