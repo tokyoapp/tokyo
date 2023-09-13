@@ -6,5 +6,9 @@ tasks:
   build:
     desc: Build wasm
     dir: "."
+    sources:
+      - src/*.rs
+    generates:
+      - pkg/*
     cmds:
       - wasm-pack build --target web

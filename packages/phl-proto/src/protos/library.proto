@@ -49,3 +49,13 @@ message Message {
       ThumbnailMessage thumbnail = 9;
   }
 }
+
+// enum REQUEST_TYPE {
+//   INDEX = 0;
+//   LIST = 1;
+// }
+
+// message Request {
+//   optional int32 id = 1;
+//   REQUEST_TYPE type = 2;
+// }

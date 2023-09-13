@@ -20,7 +20,7 @@ function createCanvas(width: number, height: number) {
 }
 
 export class DynamicImage {
-  static from(img: Uint8Array, width = 5472, height = 3648, meta?: ImageMeta) {
+  static fromRaw(img: Uint8Array, width = 5472, height = 3648, meta?: ImageMeta) {
     const canvas = document.createElement('canvas');
     const ctxt = canvas.getContext('2d');
 
@@ -101,6 +101,15 @@ export class DynamicImage {
 
   canvas() {
     return this.#canvas;
+  }
+
+  async url() {
+    return new Promise((resole, reject) => {
+      this.#canvas.toBlob((blob) => {
+        if (blob) return resole(URL.createObjectURL(blob));
+        reject();
+      });
+    });
   }
 
   rotate90() {

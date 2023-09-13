@@ -9,6 +9,11 @@ extern "C" {
     fn log(s: &str);
 }
 
+// #[link(wasm_import_module = "core/src/Library.ts")]
+// extern "C" {
+//     fn image_url() -> String;
+// }
+
 struct Resource {
     /// HTTP response
     response: ehttp::Response,
@@ -39,9 +44,16 @@ impl Resource {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
+#[wasm_bindgen(constructor)]
+pub struct Image {
+    pub orientation: u32,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize, wasm))]
 pub struct TemplateApp {
-    label: String,
+    url: String,
+    image: Image,
 
     #[cfg_attr(feature = "serde", serde(skip))]
     promise: Option<Promise<ehttp::Result<Resource>>>,
@@ -50,18 +62,39 @@ pub struct TemplateApp {
 impl Default for TemplateApp {
     fn default() -> Self {
         Self {
-            label: "Hello World!".to_owned(),
+            url: "".to_owned(),
+            image: Image { orientation: 0 },
             promise: Default::default(),
         }
     }
 }
 
 impl TemplateApp {
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>, url: &str, image: Image) -> Self {
         // if let Some(storage) = cc.storage {
         //     return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
         // }
-        Default::default()
+
+        // unsafe {
+        //     log(format!("url: {:?}", image_url()).as_str());
+        // }
+
+        let mut app: TemplateApp = Default::default();
+
+        app.image = image;
+        app.url = url.to_string();
+
+        let ctx = cc.egui_ctx.clone();
+        let (sender, promise) = Promise::new();
+        let request = ehttp::Request::get(app.url.clone());
+        ehttp::fetch(request, move |response| {
+            ctx.request_repaint(); // wake up UI thread
+            let resource = response.map(|response| Resource::from_response(&ctx, response));
+            sender.send(resource);
+        });
+        app.promise = Some(promise);
+
+        app
     }
 }
 
@@ -87,29 +120,31 @@ impl eframe::App for TemplateApp {
         // image::load(r, format)
 
         egui::CentralPanel::default().frame(frame).show(ctx, |ui| {
-            ui.horizontal(|ui| {
-                ui.heading(&self.label);
-            });
+            // ui.horizontal(|ui| {
+            //     ui.heading(&self.label);
+            // });
 
-            let btn = ui.button("load");
+            // let btn = ui.button("load");
 
-            if btn.clicked() {
-                let ctx = ctx.clone();
-                let (sender, promise) = Promise::new();
-                let request = ehttp::Request::get("http://127.0.0.1:8000/api/local/thumbnail?file=%2FUsers%2Ftihav%2FPictures%2F_MG_0013.CR2");
-                ehttp::fetch(request, move |response| {
-                    ctx.request_repaint(); // wake up UI thread
-                    let resource = response.map(|response| Resource::from_response(&ctx, response));
-                    sender.send(resource);
-                });
-                self.promise = Some(promise);
-            }
+            // if btn.clicked() {
+            // let ctx = ctx.clone();
+            // let (sender, promise) = Promise::new();
+            // let request = ehttp::Request::get(self.url.clone());
+            // ehttp::fetch(request, move |response| {
+            //     ctx.request_repaint(); // wake up UI thread
+            //     let resource = response.map(|response| Resource::from_response(&ctx, response));
+            //     sender.send(resource);
+            // });
+            // self.promise = Some(promise);
+            // }
 
             if let Some(promise) = &self.promise {
                 if let Some(result) = promise.ready() {
                     match result {
                         Ok(resource) => {
-                            ui_resource(ui, resource);
+                            ui.centered_and_justified(|ui| {
+                                ui_resource(ui, resource);
+                            });
                         }
                         Err(error) => {
                             // This should only happen if the fetch API isn't available or something similar.
@@ -120,7 +155,9 @@ impl eframe::App for TemplateApp {
                         }
                     }
                 } else {
-                    ui.spinner();
+                    ui.centered_and_justified(|ui| {
+                        ui.spinner();
+                    });
                 }
             }
 
@@ -164,8 +201,6 @@ fn ui_resource(ui: &mut egui::Ui, resource: &Resource) {
         text,
         image,
     } = resource;
-
-    ui.separator();
 
     egui::ScrollArea::vertical()
         .auto_shrink([false; 2])

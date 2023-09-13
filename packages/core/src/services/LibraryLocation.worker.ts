@@ -1,3 +1,4 @@
+import proto from 'proto';
 import { ClientStorage } from './ClientStorage.ts';
 
 type Entry = {
@@ -68,43 +69,47 @@ class LibraryLocation {
   }
 
   async open(name: string) {
-    const ws = new WebSocket('ws://127.0.0.1:8000/ws');
-    ws.onopen = () => {
-      console.log('[WS] Connected');
-    };
-    ws.onmessage = (msg) => {
-      console.log(msg);
-    };
+    return new Promise((resolve) => {
+      const loc: Location = {
+        host: 'http://127.0.0.1:8000',
+        name: name,
+        path: '/Users/tihav/Pictures',
+        entries: [],
+        index: [],
+      };
 
-    const loc: Location = {
-      host: 'http://127.0.0.1:8000',
-      name: name,
-      path: '/Users/tihav/Pictures',
-      entries: [],
-      index: [],
-    };
+      const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+      ws.onopen = () => {
+        console.log('[WS] Connected');
+      };
 
-    return fetch(`http://127.0.0.1:8000/api/library/index?name=${loc.name}`).then(async (res) => {
-      const list = await res.json();
+      ws.onmessage = async (msg) => {
+        const data = msg.data as Blob;
+        const buf = await data.arrayBuffer();
 
-      const entries = await Promise.allSettled<Entry[]>(
-        list.map(async (src: string) => {
-          return fetch(
-            `http://127.0.0.1:8000/api/local/metadata?file=${encodeURIComponent(src)}`
-          ).then(async (res) => {
-            const meta = (await res.json()) as Meta;
-            return {
-              path: src,
-              meta: meta,
-            };
+        const message = proto.Message.decode(new Uint8Array(buf));
+
+        if (message.index?.index) {
+          const metaCalls = message.index.index.map(async (src: string) => {
+            return fetch(
+              `http://127.0.0.1:8000/api/local/metadata?file=${encodeURIComponent(src)}`
+            ).then(async (res) => {
+              const meta = (await res.json()) as Meta;
+              return {
+                path: src,
+                meta: meta,
+              };
+            });
           });
-        })
-      );
 
-      loc.index = list;
-      loc.entries = entries.map((res) => res.value).filter(Boolean);
+          const entries: Entry[] = (await Promise.allSettled(metaCalls)).map((prom) => prom.value);
 
-      return loc;
+          loc.index = message.index.index;
+          loc.entries = entries.filter(Boolean);
+
+          resolve(loc);
+        }
+      };
     });
   }
 }

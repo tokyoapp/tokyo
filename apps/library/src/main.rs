@@ -37,7 +37,6 @@ async fn main() {
         .route("/ws", get(handler))
         .route("/api/local/metadata", get(metadata))
         .route("/api/local/thumbnail", get(thumbnail))
-        .route("/api/library/index", get(library_index))
         .route("/api/library", get(library_create))
         .route("/api/proto", get(library_list));
 
@@ -92,15 +91,6 @@ async fn library_list() -> impl IntoResponse {
     (headers, msg.write_to_bytes().unwrap())
 }
 
-async fn library_index(info: Query<LibraryInfo>) -> impl IntoResponse {
-    let dir = phl_library::find_library(&info.name).unwrap().path;
-    let list = phl_library::list(dir);
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-    (headers, Json(list))
-}
-
 async fn library_create() -> impl IntoResponse {
     phl_library::create_library("new", "/Users/tihav/Desktop");
 
@@ -115,7 +105,24 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
 
+fn get_index_msg() -> library::LibraryIndexMessage {
+    let dir = phl_library::find_library("default").unwrap().path;
+    let list = phl_library::list(dir);
+
+    let mut index_msg = library::LibraryIndexMessage::new();
+    index_msg.index = list;
+
+    return index_msg;
+}
+
 async fn handle_socket(mut socket: WebSocket) {
+    let mut msg = library::Message::new();
+    msg.set_index(get_index_msg());
+
+    socket
+        .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+        .await;
+
     while let Some(msg) = socket.recv().await {
         let msg = if let Ok(msg) = msg {
             msg
@@ -147,6 +154,9 @@ async fn handle_socket(mut socket: WebSocket) {
                 return;
             }
         }
+
+        // let ok_msg = msg.unwrap();
+        // ok_msg.
 
         // send message:
         if socket

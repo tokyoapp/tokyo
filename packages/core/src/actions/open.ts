@@ -1,8 +1,8 @@
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
-import { Library } from '../Library.ts';
+import { Library, Meta } from '../Library.ts';
 import { DynamicImage } from '../DynamicImage.ts';
-import { drawToCanvas, setLoading } from '../components/Viewer';
+import { loadImage, setLoading } from '../components/Viewer';
 
 let controller: AbortController;
 
@@ -27,6 +27,8 @@ export default async function open(p: string, metadata: Meta) {
 
   const id = encodeURIComponent(p);
 
+  // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
+
   const meta = await Library.metadata(id);
 
   setLoading(true);
@@ -36,19 +38,28 @@ export default async function open(p: string, metadata: Meta) {
   const prevImg = new Image();
   prevImg.onload = () => {
     const img = new DynamicImage(prevImg, meta);
-    drawToCanvas(img.resizeContain(1024).canvas());
+
+    img
+      .resizeContain(1024)
+      .canvas()
+      .toBlob((blob) => {
+        if (blob) loadImage(URL.createObjectURL(blob), metadata);
+      });
   };
 
   if (tmp && tmp.size > 0) {
     prevImg.src = URL.createObjectURL(tmp);
   }
 
-  timeout = setTimeout(() => {
-    prevImg.onload = () => {
-      drawToCanvas(new DynamicImage(prevImg, meta).canvas());
-    };
-    prevImg.src = `http://127.0.0.1:8000/api/local/thumbnail?file=${id}`;
-  }, 250);
+  // timeout = setTimeout(() => {
+  //   const img = new Image();
+  //   img.onload = () => {
+  //     new DynamicImage(img, meta).canvas().toBlob((blob) => {
+  //       if (blob) loadImage(URL.createObjectURL(blob), metadata);
+  //     });
+  //   };
+  //   img.src = `http://127.0.0.1:8000/api/local/thumbnail?file=${id}`;
+  // }, 2000);
 
   // TODO: only get full image when needed
   // await fetch(`http://localhost:8000/open?file=${id}`, {

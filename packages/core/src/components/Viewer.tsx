@@ -1,27 +1,36 @@
 import { createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
+import { Meta } from '../Library.ts';
 
 export const [loading, setLoading] = createSignal(false);
+
+const viewportCanvas = document.createElement('canvas');
+viewportCanvas.id = 'viewport_canvas';
 
 export const canvas = document.createElement('canvas');
 canvas.style.width = '100%';
 canvas.style.maxHeight = 'calc(90vh - 100px)';
 canvas.style.objectFit = 'contain';
 
-export function drawToCanvas(photo: HTMLImageElement | HTMLCanvasElement) {
-  const ctxt = canvas.getContext('2d');
-  canvas.width = photo.width;
-  canvas.height = photo.height;
-  ctxt?.drawImage(photo, 0, 0);
+const viewport = await import('viewport').then(async (module) => {
+  await module.default();
+  return module;
+});
+
+export async function loadImage(url: string, meta: Meta) {
+  setLoading(true);
+
+  await viewport.init(viewportCanvas.id, url, {
+    orientation: meta.orientation,
+  });
 
   setLoading(false);
 }
 
 export default function Preview() {
-  const canvas = document.createElement('canvas');
+  const canvas = viewportCanvas;
   canvas.style.width = '100%';
   canvas.style.position = 'absolute';
-  canvas.id = 'viewport_canvas';
 
   const resize = () => {
     const parent = canvas.parentNode as HTMLElement;
@@ -33,11 +42,6 @@ export default function Preview() {
 
   onMount(() => {
     resize();
-  });
-
-  import('viewport').then(async (module) => {
-    await module.default();
-    module.init(canvas.id);
   });
 
   return (
