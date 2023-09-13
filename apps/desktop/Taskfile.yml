@@ -5,20 +5,34 @@ version: "3"
 silent: true
 
 tasks:
-  dev:
-    desc: Run app
+  tauri:dev:
     dir: ./
     cmds:
       - cargo tauri dev
 
-  dev:web:
-    desc: Run app
+  ui:dev:
     dir: ./
     cmds:
-      - bun ./dev.ts
+      - bun x core dev
+
+  tauri:build:
+    dir: ./
+    cmds:
+      - cargo tauri build
+
+  ui:build:
+    dir: ./
+    cmds:
+      - bun x core build
+
+  dev:
+    desc: Dev
+    dir: ./
+    deps: [ui:dev, tauri:dev]
 
   build:
     desc: Build app
     dir: ./
     cmds:
-      - cargo tauri build
+      - task: ui:build
+      - task: tauri:build

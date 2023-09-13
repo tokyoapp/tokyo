@@ -2,18 +2,23 @@
   "name": "core",
   "main": "./src/components/App.tsx",
   "type": "module",
+  "bin": {
+    "core": "./cli/main.ts"
+  },
   "dependencies": {
     "proto": "workspace:packages/phl-proto",
     "viewport": "workspace:packages/viewport/pkg",
+    "vite-plugin-solid": "^2.7.0",
+    "vite-plugin-wrap-worker": "^0.3.0",
+    "vite-plugin-wasm": "^3.2.2",
+    "vite": "^4.4.4",
     "@atrium-ui/mono": "0.2.0-4",
     "@rive-app/canvas-single": "^2.3.0",
     "comlink": "^4.4.1",
     "lit": "^2.6.1",
-    "vite-plugin-wrap-worker": "^0.3.0",
     "solid-js": "^1.7.8",
     "autoprefixer": "^10.4.15",
     "postcss": "^8.4.29",
-    "tailwindcss": "^3.3.3",
-    "vite-plugin-solid": "^2.7.0"
+    "tailwindcss": "^3.3.3"
   }
 }
