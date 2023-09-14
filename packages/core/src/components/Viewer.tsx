@@ -1,6 +1,8 @@
-import { createSignal, onMount } from 'solid-js';
+import { ParentProps, createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
 import { Meta } from '../Library.ts';
+import { Stars } from './Stars.tsx';
+import { file } from '../actions/open.ts';
 
 export const [loading, setLoading] = createSignal(false);
 
@@ -27,6 +29,17 @@ export async function loadImage(url: string, meta: Meta) {
   setLoading(false);
 }
 
+const Tool = ({ children }: ParentProps) => {
+  return (
+    <div
+      class="inline-flex h-8 justify-center items-center px-2 py-2 rounded-lg
+            bg-black hover:bg-zinc-900 cursor-pointer"
+    >
+      {children}
+    </div>
+  );
+};
+
 export default function Preview() {
   const canvas = viewportCanvas;
   canvas.style.width = '100%';
@@ -40,6 +53,10 @@ export default function Preview() {
 
   window.addEventListener('resize', resize);
 
+  viewport.init(viewportCanvas.id, '', {
+    orientation: 0,
+  });
+
   onMount(() => {
     resize();
   });
@@ -48,6 +65,19 @@ export default function Preview() {
     <div class="relative grid grid-rows-[1fr] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
         {loading() ? <Icon name="loader" /> : null}
+      </div>
+
+      <div class="z-10 absolute top-2 left-3 w-auto right-3 flex gap-3">
+        <Tool>
+          <span>100%</span>
+        </Tool>
+        <Tool>
+          <Icon name="ph-cursor" />
+        </Tool>
+      </div>
+
+      <div class="z-10 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
+        <Stars value={file.metadata.rating} />
       </div>
 
       {canvas}

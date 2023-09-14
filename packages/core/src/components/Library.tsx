@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
@@ -30,10 +30,24 @@ const sort = {
   },
 };
 
+export const [selection, setSelection] = createSignal<
+  {
+    meta: any;
+    path: string;
+  }[]
+>([]);
+
+createEffect(() => {
+  const [selected] = selection();
+  if (selected) {
+    Action.run('open', [selected.path, selected.meta]);
+  }
+});
+
 export default function Library(props: { location: Location }) {
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
-    showName: true,
+    showName: false,
     showSettings: true,
   });
 
@@ -68,10 +82,13 @@ export default function Library(props: { location: Location }) {
   };
 
   return (
-    <div class="grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]" onKeyDown={onKeyDown}>
+    <div
+      class="relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]"
+      onKeyDown={onKeyDown}
+    >
       <nav class="pb-2 bg-[#18191B]">
-        <div class="px-1 py-2 border-b-zinc-800 border-b text-sm flex justify-between items-center">
-          <div class="">
+        <div class="px-2 py-2 border-b-zinc-800 border-b text-sm flex justify-between items-center">
+          <div>
             <Combobox
               title="Sort"
               onInput={(values) => {
@@ -119,27 +136,49 @@ export default function Library(props: { location: Location }) {
       <div class="p-1 overflow-auto w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 break-all gap-2 overscroll-none">
         {items()
           .filter(itemFilter)
-          .map(({ path, meta }, i) => {
+          .map((item, i) => {
             return (
               <Thumb
+                selected={selection().includes(item)}
                 number={(i + 1).toString()}
                 name={viewSettings.showName}
                 settings={viewSettings.showSettings}
                 rating={viewSettings.showRating}
                 onClick={() => {
-                  Action.run('open', [path, meta]);
+                  setSelection([item]);
                 }}
-                src={path}
-                meta={meta}
+                src={item.path}
+                meta={item.meta}
               />
             );
           })}
       </div>
+
+      {selection().length > 0 ? (
+        <div class="z-40 absolute bottom-1 left-3 right-3 w-auto">
+          <div class="bg-[#18191B] px-3 py-1 border-zinc-800 border rounded-md text-sm">
+            <span class="text-zinc-600">{selection()[0].meta.name}</span>
+            <span class="px-2" />
+            <button type="button" class="p-1 px-2">
+              <Icon name="close" />
+            </button>
+            <span class="px-2" />
+            <button type="button" class="p-1 px-2">
+              <Icon name="close" />
+            </button>
+            <span class="px-2" />
+            <button type="button" class="p-1 px-2">
+              <Icon name="close" />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
 type ThumbProps = {
+  selected: boolean;
   name: boolean;
   rating: boolean;
   settings: boolean;
@@ -216,11 +255,14 @@ function Thumb(props: ThumbProps) {
   return (
     <div
       tabIndex={0}
-      class={`h-52 px-2 relative overflow-hidden flex items-center justify-center
-            bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
-            border border-transparent shadow-none ${props.name ? 'pb-6' : 'pb-1'} ${
-        props.settings ? 'pt-6' : 'pt-1'
-      }`}
+      class={[
+        `h-52 px-2 relative overflow-hidden flex items-center justify-center
+        bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
+        border border-transparent shadow-none`,
+        props.settings ? 'pt-6' : 'pt-1',
+        props.name ? 'pb-6' : 'pb-1',
+        props.selected ? 'border-gray-600' : '',
+      ].join(' ')}
       onClick={() => props.onClick()}
       ref={ele}
     >

@@ -64,7 +64,7 @@ impl Default for TemplateApp {
         Self {
             url: "".to_owned(),
             image: Image { orientation: 0 },
-            promise: Default::default(),
+            promise: None,
         }
     }
 }
@@ -92,7 +92,10 @@ impl TemplateApp {
             let resource = response.map(|response| Resource::from_response(&ctx, response));
             sender.send(resource);
         });
-        app.promise = Some(promise);
+
+        if app.url.len() > 0 {
+            app.promise = Some(promise);
+        }
 
         app
     }
@@ -159,6 +162,10 @@ impl eframe::App for TemplateApp {
                         ui.spinner();
                     });
                 }
+            } else {
+                ui.centered_and_justified(|ui| {
+                    ui.heading("Select an image");
+                });
             }
 
             // ctx.inspection_ui(ui);

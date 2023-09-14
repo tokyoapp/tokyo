@@ -18,13 +18,18 @@ const icons = {
 // TODO: keep rive icons here too
 
 type Props = {
-  name?: keyof typeof icons;
+  name?: keyof typeof icons | string;
   class?: string;
 };
 
 export default function Icon(props: Props) {
-  const src = icons[props.name || 'unknown'].default;
+  // @ts-ignore
+  const src = icons[props.name || 'unknown']?.default;
   const className = `icon ${props.class}`;
+
+  if (props.name?.startsWith('ph-')) {
+    return <i class={`ph-light ${props.name} ${className}`} />;
+  }
 
   if (src.includes('.riv')) {
     const canvas = document.createElement('canvas');
@@ -41,8 +46,8 @@ export default function Icon(props: Props) {
       riveInstance.cleanup();
     });
 
-    return <div class={className}>{canvas}</div>;
+    return <div class={`inline-block mb-[-0.125em] align-baseline ${className}`}>{canvas}</div>;
   }
 
-  return <div class={className} innerHTML={src} />;
+  return <div class={`inline-block mb-[-0.125em] align-baseline ${className}`} innerHTML={src} />;
 }

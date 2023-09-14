@@ -7,6 +7,7 @@ export default function Combobox(
   props: {
     title: string;
     value: string;
+    class: string;
     multiple: boolean;
     onInput: (value: string[]) => void;
     items: { id: string; value: string; checked: boolean }[];
@@ -14,7 +15,7 @@ export default function Combobox(
 ) {
   return (
     <a-dropdown
-      class="relative inline-block z-50"
+      class={`relative inline-block z-50 ${props.class}`}
       style="--dropdown-speed: 0s"
       onInput={(e) => props.onInput(e.target.value)}
     >
@@ -22,7 +23,7 @@ export default function Combobox(
         title={props.title}
         type="button"
         slot="input"
-        class="cursor-pointer rounded-lg px-2 py-1 text-left shadow-none"
+        class="cursor-pointer bg-zinc-800 rounded-md px-2 py-1 text-left shadow-none"
       >
         {props.children}
       </button>

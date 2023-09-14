@@ -12,6 +12,7 @@ import CreateLibrary from './CreateLibrary.tsx';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
+  p: Action.map('search'),
 };
 
 window.addEventListener('keyup', (e) => {

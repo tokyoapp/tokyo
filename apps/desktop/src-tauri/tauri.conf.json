@@ -44,14 +44,16 @@
     },
     "windows": [
       {
-        "transparent": true,
+        "transparent": false,
+        "fileDropEnabled": true,
         "titleBarStyle": "Overlay",
+        "decorations": false,
         "hiddenTitle": true,
         "fullscreen": false,
         "resizable": true,
         "title": "TOKYO",
         "width": 1920,
-        "height": 1080
+        "height": 1280
       }
     ],
     "macOSPrivateApi": true

@@ -61,12 +61,6 @@ export default function Info(props: {
         <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
       ) : (
         <>
-          <pre class="p-3">
-            <Rating empty rating={file.metadata.rating || 0} />
-          </pre>
-
-          <Seperator />
-
           <Property title="Name" value={file.metadata.name} />
           <Property title="Date created" value={file.metadata.create_date} />
           <Property title="Type" value={[typeFromFilename(file.name)]} />
