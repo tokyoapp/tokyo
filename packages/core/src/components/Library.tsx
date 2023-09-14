@@ -48,7 +48,7 @@ export default function Library(props: { location: Location }) {
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
     showName: false,
-    showSettings: true,
+    showSettings: false,
   });
 
   const [starFilter, setStarFilter] = createSignal(0);
@@ -83,10 +83,10 @@ export default function Library(props: { location: Location }) {
 
   return (
     <div
-      class="relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-[#27272A]"
+      class="relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-transparent"
       onKeyDown={onKeyDown}
     >
-      <nav class="pb-2 bg-[#18191B]">
+      <nav class="bg-[#18191B]">
         <div class="px-2 py-2 border-b-zinc-800 border-b text-sm flex justify-between items-center">
           <div>
             <Combobox
@@ -133,7 +133,7 @@ export default function Library(props: { location: Location }) {
         </div>
       </nav>
 
-      <div class="p-1 overflow-auto w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 break-all gap-2 overscroll-none">
+      <div class="p-2 py-2 overflow-auto w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 break-all gap-2 overscroll-none">
         {items()
           .filter(itemFilter)
           .map((item, i) => {
@@ -253,37 +253,40 @@ function Thumb(props: ThumbProps) {
   });
 
   return (
-    <div
-      tabIndex={0}
-      class={[
-        `h-52 px-2 relative overflow-hidden flex items-center justify-center
-        bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
-        border border-transparent shadow-none`,
-        props.settings ? 'pt-6' : 'pt-1',
-        props.name ? 'pb-6' : 'pb-1',
-        props.selected ? 'border-gray-600' : '',
-      ].join(' ')}
-      onClick={() => props.onClick()}
-      ref={ele}
-    >
-      <div class="relative z-30 w-full h-full flex items-center">{img()}</div>
-
-      <div class="z-10 absolute top-1 right-1 opacity-5 text-7xl leading-none">{props.number}</div>
-
-      <div class="z-40 absolute top-1 left-2 text-xs opacity-70">
-        {props.settings ? (
-          <span>{`${props.meta.exif.focal_length.split('/')[0]}mm F${
-            props.meta.exif.fnumber.split('/')[0]
-          } ISO${props.meta.exif.iso_speed_ratings} ${props.meta.exif.exposure_time}`}</span>
-        ) : null}
+    <div class="relative h-52">
+      <div
+        tabIndex={0}
+        class={[
+          `px-2 h-full
+          bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
+          border border-transparent shadow-none`,
+          props.name ? 'pt-6' : 'pt-1',
+          props.settings ? 'pb-6' : 'pb-1',
+          props.selected ? 'border-gray-600' : '',
+        ].join(' ')}
+        onClick={() => props.onClick()}
+        ref={ele}
+      >
+        <div class="w-full h-full flex items-center">{img()}</div>
       </div>
-      <div class="z-40 absolute bottom-1 left-2 text-xs opacity-70">
-        {props.rating ? (
-          <div class="pb-1">
-            <Rating rating={props.meta.rating} />
-          </div>
-        ) : null}
-        {props.name ? props.meta.name : null}
+
+      <div class="z-1 absolute top-0 left-0 p-1 h-full w-full grid grid-rows-[auto_1fr_auto] opacity-70 pointer-events-none">
+        <div class="absolute text-7xl opacity-5 leading-none">{props.number}</div>
+
+        <div class="text-xs">{props.name ? props.meta.name : null}</div>
+        <span />
+        <div class="text-xs">
+          {props.rating ? (
+            <div class="pb-1">
+              <Rating rating={props.meta.rating} />
+            </div>
+          ) : null}
+          {props.settings ? (
+            <span>{`${props.meta.exif.focal_length.split('/')[0]}mm F${
+              props.meta.exif.fnumber.split('/')[0]
+            } ISO${props.meta.exif.iso_speed_ratings} ${props.meta.exif.exposure_time}`}</span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
