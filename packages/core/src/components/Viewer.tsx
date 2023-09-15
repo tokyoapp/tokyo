@@ -1,8 +1,7 @@
 import { ParentProps, createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
-import { Meta } from '../Library.ts';
+import { Entry, file } from '../Library.ts';
 import { Stars } from './Stars.tsx';
-import { file } from '../actions/open.ts';
 
 export const [loading, setLoading] = createSignal(false);
 
@@ -19,11 +18,11 @@ const viewport = await import('viewport').then(async (module) => {
   return module;
 });
 
-export async function loadImage(url: string, meta: Meta) {
+export async function loadImage(url: string, item: Entry) {
   setLoading(true);
 
   await viewport.init(viewportCanvas.id, url, {
-    orientation: meta.orientation,
+    orientation: item.orientation,
   });
 
   setLoading(false);
@@ -77,7 +76,7 @@ export default function Preview() {
       </div>
 
       <div class="z-10 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
-        <Stars value={file.metadata.rating} />
+        <Stars value={file()?.rating || 0} />
       </div>
 
       {canvas}

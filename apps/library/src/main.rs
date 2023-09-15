@@ -114,7 +114,10 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
 
     for path in list {
         let meta = phl_image::metadat(path);
-        index.push(meta);
+        let _ = meta.is_some_and(|v| {
+            index.push(v);
+            true
+        });
     }
 
     let mut index_msg = library::LibraryIndexMessage::new();
@@ -122,6 +125,7 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
         .iter()
         .map(|meta| {
             let mut msg = library::IndexEntryMessage::new();
+            msg.name = meta.name.clone();
             msg.create_date = meta.create_date.clone();
             msg.hash = meta.hash.clone();
             msg.orientation = meta.orientation as i32;
@@ -170,13 +174,14 @@ async fn handle_socket(mut socket: WebSocket) {
         let ok_msg = msg.unwrap();
         if ok_msg.has_index() {
             let index = ok_msg.index();
+            println!("Requested Index {}", index.name);
 
             let mut msg = library::Message::new();
             msg.set_index(get_index_msg(index.name.as_str()));
 
-            let _ = socket
-                .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
-                .await;
+            let bytes = msg.write_to_bytes().unwrap();
+
+            let _ = socket.send(ws::Message::Binary(bytes)).await;
         }
 
         // send message:

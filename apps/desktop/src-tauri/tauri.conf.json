@@ -52,8 +52,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "TOKYO",
-        "width": 1920,
-        "height": 1280
+        "width": 1400,
+        "height": 900
       }
     ],
     "macOSPrivateApi": true

@@ -1,13 +1,10 @@
-import Icon from './Icon.tsx';
 import '@atrium-ui/mono/expandable';
-import Rating from './Rating.tsx';
+import { Entry, Library } from '../Library.ts';
+import Icon from './Icon.tsx';
+import { createEffect, createSignal } from 'solid-js';
 
 function Seperator() {
   return <hr class="border-zinc-800" />;
-}
-
-function Title(props: { title: string }) {
-  return <div class="px-3 my-2 text-xs opacity-50">{props.title}</div>;
 }
 
 function Property(props: { title: string; value: string | string[] }) {
@@ -27,7 +24,7 @@ function Property(props: { title: string; value: string | string[] }) {
   return (
     <div class="px-3 my-4">
       <div class="text-xs opacity-50 mb-1">{props.title}</div>
-      <div class="text-xs select-text">{props.value}</div>
+      <div class="text-xs select-text text-ellipsis overflow-hidden">{props.value}</div>
     </div>
   );
 }
@@ -47,43 +44,54 @@ function typeFromFilename(name: string) {
 }
 
 export default function Info(props: {
-  name: string;
-  file: {
-    name: string;
-    metadata: any;
-  };
+  file?: Entry;
 }) {
-  const file = props.file;
+  const [meta, setMeta] = createSignal();
+
+  createEffect(() => {
+    if (props.file) {
+      Library.metadata(props.file.path).then((meta) => {
+        setMeta(meta);
+      });
+    }
+  });
 
   return (
     <div class="bg-zinc-900 w-full h-full overflow-auto absolute">
-      {!props.name ? (
+      {!props.file ? (
         <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
       ) : (
         <>
-          <Property title="Name" value={file.metadata.name} />
-          <Property title="Date created" value={file.metadata.create_date} />
-          <Property title="Type" value={[typeFromFilename(file.name)]} />
+          <Property title="Name" value={props.file.name} />
+          <Property title="Path" value={props.file.path} />
+          <Property title="Date created" value={props.file.createDate} />
+          <Property title="Type" value={[typeFromFilename(props.file.name)]} />
 
           <Seperator />
 
-          <Property title="Camera" value={file.metadata?.make} />
-          <Property
-            title="Lens"
-            value={`${file.metadata?.exif?.lens_make} ${file.metadata?.exif?.lens_model}`}
-          />
+          {meta() ? (
+            <>
+              <Property title="Camera" value={meta()?.make} />
+              <Property
+                title="Lens"
+                value={`${meta()?.exif?.lens_make} ${meta()?.exif?.lens_model}`}
+              />
 
-          <Seperator />
+              <Seperator />
 
-          <Property title="Aperture" value={`F ${file.metadata?.exif?.fnumber.split('/')[0]}`} />
-          <Property
-            title="Focal length"
-            value={`${file.metadata?.exif?.focal_length.split('/')[0]}mm`}
-          />
-          <Property title="Exposure time" value={file.metadata?.exif?.exposure_time} />
-          <Property title="ISO" value={file.metadata?.exif?.iso_speed_ratings} />
+              <Property title="Aperture" value={`F ${meta()?.exif?.fnumber.split('/')[0]}`} />
+              <Property
+                title="Focal length"
+                value={`${meta()?.exif?.focal_length.split('/')[0]}mm`}
+              />
+              <Property title="Exposure time" value={meta()?.exif?.exposure_time} />
+              <Property title="ISO" value={meta()?.exif?.iso_speed_ratings} />
 
-          <Seperator />
+              <Seperator />
+            </>
+          ) : (
+            <Icon name="loader" />
+          )}
 
           {/* <pre class="p-2 text-xs">
           <a-expandable>

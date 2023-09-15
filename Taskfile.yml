@@ -8,16 +8,19 @@ includes:
 
   library:
     aliases: [lib]
+    prefix: "Library"
     dir: apps/library
     taskfile: apps/library/Taskfile.yml
 
   desktop:
     aliases: [app]
+    prefix: "Desktop"
     dir: apps/desktop
     taskfile: apps/desktop/Taskfile.yml
 
   viewport:
     aliases: [vwp]
+    prefix: "Viewport"
     dir: packages/viewport
     taskfile: packages/viewport/Taskfile.yml
 

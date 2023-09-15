@@ -1,9 +1,8 @@
 import { createSignal } from 'solid-js';
 import { location } from '../Library.ts';
 import Action from '../actions/Action';
-import { file } from '../actions/open.ts';
-import Icon from './Icon.tsx';
-import Library from './Library';
+import Explorer from './Explorer';
+import { Library, file } from '../Library';
 import LocationSettings from './LocationSettings.tsx';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
@@ -24,7 +23,9 @@ window.addEventListener('keyup', (e) => {
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
 function App() {
-  const itemCount = () => location.index.length;
+  // const itemCount = () => location.index.length;
+
+  Library.open('default');
 
   return (
     <>
@@ -32,7 +33,7 @@ function App() {
 
       <div class="app">
         <div class="library relative">
-          {!location.path ? (
+          {!location().path ? (
             <div class="absolute top-0 left-0 w-full h-full z-[999]">
               <CreateLibrary />
             </div>
@@ -44,17 +45,17 @@ function App() {
             </div>
           ) : null}
 
-          <Library location={location} />
+          <Explorer location={location()} />
         </div>
         <div class="relative flex flex-col justify-center items-center">
           <Preview />
         </div>
         <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
-          <Info name={file.name} file={file} />
+          <Info file={file()} />
         </div>
       </div>
 
-      <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
+      {/* <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
         <div>
           <span>{itemCount()} items </span>
         </div>
@@ -64,7 +65,7 @@ function App() {
         </div>
 
         <div class="w-7">{Action.runningJobCount() > 0 ? <Icon name="loader" /> : null}</div>
-      </div>
+      </div> */}
     </>
   );
 }

@@ -1,31 +1,22 @@
-import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
-import { Library, Meta } from '../Library.ts';
+import { Library, Entry, setFile } from '../Library.ts';
 import { DynamicImage } from '../DynamicImage.ts';
 import { loadImage, setLoading } from '../components/Viewer';
 
 let controller: AbortController;
 
-export const [file, setFile] = createStore({
-  name: '',
-  metadata: {},
-});
-
 let timeout: number;
 
-export default async function open(p: string, metadata: Meta) {
+export default async function open(item: Entry) {
   clearTimeout(timeout);
 
   if (controller) controller.abort();
 
   controller = new AbortController();
 
-  setFile({
-    name: p,
-    metadata: metadata,
-  });
+  setFile(item);
 
-  const id = encodeURIComponent(p);
+  const id = encodeURIComponent(item.path);
 
   // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
 
@@ -43,7 +34,7 @@ export default async function open(p: string, metadata: Meta) {
       .resizeContain(1024)
       .canvas()
       .toBlob((blob) => {
-        if (blob) loadImage(URL.createObjectURL(blob), metadata);
+        if (blob) loadImage(URL.createObjectURL(blob), item);
       });
   };
 

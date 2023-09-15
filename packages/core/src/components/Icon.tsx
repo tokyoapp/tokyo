@@ -15,8 +15,6 @@ const icons = {
   loader: await import('../../assets/loader.riv?url'),
 } as const;
 
-// TODO: keep rive icons here too
-
 type Props = {
   name?: keyof typeof icons | string;
   class?: string;

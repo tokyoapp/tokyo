@@ -1,3 +1,1 @@
-import { proto } from './src/generated/library.js';
-
-proto.default.
+export { proto } from './src/generated/library.js';

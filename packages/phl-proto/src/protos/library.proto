@@ -17,10 +17,11 @@ message LibraryIndexMessage {
 
 message IndexEntryMessage {
   string hash = 1;
-  string path = 2;
-  string create_date = 3;
-  int32 rating = 4;
-  int32 orientation = 9;
+  string name = 2;
+  string path = 3;
+  string create_date = 4;
+  int32 rating = 5;
+  int32 orientation = 6;
 }
 
 message MetadataMessage {

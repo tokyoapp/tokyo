@@ -2,7 +2,7 @@ use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
 use rawler::{
     analyze::extract_thumbnail_pixels,
-    decoders::RawDecodeParams,
+    decoders::{RawDecodeParams, RawMetadata},
     get_decoder,
     imgop::{raw, rescale_f32_to_u8},
     RawFile, RawImageData,
@@ -29,7 +29,7 @@ pub struct Metadata {
     pub orientation: u16,
 }
 
-pub fn get_rating(path: String) -> String {
+pub fn get_rating(path: String) -> Option<u32> {
     let p = PathBuf::from(path.clone());
     let filename = p.file_stem().unwrap().to_str().unwrap();
     let xmp_file_path =
@@ -47,52 +47,61 @@ pub fn get_rating(path: String) -> String {
             .descendants()
             .find(|n| n.has_tag_name("Description"))
             .unwrap();
-        return elem
-            .attribute(("http://ns.adobe.com/xap/1.0/", "Rating"))
-            .unwrap()
-            .to_string();
-    } else {
-        return String::from("0");
+
+        let value = elem.attribute(("http://ns.adobe.com/xap/1.0/", "Rating"));
+
+        if value.is_some() {
+            let numb = value.unwrap().parse::<u32>();
+            if numb.is_ok() {
+                return Some(numb.unwrap());
+            }
+        }
     }
+
+    return None;
 }
 
-pub fn metadat(path: String) -> Metadata {
-    println!("collect metadata");
-    let raw_file = File::open(&path).unwrap();
-    let reader = BufReader::new(raw_file);
+pub fn metadat(path: String) -> Option<Metadata> {
+    let raw_file = File::open(&path);
+
+    if raw_file.is_err() {
+        return None;
+    }
+
+    let reader = BufReader::new(raw_file.unwrap());
     let p = PathBuf::from(path.clone());
     let mut rawfile = RawFile::new(&p, reader);
-
-    let rating = get_rating(path);
 
     // let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
     // let hash = sha256::digest(&bytes);
 
-    let decoder = get_decoder(&mut rawfile).unwrap();
-
-    let metadata = decoder
-        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
-        .unwrap();
-
-    // let rawimage = decoder
-    //     .raw_image(&mut rawfile, RawDecodeParams { image_index: 0 }, false)
-    //     .unwrap();
-    return Metadata {
-        hash: "none".to_owned(),
-        name: String::from(p.file_name().unwrap().to_str().unwrap()),
-        path: String::from(p.to_str().unwrap()),
-        width: 0,
-        height: 0,
-        exif: metadata.exif.clone(),
-        rating: metadata
-            .rating
-            .clone()
-            .get_or_insert(rating.parse::<u32>().unwrap())
-            .to_owned(),
-        make: metadata.make,
-        create_date: metadata.exif.create_date.unwrap(),
-        orientation: metadata.exif.orientation.unwrap(),
+    let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
+        Ok(decoder) => Some(
+            decoder
+                .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+                .unwrap(),
+        ),
+        Err(error) => {
+            println!("Error reading metadata {}", error.to_string());
+            None
+        }
     };
+
+    match meta {
+        Some(metadata) => Some(Metadata {
+            hash: "none".to_owned(),
+            name: String::from(p.file_name().unwrap().to_str().unwrap()),
+            path: String::from(p.to_str().unwrap()),
+            width: 0,
+            height: 0,
+            exif: metadata.exif.clone(),
+            rating: metadata.rating.or(get_rating(path)).or(Some(0)).unwrap(),
+            make: metadata.make,
+            create_date: metadata.exif.create_date.unwrap(),
+            orientation: metadata.exif.orientation.unwrap(),
+        }),
+        None => None,
+    }
 }
 
 pub fn thumbnail(path: String) -> Vec<u8> {

@@ -1,37 +1,5 @@
-import library from 'proto';
+import { proto as library } from 'proto';
 import { ClientStorage } from './ClientStorage.ts';
-
-type Entry = {
-  path: string;
-  meta: Meta;
-};
-
-export type Location = {
-  host?: string;
-  name: string;
-  path: string;
-  entries: Entry[];
-  index: string[];
-};
-
-type Exif = {
-  exposure_time: string;
-  fnumber: string;
-  iso_speed_ratings: string;
-  focal_length: string;
-};
-
-export type Meta = {
-  hash: string;
-  name: string;
-  width: number;
-  height: number;
-  exif: Exif;
-  rating: number;
-  make: string;
-  create_date: string;
-  orientation: number;
-};
 
 const storage = new ClientStorage();
 
@@ -66,21 +34,25 @@ class LibraryLocation {
     return meta;
   }
 
-  async open(name: string) {
+  async open(name: string): Promise<library.IIndexEntryMessage[]> {
     return new Promise((resolve) => {
-      const loc: Location = {
-        host: 'http://127.0.0.1:8000',
-        name: name,
-        path: '/Users/tihav/Pictures',
-        entries: [],
-        index: [],
-      };
-
       const ws = new WebSocket('ws://127.0.0.1:8000/ws');
       ws.onopen = () => {
         console.log('[WS] Connected');
 
-        const indxMsg = library.
+        const indxMsg = library.ClientMessage.create({
+          id: 0,
+          index: library.RequestLibraryIndex.create({
+            name,
+          }),
+        });
+
+        const data = library.ClientMessage.encode(indxMsg).finish();
+        ws.send(data);
+      };
+
+      ws.onerror = (err) => {
+        console.error('[WS] Error: ', err);
       };
 
       ws.onmessage = async (msg) => {
@@ -90,24 +62,7 @@ class LibraryLocation {
         const message = library.Message.decode(new Uint8Array(buf));
 
         if (message.index?.index) {
-          const metaCalls = message.index.index.map(async (src: string) => {
-            return fetch(
-              `http://127.0.0.1:8000/api/local/metadata?file=${encodeURIComponent(src)}`
-            ).then(async (res) => {
-              const meta = (await res.json()) as Meta;
-              return {
-                path: src,
-                meta: meta,
-              };
-            });
-          });
-
-          const entries: Entry[] = (await Promise.allSettled(metaCalls)).map((prom) => prom.value);
-
-          loc.index = message.index.index;
-          loc.entries = entries.filter(Boolean);
-
-          resolve(loc);
+          resolve(message.index.index);
         }
       };
     });

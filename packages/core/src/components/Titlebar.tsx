@@ -1,5 +1,5 @@
 import { appWindow } from '@tauri-apps/api/window';
-import { location } from '../Library.ts';
+import { Library, location } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from './App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -48,6 +48,12 @@ const WindowsTitle = () => {
 export const [cmdOpen, setCmdOpen] = createSignal(false);
 
 export default function Titlebar() {
+  const [libs, setLibs] = createSignal([]);
+
+  Library.list().then((libs) => {
+    setLibs(libs);
+  });
+
   return (
     <>
       <div
@@ -70,10 +76,25 @@ export default function Titlebar() {
                 <Icon name="chevron-right" />
               </div>
             </Button>
-            <div>{location.host ? new URL(location.host).host : null}</div>
+            <div>{location().host}</div>
             <div>
-              {location.path
-                .split('/')
+              <Combobox
+                class="px-1 pointer-events-auto"
+                items={libs().map((lib) => {
+                  return { id: lib.name, value: lib.name, checked: location().name === lib.name };
+                })}
+                title={'Library'}
+                onInput={(values) => {
+                  const value = values[0];
+                  Library.open(value);
+                }}
+              >
+                <span>{location().name}</span>
+                <Icon class="pl-2" name="expand-down" />
+              </Combobox>
+
+              {location()
+                .path.split('/')
                 .slice(1)
                 .map((part, i) => {
                   if (i >= 1) {
