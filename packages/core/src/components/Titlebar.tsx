@@ -1,5 +1,5 @@
 import { appWindow } from '@tauri-apps/api/window';
-import { Library, location } from '../Library.ts';
+import { Library, libs, location } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from './App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -48,12 +48,6 @@ const WindowsTitle = () => {
 export const [cmdOpen, setCmdOpen] = createSignal(false);
 
 export default function Titlebar() {
-  const [libs, setLibs] = createSignal([]);
-
-  Library.list().then((libs) => {
-    setLibs(libs);
-  });
-
   return (
     <>
       <div

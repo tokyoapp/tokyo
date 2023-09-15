@@ -1,16 +1,9 @@
-import { createSignal } from 'solid-js';
+import { libs } from '../Library.ts';
 import { setSettingOpen } from './App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
-import { Library } from '../Library.ts';
 
 export default function () {
-  const [libs, setLibs] = createSignal([]);
-
-  Library.list().then((libs) => {
-    setLibs(libs);
-  });
-
   return (
     <div class="w-full h-full backdrop-blur-xl bg-[#18191BEE] p-8 grid grid-cols-[150px_1fr] grid-rows-[auto_1fr]">
       <div class="flex justify-between items-center pb-8 col-span-2">

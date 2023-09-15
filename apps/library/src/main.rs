@@ -38,7 +38,6 @@ async fn main() {
         .route("/ws", get(handler))
         .route("/api/local/metadata", get(metadata))
         .route("/api/local/thumbnail", get(thumbnail))
-        .route("/api/library", get(library_create))
         .route("/api/proto", get(library_list));
 
     println!("Running app on http://127.0.0.1:8000");
@@ -70,6 +69,16 @@ async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
 async fn library_list() -> impl IntoResponse {
     phl_library::create_root_library().expect("Failed to create root library");
 
+    let list = get_library_list();
+    let mut msg = library::Message::new();
+    msg.set_list(list);
+
+    let mut headers = HeaderMap::new();
+    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    (headers, msg.write_to_bytes().unwrap())
+}
+
+fn get_library_list() -> library::LibraryListMessage {
     let mut libs = phl_library::lib_list()
         .unwrap()
         .into_iter()
@@ -84,20 +93,7 @@ async fn library_list() -> impl IntoResponse {
     let mut list = library::LibraryListMessage::new();
     list.libraries.append(&mut libs);
 
-    let mut msg = library::Message::new();
-    msg.set_list(list);
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-    (headers, msg.write_to_bytes().unwrap())
-}
-
-async fn library_create() -> impl IntoResponse {
-    phl_library::create_library("new", "/Users/tihav/Desktop");
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-    (headers, Json("{ \"ok\": true }"))
+    list
 }
 
 async fn handler(ws: WebSocketUpgrade) -> Response {
@@ -178,10 +174,17 @@ async fn handle_socket(mut socket: WebSocket) {
 
             let mut msg = library::Message::new();
             msg.set_index(get_index_msg(index.name.as_str()));
-
             let bytes = msg.write_to_bytes().unwrap();
-
             let _ = socket.send(ws::Message::Binary(bytes)).await;
+        }
+
+        if ok_msg.has_create() {
+            let create = ok_msg.create();
+            let _cr = phl_library::create_library(create.name.as_str(), create.path.as_str());
+            if _cr.is_ok() {
+                let mut msg = library::Message::new();
+                msg.set_list(get_library_list());
+            }
         }
 
         // send message:

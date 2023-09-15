@@ -45,16 +45,18 @@ export const [location, setLocation] = createSignal<Location>({
 
 export const [file, setFile] = createSignal<Entry>();
 
+export const [libs, setLibs] = createSignal([]);
+
 export class Library {
   static metadata(file: string) {
     return library.metadata(file);
   }
 
-  static list() {
-    return library.list();
-  }
-
   static open(name: string) {
+    library.list().then((libs) => {
+      setLibs(libs);
+    });
+
     library.open(name).then((index) => {
       const loc = {
         host: '127.0.0.1:8000',

@@ -35,10 +35,9 @@ pub fn find_library(name: &str) -> Result<Library> {
         .clone());
 }
 
-pub fn create_library(name: &str, path: &str) {
+pub fn create_library(name: &str, path: &str) -> Result<usize, rusqlite::Error> {
     let con = db();
     con.execute("insert into libraries values (?1, ?2)", (&name, &path))
-        .unwrap();
 }
 
 pub fn lib_list() -> Result<Vec<Library>, rusqlite::Error> {
