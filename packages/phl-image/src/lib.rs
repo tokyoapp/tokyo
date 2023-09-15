@@ -18,6 +18,7 @@ use std::{io::Cursor, time::Instant};
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
     pub hash: String,
+    pub path: String,
     pub name: String,
     pub create_date: String,
     pub rating: u32,
@@ -79,6 +80,7 @@ pub fn metadat(path: String) -> Metadata {
     return Metadata {
         hash: "none".to_owned(),
         name: String::from(p.file_name().unwrap().to_str().unwrap()),
+        path: String::from(p.to_str().unwrap()),
         width: 0,
         height: 0,
         exif: metadata.exif.clone(),

@@ -12,7 +12,15 @@ message LibraryListMessage {
 }
 
 message LibraryIndexMessage {
-  repeated string index = 1;
+  repeated IndexEntryMessage index = 1;
+}
+
+message IndexEntryMessage {
+  string hash = 1;
+  string path = 2;
+  string create_date = 3;
+  int32 rating = 4;
+  int32 orientation = 9;
 }
 
 message MetadataMessage {
@@ -50,12 +58,19 @@ message Message {
   }
 }
 
-// enum REQUEST_TYPE {
-//   INDEX = 0;
-//   LIST = 1;
-// }
+message CreateLibraryMessage {
+  string name = 1;
+  string path = 2;
+}
 
-// message Request {
-//   optional int32 id = 1;
-//   REQUEST_TYPE type = 2;
-// }
+message RequestLibraryIndex {
+  string name = 1;
+}
+
+message ClientMessage {
+  optional int32 id = 1;
+  oneof msg {
+    CreateLibraryMessage create = 5;
+    RequestLibraryIndex index = 6;
+  }
+}

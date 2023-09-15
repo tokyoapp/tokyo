@@ -11,7 +11,7 @@ export const [location, setLocation] = createStore<Location>({
   index: [],
 });
 
-library.open(location.name).then((loc) => {
+library.open("default").then((loc) => {
   setLocation(loc);
 });
 

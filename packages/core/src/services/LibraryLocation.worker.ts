@@ -1,4 +1,4 @@
-import proto from 'proto';
+import library from 'proto';
 import { ClientStorage } from './ClientStorage.ts';
 
 type Entry = {
@@ -34,8 +34,6 @@ export type Meta = {
 };
 
 const storage = new ClientStorage();
-
-import library from 'proto';
 
 class LibraryLocation {
   async list() {
@@ -81,13 +79,15 @@ class LibraryLocation {
       const ws = new WebSocket('ws://127.0.0.1:8000/ws');
       ws.onopen = () => {
         console.log('[WS] Connected');
+
+        const indxMsg = library.
       };
 
       ws.onmessage = async (msg) => {
         const data = msg.data as Blob;
         const buf = await data.arrayBuffer();
 
-        const message = proto.Message.decode(new Uint8Array(buf));
+        const message = library.Message.decode(new Uint8Array(buf));
 
         if (message.index?.index) {
           const metaCalls = message.index.index.map(async (src: string) => {

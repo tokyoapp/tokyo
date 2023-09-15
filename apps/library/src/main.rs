@@ -10,6 +10,7 @@ use axum::{
     Json, Router,
 };
 
+use phl_image::Metadata;
 use phl_proto::generated::library;
 use phl_proto::Message;
 
@@ -105,24 +106,35 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
 
-fn get_index_msg() -> library::LibraryIndexMessage {
-    let dir = phl_library::find_library("default").unwrap().path;
+fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
+    let dir = phl_library::find_library(name).unwrap().path;
     let list = phl_library::list(dir);
 
+    let mut index: Vec<Metadata> = Vec::new();
+
+    for path in list {
+        let meta = phl_image::metadat(path);
+        index.push(meta);
+    }
+
     let mut index_msg = library::LibraryIndexMessage::new();
-    index_msg.index = list;
+    index_msg.index = index
+        .iter()
+        .map(|meta| {
+            let mut msg = library::IndexEntryMessage::new();
+            msg.create_date = meta.create_date.clone();
+            msg.hash = meta.hash.clone();
+            msg.orientation = meta.orientation as i32;
+            msg.path = meta.path.clone();
+            msg.rating = meta.rating as i32;
+            msg
+        })
+        .collect();
 
     return index_msg;
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let mut msg = library::Message::new();
-    msg.set_index(get_index_msg());
-
-    socket
-        .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
-        .await;
-
     while let Some(msg) = socket.recv().await {
         let msg = if let Ok(msg) = msg {
             msg
@@ -132,7 +144,7 @@ async fn handle_socket(mut socket: WebSocket) {
         };
 
         let data = msg.into_data();
-        let msg = library::Message::parse_from_bytes(&data);
+        let msg = library::ClientMessage::parse_from_bytes(&data);
 
         println!("Rec socket message {:?}", msg);
 
@@ -155,8 +167,17 @@ async fn handle_socket(mut socket: WebSocket) {
             }
         }
 
-        // let ok_msg = msg.unwrap();
-        // ok_msg.
+        let ok_msg = msg.unwrap();
+        if ok_msg.has_index() {
+            let index = ok_msg.index();
+
+            let mut msg = library::Message::new();
+            msg.set_index(get_index_msg(index.name.as_str()));
+
+            let _ = socket
+                .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+                .await;
+        }
 
         // send message:
         if socket
