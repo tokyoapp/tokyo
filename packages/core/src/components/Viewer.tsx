@@ -1,31 +1,20 @@
-import { ParentProps, createSignal, onMount } from 'solid-js';
+import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
 import { Entry, file } from '../Library.ts';
 import { Stars } from './Stars.tsx';
 
+export const [item, setItem] = createSignal<{
+  item: Entry;
+  url: string;
+}>();
 export const [loading, setLoading] = createSignal(false);
-
-const viewportCanvas = document.createElement('canvas');
-viewportCanvas.id = 'viewport_canvas';
-
-export const canvas = document.createElement('canvas');
-canvas.style.width = '100%';
-canvas.style.maxHeight = 'calc(90vh - 100px)';
-canvas.style.objectFit = 'contain';
-
-const viewport = await import('viewport').then(async (module) => {
-  await module.default();
-  return module;
-});
 
 export async function loadImage(url: string, item: Entry) {
   setLoading(true);
-
-  await viewport.init(viewportCanvas.id, url, {
-    orientation: item.orientation,
+  setItem({
+    item,
+    url,
   });
-
-  setLoading(false);
 }
 
 const Tool = ({ children }: ParentProps) => {
@@ -39,21 +28,47 @@ const Tool = ({ children }: ParentProps) => {
   );
 };
 
+const viewport = await import('viewport').then(async (module) => {
+  await module.default();
+  return module;
+});
+
 export default function Preview() {
-  const canvas = viewportCanvas;
-  canvas.style.width = '100%';
-  canvas.style.position = 'absolute';
+  const viewportCanvas = document.createElement('canvas');
+  viewportCanvas.id = 'viewport_canvas';
+  viewportCanvas.style.width = '100%';
+  viewportCanvas.style.position = 'absolute';
 
   const resize = () => {
-    const parent = canvas.parentNode as HTMLElement;
-    canvas.width = parent?.clientWidth * 2;
-    canvas.height = parent?.clientHeight * 2;
+    const parent = viewportCanvas.parentNode as HTMLElement;
+    viewportCanvas.width = parent?.clientWidth * 2;
+    viewportCanvas.height = parent?.clientHeight * 2;
   };
 
   window.addEventListener('resize', resize);
 
-  viewport.init(viewportCanvas.id, '', {
-    orientation: 0,
+  let vp: ReturnType<typeof viewport.init>;
+  try {
+    vp = viewport.init();
+    vp.start(viewportCanvas.id, '', {
+      orientation: 0,
+    });
+  } catch (err) {
+    console.error('Viewport Error: ', err);
+  }
+
+  createEffect(() => {
+    if (vp) {
+      vp.destroy();
+
+      const i = item();
+      if (i) {
+        vp.start(viewportCanvas.id, i.url, {
+          orientation: i.item.orientation,
+        });
+      }
+    }
+    setLoading(false);
   });
 
   onMount(() => {
@@ -79,7 +94,7 @@ export default function Preview() {
         <Stars value={file()?.rating || 0} />
       </div>
 
-      {canvas}
+      {viewportCanvas}
     </div>
   );
 }
