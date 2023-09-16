@@ -3,6 +3,12 @@ version: 3
 silent: true
 
 tasks:
+  dev:
+    desc: Viewport dev command
+    prefix: "viewport"
+    cmds:
+      - task build --watch
+
   build:
     desc: Build wasm
     dir: "."

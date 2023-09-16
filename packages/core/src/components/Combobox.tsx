@@ -15,7 +15,7 @@ export default function Combobox(
 ) {
   return (
     <a-dropdown
-      class={`relative inline-block z-50 ${props.class}`}
+      class={`relative inline-block ${props.class}`}
       style="--dropdown-speed: 0s"
       onInput={(e) => props.onInput(e.target.value)}
     >

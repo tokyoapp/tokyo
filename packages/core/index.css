@@ -90,7 +90,7 @@ button:active {
 .app {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1.25fr 250px;
+  grid-template-columns: 300px 1.25fr 250px;
   height: 100%;
   width: 100%;
   --layout-grid-gap: 6px;

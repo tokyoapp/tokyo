@@ -4,8 +4,7 @@
   "description": "",
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
-    "core": "workspace:packages/core",
-    "viewport": "workspace:packages/viewport/pkg"
+    "core": "workspace:packages/core"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",

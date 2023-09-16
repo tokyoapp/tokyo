@@ -76,12 +76,12 @@ export default function Preview() {
   });
 
   return (
-    <div class="relative grid grid-rows-[1fr] w-full h-full items-center">
+    <div class="relative z-0 grid grid-rows-[1fr] w-full h-full items-center">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
         {loading() ? <Icon name="loader" /> : null}
       </div>
 
-      <div class="z-10 absolute top-2 left-3 w-auto right-3 flex gap-3">
+      <div class="z-20 absolute top-2 left-3 w-auto right-3 flex gap-3">
         <Tool>
           <span>100%</span>
         </Tool>
@@ -90,11 +90,11 @@ export default function Preview() {
         </Tool>
       </div>
 
-      <div class="z-10 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
+      <div class="z-20 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
         <Stars value={file()?.rating || 0} />
       </div>
 
-      {viewportCanvas}
+      <div class="relative z-10 w-full h-full">{viewportCanvas}</div>
     </div>
   );
 }

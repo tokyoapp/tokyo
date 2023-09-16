@@ -123,7 +123,8 @@ export default function Library(props: { location: Location }) {
         </div>
       </nav>
 
-      <div class="p-2 py-2 overflow-auto w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 break-all gap-2 overscroll-none">
+      {/* lg:grid-cols-2 xl:grid-cols-3 */}
+      <div class="p-2 py-2 overflow-auto w-full grid grid-cols-1 content-start break-all gap-2 overscroll-none">
         {items()
           .filter(itemFilter)
           .map((item, i) => {

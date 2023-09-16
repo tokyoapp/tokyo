@@ -4,23 +4,22 @@ version: "3"
 
 dotenv: [".env"]
 
+output: prefixed
+
 includes:
 
   library:
     aliases: [lib]
-    prefix: "Library"
     dir: apps/library
     taskfile: apps/library/Taskfile.yml
 
   desktop:
     aliases: [app]
-    prefix: "Desktop"
     dir: apps/desktop
     taskfile: apps/desktop/Taskfile.yml
 
   viewport:
     aliases: [vwp]
-    prefix: "Viewport"
     dir: packages/viewport
     taskfile: packages/viewport/Taskfile.yml
 
@@ -58,7 +57,7 @@ tasks:
     vars:
       deps:
         sh: task setup
-    deps: [setup, library:dev, desktop:dev]
+    deps: [library:dev, desktop:dev, vwp:dev]
 
   build:
     desc: Build app

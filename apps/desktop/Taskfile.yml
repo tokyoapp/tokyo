@@ -27,6 +27,7 @@ tasks:
 
   dev:
     desc: Dev
+    prefix: "desktop"
     dir: ./
     deps: [ui:dev, tauri:dev]
 
