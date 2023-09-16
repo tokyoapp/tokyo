@@ -13,7 +13,7 @@ edition = "2021"
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = [ "macos-private-api", "window-start-dragging", "window-close", "window-show", "window-unmaximize", "window-maximize", "window-minimize", "window-unminimize", "window-hide", "shell-open"] }
+tauri = { version = "1.4", features = [ "os-all", "macos-private-api", "window-start-dragging", "window-close", "window-show", "window-unmaximize", "window-maximize", "window-minimize", "window-unminimize", "window-hide", "shell-open"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 phl-image = { path = "../../../packages/phl-image" }

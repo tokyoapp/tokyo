@@ -17,13 +17,13 @@ export async function loadImage(url: string, item: Entry) {
   });
 }
 
-const Tool = ({ children }: ParentProps) => {
+const Tool = (props: ParentProps & { class: string }) => {
   return (
     <div
-      class="inline-flex h-8 justify-center items-center px-2 py-2 rounded-lg
-            bg-black hover:bg-zinc-900 cursor-pointer"
+      class={`inline-flex h-8 justify-center items-center px-2 py-2 rounded-lg
+            bg-black hover:bg-zinc-900 cursor-pointer ${props.class}`}
     >
-      {children}
+      {props.children}
     </div>
   );
 };
@@ -81,12 +81,12 @@ export default function Preview() {
         {loading() ? <Icon name="loader" /> : null}
       </div>
 
-      <div class="z-20 absolute top-2 left-3 w-auto right-3 flex gap-3">
+      <div class="z-20 absolute top-2 left-3 w-auto right-3 flex gap-3 text-xs">
         <Tool>
           <span>100%</span>
         </Tool>
-        <Tool>
-          <Icon name="ph-cursor" />
+        <Tool class="bg-zinc-900">
+          <Icon class="text-base" name="ph-cursor" />
         </Tool>
       </div>
 

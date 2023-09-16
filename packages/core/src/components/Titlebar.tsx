@@ -7,6 +7,11 @@ import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
+import { platform } from '@tauri-apps/api/os';
+
+const os = await platform().catch((err) => {
+  console.error(err);
+});
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-700 hover:border-zinc-700 cursor-default';
@@ -55,8 +60,8 @@ export default function Titlebar() {
         class="bg-[#18191B] border-b border-[#2A2A2A] flex justify-between items-start"
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[500px_1fr_500px] items-center text-xs text-zinc-500">
-          <div class="flex gap-4  items-center">
-            <MacTitle />
+          <div class="flex gap-4 items-center">
+            {os === 'darwin' ? <MacTitle /> : null}
             <Button
               onClick={() => {
                 setSettingOpen(!settingsOpen());
@@ -119,7 +124,7 @@ export default function Titlebar() {
           <div />
         </div>
 
-        {/* <WindowsTitle /> */}
+        {os !== 'darwin' ? <WindowsTitle /> : null}
       </div>
 
       {cmdOpen() ? (

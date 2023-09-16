@@ -7,7 +7,9 @@ import LocationSettings from './LocationSettings.tsx';
 import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
 import Info from './Info';
+import Edit from './Edit';
 import CreateLibrary from './CreateLibrary.tsx';
+import { Tabs } from './Tabs.tsx';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -51,7 +53,14 @@ function App() {
           <Preview />
         </div>
         <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
-          <Info file={file()} />
+          <Tabs>
+            <Tabs.Tab tab="Info" icon="ph-info">
+              <Info file={file()} />
+            </Tabs.Tab>
+            <Tabs.Tab tab="Edit" icon="ph-pencil">
+              <Edit file={file()} />
+            </Tabs.Tab>
+          </Tabs>
         </div>
       </div>
 
