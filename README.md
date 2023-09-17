@@ -3,7 +3,6 @@
 ![Library View](./docs/Library_View.png)
 
 Required tools:
-- wasm-pack
-- protoc
-- bun
 - task
+- rtx
+- rust (install using rustup)

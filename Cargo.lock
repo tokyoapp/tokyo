@@ -850,6 +850,20 @@ checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 [[package]]
 name = "core"
 version = "0.1.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "egui_extras",
+ "ehttp",
+ "image",
+ "log",
+ "poll-promise",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
 
 [[package]]
 name = "core-foundation"
@@ -1083,7 +1097,6 @@ dependencies = [
 name = "desktop"
 version = "0.0.0"
 dependencies = [
- "phl-image",
  "phl-library",
  "phl-proto",
  "serde",
@@ -2577,7 +2590,6 @@ name = "library"
 version = "0.1.0"
 dependencies = [
  "axum",
- "phl-image",
  "phl-library",
  "phl-proto",
  "serde",
@@ -3329,21 +3341,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "phl-image"
+name = "phl-library"
 version = "0.1.0"
 dependencies = [
  "image",
  "rawler",
  "rawloader",
  "roxmltree",
- "serde",
- "sha256",
-]
-
-[[package]]
-name = "phl-library"
-version = "0.1.0"
-dependencies = [
  "rusqlite",
  "serde",
  "sha256",
@@ -3356,6 +3360,7 @@ version = "0.1.0"
 dependencies = [
  "bytes",
  "protobuf",
+ "protobuf-codegen",
 ]
 
 [[package]]
@@ -3520,6 +3525,37 @@ dependencies = [
  "once_cell",
  "protobuf-support",
  "thiserror",
+]
+
+[[package]]
+name = "protobuf-codegen"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0dd418ac3c91caa4032d37cb80ff0d44e2ebe637b2fb243b6234bf89cdac4901"
+dependencies = [
+ "anyhow",
+ "once_cell",
+ "protobuf",
+ "protobuf-parse",
+ "regex",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
+name = "protobuf-parse"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d39b14605eaa1f6a340aec7f320b34064feb26c93aec35d6a9a2272a8ddfa49"
+dependencies = [
+ "anyhow",
+ "indexmap 1.9.3",
+ "log",
+ "protobuf",
+ "protobuf-support",
+ "tempfile",
+ "thiserror",
+ "which",
 ]
 
 [[package]]
@@ -5240,24 +5276,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
-name = "viewport"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "egui",
- "egui_extras",
- "ehttp",
- "image",
- "log",
- "poll-promise",
- "serde",
- "serde-wasm-bindgen",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
 name = "vswhom"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5597,6 +5615,18 @@ name = "weezl"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
+
+[[package]]
+name = "which"
+version = "4.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87ba24419a2078cd2b0f2ede2691b6c66d8e47836da3b6db8265ebad47afbfc7"
+dependencies = [
+ "either",
+ "home",
+ "once_cell",
+ "rustix 0.38.13",
+]
 
 [[package]]
 name = "winapi"

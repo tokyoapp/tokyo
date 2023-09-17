@@ -1,9 +1,9 @@
 {
-  "name": "core",
+  "name": "app",
   "main": "./src/components/App.tsx",
   "type": "module",
   "bin": {
-    "core": "./cli/main.ts"
+    "app": "./cli/main.ts"
   },
   "dependencies": {
     "@atrium-ui/mono": "0.2.0-4",
@@ -16,11 +16,9 @@
     "proto": "workspace:packages/phl-proto",
     "solid-js": "^1.7.8",
     "tailwindcss": "^3.3.3",
-    "viewport": "workspace:packages/viewport/pkg",
     "vite": "^4.4.4",
     "vite-plugin-solid": "^2.7.0",
     "vite-plugin-wasm": "^3.2.2",
-    "vite-plugin-watch": "^0.2.0",
     "vite-plugin-wrap-worker": "^0.3.0"
   }
 }

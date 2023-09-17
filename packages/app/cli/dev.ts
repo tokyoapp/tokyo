@@ -2,6 +2,7 @@ import path from 'node:path';
 import { createServer, defineConfig } from 'vite';
 import worker from 'vite-plugin-wrap-worker';
 import solidPlugin from 'vite-plugin-solid';
+import rust from './plugins/vite-rust.js';
 const wasm = require('vite-plugin-wasm');
 
 const config = defineConfig({
@@ -12,7 +13,7 @@ const config = defineConfig({
   },
   root: path.resolve('src'),
   envPrefix: ['VITE_', 'TAURI_'],
-  plugins: [wasm.default(), worker(), solidPlugin()],
+  plugins: [rust(), wasm.default(), worker(), solidPlugin()],
 });
 
 const server = await createServer(config);

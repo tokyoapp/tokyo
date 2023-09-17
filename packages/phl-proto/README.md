@@ -1,5 +1,6 @@
+TypeScript
+https://github.com/stephenh/ts-proto#ts-proto
 https://github.com/protobufjs/protobuf.js/#using-proto-files
 
-https://www.npmjs.com/package/protobufjs-cli#command-line-api
-
-https://protobuf.dev/reference/python/python-generated/
+Rust
+https://docs.rs/protobuf-codegen/latest/protobuf_codegen/

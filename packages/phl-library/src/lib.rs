@@ -1,3 +1,5 @@
+pub mod image;
+
 mod db;
 mod images;
 
@@ -63,7 +65,7 @@ pub fn create_root_library() -> Result<()> {
 
     let list = lib_list()?;
     if list.len() == 0 {
-        create_library("Default", "/Users/tihav/Pictures");
+        create_library("default", "/Users/tihav/Pictures");
     }
 
     return Ok(());

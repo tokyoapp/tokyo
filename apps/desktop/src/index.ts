@@ -1,7 +1,7 @@
 import '@phosphor-icons/web/light';
 
-import 'core/index.css';
+import 'app/index.css';
 import { render } from 'solid-js/web';
-import App from 'core';
+import App from 'app';
 main.innerHTML = '';
 render(App, main);
