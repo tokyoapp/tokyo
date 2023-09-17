@@ -4,7 +4,7 @@ import Icon from './Icon.tsx';
 import { createEffect, createSignal } from 'solid-js';
 
 function Seperator() {
-  return <hr class="border-zinc-800" />;
+  return <hr class="border-zinc-500" />;
 }
 
 function Property(props: { title: string; value: string | string[] }) {
@@ -14,7 +14,7 @@ function Property(props: { title: string; value: string | string[] }) {
         <div class="text-xs opacity-50 mb-1">{props.title}</div>
         <div class="text-xs flex gap-2">
           {props.value.map((value) => {
-            return <div class="rounded-md bg-zinc-600 p-[2px_6px]">{value}</div>;
+            return <div class="rounded-md bg-zinc-700 p-[2px_6px]">{value}</div>;
           })}
         </div>
       </div>

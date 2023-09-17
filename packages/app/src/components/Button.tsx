@@ -3,7 +3,7 @@ import { ParentProps } from 'solid-js';
 const variants = {
   solid: `flex items-center
   min-h-[28px] px-2 py-1
-  bg-[#27272A] border border-[#2A2A2A]
+  bg-[#27272A] border border-zinc-800
   pointer-events-auto`,
   ghost: 'p-2 shadow-none',
 } as const;

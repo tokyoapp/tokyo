@@ -78,7 +78,7 @@ export default function Library(props: { location: Location }) {
       class="relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-transparent"
       onKeyDown={onKeyDown}
     >
-      <nav class="bg-[#18191B]">
+      <nav class="bg-zinc-900">
         <div class="px-2 py-2 border-b-zinc-800 border-b text-xs flex justify-between items-center">
           <div>
             <Combobox
@@ -145,8 +145,8 @@ export default function Library(props: { location: Location }) {
 
       {selection().length > 0 ? (
         <div class="z-40 absolute bottom-3 left-3 right-3 w-auto">
-          <div class="bg-[#18191B] px-3 py-1 border-zinc-800 border rounded-md text-sm">
-            <span class="text-zinc-600">{selection()[0].name}</span>
+          <div class="bg-zinc-900 px-3 py-1 border-zinc-800 border rounded-md text-sm">
+            <span class="text-zinc-700">{selection()[0].name}</span>
             <span class="px-2" />
             <button type="button" class="p-1 px-2">
               <Icon name="close" />

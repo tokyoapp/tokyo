@@ -47,9 +47,8 @@
     },
     "windows": [
       {
-        "transparent": false,
+        "transparent": true,
         "fileDropEnabled": true,
-        "titleBarStyle": "Overlay",
         "decorations": false,
         "hiddenTitle": true,
         "fullscreen": false,

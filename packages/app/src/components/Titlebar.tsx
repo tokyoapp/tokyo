@@ -14,7 +14,7 @@ const os = await platform().catch((err) => {
 });
 
 const MacTitle = () => {
-  const dot = 'p-0 w-[14px] h-[14px] border border-zinc-700 hover:border-zinc-700 cursor-default';
+  const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
   return (
     <div class="w-20 flex gap-[6px] px-2 pointer-events-auto">
       <button type="button" class={`${dot} hover:bg-red-700`} onClick={() => appWindow.close()} />
@@ -57,7 +57,7 @@ export default function Titlebar() {
     <>
       <div
         data-tauri-drag-region
-        class="bg-[#18191B] border-b border-[#2A2A2A] flex justify-between items-start"
+        class="bg-zinc-900 border-b border-zinc-800 flex justify-between items-start"
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[500px_1fr_500px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">

@@ -29,7 +29,7 @@ export default function Combobox(
         {props.children}
       </button>
 
-      <div class="rounded-md bg-zinc-800 border border-zinc-700 p-1 mt-1 min-w-[150px]">
+      <div class="rounded-md bg-zinc-800 border border-zinc-800 p-1 mt-1 min-w-[150px]">
         <a-toggle
           multiple={props.multiple}
           value={props.items.map((item) => (item.checked ? item.id : false)).filter(Boolean)}
@@ -40,7 +40,7 @@ export default function Combobox(
                 type="button"
                 value={item.id}
                 class="outline-none group cursor-pointer w-full flex items-center justify-start px-2 py-1 shadow-none
-                    rounded-md bg-transparent hover:bg-zinc-600 active:bg-zinc-700"
+                    rounded-md bg-transparent hover:bg-zinc-700 active:bg-zinc-800"
               >
                 <div class="opacity-0 group-[&[selected]]:opacity-100 ml-1 mr-2">
                   <Icon name="check" />
