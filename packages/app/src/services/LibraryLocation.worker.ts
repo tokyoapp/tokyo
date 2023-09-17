@@ -1,4 +1,4 @@
-import { proto as library } from 'proto';
+import * as library from 'proto';
 import { ClientStorage } from './ClientStorage.ts';
 
 const storage = new ClientStorage();
@@ -34,7 +34,7 @@ class LibraryLocation {
     return meta;
   }
 
-  async open(name: string): Promise<library.IIndexEntryMessage[]> {
+  async open(name: string): Promise<library.IndexEntryMessage[]> {
     return new Promise((resolve) => {
       const ws = new WebSocket('ws://127.0.0.1:8000/ws');
       ws.onopen = () => {

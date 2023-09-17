@@ -10,8 +10,8 @@ use axum::{
     Json, Router,
 };
 
-use phl_image::Metadata;
-use phl_proto::generated::library;
+use phl_library::image::Metadata;
+use phl_proto::library;
 use phl_proto::Message;
 
 use serde::{Deserialize, Serialize};
@@ -50,7 +50,7 @@ async fn main() {
 
 async fn metadata(info: Query<FileInfo>) -> impl IntoResponse {
     let p = decode(&info.file).expect("UTF-8");
-    let m = phl_image::metadat(p.to_string());
+    let m = phl_library::image::metadat(p.to_string());
 
     let mut headers = HeaderMap::new();
     headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
@@ -63,7 +63,7 @@ async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
     headers.insert("Content-Type", "image/jpeg".parse().unwrap());
-    (headers, phl_image::cached_thumb(p.to_string()))
+    (headers, phl_library::image::cached_thumb(p.to_string()))
 }
 
 async fn library_list() -> impl IntoResponse {
@@ -109,7 +109,7 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
     let mut index: Vec<Metadata> = Vec::new();
 
     for path in list {
-        let meta = phl_image::metadat(path);
+        let meta = phl_library::image::metadat(path);
         let _ = meta.is_some_and(|v| {
             index.push(v);
             true

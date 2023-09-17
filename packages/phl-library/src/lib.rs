@@ -1,3 +1,5 @@
+pub mod image;
+
 mod db;
 mod images;
 

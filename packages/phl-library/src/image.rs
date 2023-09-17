@@ -167,7 +167,7 @@ pub fn open(path: String) -> DynamicImage {
     println!("start decode {}", start.elapsed().as_millis());
 
     let raw_params = RawDecodeParams { image_index: 0 };
-    let decoder = crate::get_decoder(&mut rawfile).unwrap();
+    let decoder = get_decoder(&mut rawfile).unwrap();
     let rawimage = decoder
         .raw_image(&mut rawfile, raw_params.clone(), false)
         .unwrap();

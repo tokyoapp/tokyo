@@ -28,11 +28,6 @@ const Tool = (props: ParentProps & { class: string }) => {
   );
 };
 
-const viewport = await import('viewport').then(async (module) => {
-  await module.default();
-  return module;
-});
-
 export default function Preview() {
   const viewportCanvas = document.createElement('canvas');
   viewportCanvas.id = 'viewport_canvas';
@@ -48,25 +43,32 @@ export default function Preview() {
   window.addEventListener('resize', resize);
 
   let vp: ReturnType<typeof viewport.init>;
-  try {
-    vp = viewport.init();
-    vp.start(viewportCanvas.id, '', {
-      orientation: 0,
+
+  import('../lib.rs')
+    .then(async (module) => {
+      await module.default();
+      return module;
+    })
+    .then(async (viewport) => {
+      console.log(viewport);
+
+      vp = viewport.init();
+      vp.start(viewportCanvas.id, '', {
+        orientation: 0,
+      });
+    })
+    .catch((err) => {
+      console.error('Viewport Error: ', err);
     });
-  } catch (err) {
-    console.error('Viewport Error: ', err);
-  }
 
   createEffect(() => {
-    if (vp) {
-      vp.destroy();
+    const i = item();
 
-      const i = item();
-      if (i) {
-        vp.start(viewportCanvas.id, i.url, {
-          orientation: i.item.orientation,
-        });
-      }
+    if (vp && i) {
+      vp.destroy();
+      vp.start(viewportCanvas.id, i.url, {
+        orientation: i.item.orientation,
+      });
     }
     setLoading(false);
   });
