@@ -1,7 +1,7 @@
-mod app;
+mod viewport;
 
-use app::{Image, TemplateApp};
 use eframe;
+use viewport::{Image, TemplateApp};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures;
 

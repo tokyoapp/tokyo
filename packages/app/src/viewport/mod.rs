@@ -1,8 +1,6 @@
 use std::ops::Add;
 
-use egui::{
-    emath::RectTransform, Align2, Color32, Frame, PointerButton, Pos2, Rect, Shape, Stroke, Vec2,
-};
+use egui::{Align2, Color32, Frame, PointerButton, Pos2, Rect, Shape, Stroke, Vec2};
 use egui_extras::RetainedImage;
 use poll_promise::Promise;
 use wasm_bindgen::prelude::*;

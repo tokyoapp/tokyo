@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
-import { readFileSync, write, writeFile } from 'node:fs';
-import { resolve, dirname, relative, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { Plugin } from 'vite';
 
 function exec(exec: string, args: string[], options: { cwd: string }): Promise<number | null> {
   return new Promise((resolve, reject) => {
@@ -8,39 +9,63 @@ function exec(exec: string, args: string[], options: { cwd: string }): Promise<n
       stdio: 'ignore',
       ...options,
     });
-
-    child.stderr?.on('data', (data) => {
-      reject(data);
-    });
-
-    child.on('close', (code) => {
-      resolve(code);
-    });
+    child.stderr?.on('data', reject);
+    child.on('close', resolve);
   });
 }
 
-const fileRegex = /\.rs$/;
+export default function rust(): Plugin {
+  const entries = new Set<string>();
 
-export default function rust() {
+  const build = async (id: string) => {
+    if (!entries.has(id)) entries.add(id);
+
+    const dist = 'node_modules/.rust';
+    const cwd = resolve(dirname(resolve(id)), '..');
+
+    await exec('wasm-pack', ['build', '--target', 'web', '-d', dist], {
+      cwd,
+    }).catch(console.error);
+
+    const pkg = JSON.parse(readFileSync(resolve(cwd, dist, 'package.json')).toString());
+    const module = resolve(cwd, dist, pkg.module);
+
+    return {
+      code: readFileSync(module)
+        .toString()
+        .replace('core_bg.wasm', join(cwd, dist, 'core_bg.wasm')),
+    };
+  };
+
   return {
     name: 'vite-plugin-rust',
 
+    config: () => ({
+      server: {
+        watch: {
+          disableGlobbing: false,
+        },
+      },
+    }),
+
+    configureServer(server) {
+      const dir = resolve(__dirname, '../../src/**/*.rs');
+      server.watcher.add(dir);
+      server.watcher.on('change', (path, stat) => {
+        if (path.match('.rs')) {
+          for (const id of entries) {
+            build(id);
+          }
+        }
+      });
+    },
+
     async transform(src, id) {
-      if (fileRegex.test(id)) {
-        const dist = 'node_modules/.rust';
-        const dir = resolve(dirname(resolve(id)), '..');
-
-        await exec('wasm-pack', ['build', '--target', 'web', '-d', dist], {
-          cwd: dir,
-        }).catch(console.error);
-
-        const pkg = JSON.parse(readFileSync(resolve(dir, dist, 'package.json')).toString());
-        const module = resolve(dir, dist, pkg.module);
+      if (/\.rs$/.test(id)) {
+        const { code } = await build(id);
 
         return {
-          code: readFileSync(module)
-            .toString()
-            .replace('core_bg.wasm', join(dir, dist, 'core_bg.wasm')),
+          code: code,
           map: null,
         };
       }
