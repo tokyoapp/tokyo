@@ -12,11 +12,12 @@ const icons = {
   more: await import('../../assets/icons/more.svg?raw'),
   'smaller-equals': await import('../../assets/icons/smaller-equals.svg?raw'),
   text: await import('../../assets/icons/text.svg?raw'),
-  loader: await import('../../assets/loader.riv?url'),
+  plus: await import('../../assets/icons/plus.svg?raw'),
+  loader: await import('../../assets/icons/loader.riv?url'),
 } as const;
 
 type Props = {
-  name?: keyof typeof icons | string;
+  name?: keyof typeof icons;
   class?: string;
 };
 
@@ -44,8 +45,8 @@ export default function Icon(props: Props) {
       riveInstance.cleanup();
     });
 
-    return <div class={`inline-block mb-[-0.125em] align-baseline ${className}`}>{canvas}</div>;
+    return <div class={`inline-block mb-[-0.175em] align-baseline ${className}`}>{canvas}</div>;
   }
 
-  return <div class={`inline-block mb-[-0.125em] align-baseline ${className}`} innerHTML={src} />;
+  return <div class={`inline-block mb-[-0.175em] align-baseline ${className}`} innerHTML={src} />;
 }

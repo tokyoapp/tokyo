@@ -125,3 +125,7 @@ a-dropdown::part(dropdown) {
 .view-settings a-dropdown::part(dropdown) {
   right: 0;
 }
+
+hr {
+  opacity: 0.1;
+}

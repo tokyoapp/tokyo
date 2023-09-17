@@ -87,6 +87,19 @@ export default function Titlebar() {
                   const value = values[0];
                   Library.open(value);
                 }}
+                content={
+                  <div>
+                    <hr class="my-2" />
+                    <button
+                      type="button"
+                      onClick={() => console.log('create lib')}
+                      class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
+                    >
+                      <Icon name="plus" class="mr-2" />
+                      <span>Create new</span>
+                    </button>
+                  </div>
+                }
               >
                 <span>{location().name}</span>
                 <Icon class="pl-2" name="expand-down" />

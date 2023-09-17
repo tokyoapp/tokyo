@@ -11,6 +11,7 @@ export default function Combobox(
     multiple: boolean;
     onInput: (value: string[]) => void;
     items: { id: string; value: string; checked: boolean }[];
+    content?: Element;
   } & ParentProps
 ) {
   return (
@@ -48,6 +49,7 @@ export default function Combobox(
               </button>
             );
           })}
+          {props.content || null}
         </a-toggle>
       </div>
     </a-dropdown>
