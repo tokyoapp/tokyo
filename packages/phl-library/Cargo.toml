@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rusqlite = "0.29.0"
 serde = { version = "1.0", features = ["derive"] }
 sha256 = "1.4.0"
 walkdir = "2.3.3"
@@ -12,3 +11,9 @@ image = "0.24.7"
 rawloader = "0.37.1"
 rawler = { git = "https://github.com/luckydye/dnglab" }
 roxmltree = "0.18"
+rusqlite = "0.29.0"
+tokio = "1.32.0"
+
+[dependencies.uuid]
+version = "1.4.1"
+features = ["v4"]

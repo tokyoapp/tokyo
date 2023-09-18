@@ -3351,6 +3351,8 @@ dependencies = [
  "rusqlite",
  "serde",
  "sha256",
+ "tokio",
+ "uuid",
  "walkdir",
 ]
 
