@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use axum::extract::ws;
 use axum::{
   extract::{
@@ -5,7 +7,7 @@ use axum::{
     Query,
   },
   http::HeaderMap,
-  response::{IntoResponse, Response},
+  response::IntoResponse,
   routing::get,
   Json, Router,
 };
@@ -45,9 +47,18 @@ impl App {
       library: Library::new(),
     };
 
+    let app_arc = Arc::new(app);
+
     app.router.route(
       "/ws",
-      get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| app.handle_socket(socket)) }),
+      get(|ws: WebSocketUpgrade| async {
+        let res = ws.on_upgrade(move |socket| App::handle_socket(&app_arc, socket));
+
+        res
+
+        // let app = app_mutex.lock();
+        // ws.on_upgrade(async move |socket| App::handle_socket(&app, socket).await)
+      }),
     );
 
     app.router.route(
@@ -93,20 +104,41 @@ impl App {
   }
 
   pub async fn library_list(self: &Self) -> impl IntoResponse {
-    phl_library::create_root_library().expect("Failed to create root library");
+    self
+      .library
+      .create_root_library()
+      .await
+      .expect("Failed to create root library");
 
-    let list = self.library_list();
     let mut msg = library::Message::new();
-    msg.set_list(list);
+    let list_msg = self.get_location_list();
+
+    msg.set_list(list_msg);
 
     let mut headers = HeaderMap::new();
     headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
     (headers, msg.write_to_bytes().unwrap())
   }
 
-  pub fn get_index_msg(self: Self, name: &str) -> library::LibraryIndexMessage {
-    let dir = phl_library::find_library(name).unwrap().path;
-    let list = phl_library::list(dir);
+  pub fn get_location_list(self: &Self) -> library::LibraryListMessage {
+    let list = self.library.root.location_list().unwrap();
+    let mut list_msg = library::LibraryListMessage::new();
+    list_msg.libraries = list
+      .into_iter()
+      .map(|loc| {
+        let mut m = library::LibraryMessage::new();
+        m.name = loc.name;
+        m.path = loc.path;
+        m
+      })
+      .collect();
+
+    list_msg
+  }
+
+  pub fn get_index_msg(self: &Self, name: &str) -> library::LibraryIndexMessage {
+    let dir = self.library.find_library(name).unwrap().path;
+    let list = self.library.list(dir);
 
     let mut index: Vec<Metadata> = Vec::new();
 
@@ -136,7 +168,7 @@ impl App {
     return index_msg;
   }
 
-  pub async fn handle_socket(self: Self, mut socket: WebSocket) {
+  pub async fn handle_socket(app: &App, mut socket: WebSocket) {
     while let Some(msg) = socket.recv().await {
       let msg = if let Ok(msg) = msg {
         msg
@@ -175,19 +207,22 @@ impl App {
         println!("Requested Index {}", index.name);
 
         let mut msg = library::Message::new();
-        msg.set_index(get_index_msg(index.name.as_str()));
+        msg.set_index(app.get_index_msg(index.name.as_str()));
         let bytes = msg.write_to_bytes().unwrap();
         let _ = socket.send(ws::Message::Binary(bytes)).await;
       }
 
-      if ok_msg.has_create() {
-        let create = ok_msg.create();
-        let _cr = phl_library::create_library(create.name.as_str(), create.path.as_str());
-        if _cr.is_ok() {
-          let mut msg = library::Message::new();
-          msg.set_list(get_library_list());
-        }
-      }
+      // if ok_msg.has_create() {
+      //   let create = ok_msg.create();
+      //   let _cr = self
+      //     .library
+      //     .create_library(create.name.as_str(), create.path.as_str())
+      //     .await;
+      //   if _cr.is_ok() {
+      //     let mut msg = library::Message::new();
+      //     msg.set_list(self.get_location_list());
+      //   }
+      // }
 
       // send message:
       if socket

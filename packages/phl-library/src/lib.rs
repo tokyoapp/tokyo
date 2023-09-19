@@ -17,7 +17,7 @@ impl Library {
     }
   }
 
-  pub fn list(dir: String) -> Vec<String> {
+  pub fn list(self: &Self, dir: String) -> Vec<String> {
     return images::list(dir);
   }
 

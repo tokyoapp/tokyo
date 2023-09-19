@@ -4,10 +4,7 @@ version: "3"
 
 dotenv: [".env"]
 
-output: prefixed
-
 includes:
-
   library:
     aliases: [lib]
     dir: apps/library
@@ -19,26 +16,25 @@ includes:
     taskfile: apps/desktop/Taskfile.yml
 
 tasks:
-
   run:
     desc: Run a task recursivly in all included Taskfiles.
     vars:
       TASK: '{{.TASK | default "help"}}'
       TASKS:
         sh: echo $(task --list --json | jq -r '.tasks[] | select(.name | contains(":{{.TASK}}")).name')
-    cmds: 
+    cmds:
       - task --parallel {{.TASKS}}
 
   setup:
     desc: Install dependencies
-    dir: '.'
+    dir: "."
     sources:
       - .rtx.toml
       - bun.lockb
       - package.json
       - Cargo.toml
       - Cargo.lock
-      - '**/package.json'
+      - "**/package.json"
     cmds:
       - rtx install 2> /dev/null || true
       - bun install
@@ -47,7 +43,7 @@ tasks:
       - task: codegen
 
   codegen:
-    dir: './packages/phl-proto'
+    dir: "./packages/phl-proto"
     cmds:
       - cargo install protobuf-codegen
       - bun x cargo build
