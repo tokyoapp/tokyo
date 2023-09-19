@@ -20,9 +20,18 @@ includes:
 
 tasks:
 
+  run:
+    desc: Run a task recursivly in all included Taskfiles.
+    vars:
+      TASK: '{{.TASK | default "help"}}'
+      TASKS:
+        sh: echo $(task --list --json | jq -r '.tasks[] | select(.name | contains(":{{.TASK}}")).name')
+    cmds: 
+      - task --parallel {{.TASKS}}
+
   setup:
     desc: Install dependencies
-    dir: '{{.TASKFILE_DIR}}'
+    dir: '.'
     sources:
       - .rtx.toml
       - bun.lockb
@@ -37,7 +46,7 @@ tasks:
       - task: codegen
 
   codegen:
-    dir: '{{.TASKFILE_DIR}}/packages/phl-proto'
+    dir: './packages/phl-proto'
     cmds:
       - cargo install protobuf-codegen
       - bun x cargo build
