@@ -1,44 +1,46 @@
+use rusqlite::params;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Tag {
   pub id: String,
   pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Set {
   pub id: String,
-  pub tags: Vec<Tag>,
+  pub tags: Vec<String>,
   pub rating: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Location {
   pub id: String,
   pub name: String,
   pub path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Edit {
   pub id: String,
   pub edits: String,
   pub file: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preset {
   pub id: String,
   pub edits: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct File {
   pub hash: String,
   pub rating: i32,
+  pub tags: Vec<String>,
 }
 
 pub struct Root {
@@ -80,36 +82,39 @@ impl Root {
 
     // table: locations
     con.execute(
-      "create table if not exists locations (id TEXT, name TEXT, path TEXT);",
+      "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
       (),
     )?;
 
     // table: files
     con.execute(
-      "create table if not exists files (hash TEXT, rating INTEGER);",
+      "create table if not exists files (hash TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
       (),
     )?;
 
     // table: presets
     con.execute(
-      "create table if not exists presets (id TEXT, edits INTEGER);",
+      "create table if not exists presets (id TEXT PRIMARY KEY, edits INTEGER);",
       (),
     )?;
 
     // table: edits
     con.execute(
-      "create table if not exists edits (id TEXT, edits TEXT, file TEXT);",
+      "create table if not exists edits (id TEXT PRIMARY KEY, edits TEXT, file TEXT);",
       (),
     )?;
 
     // table: set
     con.execute(
-      "create table if not exists sets (id TEXT, tags TEXT, rating INTEGER);",
+      "create table if not exists sets (id TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
       (),
     )?;
 
     // table: tags
-    con.execute("create table if not exists tags (id TEXT, name TEXT);", ())?;
+    con.execute(
+      "create table if not exists tags (id TEXT PRIMARY KEY, name TEXT);",
+      (),
+    )?;
 
     let list = self.location_list()?;
     if list.len() == 0 {
@@ -121,7 +126,7 @@ impl Root {
     return Ok(());
   }
 
-  pub async fn insert_tag(self: &Self, name: &str) -> Result<(), rusqlite::Error> {
+  pub async fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
@@ -130,7 +135,7 @@ impl Root {
       .unwrap()
       .execute("insert into tags (id, name) values (?1, ?2)", (&uid, &name))?;
 
-    Ok(())
+    Ok(uid)
   }
 
   pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<(), rusqlite::Error> {
@@ -146,8 +151,8 @@ impl Root {
 
   pub async fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
     self.connection.as_ref().unwrap().execute(
-      "insert into files (hash, rating) values (?1, ?2)",
-      (&hash, &rating),
+      "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
+      (&hash, &rating, &""),
     )?;
 
     Ok(())
@@ -171,17 +176,40 @@ impl Root {
 
   pub async fn get_file(self: &Self, hash: &str) -> Result<Vec<File>, rusqlite::Error> {
     let con = self.connection.as_ref().unwrap();
-    let mut stmt = con.prepare("select hash, rating from files where hash = :hash")?;
+    let mut stmt = con.prepare("select hash, tags, rating from files where hash = :hash")?;
 
     let rows = stmt.query_map(&[(":hash", &hash)], |row| {
+      let tags: String = row.get(1)?;
+
       Ok(File {
         hash: row.get(0)?,
-        rating: row.get(1)?,
+        tags: tags.split(",").map(|str| String::from(str)).collect(),
+        rating: row.get(2)?,
       })
     })?;
 
     let list: Vec<File> = rows.map(|v| v.unwrap()).collect();
     return Ok(list);
+  }
+
+  pub async fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
+    self.connection.as_ref().unwrap().execute(
+      "update files SET rating = ?1 where hash = ?2",
+      params![rating, hash],
+    )?;
+
+    Ok(())
+  }
+
+  pub async fn set_tags(self: &Self, hash: &str, tags: Vec<String>) -> Result<(), rusqlite::Error> {
+    let ts = tags.join(",");
+
+    self.connection.as_ref().unwrap().execute(
+      "update files SET tags = ?1 where hash = ?2",
+      params![ts, hash],
+    )?;
+
+    Ok(())
   }
 
   pub async fn insert_location(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {

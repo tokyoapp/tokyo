@@ -3,70 +3,58 @@ pub mod image;
 mod db;
 mod images;
 
-use std::{fs, path::Path};
+use db::{Location, Root};
+use rusqlite::Result;
 
-use rusqlite::{Connection, Result};
-
-#[derive(Debug, serde::Serialize, Clone)]
 pub struct Library {
-    pub name: String,
-    pub path: String,
+  pub root: Root,
 }
 
-pub fn list(dir: String) -> Vec<String> {
-    return images::list(dir);
-}
-
-fn db() -> Connection {
-    if !Path::exists(&Path::new("./data/")) {
-        fs::create_dir("./data/").expect("Unable to create dir './data/'");
+impl Library {
+  pub fn new() -> Library {
+    Library {
+      root: db::Root::new(),
     }
+  }
 
-    Connection::open("./data/db.sqlite").expect("Failed to open database")
-}
+  pub fn list(dir: String) -> Vec<String> {
+    return images::list(dir);
+  }
 
-pub fn default_library() -> Result<Library> {
-    return Ok(lib_list()?.first().unwrap().clone());
-}
+  pub fn default_library(self: &Self) -> Option<Location> {
+    let locs = self.root.location_list().expect("Failed to list locations");
+    let first = locs.first();
 
-pub fn find_library(name: &str) -> Result<Library> {
-    return Ok(lib_list()?
-        .iter()
-        .find(|lib| lib.name == name)
-        .expect("Could not find library")
-        .clone());
-}
+    if let Some(location) = first {
+      return Some(location.clone());
+    }
+    None
+  }
 
-pub fn create_library(name: &str, path: &str) -> Result<usize, rusqlite::Error> {
-    let con = db();
-    con.execute("insert into libraries values (?1, ?2)", (&name, &path))
-}
+  pub fn find_library(self: &Self, name: &str) -> Result<Location> {
+    let locs = self.root.location_list()?;
+    let loc = locs
+      .iter()
+      .find(|lib| lib.name == name)
+      .expect("Could not find library");
 
-pub fn lib_list() -> Result<Vec<Library>, rusqlite::Error> {
-    let con = db();
-    let mut stmt = con.prepare("select * from libraries")?;
+    return Ok(loc.clone());
+  }
 
-    let rows = stmt.query_map([], |row| {
-        Ok(Library {
-            name: row.get(0)?,
-            path: row.get(1)?,
-        })
-    })?;
+  pub async fn create_library(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+    self.root.insert_location(name, path).await?;
+    Ok(())
+  }
 
-    let list: Vec<Library> = rows.map(|v| v.unwrap()).collect();
-    return Ok(list);
-}
-
-pub fn create_root_library() -> Result<()> {
-    let con = db();
-
-    let query = "create table if not exists libraries (name TEXT, path TEXT);";
-    con.execute(query, ())?;
-
-    let list = lib_list()?;
+  pub async fn create_root_library(self: &Self) -> Result<()> {
+    let list = self.root.location_list()?;
     if list.len() == 0 {
-        create_library("default", "/Users/tihav/Pictures");
+      self
+        .root
+        .insert_location("default", "/Users/tihav/Pictures")
+        .await?;
     }
 
     return Ok(());
+  }
 }
