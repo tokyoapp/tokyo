@@ -1,5 +1,6 @@
 import { Rive } from '@rive-app/canvas-single';
 import { onCleanup } from 'solid-js';
+import '@phosphor-icons/web/light';
 
 const icons = {
   unknown: await import('../../assets/icons/unknown.svg?raw'),

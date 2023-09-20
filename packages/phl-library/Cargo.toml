@@ -13,6 +13,7 @@ rawler = { git = "https://github.com/luckydye/dnglab" }
 roxmltree = "0.18"
 rusqlite = "0.29.0"
 tokio = "1.32.0"
+anyhow = "1.0.75"
 
 [dependencies.uuid]
 version = "1.4.1"

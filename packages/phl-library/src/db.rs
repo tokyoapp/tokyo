@@ -44,8 +44,10 @@ pub struct File {
 }
 
 pub struct Root {
-  connection: Option<Connection>,
+  connection: Connection,
 }
+
+unsafe impl Sync for Root {}
 
 // trait Summary {
 //     fn summarize(&self) -> String;
@@ -61,24 +63,19 @@ impl Root {
   pub fn new() -> Self {
     println!("Create root");
 
-    Root { connection: None }
-  }
-
-  pub async fn connect(self: &mut Self) -> Result<(), rusqlite::Error> {
-    println!("Connect to db");
-
     if !Path::exists(&Path::new("./data/")) {
       println!("Path for data exists");
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 
-    self.connection = Some(Connection::open("./data/db.sqlite")?);
+    let connection = Connection::open("./data/db.sqlite").expect("Failed to open db");
+    let root = Root { connection };
 
-    Ok(())
+    return root;
   }
 
-  pub async fn init_db(self: &Self) -> Result<(), rusqlite::Error> {
-    let con = self.connection.as_ref().unwrap();
+  pub fn init_db(self: &Self) -> Result<(), rusqlite::Error> {
+    let con = &self.connection;
 
     // table: locations
     con.execute(
@@ -118,9 +115,7 @@ impl Root {
 
     let list = self.location_list()?;
     if list.len() == 0 {
-      self
-        .insert_location("default", "/Users/tihav/Pictures")
-        .await?;
+      self.insert_location("default", "/Users/tihav/Pictures")?;
     }
 
     return Ok(());
@@ -131,8 +126,6 @@ impl Root {
 
     self
       .connection
-      .as_ref()
-      .unwrap()
       .execute("insert into tags (id, name) values (?1, ?2)", (&uid, &name))?;
 
     Ok(uid)
@@ -141,7 +134,7 @@ impl Root {
   pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<(), rusqlite::Error> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.connection.as_ref().unwrap().execute(
+    self.connection.execute(
       "insert into edits (id, edits, file) values (?1, ?2, ?3)",
       (&uid, &edits, &hash),
     )?;
@@ -150,7 +143,7 @@ impl Root {
   }
 
   pub async fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
-    self.connection.as_ref().unwrap().execute(
+    self.connection.execute(
       "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
       (&hash, &rating, &""),
     )?;
@@ -159,7 +152,7 @@ impl Root {
   }
 
   pub async fn get_edits(self: &Self, hash: &str) -> Result<Vec<Edit>, rusqlite::Error> {
-    let con = self.connection.as_ref().unwrap();
+    let con = &self.connection;
     let mut stmt = con.prepare("select id, edits, file from edits where file = :hash")?;
 
     let rows = stmt.query_map(&[(":hash", &hash)], |row| {
@@ -175,7 +168,7 @@ impl Root {
   }
 
   pub async fn get_file(self: &Self, hash: &str) -> Result<Vec<File>, rusqlite::Error> {
-    let con = self.connection.as_ref().unwrap();
+    let con = &self.connection;
     let mut stmt = con.prepare("select hash, tags, rating from files where hash = :hash")?;
 
     let rows = stmt.query_map(&[(":hash", &hash)], |row| {
@@ -193,7 +186,7 @@ impl Root {
   }
 
   pub async fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
-    self.connection.as_ref().unwrap().execute(
+    self.connection.execute(
       "update files SET rating = ?1 where hash = ?2",
       params![rating, hash],
     )?;
@@ -204,7 +197,7 @@ impl Root {
   pub async fn set_tags(self: &Self, hash: &str, tags: Vec<String>) -> Result<(), rusqlite::Error> {
     let ts = tags.join(",");
 
-    self.connection.as_ref().unwrap().execute(
+    self.connection.execute(
       "update files SET tags = ?1 where hash = ?2",
       params![ts, hash],
     )?;
@@ -212,10 +205,10 @@ impl Root {
     Ok(())
   }
 
-  pub async fn insert_location(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+  pub fn insert_location(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.connection.as_ref().unwrap().execute(
+    self.connection.execute(
       "insert into locations (id, name, path) values (?1, ?2, ?3)",
       (&uid, &name, &path),
     )?;
@@ -224,7 +217,7 @@ impl Root {
   }
 
   pub fn location_list(self: &Self) -> Result<Vec<Location>, rusqlite::Error> {
-    let con = self.connection.as_ref().unwrap();
+    let con = &self.connection;
     let mut stmt = con.prepare("select id, name, path from locations")?;
 
     let rows = stmt.query_map([], |row| {
@@ -240,7 +233,7 @@ impl Root {
   }
 
   pub fn tags_list(self: &Self) -> Result<Vec<Tag>, rusqlite::Error> {
-    let con = self.connection.as_ref().unwrap();
+    let con = &self.connection;
     let mut stmt = con.prepare("select id, name from tags")?;
 
     let rows = stmt.query_map([], |row| {

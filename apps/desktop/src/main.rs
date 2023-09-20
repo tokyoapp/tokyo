@@ -1,4 +1,4 @@
-use phl_library;
+use phl_library::{self, db};
 use std::env;
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
@@ -20,15 +20,17 @@ use std::env;
 
 // get local library list
 #[tauri::command]
-fn list() -> Vec<phl_library::Library> {
-    phl_library::create_root_library().expect("Failed to create root library");
-
-    return phl_library::lib_list().unwrap();
+async fn list() -> Vec<db::Location> {
+  let root = db::Root::new();
+  return root.location_list().unwrap();
 }
 
 fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![list])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+  let root = db::Root::new();
+  let _ = root.init_db();
+
+  tauri::Builder::default()
+    .invoke_handler(tauri::generate_handler![list])
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }

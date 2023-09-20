@@ -1,5 +1,3 @@
-import '@phosphor-icons/web/light';
-
 import './index.css';
 import { render } from 'solid-js/web';
 import App from 'app';

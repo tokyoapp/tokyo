@@ -1,28 +1,20 @@
 pub mod image;
 
-mod db;
+pub mod db;
 mod images;
 
 use db::{Location, Root};
 use rusqlite::Result;
 
-pub struct Library {
-  pub root: Root,
-}
+pub struct Library {}
 
 impl Library {
-  pub fn new() -> Library {
-    Library {
-      root: db::Root::new(),
-    }
-  }
-
-  pub fn list(self: &Self, dir: String) -> Vec<String> {
+  pub fn list(dir: String) -> Vec<String> {
     return images::list(dir);
   }
 
-  pub fn default_library(self: &Self) -> Option<Location> {
-    let locs = self.root.location_list().expect("Failed to list locations");
+  pub fn default_library(root: &Root) -> Option<Location> {
+    let locs = root.location_list().expect("Failed to list locations");
     let first = locs.first();
 
     if let Some(location) = first {
@@ -31,8 +23,8 @@ impl Library {
     None
   }
 
-  pub fn find_library(self: &Self, name: &str) -> Result<Location> {
-    let locs = self.root.location_list()?;
+  pub fn find_library(root: &Root, name: &str) -> Result<Location> {
+    let locs = root.location_list()?;
     let loc = locs
       .iter()
       .find(|lib| lib.name == name)
@@ -41,18 +33,15 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub async fn create_library(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {
-    self.root.insert_location(name, path).await?;
+  pub async fn create_library(root: &Root, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+    root.insert_location(name, path)?;
     Ok(())
   }
 
-  pub async fn create_root_library(self: &Self) -> Result<()> {
-    let list = self.root.location_list()?;
+  pub async fn create_root_library(root: &Root) -> Result<()> {
+    let list = root.location_list()?;
     if list.len() == 0 {
-      self
-        .root
-        .insert_location("default", "/Users/tihav/Pictures")
-        .await?;
+      root.insert_location("default", "/Users/tihav/Pictures")?;
     }
 
     return Ok(());
