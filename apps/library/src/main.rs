@@ -48,6 +48,7 @@ async fn main() {
     )
     .route("/api/local/metadata", get(metadata))
     .route("/api/local/thumbnail", get(thumbnail))
+    .route("/api/local/tags", get(get_tag_list))
     .route(
       "/api/proto",
       get(|| async {
@@ -70,9 +71,41 @@ async fn metadata(info: Query<FileInfo>) -> impl IntoResponse {
   let p = decode(&info.file).expect("UTF-8");
   let m = phl_library::image::metadat(p.to_string());
 
+  let mut msg = library::Message::new();
+
+  if let Some(meta) = m {
+    let root = db::Root::new();
+    let hash = phl_library::image::hash(p.to_string());
+    let file = Library::get_file(&root, &hash);
+
+    let mut tags: Vec<String> = Vec::new();
+
+    if let Some(f) = file {
+      tags.append(&mut f.tags.clone());
+    } else {
+      println!("Write file to index");
+      Library::add_file(&root, &hash, meta.rating as i32);
+    }
+
+    let mut meta_msg = library::MetadataMessage::new();
+    meta_msg.create_date = meta.create_date;
+    meta_msg.exif = serde_json::to_string(&meta.exif).unwrap();
+    meta_msg.hash = meta.hash;
+    meta_msg.height = meta.height as i32;
+    meta_msg.width = meta.width as i32;
+    meta_msg.make = meta.make;
+    meta_msg.name = meta.name;
+    meta_msg.orientation = meta.orientation as i32;
+    meta_msg.rating = meta.rating as i32;
+    meta_msg.tags = tags;
+    meta_msg.thumbnail = phl_library::image::cached_thumb(p.to_string());
+
+    msg.set_metadata(meta_msg);
+  }
+
   let mut headers = HeaderMap::new();
   headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-  (headers, Json(m))
+  (headers, msg.write_to_bytes().unwrap())
 }
 
 async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
@@ -113,6 +146,15 @@ fn get_location_list() -> library::LibraryListMessage {
     .collect();
 
   list_msg
+}
+
+async fn get_tag_list() -> impl IntoResponse {
+  let root = db::Root::new();
+  let list = root.tags_list().unwrap();
+
+  let mut headers = HeaderMap::new();
+  headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+  (headers, serde_json::to_string(&list).unwrap())
 }
 
 fn get_index_msg(name: &str) -> library::LibraryIndexMessage {

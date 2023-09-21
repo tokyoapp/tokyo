@@ -25,6 +25,9 @@
   "linter": {
     "rules": {
       "recommended": true,
+      "complexity": {
+        "noStaticOnlyClass": "off"
+      },
       "a11y": {
         "useKeyWithClickEvents": "off"
       }

@@ -121,7 +121,7 @@ impl Root {
     return Ok(());
   }
 
-  pub async fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
+  pub fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
@@ -142,7 +142,7 @@ impl Root {
     Ok(())
   }
 
-  pub async fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
+  pub fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
     self.connection.execute(
       "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
       (&hash, &rating, &""),
@@ -167,7 +167,7 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn get_file(self: &Self, hash: &str) -> Result<Vec<File>, rusqlite::Error> {
+  pub fn get_file(self: &Self, hash: &str) -> Result<Vec<File>, rusqlite::Error> {
     let con = &self.connection;
     let mut stmt = con.prepare("select hash, tags, rating from files where hash = :hash")?;
 
@@ -194,7 +194,7 @@ impl Root {
     Ok(())
   }
 
-  pub async fn set_tags(self: &Self, hash: &str, tags: Vec<String>) -> Result<(), rusqlite::Error> {
+  pub fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<(), rusqlite::Error> {
     let ts = tags.join(",");
 
     self.connection.execute(

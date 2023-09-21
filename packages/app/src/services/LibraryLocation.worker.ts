@@ -22,14 +22,24 @@ class LibraryLocation {
     });
   }
 
+  async tags() {
+    return fetch('http://127.0.0.1:8000/api/local/tags').then(async (res) => {
+      return await res.json();
+    });
+  }
+
   async metadata(file: string) {
     const meta: {
       width: number;
       height: number;
       orientation: number;
-    } = await fetch(`http://127.0.0.1:8000/api/local/metadata?file=${file}`).then((res) =>
-      res.json()
-    );
+    } = await fetch(`http://127.0.0.1:8000/api/local/metadata?file=${file}`).then(async (res) => {
+      const list = library.Message.decode(new Uint8Array(await res.arrayBuffer()));
+      if (!list.metadata) {
+        throw new Error('Metadata undefined');
+      }
+      return list.metadata;
+    });
 
     return meta;
   }

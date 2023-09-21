@@ -34,17 +34,14 @@ message MetadataMessage {
   string make = 7;
   string exif = 8;
   int32 orientation = 9;
+  bytes thumbnail = 10;
+  repeated string tags = 11;
 }
 
 message ImageMessage {
-  MetadataMessage metadata = 1;
   bytes image = 2;
 }
 
-message ThumbnailMessage {
-  MetadataMessage metadata = 1;
-  bytes image = 2;
-}
 
 message Message {
   optional int32 id = 1;
@@ -55,7 +52,6 @@ message Message {
       LibraryIndexMessage index = 6;
       MetadataMessage metadata = 7;
       ImageMessage image = 8;
-      ThumbnailMessage thumbnail = 9;
   }
 }
 

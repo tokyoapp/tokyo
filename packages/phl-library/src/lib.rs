@@ -3,6 +3,7 @@ pub mod image;
 pub mod db;
 mod images;
 
+use db::{File, Tag};
 use db::{Location, Root};
 use rusqlite::Result;
 
@@ -13,6 +14,10 @@ impl Library {
     return images::list(dir);
   }
 
+  pub fn list_tags(root: &Root) -> Vec<Tag> {
+    root.tags_list().unwrap()
+  }
+
   pub fn default_library(root: &Root) -> Option<Location> {
     let locs = root.location_list().expect("Failed to list locations");
     let first = locs.first();
@@ -21,6 +26,29 @@ impl Library {
       return Some(location.clone());
     }
     None
+  }
+
+  pub fn add_file(root: &Root, hash: &str, rating: i32) {
+    let id = root.insert_tag("Test").unwrap();
+
+    let _ = root
+      .insert_file(hash, rating)
+      .expect("Failed to insert file");
+
+    let mut f = root.get_file(hash).unwrap();
+    let tags = &mut f.first_mut().unwrap().tags;
+
+    tags.push(id);
+
+    let _ = root.set_tags(hash, tags.as_ref());
+  }
+
+  pub fn get_file(root: &Root, hash: &str) -> Option<File> {
+    return root
+      .get_file(hash)
+      .expect("Failed to get file")
+      .first()
+      .and_then(|f| Some(f.clone()));
   }
 
   pub fn find_library(root: &Root, name: &str) -> Result<Location> {

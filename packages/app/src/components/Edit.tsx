@@ -36,9 +36,6 @@ export default function Info(props: {
 
   createEffect(() => {
     if (props.file) {
-      Library.metadata(props.file.path).then((meta) => {
-        setMeta(meta);
-      });
     }
   });
 

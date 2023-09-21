@@ -12,8 +12,8 @@ function Property(props: { title: string; value: string | string[] }) {
     return (
       <div class="px-3 my-4">
         <div class="text-xs opacity-50 mb-1">{props.title}</div>
-        <div class="text-xs flex gap-2">
-          {props.value.map((value) => {
+        <div class="text-xs flex gap-2 flex-wrap">
+          {props.value.filter(Boolean).map((value) => {
             return <div class="rounded-md bg-zinc-700 p-[2px_6px]">{value}</div>;
           })}
         </div>
@@ -43,6 +43,12 @@ function typeFromFilename(name: string) {
   return 'unknown';
 }
 
+const [tagList, setTagList] = createSignal([]);
+
+Library.tags().then((tags) => {
+  setTagList(tags);
+});
+
 export default function Info(props: {
   file?: Entry;
 }) {
@@ -52,9 +58,22 @@ export default function Info(props: {
     if (props.file) {
       Library.metadata(props.file.path).then((meta) => {
         setMeta(meta);
+        console.log(meta);
       });
     }
   });
+
+  const exif = () => {
+    return JSON.parse(meta()?.exif);
+  };
+
+  const tags = () => {
+    const arr = meta()?.tags.map((tag) => {
+      return tagList().find((t) => t.id === tag)?.name || tag;
+    });
+    console.log(arr);
+    return arr || [];
+  };
 
   return (
     <div class="bg-zinc-900 w-full h-full overflow-auto absolute">
@@ -65,27 +84,21 @@ export default function Info(props: {
           <Property title="Name" value={props.file.name} />
           <Property title="Path" value={props.file.path} />
           <Property title="Date created" value={props.file.createDate} />
-          <Property title="Type" value={[typeFromFilename(props.file.name)]} />
+          <Property title="Tags" value={[typeFromFilename(props.file.name), ...tags()]} />
 
           <Seperator />
 
           {meta() ? (
             <>
               <Property title="Camera" value={meta()?.make} />
-              <Property
-                title="Lens"
-                value={`${meta()?.exif?.lens_make} ${meta()?.exif?.lens_model}`}
-              />
+              <Property title="Lens" value={`${exif()?.lens_make} ${exif()?.lens_model}`} />
 
               <Seperator />
 
-              <Property title="Aperture" value={`F ${meta()?.exif?.fnumber.split('/')[0]}`} />
-              <Property
-                title="Focal length"
-                value={`${meta()?.exif?.focal_length.split('/')[0]}mm`}
-              />
-              <Property title="Exposure time" value={meta()?.exif?.exposure_time} />
-              <Property title="ISO" value={meta()?.exif?.iso_speed_ratings} />
+              <Property title="Aperture" value={`F ${exif()?.fnumber.split('/')[0]}`} />
+              <Property title="Focal length" value={`${exif()?.focal_length.split('/')[0]}mm`} />
+              <Property title="Exposure time" value={exif()?.exposure_time} />
+              <Property title="ISO" value={exif()?.iso_speed_ratings} />
 
               <Seperator />
             </>

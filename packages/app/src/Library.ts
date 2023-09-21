@@ -48,8 +48,12 @@ export const [file, setFile] = createSignal<Entry>();
 export const [libs, setLibs] = createSignal([]);
 
 export class Library {
-  static metadata(file: string) {
-    return library.metadata(file);
+  static async metadata(file: string) {
+    return await library.metadata(file);
+  }
+
+  static async tags() {
+    return await library.tags();
   }
 
   static open(name: string) {
