@@ -61,7 +61,7 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub async fn create_library(root: &Root, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+  pub fn create_library(root: &Root, name: &str, path: &str) -> Result<(), rusqlite::Error> {
     root.insert_location(name, path)?;
     Ok(())
   }

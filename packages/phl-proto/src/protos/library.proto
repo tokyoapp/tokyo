@@ -7,14 +7,6 @@ message LibraryMessage {
   string path = 2;
 }
 
-message LibraryListMessage {
-  repeated LibraryMessage libraries = 1;
-}
-
-message LibraryIndexMessage {
-  repeated IndexEntryMessage index = 1;
-}
-
 message IndexEntryMessage {
   string hash = 1;
   string name = 2;
@@ -42,16 +34,29 @@ message ImageMessage {
   bytes image = 2;
 }
 
+message TagMessage {
+  string id = 1;
+  string name = 2;
+}
+
+message LibraryListMessage {
+  repeated LibraryMessage libraries = 1;
+  repeated TagMessage tags = 2;
+}
+
+message LibraryIndexMessage {
+  repeated IndexEntryMessage index = 1;
+}
 
 message Message {
   optional int32 id = 1;
   optional string message = 2;
   optional bool error = 3;
   oneof msg {
-      LibraryListMessage list = 5;
-      LibraryIndexMessage index = 6;
-      MetadataMessage metadata = 7;
-      ImageMessage image = 8;
+    LibraryListMessage list = 5;
+    LibraryIndexMessage index = 6;
+    MetadataMessage metadata = 7;
+    ImageMessage image = 8;
   }
 }
 
@@ -64,10 +69,20 @@ message RequestLibraryIndex {
   string name = 1;
 }
 
+message RequestMetadata {
+  string file = 1;
+}
+
+message RequestImage {
+  string file = 1;
+}
+
 message ClientMessage {
   optional int32 id = 1;
   oneof msg {
     CreateLibraryMessage create = 5;
     RequestLibraryIndex index = 6;
+    RequestMetadata meta = 7;
+    RequestImage image = 8;
   }
 }

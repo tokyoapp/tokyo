@@ -13,6 +13,7 @@ use axum::{
   Json, Router,
 };
 
+use phl_library::db::Root;
 use phl_library::image::Metadata;
 use phl_library::{db, Library};
 use phl_proto::library;
@@ -41,23 +42,10 @@ async fn main() {
   let root = db::Root::new();
   let _ = root.init_db();
 
-  let router = Router::new()
-    .route(
-      "/ws",
-      get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| handle_socket(socket)) }),
-    )
-    .route("/api/local/metadata", get(metadata))
-    .route("/api/local/thumbnail", get(thumbnail))
-    .route("/api/local/tags", get(get_tag_list))
-    .route(
-      "/api/proto",
-      get(|| async {
-        let list = library_list().await;
-        let mut headers = HeaderMap::new();
-        headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-        (headers, list)
-      }),
-    );
+  let router = Router::new().route(
+    "/ws",
+    get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| handle_socket(socket)) }),
+  );
 
   println!("Running app on http://127.0.0.1:8000");
 
@@ -67,8 +55,8 @@ async fn main() {
     .unwrap();
 }
 
-async fn metadata(info: Query<FileInfo>) -> impl IntoResponse {
-  let p = decode(&info.file).expect("UTF-8");
+fn metadata(file: &String) -> library::Message {
+  let p = file;
   let m = phl_library::image::metadat(p.to_string());
 
   let mut msg = library::Message::new();
@@ -98,43 +86,29 @@ async fn metadata(info: Query<FileInfo>) -> impl IntoResponse {
     meta_msg.orientation = meta.orientation as i32;
     meta_msg.rating = meta.rating as i32;
     meta_msg.tags = tags;
-    meta_msg.thumbnail = phl_library::image::cached_thumb(p.to_string());
+    meta_msg.thumbnail = phl_library::image::cached_thumb(&p.to_string());
 
     msg.set_metadata(meta_msg);
   }
 
-  let mut headers = HeaderMap::new();
-  headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-  (headers, msg.write_to_bytes().unwrap())
-}
-
-async fn thumbnail(info: Query<FileInfo>) -> impl IntoResponse {
-  let p = decode(&info.file).expect("UTF-8");
-
-  let mut headers = HeaderMap::new();
-  headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-  headers.insert("Content-Type", "image/jpeg".parse().unwrap());
-  (headers, phl_library::image::cached_thumb(p.to_string()))
-}
-
-async fn library_list() -> Vec<u8> {
-  let root = db::Root::new();
-  let _ = Library::create_root_library(&root).await;
-
-  let mut msg = library::Message::new();
-  let list_msg = get_location_list();
-
-  msg.set_list(list_msg);
-
-  // let mut headers = HeaderMap::new();
-  // headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-  msg.write_to_bytes().unwrap()
+  return msg;
 }
 
 fn get_location_list() -> library::LibraryListMessage {
   let root = db::Root::new();
   let list = root.location_list().unwrap();
+  let tags = root.tags_list().unwrap();
+
   let mut list_msg = library::LibraryListMessage::new();
+  list_msg.tags = tags
+    .iter()
+    .map(|t| {
+      let mut m = library::TagMessage::new();
+      m.id = t.id.clone();
+      m.name = t.name.clone();
+      return m;
+    })
+    .collect();
   list_msg.libraries = list
     .into_iter()
     .map(|loc| {
@@ -146,15 +120,6 @@ fn get_location_list() -> library::LibraryListMessage {
     .collect();
 
   list_msg
-}
-
-async fn get_tag_list() -> impl IntoResponse {
-  let root = db::Root::new();
-  let list = root.tags_list().unwrap();
-
-  let mut headers = HeaderMap::new();
-  headers.insert("Access-Control-Allow-Origin", "*".parse().unwrap());
-  (headers, serde_json::to_string(&list).unwrap())
 }
 
 fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
@@ -191,6 +156,14 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
+  println!("Socket connected");
+
+  let mut msg = library::Message::new();
+  msg.set_list(get_location_list());
+  let _ = socket
+    .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+    .await;
+
   while let Some(msg) = socket.recv().await {
     let msg = if let Ok(msg) = msg {
       msg
@@ -221,30 +194,52 @@ async fn handle_socket(mut socket: WebSocket) {
         // client disconnected
         return;
       }
+    } else if let Ok(ok_msg) = msg {
+      if ok_msg.has_create() {
+        let root = Root::new();
+        let create = ok_msg.create();
+        let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
+
+        if _cr.is_ok() {
+          let mut msg = library::Message::new();
+          msg.set_list(get_location_list());
+          let _ = socket
+            .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+            .await;
+        }
+      }
+
+      if ok_msg.has_index() {
+        let index = ok_msg.index();
+        println!("Requested Index {}", index.name);
+
+        let mut msg = library::Message::new();
+        msg.id = ok_msg.id;
+        msg.set_index(get_index_msg(index.name.as_str()));
+        let bytes = msg.write_to_bytes().unwrap();
+        let _ = socket.send(ws::Message::Binary(bytes)).await;
+      }
+
+      if ok_msg.has_meta() {
+        let file = &ok_msg.meta().file;
+        let mut msg = metadata(file);
+        msg.id = ok_msg.id;
+        let bytes = msg.write_to_bytes().unwrap();
+        let _ = socket.send(ws::Message::Binary(bytes)).await;
+      }
+
+      if ok_msg.has_image() {
+        let file = &ok_msg.image().file;
+        let image = phl_library::image::cached_thumb(file);
+        let mut img_msg = library::ImageMessage::new();
+        img_msg.image = image;
+        let mut msg = library::Message::new();
+        msg.id = ok_msg.id;
+        msg.set_image(img_msg);
+        let bytes = msg.write_to_bytes().unwrap();
+        let _ = socket.send(ws::Message::Binary(bytes)).await;
+      }
     }
-
-    let ok_msg = msg.unwrap();
-    if ok_msg.has_index() {
-      let index = ok_msg.index();
-      println!("Requested Index {}", index.name);
-
-      let mut msg = library::Message::new();
-      msg.set_index(get_index_msg(index.name.as_str()));
-      let bytes = msg.write_to_bytes().unwrap();
-      let _ = socket.send(ws::Message::Binary(bytes)).await;
-    }
-
-    // let mut library = Library::new();
-    // if ok_msg.has_create() {
-    //   let create = ok_msg.create();
-    //   let _cr = library
-    //     .create_library(create.name.as_str(), create.path.as_str())
-    //     .await;
-    //   if _cr.is_ok() {
-    //     let mut msg = library::Message::new();
-    //     msg.set_list(get_location_list());
-    //   }
-    // }
 
     // send message:
     if socket

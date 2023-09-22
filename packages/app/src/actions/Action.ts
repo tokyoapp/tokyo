@@ -2,6 +2,7 @@ import { createSignal } from 'solid-js';
 import open from './open.js';
 import reload from './reload.js';
 import search from './search.js';
+import create from './create.js';
 
 type Job = {
   running: boolean;
@@ -19,6 +20,7 @@ export default class Action {
     reload: reload as ActionFunction,
     open: open as ActionFunction,
     search: search as ActionFunction,
+    create: create as ActionFunction,
   } as const;
 
   static get runningJobCount() {

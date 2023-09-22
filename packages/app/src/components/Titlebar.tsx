@@ -8,6 +8,7 @@ import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
 import { platform } from '@tauri-apps/api/os';
+import Action from '../actions/Action.ts';
 
 const os = await platform().catch((err) => {
   console.error(err);
@@ -85,14 +86,17 @@ export default function Titlebar() {
                 title={'Library'}
                 onInput={(values) => {
                   const value = values[0];
-                  Library.open(value);
+                  if (value) {
+                    Library.open(value);
+                  } else {
+                    Action.run('create');
+                  }
                 }}
                 content={
                   <div>
                     <hr class="my-2" />
                     <button
                       type="button"
-                      onClick={() => console.log('create lib')}
                       class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
                     >
                       <Icon name="plus" class="mr-2" />

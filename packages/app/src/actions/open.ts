@@ -16,19 +16,17 @@ export default async function open(item: Entry) {
 
   setFile(item);
 
-  const id = encodeURIComponent(item.path);
-
   // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
 
-  const meta = await Library.metadata(id);
+  const meta = await Library.metadata(item.path);
 
   setLoading(true);
 
-  const tmp = await storage.readTemp(id);
+  const tmp = await storage.readTemp(item.path);
 
   const prevImg = new Image();
   prevImg.onload = () => {
-    const img = new DynamicImage(prevImg, meta);
+    const img = new DynamicImage(prevImg, meta.metadata);
 
     img
       .resizeContain(1024)
@@ -40,6 +38,9 @@ export default async function open(item: Entry) {
 
   if (tmp && tmp.size > 0) {
     prevImg.src = URL.createObjectURL(tmp);
+  } else {
+    const thumb = new Blob([meta.metadata?.thumbnail]);
+    prevImg.src = URL.createObjectURL(thumb);
   }
 
   // timeout = setTimeout(() => {

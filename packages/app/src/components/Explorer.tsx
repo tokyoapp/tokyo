@@ -200,15 +200,16 @@ function Thumb(props: ThumbProps) {
   const onView = async () => {
     controller = new AbortController();
 
-    const id = encodeURIComponent(props.item.path);
-    const tmp = await storage.readTemp(id);
+    const tmp = await storage.readTemp(props.item.path);
 
     if (tmp && tmp.size > 0) {
       useThumb(tmp);
     } else {
-      library.thumbnail(id).then((thumb) => {
-        useThumb(thumb);
+      library.getMetadata(props.item.path).then((meta) => {
+        const blob = new Blob([meta.metadata?.thumbnail]);
+        useThumb(blob);
       });
+      // get thumbnail from metadata data
     }
   };
 

@@ -1,10 +1,10 @@
 import { createSignal } from 'solid-js';
+import Titlebar from './Titlebar.tsx';
 import { location } from '../Library.ts';
 import Action from '../actions/Action';
 import Explorer from './Explorer';
 import { Library, file } from '../Library';
 import LocationSettings from './LocationSettings.tsx';
-import Titlebar from './Titlebar.tsx';
 import Preview from './Viewer';
 import Info from './Info';
 import Edit from './Edit';

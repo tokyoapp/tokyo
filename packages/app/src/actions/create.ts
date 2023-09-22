@@ -1,3 +1,5 @@
-export default function () {
-  console.log('create lib');
+import { Library } from '../Library.ts';
+
+export default async function () {
+  Library.create();
 }

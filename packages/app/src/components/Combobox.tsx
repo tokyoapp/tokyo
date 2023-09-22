@@ -18,7 +18,11 @@ export default function Combobox(
     <a-dropdown
       class={`relative inline-block ${props.class}`}
       style="--dropdown-speed: 0s"
-      onInput={(e) => props.onInput(e.target.value)}
+      onInput={(e) => {
+        if (e.target.value[0] !== 'none') {
+          props.onInput(e.target.value);
+        }
+      }}
     >
       <button
         title={props.title}
@@ -49,7 +53,8 @@ export default function Combobox(
               </button>
             );
           })}
-          {props.content || null}
+
+          <div value="none">{props.content || null}</div>
         </a-toggle>
       </div>
     </a-dropdown>

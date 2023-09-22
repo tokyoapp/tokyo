@@ -124,7 +124,7 @@ pub fn thumbnail(path: String) -> Vec<u8> {
   return bytes;
 }
 
-pub fn cached_thumb(p: String) -> Vec<u8> {
+pub fn cached_thumb(p: &String) -> Vec<u8> {
   let bytes = std::fs::read(p.to_string()).unwrap(); // Vec<u8>
 
   let ext = Path::new(&p).extension().unwrap().to_str().unwrap();

@@ -1,4 +1,6 @@
 import library from './services/LibraryLocation.worker.ts';
+import * as Comlink from 'comlink';
+import { LibraryMessage, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
 
 export type Entry = {
@@ -45,43 +47,62 @@ export const [location, setLocation] = createSignal<Location>({
 
 export const [file, setFile] = createSignal<Entry>();
 
-export const [libs, setLibs] = createSignal([]);
+export const [libs, setLibs] = createSignal<LibraryMessage[]>([]);
+
+export const [tags, setTags] = createSignal<TagMessage[]>([]);
 
 export class Library {
   static async metadata(file: string) {
-    return await library.metadata(file);
+    return await library.getMetadata(file);
   }
 
-  static async tags() {
-    return await library.tags();
+  static async create() {
+    return await library.createLocation();
   }
 
   static open(name: string) {
-    library.list().then((libs) => {
-      setLibs(libs);
-    });
+    library.onIndex(
+      Comlink.proxy((msg) => {
+        const index = msg.index.index;
 
-    library.open(name).then((index) => {
-      const loc = {
-        host: '127.0.0.1:8000',
-        name: name,
-        path: '/',
-        index: index.map((entry) => {
-          const e: Entry = {
-            createDate: entry.createDate || '',
-            name: entry.name || '',
-            path: entry.path || '',
-            rating: entry.rating || 0,
-            hash: entry.hash || '',
-            orientation: entry.orientation || 0,
+        // TODO: empty index message?
+        if (index.length > 1) {
+          const loc = {
+            host: '127.0.0.1:8000',
+            name: name,
+            path: '/',
+            index: index.map((entry) => {
+              const e: Entry = {
+                createDate: entry.createDate || '',
+                name: entry.name || '',
+                path: entry.path || '',
+                rating: entry.rating || 0,
+                hash: entry.hash || '',
+                orientation: entry.orientation || 0,
+              };
+              return e;
+            }),
           };
-          return e;
-        }),
-      };
-      console.log(loc);
 
-      setLocation(loc);
-    });
+          setLocation(loc);
+        }
+      })
+    );
+
+    library.onList(
+      Comlink.proxy((list) => {
+        setLibs(list.list?.libraries);
+        setTags(list.list?.tags);
+      })
+    );
+
+    // library.onMetadata(
+    //   Comlink.proxy((meta) => {
+    //     console.log('Metadata', meta.metadata);
+    //   })
+    // );
+
+    library.open(name);
   }
 }
 

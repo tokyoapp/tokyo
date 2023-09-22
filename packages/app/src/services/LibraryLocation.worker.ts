@@ -3,77 +3,137 @@ import { ClientStorage } from './ClientStorage.ts';
 
 const storage = new ClientStorage();
 
+let msg_count = 1;
+
 class LibraryLocation {
-  async list() {
-    return fetch('http://127.0.0.1:8000/api/proto', {}).then(async (res) => {
-      const list = library.Message.decode(new Uint8Array(await res.arrayBuffer()));
-      return list.list?.libraries;
-    });
+  ws!: WebSocket;
+
+  indexListeners = new Set<(arg: library.Message) => void>();
+  listListeners = new Set<(arg: library.Message) => void>();
+  metadataListeners = new Set<(arg: library.Message) => void>();
+  imageListeners = new Set<(arg: library.Message) => void>();
+
+  public onIndex(callback: (arg: library.Message) => void) {
+    this.indexListeners.add(callback);
+    return () => this.indexListeners.delete(callback);
   }
 
-  async thumbnail(file: string) {
-    return fetch(`http://127.0.0.1:8000/api/local/thumbnail?file=${file}`, {
-      // signal: controller.signal,
-    }).then(async (res) => {
-      const buffer = await res.arrayBuffer();
-      const blob = new Blob([buffer]);
-      storage.writeTemp(file, await blob.arrayBuffer());
-      return blob;
-    });
+  public onList(callback: (arg: library.Message) => void) {
+    this.listListeners.add(callback);
+    return () => this.listListeners.delete(callback);
   }
 
-  async tags() {
-    return fetch('http://127.0.0.1:8000/api/local/tags').then(async (res) => {
-      return await res.json();
-    });
+  public onMetadata(callback: (arg: library.Message) => void) {
+    this.metadataListeners.add(callback);
+    return () => this.metadataListeners.delete(callback);
   }
 
-  async metadata(file: string) {
-    const meta: {
-      width: number;
-      height: number;
-      orientation: number;
-    } = await fetch(`http://127.0.0.1:8000/api/local/metadata?file=${file}`).then(async (res) => {
-      const list = library.Message.decode(new Uint8Array(await res.arrayBuffer()));
-      if (!list.metadata) {
-        throw new Error('Metadata undefined');
+  public onImage(callback: (arg: library.Message) => void) {
+    this.imageListeners.add(callback);
+    return () => this.imageListeners.delete(callback);
+  }
+
+  private async handleMessage(message: library.Message) {
+    const type =
+      message.error || message.image || message.index || message.list || message.metadata;
+
+    switch (type) {
+      case message.error: {
+        console.error('Error response:', message);
+        break;
       }
-      return list.metadata;
-    });
+      case message.index: {
+        this.indexListeners.forEach((cb) => cb(message));
+        break;
+      }
+      case message.list: {
+        this.listListeners.forEach((cb) => cb(message));
+        break;
+      }
+      case message.metadata: {
+        const file = message.metadata?.hash;
+        const thumbnail = message.metadata?.thumbnail;
+        if (file && thumbnail) {
+          const blob = new Blob([thumbnail]);
+          storage.writeTemp(file, await blob.arrayBuffer());
+        }
 
-    return meta;
+        if (message.metadata) {
+          this.metadataListeners.forEach((cb) => cb(message));
+        }
+        break;
+      }
+      case message.image: {
+        this.imageListeners.forEach((cb) => cb(message));
+        break;
+      }
+    }
   }
 
-  async open(name: string): Promise<library.IndexEntryMessage[]> {
+  private onConnected(name: string) {
+    console.log('[WS] Connected');
+
+    const msg = library.ClientMessage.create({
+      id: 0,
+      index: library.RequestLibraryIndex.create({
+        name,
+      }),
+    });
+    const data = library.ClientMessage.encode(msg).finish();
+    this.ws.send(data);
+  }
+
+  getMetadata(file: string) {
+    const id = ++msg_count;
+    const msg = library.ClientMessage.create({
+      id: id,
+      meta: library.RequestMetadata.create({
+        file: file,
+      }),
+    });
+    this.send(msg);
+
+    return new Promise<library.Message>((resolve) => {
+      this.onMetadata((msg) => {
+        if (msg.id === id) {
+          resolve(msg);
+        }
+      });
+    });
+  }
+
+  send(msg: library.ClientMessage) {
+    this.ws.send(library.ClientMessage.encode(msg).finish());
+  }
+
+  createLocation() {
+    const msg = library.ClientMessage.create({
+      create: library.CreateLibraryMessage.create({
+        name: 'Desktop',
+        path: '/Users/tihav/Desktop',
+      }),
+    });
+    this.send(msg);
+  }
+
+  async open(name: string): Promise<void> {
     return new Promise((resolve) => {
-      const ws = new WebSocket('ws://127.0.0.1:8000/ws');
-      ws.onopen = () => {
-        console.log('[WS] Connected');
+      this.ws = new WebSocket('ws://127.0.0.1:8000/ws');
 
-        const indxMsg = library.ClientMessage.create({
-          id: 0,
-          index: library.RequestLibraryIndex.create({
-            name,
-          }),
-        });
+      this.ws.onopen = () => {
+        this.onConnected(name);
 
-        const data = library.ClientMessage.encode(indxMsg).finish();
-        ws.send(data);
+        resolve();
       };
 
-      ws.onerror = (err) => {
+      this.ws.onerror = (err) => {
         console.error('[WS] Error: ', err);
       };
 
-      ws.onmessage = async (msg) => {
-        const data = msg.data as Blob;
-        const buf = await data.arrayBuffer();
-
+      this.ws.onmessage = async (msg) => {
+        const buf = await (msg.data as Blob).arrayBuffer();
         const message = library.Message.decode(new Uint8Array(buf));
-
-        if (message.index?.index) {
-          resolve(message.index.index);
-        }
+        this.handleMessage(message);
       };
     });
   }

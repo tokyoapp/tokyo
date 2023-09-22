@@ -1,5 +1,5 @@
 import '@atrium-ui/mono/expandable';
-import { Entry, Library } from '../Library.ts';
+import { Entry, Library, tags } from '../Library.ts';
 import Icon from './Icon.tsx';
 import { createEffect, createSignal } from 'solid-js';
 
@@ -43,11 +43,11 @@ function typeFromFilename(name: string) {
   return 'unknown';
 }
 
-const [tagList, setTagList] = createSignal([]);
+// const [tagList, setTagList] = createSignal([]);
 
-Library.tags().then((tags) => {
-  setTagList(tags);
-});
+// Library.tags().then((tags) => {
+//   setTagList(tags);
+// });
 
 export default function Info(props: {
   file?: Entry;
@@ -57,8 +57,7 @@ export default function Info(props: {
   createEffect(() => {
     if (props.file) {
       Library.metadata(props.file.path).then((meta) => {
-        setMeta(meta);
-        console.log(meta);
+        setMeta(meta.metadata);
       });
     }
   });
@@ -67,9 +66,9 @@ export default function Info(props: {
     return JSON.parse(meta()?.exif);
   };
 
-  const tags = () => {
+  const file_tags = () => {
     const arr = meta()?.tags.map((tag) => {
-      return tagList().find((t) => t.id === tag)?.name || tag;
+      return tags().find((t) => t.id === tag)?.name || tag;
     });
     console.log(arr);
     return arr || [];
@@ -84,7 +83,7 @@ export default function Info(props: {
           <Property title="Name" value={props.file.name} />
           <Property title="Path" value={props.file.path} />
           <Property title="Date created" value={props.file.createDate} />
-          <Property title="Tags" value={[typeFromFilename(props.file.name), ...tags()]} />
+          <Property title="Tags" value={[typeFromFilename(props.file.name), ...file_tags()]} />
 
           <Seperator />
 
