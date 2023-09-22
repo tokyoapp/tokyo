@@ -118,7 +118,7 @@ class LibraryLocation {
 
   async open(name: string): Promise<void> {
     return new Promise((resolve) => {
-      this.ws = new WebSocket('ws://127.0.0.1:8000/ws');
+      this.ws = new WebSocket('ws://192.168.1.11:8000/ws');
 
       this.ws.onopen = () => {
         this.onConnected(name);

@@ -47,9 +47,9 @@ async fn main() {
     get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| handle_socket(socket)) }),
   );
 
-  println!("Running app on http://127.0.0.1:8000");
+  println!("Running app on http://0.0.0.0:8000");
 
-  axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
+  axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
     .serve(router.into_make_service())
     .await
     .unwrap();

@@ -1,4 +1,3 @@
-import { appWindow } from '@tauri-apps/api/window';
 import { Library, libs, location } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from './App.tsx';
 import Button from './Button.tsx';
@@ -7,12 +6,11 @@ import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
-import { platform } from '@tauri-apps/api/os';
+// import { appWindow } from '@tauri-apps/api/window';
+// import { platform } from '@tauri-apps/api';
 import Action from '../actions/Action.ts';
 
-const os = await platform().catch((err) => {
-  console.error(err);
-});
+const os = 'ios';
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
