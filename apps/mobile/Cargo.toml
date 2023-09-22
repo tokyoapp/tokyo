@@ -1,32 +1,23 @@
 [package]
-name = "desktop"
+name = "mobile"
 version = "0.0.0"
 description = "A Tauri App"
 edition = "2021"
 
+[lib]
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.4", features = [] }
+tauri-build = { version = "2.0.0-alpha.8", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = [
-  "os-all",
-  "macos-private-api",
-  "window-start-dragging",
-  "window-close",
-  "window-show",
-  "window-unmaximize",
-  "window-maximize",
-  "window-minimize",
-  "window-unminimize",
-  "window-hide",
-  "shell-open",
-] }
+tauri = { version = "2.0.0-alpha.14", features = ["macos-private-api"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-phl-proto = { path = "../../packages/phl-proto" }
-phl-library = { path = "../../packages/phl-library" }
+# phl-proto = { path = "../../packages/phl-proto" }
+# phl-library = { path = "../../packages/phl-library" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

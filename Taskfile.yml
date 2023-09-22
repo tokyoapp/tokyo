@@ -39,7 +39,7 @@ tasks:
       - rtx install 2> /dev/null || true
       - bun install
       - cargo install wasm-pack
-      - cargo install tauri-cli
+      - cargo install tauri-cli --version "^2.0.0-alpha"
       - task: codegen
 
   codegen:

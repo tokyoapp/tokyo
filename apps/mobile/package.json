@@ -1,13 +1,13 @@
 {
-  "name": "desktop",
+  "name": "mobile",
   "version": "0.0.0",
   "description": "",
   "dependencies": {
-    "@tauri-apps/api": "^1.4.0",
+    "@tauri-apps/api": "2.0.0-alpha.8",
     "app": "workspace:packages/app"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.4.0",
+    "@tauri-apps/cli": "2.0.0-alpha.14",
     "typescript": "^5.0.2"
   }
 }
