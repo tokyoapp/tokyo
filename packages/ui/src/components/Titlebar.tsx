@@ -13,7 +13,7 @@ import Action from '../actions/Action.ts';
 
 const os = await platform().catch((err) => {
   console.error(err);
-  return 'unnkown';
+  return undefined;
 });
 
 const MacTitle = () => {
@@ -68,7 +68,7 @@ export default function Titlebar() {
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[500px_1fr_500px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
-            {os === 'darwin' ? <MacTitle /> : null}
+            {os === 'macos' ? <MacTitle /> : null}
             <Button
               onClick={() => {
                 setSettingOpen(!settingsOpen());
@@ -147,7 +147,7 @@ export default function Titlebar() {
           <div />
         </div>
 
-        {os !== 'darwin' ? <WindowsTitle /> : null}
+        {os === 'windows' ? <WindowsTitle /> : null}
       </div>
 
       {cmdOpen() ? (

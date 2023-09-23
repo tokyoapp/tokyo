@@ -3,6 +3,8 @@
   windows_subsystem = "windows"
 )]
 
+use phl_library::db;
+
 // get local library list
 #[tauri::command]
 async fn list() -> Vec<db::Location> {
@@ -14,5 +16,5 @@ pub fn main() {
   let root = db::Root::new();
   let _ = root.init_db();
 
-  mobile::AppBuilder::new().run();
+  app::AppBuilder::new().run();
 }

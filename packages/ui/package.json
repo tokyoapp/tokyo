@@ -3,7 +3,7 @@
   "main": "./src/components/App.tsx",
   "type": "module",
   "bin": {
-    "app": "./cli/main.ts"
+    "ui": "./cli/main.ts"
   },
   "dependencies": {
     "@tauri-apps/plugin-os": "^2.0.0-alpha.2",

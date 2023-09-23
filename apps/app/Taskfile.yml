@@ -18,7 +18,7 @@ tasks:
   ui:dev:
     dir: ./
     cmds:
-      - bun x app dev
+      - bun x ui dev
 
   tauri:build:
     dir: ./
@@ -28,7 +28,7 @@ tasks:
   ui:build:
     dir: ./
     cmds:
-      - bun x app build
+      - bun x ui build
 
   dev:ios:
     desc: Dev ios

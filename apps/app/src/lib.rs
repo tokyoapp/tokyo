@@ -29,6 +29,9 @@ impl AppBuilder {
   pub fn run(self) {
     let setup = self.setup;
     tauri::Builder::default()
+      .plugin(tauri_plugin_os::init())
+      .plugin(tauri_plugin_app::init())
+      .plugin(tauri_plugin_window::init())
       .setup(move |app| {
         if let Some(setup) = setup {
           (setup)(app)?;

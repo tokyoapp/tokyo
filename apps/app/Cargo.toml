@@ -14,6 +14,9 @@ tauri-build = { version = "2.0.0-alpha.8", features = [] }
 
 [dependencies]
 tauri = { version = "2.0.0-alpha.14", features = ["macos-private-api"] }
+tauri-plugin-os = "2.0.0-alpha.2"
+tauri-plugin-app = "2.0.0-alpha.2"
+tauri-plugin-window = "2.0.0-alpha.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 phl-proto = { path = "../../packages/phl-proto" }
