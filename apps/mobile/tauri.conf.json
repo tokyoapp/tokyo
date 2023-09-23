@@ -9,28 +9,10 @@
     "version": "0.0.0"
   },
   "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "os": {
-        "all": true
-      },
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "startDragging": true
-      }
-    },
     "bundle": {
+      "iOS": {
+        "developmentTeam": "luckydye"
+      },
       "active": true,
       "targets": "all",
       "identifier": "com.tauri.dev",

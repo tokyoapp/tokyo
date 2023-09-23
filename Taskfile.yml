@@ -10,10 +10,10 @@ includes:
     dir: apps/library
     taskfile: apps/library/Taskfile.yml
 
-  desktop:
+  mobile:
     aliases: [app]
-    dir: apps/desktop
-    taskfile: apps/desktop/Taskfile.yml
+    dir: apps/mobile
+    taskfile: apps/mobile/Taskfile.yml
 
 tasks:
   run:
@@ -39,7 +39,7 @@ tasks:
       - rtx install 2> /dev/null || true
       - bun install
       - cargo install wasm-pack
-      - cargo install tauri-cli
+      - cargo install tauri-cli --version "^2.0.0-alpha"
       - task: codegen
 
   codegen:
@@ -60,6 +60,13 @@ tasks:
       deps:
         sh: task setup
     deps: [library:dev, desktop:dev]
+
+  dev:ios:
+    desc: Run ios app in simulator
+    vars:
+      deps:
+        sh: task setup
+    deps: [library:dev, mobile:dev:ios]
 
   build:
     desc: Build app

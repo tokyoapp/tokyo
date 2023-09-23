@@ -8,6 +8,7 @@ const wasm = require('vite-plugin-wasm');
 const config = defineConfig({
   clearScreen: false,
   server: {
+    host: '0.0.0.0',
     port: 1420,
     strictPort: true,
   },

@@ -10,6 +10,11 @@ tasks:
     cmds:
       - cargo tauri dev
 
+  tauri:dev:ios:
+    dir: ./
+    cmds:
+      - cargo tauri ios dev
+
   ui:dev:
     dir: ./
     cmds:
@@ -24,6 +29,12 @@ tasks:
     dir: ./
     cmds:
       - bun x app build
+
+  dev:ios:
+    desc: Dev ios
+    prefix: ios
+    dir: "./"
+    deps: [ui:dev, tauri:dev:ios]
 
   dev:
     desc: Dev
