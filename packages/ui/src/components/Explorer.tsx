@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
 import library from '../services/LibraryLocation.worker';
-import { type Location, type Entry } from '../Library.ts';
+import { type Location, type Entry, file } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -34,6 +34,17 @@ createEffect(() => {
   const [selected] = selection();
   if (selected) {
     Action.run('open', [selected]);
+  }
+});
+
+createEffect(() => {
+  if (file()) {
+    setTimeout(() => {
+      const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
+      if (ele) {
+        ele.scrollIntoView({ inline: 'center', block: 'center' });
+      }
+    }, 100);
   }
 });
 
@@ -75,11 +86,11 @@ export default function Library(props: { location: Location }) {
 
   return (
     <div
-      class="relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-transparent"
+      class="@container relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-transparent"
       onKeyDown={onKeyDown}
     >
-      <nav class="bg-zinc-900">
-        <div class="px-2 py-2 border-b-zinc-800 border-b text-xs flex justify-between items-center">
+      <nav class="bg-[#111]">
+        <div class="px-2 py-2 text-xs flex justify-between items-center">
           <div>
             <Combobox
               title="Sort"
@@ -92,7 +103,10 @@ export default function Library(props: { location: Location }) {
                 { id: 'rating', value: 'Rating', checked: sorting() === 'rating' },
               ]}
             >
-              {`Sort by ${sorting()}`}
+              <div class="flex items-center">
+                <Icon name="ph-sort-ascending" class="mr-1" />
+                <span>{sorting()}</span>
+              </div>
             </Combobox>
           </div>
 
@@ -117,14 +131,13 @@ export default function Library(props: { location: Location }) {
                 { id: 'showName', value: 'Filename', checked: viewSettings.showName },
               ]}
             >
-              <Icon name="more" />
+              <Icon name="ph-eye" />
             </Combobox>
           </div>
         </div>
       </nav>
 
-      {/* lg:grid-cols-2 xl:grid-cols-3 */}
-      <div class="p-2 py-2 overflow-auto w-full grid grid-cols-1 content-start break-all gap-2 overscroll-none">
+      <div class="p-1 overflow-auto w-full grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
         {items()
           .filter(itemFilter)
           .map((item, i) => {
@@ -175,7 +188,6 @@ type ThumbProps = {
   onClick: () => void;
 };
 
-// FIX: These have terrible performance for som reason.
 function Thumb(props: ThumbProps) {
   const [img, setImg] = createSignal<HTMLCanvasElement>();
 
@@ -244,12 +256,11 @@ function Thumb(props: ThumbProps) {
     <div class="relative h-52">
       <div
         title={props.item.path}
+        data-selected={props.selected || undefined}
         tabIndex={0}
         class={[
-          `px-2 h-full
-          bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
+          `h-full bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
           border shadow-none`,
-          props.name ? 'pt-6' : 'pt-1',
           props.selected ? 'border-gray-600' : 'border-transparent',
         ].join(' ')}
         onClick={() => props.onClick()}

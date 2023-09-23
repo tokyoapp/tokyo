@@ -77,6 +77,12 @@ message RequestImage {
   string file = 1;
 }
 
+message PostFileMetadata {
+  string file = 1;
+  optional int32 rating = 2;
+  repeated string tags = 3;
+}
+
 message ClientMessage {
   optional int32 id = 1;
   oneof msg {
@@ -84,5 +90,6 @@ message ClientMessage {
     RequestLibraryIndex index = 6;
     RequestMetadata meta = 7;
     RequestImage image = 8;
+    PostFileMetadata postmeta = 9;
   }
 }

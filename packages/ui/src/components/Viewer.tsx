@@ -1,7 +1,8 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
-import { Entry, file } from '../Library.ts';
+import { Entry, file, setFile } from '../Library.ts';
 import { Stars } from './Stars.tsx';
+import Button from './Button.tsx';
 
 export const [item, setItem] = createSignal<{
   item: Entry;
@@ -84,6 +85,17 @@ export default function Preview() {
       </div>
 
       <div class="z-20 absolute top-2 left-3 w-auto right-3 flex gap-3 text-xs">
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setFile(undefined);
+          }}
+        >
+          <div class="flex items-center">
+            <Icon name="ph-arrow-left" class="mr-2 text-md" />
+            <span>Back</span>
+          </div>
+        </Button>
         <Tool>
           <span>100%</span>
         </Tool>

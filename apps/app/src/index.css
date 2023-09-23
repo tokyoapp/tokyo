@@ -95,28 +95,9 @@ button:active {
   background-color: #0f0f0f69;
 }
 
-.app {
-  position: relative;
-  display: grid;
-  grid-template-columns: 300px 1.25fr 300px;
-  height: 100%;
-  width: 100%;
-  --layout-grid-gap: 6px;
-}
-
 .library {
   position: relative;
   height: calc(100vh - 45px);
-}
-
-[data-orientation="7"],
-[data-orientation="8"] {
-  transform: rotate(270deg);
-}
-
-[data-orientation="5"],
-[data-orientation="6"] {
-  transform: rotate(90deg);
 }
 
 .icon canvas,

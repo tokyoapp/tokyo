@@ -32,8 +32,11 @@ function App() {
   return (
     <>
       <Titlebar />
-
-      <div class="app">
+      <div
+        class={`app w-full h-full grid ${
+          file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+        }`}
+      >
         <div class="library relative">
           {!location().path ? (
             <div class="absolute top-0 left-0 w-full h-full z-[999]">
@@ -49,19 +52,25 @@ function App() {
 
           <Explorer location={location()} />
         </div>
-        <div class="relative flex flex-col justify-center items-center">
-          <Preview />
-        </div>
-        <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
-          <Tabs>
-            <Tabs.Tab tab="Info" icon="ph-info">
-              <Info file={file()} />
-            </Tabs.Tab>
-            <Tabs.Tab tab="Edit" icon="ph-pencil">
-              <Edit file={file()} />
-            </Tabs.Tab>
-          </Tabs>
-        </div>
+
+        {file() ? (
+          <>
+            <div class="relative flex flex-col justify-center items-center">
+              <Preview />
+            </div>
+
+            <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
+              <Tabs>
+                <Tabs.Tab tab="Info" icon="ph-info">
+                  <Info file={file()} />
+                </Tabs.Tab>
+                <Tabs.Tab tab="Edit" icon="ph-pencil">
+                  <Edit file={file()} />
+                </Tabs.Tab>
+              </Tabs>
+            </div>
+          </>
+        ) : null}
       </div>
 
       {/* <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">

@@ -66,7 +66,7 @@ export default function Titlebar() {
         data-tauri-drag-region
         class="bg-zinc-900 border-b border-zinc-800 flex justify-between items-start"
       >
-        <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[500px_1fr_500px] items-center text-xs text-zinc-500">
+        <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
             {os === 'macos' ? <MacTitle /> : null}
             <Button
