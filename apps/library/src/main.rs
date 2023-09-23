@@ -63,8 +63,8 @@ fn metadata(file: &String) -> library::Message {
 
   if let Some(meta) = m {
     let root = db::Root::new();
-    let hash = phl_library::image::hash(p.to_string());
-    let file = Library::get_file(&root, &hash);
+    let metadata = phl_library::image::metadat(p.to_string()).unwrap();
+    let file = Library::get_file(&root, &metadata.hash);
 
     let mut tags: Vec<String> = Vec::new();
 
@@ -72,7 +72,7 @@ fn metadata(file: &String) -> library::Message {
       tags.append(&mut f.tags.clone());
     } else {
       println!("Write file to index");
-      Library::add_file(&root, &hash, meta.rating as i32);
+      Library::add_file(&root, &metadata.hash, meta.rating as i32);
     }
 
     let mut meta_msg = library::MetadataMessage::new();

@@ -22,7 +22,7 @@ export default async function open(item: Entry) {
 
   setLoading(true);
 
-  const tmp = await storage.readTemp(item.path);
+  const tmp = await storage.readTemp(item.hash);
 
   const prevImg = new Image();
   prevImg.onload = () => {

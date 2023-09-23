@@ -200,7 +200,7 @@ function Thumb(props: ThumbProps) {
   const onView = async () => {
     controller = new AbortController();
 
-    const tmp = await storage.readTemp(props.item.path);
+    const tmp = await storage.readTemp(props.item.hash);
 
     if (tmp && tmp.size > 0) {
       useThumb(tmp);

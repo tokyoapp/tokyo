@@ -61,11 +61,6 @@ pub fn get_rating(path: String) -> Option<u32> {
   return None;
 }
 
-pub fn hash(path: String) -> String {
-  let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
-  sha256::digest(&bytes)
-}
-
 pub fn metadat(path: String) -> Option<Metadata> {
   let raw_file = File::open(&path);
 
@@ -73,12 +68,9 @@ pub fn metadat(path: String) -> Option<Metadata> {
     return None;
   }
 
-  let reader = BufReader::new(raw_file.unwrap());
   let p = PathBuf::from(path.clone());
+  let reader = BufReader::new(raw_file.unwrap());
   let mut rawfile = RawFile::new(&p, reader);
-
-  // let bytes = std::fs::read(path.to_string()).unwrap(); // Vec<u8>
-  // let hash = sha256::digest(&bytes);
 
   let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
     Ok(decoder) => Some(
@@ -94,7 +86,9 @@ pub fn metadat(path: String) -> Option<Metadata> {
 
   match meta {
     Some(metadata) => Some(Metadata {
-      hash: "hash".to_owned(),
+      hash: sha256::digest(
+        metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
+      ),
       name: String::from(p.file_name().unwrap().to_str().unwrap()),
       path: String::from(p.to_str().unwrap()),
       width: 0,
