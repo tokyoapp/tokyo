@@ -1,11 +1,13 @@
 {
-  "name": "app",
+  "name": "ui",
   "main": "./src/components/App.tsx",
   "type": "module",
   "bin": {
     "app": "./cli/main.ts"
   },
   "dependencies": {
+    "@tauri-apps/plugin-os": "^2.0.0-alpha.2",
+    "@tauri-apps/plugin-window": "^2.0.0-alpha.1",
     "@atrium-ui/mono": "0.2.0-4",
     "@phosphor-icons/web": "^2.0.3",
     "@rive-app/canvas-single": "^2.3.0",

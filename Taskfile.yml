@@ -10,10 +10,10 @@ includes:
     dir: apps/library
     taskfile: apps/library/Taskfile.yml
 
-  mobile:
+  app:
     aliases: [app]
-    dir: apps/mobile
-    taskfile: apps/mobile/Taskfile.yml
+    dir: apps/app
+    taskfile: apps/app/Taskfile.yml
 
 tasks:
   run:
@@ -59,21 +59,21 @@ tasks:
     vars:
       deps:
         sh: task setup
-    deps: [library:dev, desktop:dev]
+    deps: [library:dev, app:dev]
 
   dev:ios:
     desc: Run ios app in simulator
     vars:
       deps:
         sh: task setup
-    deps: [library:dev, mobile:dev:ios]
+    deps: [library:dev, app:dev:ios]
 
   build:
     desc: Build app
     vars:
       deps:
         sh: task setup
-    deps: [library:build, desktop:build]
+    deps: [library:build, app:build]
 
   check:
     desc: Check files

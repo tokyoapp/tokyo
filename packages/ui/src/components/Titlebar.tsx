@@ -1,4 +1,6 @@
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrent } from '@tauri-apps/plugin-window';
+import { platform } from '@tauri-apps/plugin-os';
+
 import { Library, libs, location } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from './App.tsx';
 import Button from './Button.tsx';
@@ -7,27 +9,31 @@ import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
-import { platform } from '@tauri-apps/api/os';
 import Action from '../actions/Action.ts';
 
 const os = await platform().catch((err) => {
   console.error(err);
+  return 'unnkown';
 });
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
   return (
     <div class="w-20 flex gap-[6px] px-2 pointer-events-auto">
-      <button type="button" class={`${dot} hover:bg-red-700`} onClick={() => appWindow.close()} />
+      <button
+        type="button"
+        class={`${dot} hover:bg-red-700`}
+        onClick={() => getCurrent().close()}
+      />
       <button
         type="button"
         class={`${dot} hover:bg-yellow-400`}
-        onClick={() => appWindow.minimize()}
+        onClick={() => getCurrent().minimize()}
       />
       <button
         type="button"
         class={`${dot} hover:bg-green-700`}
-        onClick={() => appWindow.toggleMaximize()}
+        onClick={() => getCurrent().toggleMaximize()}
       />
     </div>
   );

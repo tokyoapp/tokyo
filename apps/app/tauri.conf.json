@@ -5,7 +5,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "desktop",
+    "productName": "app",
     "version": "0.0.0"
   },
   "tauri": {
@@ -15,7 +15,7 @@
       },
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.luckydye.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
