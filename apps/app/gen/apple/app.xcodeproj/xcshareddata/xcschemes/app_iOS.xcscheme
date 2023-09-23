@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9DFE3F2B3FB7F55440B4266E"
-               BuildableName = "desktop.app"
-               BlueprintName = "mobile_iOS"
-               ReferencedContainer = "container:mobile.xcodeproj">
+               BlueprintIdentifier = "E86255CB8A1836C0BF0C0E14"
+               BuildableName = "app.app"
+               BlueprintName = "app_iOS"
+               ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -30,10 +30,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9DFE3F2B3FB7F55440B4266E"
-            BuildableName = "desktop.app"
-            BlueprintName = "mobile_iOS"
-            ReferencedContainer = "container:mobile.xcodeproj">
+            BlueprintIdentifier = "E86255CB8A1836C0BF0C0E14"
+            BuildableName = "app.app"
+            BlueprintName = "app_iOS"
+            ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -65,10 +65,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9DFE3F2B3FB7F55440B4266E"
-            BuildableName = "desktop.app"
-            BlueprintName = "mobile_iOS"
-            ReferencedContainer = "container:mobile.xcodeproj">
+            BlueprintIdentifier = "E86255CB8A1836C0BF0C0E14"
+            BuildableName = "app.app"
+            BlueprintName = "app_iOS"
+            ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -94,10 +94,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9DFE3F2B3FB7F55440B4266E"
-            BuildableName = "desktop.app"
-            BlueprintName = "mobile_iOS"
-            ReferencedContainer = "container:mobile.xcodeproj">
+            BlueprintIdentifier = "E86255CB8A1836C0BF0C0E14"
+            BuildableName = "app.app"
+            BlueprintName = "app_iOS"
+            ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
