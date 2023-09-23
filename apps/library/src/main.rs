@@ -68,6 +68,12 @@ fn metadata(file: &String) -> library::Message {
 
     let mut tags: Vec<String> = Vec::new();
 
+    let rating = file
+      .clone()
+      .and_then(|f| Some(f.rating))
+      .or(Some(meta.rating as i32))
+      .unwrap();
+
     if let Some(f) = file {
       tags.append(&mut f.tags.clone());
     } else {
@@ -84,7 +90,7 @@ fn metadata(file: &String) -> library::Message {
     meta_msg.make = meta.make;
     meta_msg.name = meta.name;
     meta_msg.orientation = meta.orientation as i32;
-    meta_msg.rating = meta.rating as i32;
+    meta_msg.rating = rating;
     meta_msg.tags = tags;
     meta_msg.thumbnail = phl_library::image::cached_thumb(&p.to_string());
 
@@ -141,13 +147,20 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
   index_msg.index = index
     .iter()
     .map(|meta| {
+      let file = Library::get_file(&root, &meta.hash);
+      let rating = file
+        .clone()
+        .and_then(|f| Some(f.rating))
+        .or(Some(meta.rating as i32))
+        .unwrap();
+
       let mut msg = library::IndexEntryMessage::new();
       msg.name = meta.name.clone();
       msg.create_date = meta.create_date.clone();
       msg.hash = meta.hash.clone();
       msg.orientation = meta.orientation as i32;
       msg.path = meta.path.clone();
-      msg.rating = meta.rating as i32;
+      msg.rating = rating;
       msg
     })
     .collect();
@@ -236,6 +249,19 @@ async fn handle_socket(mut socket: WebSocket) {
         let mut msg = library::Message::new();
         msg.id = ok_msg.id;
         msg.set_image(img_msg);
+        let bytes = msg.write_to_bytes().unwrap();
+        let _ = socket.send(ws::Message::Binary(bytes)).await;
+      }
+
+      if ok_msg.has_postmeta() {
+        let file = &ok_msg.postmeta().file;
+        let rating = ok_msg.postmeta().rating.unwrap();
+        let root = Root::new();
+        root.set_rating(file, rating).expect("Failed to set rating");
+
+        let mut msg = library::Message::new();
+        msg.id = ok_msg.id;
+        msg.set_index(get_index_msg("default"));
         let bytes = msg.write_to_bytes().unwrap();
         let _ = socket.send(ws::Message::Binary(bytes)).await;
       }

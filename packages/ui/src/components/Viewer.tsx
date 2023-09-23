@@ -1,6 +1,6 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
 import Icon from './Icon.tsx';
-import { Entry, file, setFile } from '../Library.ts';
+import { Entry, Library, file, setFile } from '../Library.ts';
 import { Stars } from './Stars.tsx';
 import Button from './Button.tsx';
 
@@ -105,7 +105,19 @@ export default function Preview() {
       </div>
 
       <div class="z-20 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
-        <Stars value={file()?.rating || 0} />
+        <Stars
+          value={file()?.rating || 0}
+          onChange={(value) => {
+            const f = file()?.hash;
+            console.log(f);
+
+            if (f) {
+              Library.postMetadata(f, {
+                rating: value,
+              });
+            }
+          }}
+        />
       </div>
 
       <div class="relative z-10 w-full h-full">{viewportCanvas}</div>

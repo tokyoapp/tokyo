@@ -81,6 +81,7 @@ export default function Info(props: {
       ) : (
         <>
           <Property title="Name" value={props.file.name} />
+          <Property title="Hash" value={props.file.hash} />
           <Property title="Path" value={props.file.path} />
           <Property title="Date created" value={props.file.createDate} />
           <Property title="Tags" value={[typeFromFilename(props.file.name), ...file_tags()]} />

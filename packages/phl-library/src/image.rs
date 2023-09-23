@@ -15,6 +15,8 @@ use std::{
 };
 use std::{io::Cursor, time::Instant};
 
+use crate::db;
+
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
   pub hash: String,
@@ -85,20 +87,24 @@ pub fn metadat(path: String) -> Option<Metadata> {
   };
 
   match meta {
-    Some(metadata) => Some(Metadata {
-      hash: sha256::digest(
+    Some(metadata) => {
+      let hash = sha256::digest(
         metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
-      ),
-      name: String::from(p.file_name().unwrap().to_str().unwrap()),
-      path: String::from(p.to_str().unwrap()),
-      width: 0,
-      height: 0,
-      exif: metadata.exif.clone(),
-      rating: metadata.rating.or(get_rating(path)).or(Some(0)).unwrap(),
-      make: metadata.make,
-      create_date: metadata.exif.create_date.unwrap(),
-      orientation: metadata.exif.orientation.unwrap(),
-    }),
+      );
+
+      Some(Metadata {
+        hash,
+        name: String::from(p.file_name().unwrap().to_str().unwrap()),
+        path: String::from(p.to_str().unwrap()),
+        width: 0,
+        height: 0,
+        exif: metadata.exif.clone(),
+        rating: metadata.rating.or(get_rating(path)).or(Some(0)).unwrap(),
+        make: metadata.make,
+        create_date: metadata.exif.create_date.unwrap(),
+        orientation: metadata.exif.orientation.unwrap(),
+      })
+    }
     None => None,
   }
 }

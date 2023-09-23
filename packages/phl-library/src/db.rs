@@ -185,7 +185,7 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
+  pub fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
     self.connection.execute(
       "update files SET rating = ?1 where hash = ?2",
       params![rating, hash],

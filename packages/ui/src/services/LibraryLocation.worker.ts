@@ -83,6 +83,23 @@ class LibraryLocation {
     this.ws.send(data);
   }
 
+  postMetadata(
+    file: string,
+    meta: {
+      rating?: number;
+    }
+  ) {
+    const id = ++msg_count;
+    const msg = library.ClientMessage.create({
+      id: id,
+      postmeta: library.PostFileMetadata.create({
+        file: file,
+        rating: meta.rating,
+      }),
+    });
+    this.send(msg);
+  }
+
   getMetadata(file: string) {
     const id = ++msg_count;
     const msg = library.ClientMessage.create({

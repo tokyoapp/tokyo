@@ -56,6 +56,18 @@ export class Library {
     return await library.getMetadata(file);
   }
 
+  static async postMetadata(
+    file: string,
+    metadata: {
+      rating?: number;
+      tags?: string[];
+    }
+  ) {
+    return await library.postMetadata(file, {
+      rating: metadata.rating,
+    });
+  }
+
   static async create() {
     return await library.createLocation();
   }

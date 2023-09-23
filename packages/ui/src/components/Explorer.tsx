@@ -90,7 +90,7 @@ export default function Library(props: { location: Location }) {
       onKeyDown={onKeyDown}
     >
       <nav class="bg-[#111]">
-        <div class="px-2 py-2 text-xs flex justify-between items-center">
+        <div class="px-2 py-2 box-content h-[34px] text-xs flex justify-between items-center">
           <div>
             <Combobox
               title="Sort"
