@@ -12,6 +12,7 @@ class LibraryLocation {
   listListeners = new Set<(arg: library.Message) => void>();
   metadataListeners = new Set<(arg: library.Message) => void>();
   imageListeners = new Set<(arg: library.Message) => void>();
+  errorListeners = new Set<(arg: Error) => void>();
 
   public onIndex(callback: (arg: library.Message) => void) {
     this.indexListeners.add(callback);
@@ -33,6 +34,11 @@ class LibraryLocation {
     return () => this.imageListeners.delete(callback);
   }
 
+  public onError(callback: (arg: Error) => void) {
+    this.errorListeners.add(callback);
+    return () => this.errorListeners.delete(callback);
+  }
+
   private async handleMessage(message: library.Message) {
     const type =
       message.error || message.image || message.index || message.list || message.metadata;
@@ -40,6 +46,7 @@ class LibraryLocation {
     switch (type) {
       case message.error: {
         console.error('Error response:', message);
+        this.errorListeners.forEach((cb) => cb(new Error(`Error: ${message.message}`)));
         break;
       }
       case message.index: {
@@ -145,6 +152,7 @@ class LibraryLocation {
 
       this.ws.onerror = (err) => {
         console.error('[WS] Error: ', err);
+        this.errorListeners.forEach((cb) => cb(new Error(`[WS] Error: ${err}`)));
       };
 
       this.ws.onmessage = async (msg) => {

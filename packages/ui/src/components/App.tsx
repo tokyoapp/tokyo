@@ -10,6 +10,8 @@ import Info from './Info';
 import Edit from './Edit';
 import CreateLibrary from './CreateLibrary.tsx';
 import { Tabs } from './Tabs.tsx';
+import './notifications/index.ts';
+import { ErrorNotification, Notification, Notifications } from './notifications/index.ts';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -27,11 +29,30 @@ export const [settingsOpen, setSettingOpen] = createSignal(false);
 function App() {
   // const itemCount = () => location.index.length;
 
-  Library.open('default');
+  Library.open('default').then(() => {
+    Notifications.push(
+      new Notification({
+        message: `Loading library "${'default'}"`,
+        time: 2000,
+      })
+    );
+  });
+
+  window.addEventListener('error', (e) => {
+    Notifications.push(
+      new ErrorNotification({
+        message: `Error: ${e.message}`,
+        time: 3000,
+      })
+    );
+  });
 
   return (
     <>
       <Titlebar />
+
+      <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
+
       <div
         class={`app w-full h-full grid ${
           file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'

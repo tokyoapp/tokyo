@@ -114,7 +114,7 @@ export class Library {
     //   })
     // );
 
-    library.open(name);
+    return library.open(name);
   }
 }
 
