@@ -1,22 +1,67 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
-import Icon from './Icon.tsx';
+import { DynamicImage } from '../DynamicImage.ts';
 import { Entry, Library, file, setFile } from '../Library.ts';
-import { Stars } from './Stars.tsx';
+import storage from '../services/ClientStorage.worker';
 import Button from './Button.tsx';
+import Icon from './Icon.tsx';
+import { Stars } from './Stars.tsx';
+import { Notifications } from './notifications/Notifications.ts';
+import { ErrorNotification } from './notifications/index.ts';
 
-export const [item, setItem] = createSignal<{
+const [item, setItem] = createSignal<{
   item: Entry;
   url: string;
 }>();
-export const [loading, setLoading] = createSignal(false);
+const [loading, setLoading] = createSignal(false);
 
-export async function loadImage(url: string, item: Entry) {
-  setLoading(true);
-  setItem({
-    item,
-    url,
-  });
-}
+let controller: AbortController;
+let timeout: number;
+
+createEffect(async () => {
+  // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
+
+  clearTimeout(timeout);
+
+  if (controller) controller.abort();
+
+  controller = new AbortController();
+
+  const item = file();
+
+  if (item) {
+    const meta = await Library.metadata(item.path);
+
+    setLoading(true);
+
+    const tmp = await storage.readTemp(item.hash);
+
+    const prevImg = new Image();
+    prevImg.onload = () => {
+      const img = new DynamicImage(prevImg, meta.metadata);
+
+      img
+        .resizeContain(1024)
+        .canvas()
+        .toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            setLoading(true);
+            setItem({
+              item,
+              url,
+            });
+          }
+        });
+    };
+
+    if (tmp && tmp.size > 0) {
+      prevImg.src = URL.createObjectURL(tmp);
+    } else {
+      const thumb = new Blob([meta.metadata?.thumbnail]);
+      prevImg.src = URL.createObjectURL(thumb);
+    }
+  }
+});
 
 const Tool = (props: ParentProps & { class: string }) => {
   return (
@@ -51,8 +96,6 @@ export default function Preview() {
       return module;
     })
     .then(async (viewport) => {
-      console.log(viewport);
-
       vp = viewport.init();
       vp.start(viewportCanvas.id, '', {
         orientation: 0,
@@ -60,6 +103,12 @@ export default function Preview() {
     })
     .catch((err) => {
       console.error('Viewport Error: ', err);
+      Notifications.push(
+        new ErrorNotification({
+          message: `Error: ${err.message}`,
+          time: 3000,
+        })
+      );
     });
 
   createEffect(() => {
@@ -109,8 +158,6 @@ export default function Preview() {
           value={file()?.rating || 0}
           onChange={(value) => {
             const f = file()?.hash;
-            console.log(f);
-
             if (f) {
               Library.postMetadata(f, {
                 rating: value,

@@ -70,7 +70,6 @@ export default function Info(props: {
     const arr = meta()?.tags.map((tag) => {
       return tags().find((t) => t.id === tag)?.name || tag;
     });
-    console.log(arr);
     return arr || [];
   };
 

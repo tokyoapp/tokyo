@@ -2,6 +2,8 @@ import library from './services/LibraryLocation.worker.ts';
 import * as Comlink from 'comlink';
 import { LibraryMessage, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
+import { Notifications } from './components/notifications/Notifications.ts';
+import { ErrorNotification } from './components/notifications/index.ts';
 
 export type Entry = {
   hash: string;
@@ -97,6 +99,12 @@ export class Library {
           };
 
           setLocation(loc);
+
+          const item = file();
+          const index_item = loc.index.find((entry) => entry.hash === item?.hash);
+          if (index_item) {
+            setFile(index_item);
+          }
         }
       })
     );
@@ -108,15 +116,17 @@ export class Library {
       })
     );
 
-    // library.onMetadata(
-    //   Comlink.proxy((meta) => {
-    //     console.log('Metadata', meta.metadata);
-    //   })
-    // );
+    library.onError(
+      Comlink.proxy((err) => {
+        Notifications.push(
+          new ErrorNotification({
+            message: `Error: ${err.message}`,
+            time: 3000,
+          })
+        );
+      })
+    );
 
     return library.open(name);
   }
 }
-
-// import { invoke } from '@tauri-apps/api/tauri';
-// invoke('list').then((list) => console.log('local libs', list));
