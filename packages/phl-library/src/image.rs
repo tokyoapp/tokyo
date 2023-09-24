@@ -15,8 +15,6 @@ use std::{
 };
 use std::{io::Cursor, time::Instant};
 
-use crate::db;
-
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
   pub hash: String,

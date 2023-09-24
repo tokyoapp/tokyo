@@ -19,6 +19,7 @@ let timeout: number;
 
 createEffect(async () => {
   // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
+  const _item = file();
 
   clearTimeout(timeout);
 
@@ -26,14 +27,12 @@ createEffect(async () => {
 
   controller = new AbortController();
 
-  const item = file();
-
-  if (item) {
-    const meta = await Library.metadata(item.path);
+  if (_item && _item.hash !== item()?.item.hash) {
+    const meta = await Library.metadata(_item.path);
 
     setLoading(true);
 
-    const tmp = await storage.readTemp(item.hash);
+    const tmp = await storage.readTemp(_item.hash);
 
     const prevImg = new Image();
     prevImg.onload = () => {
@@ -47,7 +46,7 @@ createEffect(async () => {
             const url = URL.createObjectURL(blob);
             setLoading(true);
             setItem({
-              item,
+              item: _item,
               url,
             });
           }

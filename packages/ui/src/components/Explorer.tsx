@@ -10,6 +10,7 @@ import Combobox from './Combobox.tsx';
 import FilterCombobox from './FilterCombobox.tsx';
 import { Stars } from './Stars.tsx';
 import Icon from './Icon.tsx';
+import { SystemInfo } from './System.tsx';
 
 const sort = {
   rating: (a: Entry, b: Entry) => {
@@ -137,23 +138,29 @@ export default function Library(props: { location: Location }) {
         </div>
       </nav>
 
-      <div class="p-1 overflow-auto w-full grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
-        {items()
-          .filter(itemFilter)
-          .map((item, i) => {
-            return (
-              <Thumb
-                selected={selection().includes(item)}
-                number={(i + 1).toString()}
-                name={viewSettings.showName}
-                rating={viewSettings.showRating}
-                onClick={() => {
-                  setSelection([item]);
-                }}
-                item={item}
-              />
-            );
-          })}
+      <div class="p-1 overflow-auto w-full overscroll-none">
+        <div class="hidden @5xl:block">
+          <SystemInfo />
+        </div>
+
+        <div class="grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
+          {items()
+            .filter(itemFilter)
+            .map((item, i) => {
+              return (
+                <Thumb
+                  selected={selection().includes(item)}
+                  number={(i + 1).toString()}
+                  name={viewSettings.showName}
+                  rating={viewSettings.showRating}
+                  onClick={() => {
+                    setSelection([item]);
+                  }}
+                  item={item}
+                />
+              );
+            })}
+        </div>
       </div>
 
       {selection().length > 0 ? (

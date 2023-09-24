@@ -1,16 +1,10 @@
-use std::sync::{Arc, Mutex};
+use axum::Router;
+use sysinfo::{DiskExt, NetworkExt, NetworksExt, ProcessExt, System, SystemExt};
 
 use axum::extract::ws;
-use axum::response::Response;
 use axum::{
-  extract::{
-    ws::{WebSocket, WebSocketUpgrade},
-    Query,
-  },
-  http::HeaderMap,
-  response::IntoResponse,
+  extract::ws::{WebSocket, WebSocketUpgrade},
   routing::get,
-  Json, Router,
 };
 
 use phl_library::db::Root;
@@ -20,7 +14,6 @@ use phl_proto::library;
 use phl_proto::Message;
 
 use serde::{Deserialize, Serialize};
-use urlencoding::decode;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -175,6 +168,19 @@ async fn handle_socket(mut socket: WebSocket) {
   msg.set_list(get_location_list());
   let _ = socket
     .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+    .await;
+
+  let sys = System::new_all();
+  let disk = sys.disks().first().unwrap();
+
+  let mut sys_msg = library::Message::new();
+  let mut _sys_msg = library::SystemInfo::new();
+  _sys_msg.disk_name = disk.name().to_str().unwrap().to_string();
+  _sys_msg.disk_size = (disk.total_space() / 1000 / 1000) as i32;
+  _sys_msg.disk_available = (disk.available_space() / 1000 / 1000) as i32;
+  sys_msg.set_system(_sys_msg);
+  let _ = socket
+    .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
 
   while let Some(msg) = socket.recv().await {

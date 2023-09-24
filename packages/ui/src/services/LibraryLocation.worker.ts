@@ -12,6 +12,7 @@ class LibraryLocation {
   listListeners = new Set<(arg: library.Message) => void>();
   metadataListeners = new Set<(arg: library.Message) => void>();
   imageListeners = new Set<(arg: library.Message) => void>();
+  systemListener = new Set<(arg: library.Message) => void>();
   errorListeners = new Set<(arg: Error) => void>();
 
   public onIndex(callback: (arg: library.Message) => void) {
@@ -39,9 +40,19 @@ class LibraryLocation {
     return () => this.errorListeners.delete(callback);
   }
 
+  public onSystem(callback: (arg: library.Message) => void) {
+    this.systemListener.add(callback);
+    return () => this.systemListener.delete(callback);
+  }
+
   private async handleMessage(message: library.Message) {
     const type =
-      message.error || message.image || message.index || message.list || message.metadata;
+      message.error ||
+      message.image ||
+      message.index ||
+      message.list ||
+      message.metadata ||
+      message.system;
 
     switch (type) {
       case message.error: {
@@ -72,6 +83,10 @@ class LibraryLocation {
       }
       case message.image: {
         this.imageListeners.forEach((cb) => cb(message));
+        break;
+      }
+      case message.system: {
+        this.systemListener.forEach((cb) => cb(message));
         break;
       }
     }

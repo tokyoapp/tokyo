@@ -48,6 +48,12 @@ message LibraryIndexMessage {
   repeated IndexEntryMessage index = 1;
 }
 
+message SystemInfo {
+  string disk_name = 1;
+  int32 disk_size = 3;
+  int32 disk_available = 4;
+}
+
 message Message {
   optional int32 id = 1;
   optional string message = 2;
@@ -57,6 +63,7 @@ message Message {
     LibraryIndexMessage index = 6;
     MetadataMessage metadata = 7;
     ImageMessage image = 8;
+    SystemInfo system = 9;
   }
 }
 

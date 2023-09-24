@@ -54,24 +54,26 @@ function App() {
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div
-        class={`app w-full h-full grid ${
+        class={`relative w-full h-full grid ${
           file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
         }`}
       >
-        <div class="library relative">
-          {!location().path ? (
-            <div class="absolute top-0 left-0 w-full h-full z-[999]">
-              <CreateLibrary />
-            </div>
-          ) : null}
+        <div class="relative">
+          <div class="library">
+            {!location().path ? (
+              <div class="absolute top-0 left-0 w-full h-full z-[999]">
+                <CreateLibrary />
+              </div>
+            ) : null}
 
-          {settingsOpen() ? (
-            <div class="absolute top-0 left-0 w-full h-full z-[999]">
-              <LocationSettings />
-            </div>
-          ) : null}
+            {settingsOpen() ? (
+              <div class="absolute top-0 left-0 w-full h-full z-[999]">
+                <LocationSettings />
+              </div>
+            ) : null}
 
-          <Explorer location={location()} />
+            <Explorer location={location()} />
+          </div>
         </div>
 
         {file() ? (

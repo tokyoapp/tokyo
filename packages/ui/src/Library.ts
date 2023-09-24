@@ -1,6 +1,6 @@
 import library from './services/LibraryLocation.worker.ts';
 import * as Comlink from 'comlink';
-import { LibraryMessage, TagMessage } from 'proto';
+import { LibraryMessage, SystemInfo, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
@@ -21,25 +21,6 @@ export type Location = {
   index: Entry[];
 };
 
-type Exif = {
-  exposure_time: string;
-  fnumber: string;
-  iso_speed_ratings: string;
-  focal_length: string;
-};
-
-export type Meta = {
-  hash: string;
-  name: string;
-  width: number;
-  height: number;
-  exif: Exif;
-  rating: number;
-  make: string;
-  create_date: string;
-  orientation: number;
-};
-
 export const [location, setLocation] = createSignal<Location>({
   host: '',
   name: 'default',
@@ -52,6 +33,8 @@ export const [file, setFile] = createSignal<Entry>();
 export const [libs, setLibs] = createSignal<LibraryMessage[]>([]);
 
 export const [tags, setTags] = createSignal<TagMessage[]>([]);
+
+export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
 export class Library {
   static async metadata(file: string) {
@@ -113,6 +96,12 @@ export class Library {
       Comlink.proxy((list) => {
         setLibs(list.list?.libraries);
         setTags(list.list?.tags);
+      })
+    );
+
+    library.onSystem(
+      Comlink.proxy((msg) => {
+        setSysInfo(msg.system);
       })
     );
 
