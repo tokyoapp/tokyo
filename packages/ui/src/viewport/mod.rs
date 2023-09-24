@@ -37,6 +37,12 @@ pub struct Image {
   pub orientation: u32,
 }
 
+#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
+#[wasm_bindgen]
+pub struct EditSettings {
+  pub exposure: f32,
+}
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize, wasm))]
 pub struct TemplateApp {
   url: String,
@@ -142,7 +148,7 @@ impl eframe::App for TemplateApp {
     egui::Area::new("view")
       .movable(true)
       .pivot(Align2::CENTER_CENTER)
-      .current_pos(Pos2 {
+      .default_pos(Pos2 {
         x: (self.position.x * zoom + (ctx.screen_rect().width() / 2.0) - offset.x),
         y: (self.position.y * zoom + (ctx.screen_rect().height() / 2.0) - offset.y),
       })

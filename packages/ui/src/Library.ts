@@ -1,24 +1,15 @@
 import library from './services/LibraryLocation.worker.ts';
 import * as Comlink from 'comlink';
-import { LibraryMessage, SystemInfo, TagMessage } from 'proto';
+import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
-
-export type Entry = {
-  hash: string;
-  name: string;
-  path: string;
-  createDate: string;
-  rating: number;
-  orientation: number;
-};
 
 export type Location = {
   host?: string;
   name: string;
   path: string;
-  index: Entry[];
+  index: IndexEntryMessage[];
 };
 
 export const [location, setLocation] = createSignal<Location>({
@@ -28,7 +19,7 @@ export const [location, setLocation] = createSignal<Location>({
   index: [],
 });
 
-export const [file, setFile] = createSignal<Entry>();
+export const [file, setFile] = createSignal<IndexEntryMessage>();
 
 export const [libs, setLibs] = createSignal<LibraryMessage[]>([]);
 
@@ -60,25 +51,14 @@ export class Library {
   static open(name: string) {
     library.onIndex(
       Comlink.proxy((msg) => {
-        const index = msg.index.index;
+        const index = msg.index?.index;
 
-        // TODO: empty index message?
-        if (index.length > 1) {
+        if (index && index.length > 1) {
           const loc = {
             host: '127.0.0.1:8000',
             name: name,
             path: '/',
-            index: index.map((entry) => {
-              const e: Entry = {
-                createDate: entry.createDate || '',
-                name: entry.name || '',
-                path: entry.path || '',
-                rating: entry.rating || 0,
-                hash: entry.hash || '',
-                orientation: entry.orientation || 0,
-              };
-              return e;
-            }),
+            index: index,
           };
 
           setLocation(loc);

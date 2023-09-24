@@ -150,7 +150,7 @@ pub fn cached_thumb(p: &String) -> Vec<u8> {
 
     return fs::read(&thumbnail_path).unwrap();
   } else {
-    println!("PP {}", p);
+    // TODO: this is slow
     let thumb = thumbnail(p.to_string());
 
     let _ = fs::create_dir_all(cache_dir);

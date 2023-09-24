@@ -50,6 +50,7 @@ async fn main() {
 
 fn metadata(file: &String) -> library::Message {
   let p = file;
+
   let m = phl_library::image::metadat(p.to_string());
 
   let mut msg = library::Message::new();
@@ -70,7 +71,6 @@ fn metadata(file: &String) -> library::Message {
     if let Some(f) = file {
       tags.append(&mut f.tags.clone());
     } else {
-      println!("Write file to index");
       Library::add_file(&root, &metadata.hash, meta.rating as i32);
     }
 
@@ -154,6 +154,10 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
       msg.orientation = meta.orientation as i32;
       msg.path = meta.path.clone();
       msg.rating = rating;
+      msg.tags = file
+        .and_then(|f| Some(f.tags))
+        .or(Some(Vec::new()))
+        .unwrap();
       msg
     })
     .collect();

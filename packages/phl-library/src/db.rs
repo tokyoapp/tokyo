@@ -61,10 +61,7 @@ unsafe impl Sync for Root {}
 
 impl Root {
   pub fn new() -> Self {
-    println!("Create root");
-
     if !Path::exists(&Path::new("./data/")) {
-      println!("Path for data exists");
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 

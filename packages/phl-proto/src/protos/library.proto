@@ -14,6 +14,7 @@ message IndexEntryMessage {
   string create_date = 4;
   int32 rating = 5;
   int32 orientation = 6;
+  repeated string tags = 7;
 }
 
 message MetadataMessage {

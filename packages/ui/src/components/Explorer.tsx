@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
 import library from '../services/LibraryLocation.worker';
-import { type Location, type Entry, file } from '../Library.ts';
+import { type Location, type Entry, file, tags } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -11,6 +11,7 @@ import FilterCombobox from './FilterCombobox.tsx';
 import { Stars } from './Stars.tsx';
 import Icon from './Icon.tsx';
 import { SystemInfo } from './System.tsx';
+import { IndexEntryMessage } from 'proto';
 
 const sort = {
   rating: (a: Entry, b: Entry) => {
@@ -53,6 +54,7 @@ export default function Library(props: { location: Location }) {
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
     showName: false,
+    showTags: false,
   });
 
   const [starFilter, setStarFilter] = createSignal(0);
@@ -125,11 +127,13 @@ export default function Library(props: { location: Location }) {
                 setViewSettings({
                   showRating: value.includes('showRating'),
                   showName: value.includes('showName'),
+                  showTags: value.includes('showTags'),
                 });
               }}
               items={[
                 { id: 'showRating', value: 'Rating', checked: viewSettings.showRating },
                 { id: 'showName', value: 'Filename', checked: viewSettings.showName },
+                { id: 'showTags', value: 'Tags', checked: viewSettings.showTags },
               ]}
             >
               <Icon name="ph-eye" />
@@ -143,7 +147,7 @@ export default function Library(props: { location: Location }) {
           <SystemInfo />
         </div>
 
-        <div class="grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
+        <div class="pb-24 grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
           {items()
             .filter(itemFilter)
             .map((item, i) => {
@@ -152,6 +156,7 @@ export default function Library(props: { location: Location }) {
                   selected={selection().includes(item)}
                   number={(i + 1).toString()}
                   name={viewSettings.showName}
+                  tags={viewSettings.showTags}
                   rating={viewSettings.showRating}
                   onClick={() => {
                     setSelection([item]);
@@ -190,8 +195,9 @@ type ThumbProps = {
   selected: boolean;
   name: boolean;
   rating: boolean;
+  tags: boolean;
   number: string;
-  item: Entry;
+  item: IndexEntryMessage;
   onClick: () => void;
 };
 
@@ -259,10 +265,16 @@ function Thumb(props: ThumbProps) {
     });
   });
 
+  const file_tags = () => {
+    const arr = props.item.tags.filter(Boolean).map((tag) => {
+      return tags().find((t) => t.id === tag)?.name || tag;
+    });
+    return arr || [];
+  };
+
   return (
     <div class="relative h-52">
       <div
-        title={props.item.path}
         data-selected={props.selected || undefined}
         tabIndex={0}
         class={[
@@ -280,7 +292,13 @@ function Thumb(props: ThumbProps) {
         <div class="absolute text-7xl opacity-5 leading-none">{props.number}</div>
 
         <div class="text-xs">{props.name ? props.item.name : null}</div>
-        <span />
+
+        <div class="flex flex-wrap justify-items-start items-start text-xs">
+          {props.tags
+            ? file_tags().map((tag) => <div class="rounded-md bg-zinc-700 p-[2px_6px]">{tag}</div>)
+            : null}
+        </div>
+
         <div class="text-xs">
           {props.rating ? (
             <div class="pb-1">

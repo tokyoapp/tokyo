@@ -1,21 +1,34 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
 import { DynamicImage } from '../DynamicImage.ts';
-import { Entry, Library, file, setFile } from '../Library.ts';
+import { Library, file, setFile } from '../Library.ts';
 import storage from '../services/ClientStorage.worker';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import { Stars } from './Stars.tsx';
 import { Notifications } from './notifications/Notifications.ts';
 import { ErrorNotification } from './notifications/index.ts';
+import { settings } from './Edit.tsx';
+import { IndexEntryMessage } from 'proto';
+import * as wasmViewport from '../lib.rs';
+import type * as Viewport from '.rust/core.d.ts';
+
+const viewport = wasmViewport as {
+  default: () => Promise<void>;
+  init: () => Promise<Viewport.WebHandle>;
+};
 
 const [item, setItem] = createSignal<{
-  item: Entry;
+  item: IndexEntryMessage;
   url: string;
 }>();
 const [loading, setLoading] = createSignal(false);
 
 let controller: AbortController;
 let timeout: number;
+
+createEffect(() => {
+  const setts = settings();
+});
 
 createEffect(async () => {
   // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
@@ -73,12 +86,12 @@ const Tool = (props: ParentProps & { class: string }) => {
   );
 };
 
-export default function Preview() {
-  const viewportCanvas = document.createElement('canvas');
-  viewportCanvas.id = 'viewport_canvas';
-  viewportCanvas.style.width = '100%';
-  viewportCanvas.style.position = 'absolute';
+const viewportCanvas = document.createElement('canvas');
+viewportCanvas.id = 'viewport_canvas';
+viewportCanvas.style.width = '100%';
+viewportCanvas.style.position = 'absolute';
 
+export default function Preview() {
   const resize = () => {
     const parent = viewportCanvas.parentNode as HTMLElement;
     viewportCanvas.width = parent?.clientWidth * 2;
@@ -87,18 +100,14 @@ export default function Preview() {
 
   window.addEventListener('resize', resize);
 
-  let vp: ReturnType<typeof viewport.init>;
+  let vp: Viewport.WebHandle;
 
-  import('../lib.rs')
-    .then(async (module) => {
-      await module.default();
-      return module;
-    })
-    .then(async (viewport) => {
-      vp = viewport.init();
-      vp.start(viewportCanvas.id, '', {
-        orientation: 0,
-      });
+  viewport
+    .default()
+    .then(async () => {
+      const handle = await viewport.init();
+      vp = handle;
+      return handle;
     })
     .catch((err) => {
       console.error('Viewport Error: ', err);
@@ -109,6 +118,13 @@ export default function Preview() {
         })
       );
     });
+
+  createEffect(() => {
+    const edit = settings();
+    if (vp) {
+      vp.apply_edit(edit);
+    }
+  });
 
   createEffect(() => {
     const i = item();
