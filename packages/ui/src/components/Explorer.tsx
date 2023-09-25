@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
 import library from '../services/LibraryLocation.worker';
-import { type Location, type Entry, file, tags } from '../Library.ts';
+import { type Location, file, tags } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -13,32 +13,6 @@ import Icon from './Icon.tsx';
 import { SystemInfo } from './System.tsx';
 import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
-
-const sort = {
-  rating: (a: Entry, b: Entry) => {
-    return +b.rating - +a.rating;
-  },
-  created: (a: Entry, b: Entry) => {
-    const dateASlice = a.createDate.split(' ');
-    dateASlice[0] = dateASlice[0].replaceAll(':', '-');
-    const dateA = new Date(dateASlice.join(' '));
-
-    const dateBSlice = b.createDate.split(' ');
-    dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
-    const dateB = new Date(dateBSlice.join(' '));
-
-    return dateA.valueOf() - dateB.valueOf();
-  },
-};
-
-export const [selection, setSelection] = createSignal<Entry[]>([]);
-
-createEffect(() => {
-  const [selected] = selection();
-  if (selected) {
-    Action.run('open', [selected]);
-  }
-});
 
 createEffect(() => {
   if (file()) {
@@ -52,11 +26,71 @@ createEffect(() => {
 });
 
 export default function Library(props: { location: Location }) {
+  const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
+
+  createEffect(() => {
+    const [selected] = selection();
+    if (selected) {
+      Action.run('open', [selected]);
+    }
+  });
+
+  const sort = {
+    rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
+      return +b.rating - +a.rating;
+    },
+    created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
+      const dateASlice = a.createDate.split(' ');
+      dateASlice[0] = dateASlice[0].replaceAll(':', '-');
+      const dateA = new Date(dateASlice.join(' '));
+
+      const dateBSlice = b.createDate.split(' ');
+      dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
+      const dateB = new Date(dateBSlice.join(' '));
+
+      return dateA.valueOf() - dateB.valueOf();
+    },
+  };
+
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
     showName: false,
     showTags: false,
   });
+
+  function stack(items: IndexEntryMessage[]) {
+    const stacked = [];
+
+    _stack: for (const item of items) {
+      for (const stacked_item of stacked) {
+        const _item = stacked_item[0];
+        if (_item.hash === item.hash) {
+          stacked_item.push(_item);
+          continue _stack;
+        }
+      }
+      stacked.push([item]);
+    }
+
+    return stacked;
+  }
+
+  function entryToThumbnail(items: IndexEntryMessage[], i: number) {
+    const item = items[0];
+    return (
+      <Thumbnail
+        selected={selection().includes(item)}
+        number={(i + 1).toString()}
+        name={viewSettings.showName}
+        tags={viewSettings.showTags}
+        rating={viewSettings.showRating}
+        onClick={() => {
+          setSelection([item]);
+        }}
+        items={items}
+      />
+    );
+  }
 
   const [starFilter, setStarFilter] = createSignal(0);
 
@@ -68,7 +102,7 @@ export default function Library(props: { location: Location }) {
   }
 
   const [sorting, setSorting] = createSignal<keyof typeof sort>('created');
-  const items = () => [...props.location.index].sort(sort[sorting()]);
+  const items = () => [...props.location.index];
 
   const onKeyDown = (e: KeyboardEvent) => {
     const parent = (e.target as HTMLElement).parentNode;
@@ -161,23 +195,11 @@ export default function Library(props: { location: Location }) {
         </div>
 
         <div class="pb-24 grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
-          {items()
-            .filter(itemFilter)
-            .map((item, i) => {
-              return (
-                <Thumb
-                  selected={selection().includes(item)}
-                  number={(i + 1).toString()}
-                  name={viewSettings.showName}
-                  tags={viewSettings.showTags}
-                  rating={viewSettings.showRating}
-                  onClick={() => {
-                    setSelection([item]);
-                  }}
-                  item={item}
-                />
-              );
-            })}
+          {stack(
+            items()
+              .filter(itemFilter)
+              .sort(sort[sorting()])
+          ).map(entryToThumbnail)}
         </div>
       </div>
 
@@ -210,45 +232,46 @@ type ThumbProps = {
   rating: boolean;
   tags: boolean;
   number: string;
-  item: IndexEntryMessage;
+  items: IndexEntryMessage[];
   onClick: () => void;
 };
 
-function Thumb(props: ThumbProps) {
-  const [img, setImg] = createSignal<HTMLCanvasElement>();
+function Thumbnail(props: ThumbProps) {
+  const [img, setImg] = createSignal<Blob>();
 
-  let ele: HTMLDivElement;
-
-  let controller: AbortController;
-
-  const useThumb = (blob: Blob) => {
-    const url = URL.createObjectURL(blob);
-    const image = new Image();
-    image.onload = () => {
-      const dynimg = new DynamicImage(image, props.item);
-      const canvas = dynimg.resizeContain(256).canvas();
-      canvas.style.width = '100%';
-      canvas.style.maxHeight = '100%';
-      canvas.style.objectFit = 'contain';
-      setImg(canvas);
-    };
-    image.src = url;
-  };
-
-  const onView = async () => {
-    controller = new AbortController();
-
-    const tmp = await storage.readTemp(props.item.hash);
+  const onView = async (item: IndexEntryMessage) => {
+    const tmp = await storage.readTemp(item.hash);
 
     if (tmp && tmp.size > 0) {
-      useThumb(tmp);
+      setImg(tmp);
     } else {
-      library.getMetadata(props.item.path).then((meta) => {
+      library.getMetadata(item.path).then((meta) => {
         const blob = new Blob([meta.metadata?.thumbnail]);
-        useThumb(blob);
+        setImg(blob);
       });
       // get thumbnail from metadata data
     }
+  };
+
+  let ele: HTMLDivElement;
+
+  const useThumb = (blob?: Blob) => {
+    const dynimg = new DynamicImage();
+    const canvas = dynimg.canvas();
+
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.onload = () => {
+        dynimg.fromDrawable(image, props.items[0]).resizeContain(256);
+        const newCanvas = dynimg.canvas();
+
+        canvas.parentNode?.replaceChild(newCanvas, canvas);
+      };
+      image.src = url;
+    }
+
+    return canvas;
   };
 
   onMount(() => {
@@ -257,11 +280,7 @@ function Thumb(props: ThumbProps) {
         if (!img()) {
           entires.forEach((entry) => {
             if (entry.isIntersecting) {
-              onView();
-            } else {
-              if (controller) {
-                controller.abort();
-              }
+              onView(props.items[0]);
             }
           });
         }
@@ -279,14 +298,14 @@ function Thumb(props: ThumbProps) {
   });
 
   const file_tags = () => {
-    const arr = props.item.tags.filter(Boolean).map((tag) => {
+    const arr = props.items[0].tags.filter(Boolean).map((tag) => {
       return tags().find((t) => t.id === tag)?.name || tag;
     });
     return arr || [];
   };
 
   return (
-    <div class="relative h-52">
+    <div class="thumbnail z-0 relative h-52 overflow-hidden">
       <div
         data-selected={props.selected || undefined}
         tabIndex={0}
@@ -298,13 +317,27 @@ function Thumb(props: ThumbProps) {
         onClick={() => props.onClick()}
         ref={ele}
       >
-        <div class="w-full h-full flex items-center">{img()}</div>
+        <div class="w-full h-full flex items-center">
+          {props.items.slice(0, 3).map((item, i) => {
+            return (
+              <div
+                class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+                  ${i === 0 ? 'z-30 shadow-md' : ''}
+                  ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
+                  ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
+                `}
+              >
+                {useThumb(img())}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div class="z-1 absolute top-0 left-0 p-1 h-full w-full grid grid-rows-[auto_1fr_auto] opacity-70 pointer-events-none">
+      <div class="z-40 absolute top-0 left-0 p-1 h-full w-full grid grid-rows-[auto_1fr_auto] opacity-70 pointer-events-none">
         <div class="absolute text-7xl opacity-5 leading-none">{props.number}</div>
 
-        <div class="text-xs">{props.name ? props.item.name : null}</div>
+        <div class="text-xs">{props.name ? props.items[0].name : null}</div>
 
         <div class="flex flex-wrap justify-items-start items-start text-xs">
           {props.tags
@@ -315,7 +348,7 @@ function Thumb(props: ThumbProps) {
         <div class="text-xs">
           {props.rating ? (
             <div class="pb-1">
-              <Rating rating={props.item.rating} />
+              <Rating rating={props.items[0].rating} />
             </div>
           ) : null}
         </div>

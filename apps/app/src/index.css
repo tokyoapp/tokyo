@@ -121,3 +121,13 @@ a-dropdown::part(dropdown) {
 hr {
   opacity: 0.1;
 }
+
+.thumbnail canvas {
+  height: 100%;
+}
+
+.thumbnail-image:nth-child(1) canvas,
+.thumbnail-image:nth-child(3) canvas,
+.thumbnail-image:nth-child(2) canvas {
+  box-shadow: 4px 3px 15px rgba(0, 0, 0, 0.33);
+}
