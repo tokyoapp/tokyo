@@ -10,6 +10,7 @@ import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
 import Action from '../actions/Action.ts';
+import { t } from '../locales/messages.ts';
 
 const os = await platform().catch((err) => {
   console.error(err);
@@ -140,7 +141,7 @@ export default function Titlebar() {
               onClick={() => setCmdOpen(true)}
               class="shadow-none border-zinc-800 bg-[#151517] pointer-events-auto py-[5px] w-80 text-zinc-500"
             >
-              <span>Search</span>
+              <span>{t('search')}</span>
               <Icon class="px-2" name="ph-magnifying-glass" />
             </button>
           </div>

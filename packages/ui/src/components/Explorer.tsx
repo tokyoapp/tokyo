@@ -12,6 +12,7 @@ import { Stars } from './Stars.tsx';
 import Icon from './Icon.tsx';
 import { SystemInfo } from './System.tsx';
 import { IndexEntryMessage } from 'proto';
+import { t } from '../locales/messages.ts';
 
 const sort = {
   rating: (a: Entry, b: Entry) => {
@@ -102,13 +103,17 @@ export default function Library(props: { location: Location }) {
                 if (value in sort) setSorting(value);
               }}
               items={[
-                { id: 'created', value: 'Created', checked: sorting() === 'created' },
-                { id: 'rating', value: 'Rating', checked: sorting() === 'rating' },
+                {
+                  id: 'created',
+                  value: t('explorer_sort_created'),
+                  checked: sorting() === 'created',
+                },
+                { id: 'rating', value: t('explorer_sort_rating'), checked: sorting() === 'rating' },
               ]}
             >
               <div class="flex items-center">
                 <Icon name="ph-sort-ascending" class="mr-1" />
-                <span>{sorting()}</span>
+                <span>{t('explorer_sort_' + sorting())}</span>
               </div>
             </Combobox>
           </div>
@@ -131,9 +136,17 @@ export default function Library(props: { location: Location }) {
                 });
               }}
               items={[
-                { id: 'showRating', value: 'Rating', checked: viewSettings.showRating },
-                { id: 'showName', value: 'Filename', checked: viewSettings.showName },
-                { id: 'showTags', value: 'Tags', checked: viewSettings.showTags },
+                {
+                  id: 'showRating',
+                  value: t('explorer_view_rating'),
+                  checked: viewSettings.showRating,
+                },
+                {
+                  id: 'showName',
+                  value: t('explorer_view_filename'),
+                  checked: viewSettings.showName,
+                },
+                { id: 'showTags', value: t('explorer_view_tags'), checked: viewSettings.showTags },
               ]}
             >
               <Icon name="ph-eye" />

@@ -2,6 +2,7 @@ import '@atrium-ui/mono/expandable';
 import { Entry, Library, tags } from '../Library.ts';
 import Icon from './Icon.tsx';
 import { createEffect, createSignal } from 'solid-js';
+import { t } from '../locales/messages.ts';
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -79,25 +80,34 @@ export default function Info(props: {
         <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
       ) : (
         <>
-          <Property title="Name" value={props.file.name} />
-          <Property title="Hash" value={props.file.hash} />
-          <Property title="Path" value={props.file.path} />
-          <Property title="Date created" value={props.file.createDate} />
-          <Property title="Tags" value={[typeFromFilename(props.file.name), ...file_tags()]} />
+          <Property title={t('info_name')} value={props.file.name} />
+          <Property title={t('info_hash')} value={props.file.hash} />
+          <Property title={t('info_path')} value={props.file.path} />
+          <Property title={t('info_date_created')} value={props.file.createDate} />
+          <Property
+            title={t('info_tags')}
+            value={[typeFromFilename(props.file.name), ...file_tags()]}
+          />
 
           <Seperator />
 
           {meta() ? (
             <>
-              <Property title="Camera" value={meta()?.make} />
-              <Property title="Lens" value={`${exif()?.lens_make} ${exif()?.lens_model}`} />
+              <Property title={t('info_camera')} value={meta()?.make} />
+              <Property
+                title={t('info_lens')}
+                value={`${exif()?.lens_make} ${exif()?.lens_model}`}
+              />
 
               <Seperator />
 
-              <Property title="Aperture" value={`F ${exif()?.fnumber.split('/')[0]}`} />
-              <Property title="Focal length" value={`${exif()?.focal_length.split('/')[0]}mm`} />
-              <Property title="Exposure time" value={exif()?.exposure_time} />
-              <Property title="ISO" value={exif()?.iso_speed_ratings} />
+              <Property title={t('info_aperture')} value={`F ${exif()?.fnumber.split('/')[0]}`} />
+              <Property
+                title={t('info_focal_length')}
+                value={`${exif()?.focal_length.split('/')[0]}mm`}
+              />
+              <Property title={t('info_exposure_time')} value={exif()?.exposure_time} />
+              <Property title={t('info_iso')} value={exif()?.iso_speed_ratings} />
 
               <Seperator />
             </>

@@ -11,6 +11,7 @@ import { settings } from './Edit.tsx';
 import { IndexEntryMessage } from 'proto';
 import * as wasmViewport from '../lib.rs';
 import type * as Viewport from '.rust/core.d.ts';
+import { t } from '../locales/messages.ts';
 
 const viewport = wasmViewport as {
   default: () => Promise<void>;
@@ -157,7 +158,7 @@ export default function Preview() {
         >
           <div class="flex items-center">
             <Icon name="ph-arrow-left" class="mr-2 text-md" />
-            <span>Back</span>
+            <span>{t('viewer_back')}</span>
           </div>
         </Button>
         <Tool>

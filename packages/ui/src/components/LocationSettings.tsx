@@ -1,7 +1,9 @@
 import { libs } from '../Library.ts';
+import { langs, language, setLanguage } from '../locales/messages.ts';
 import { setSettingOpen } from './App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
+import Select from './Select.tsx';
 
 export default function () {
   return (
@@ -27,6 +29,14 @@ export default function () {
       </nav>
 
       <div>
+        <Select
+          items={Object.keys(langs).map((lang) => ({ id: lang, value: lang }))}
+          onChange={(value) => {
+            setLanguage(value);
+          }}
+        >
+          Language: {language()}
+        </Select>
         <pre>{JSON.stringify(libs(), null, '  ')}</pre>
       </div>
     </div>

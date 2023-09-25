@@ -12,6 +12,7 @@ import CreateLibrary from './CreateLibrary.tsx';
 import { Tabs } from './Tabs.tsx';
 import './notifications/index.ts';
 import { ErrorNotification, Notification, Notifications } from './notifications/index.ts';
+import { t } from '../locales/messages.ts';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -32,7 +33,7 @@ function App() {
   Library.open('default').then(() => {
     Notifications.push(
       new Notification({
-        message: `Loading library "${'default'}"`,
+        message: t('notification_loaded', ['default']),
         time: 2000,
       })
     );

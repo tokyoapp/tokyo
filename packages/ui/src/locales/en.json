@@ -1,0 +1,31 @@
+{
+  "copyright": "(c) Tim Havlicek",
+
+  "search": "Search",
+
+  "notification_loaded": "Loading library {}",
+
+  "explorer_sort_created": "Created",
+  "explorer_sort_rating": "Rating",
+  "explorer_view_rating": "Rating",
+  "explorer_view_tags": "Tags",
+  "explorer_view_filename": "Filename",
+
+  "system_disk_total": "Total {} GB",
+  "system_disk_available": "Available {} GB",
+  "system_photo_count": "{} Photos",
+
+  "viewer_back": "Back",
+
+  "info_name": "Name",
+  "info_hash": "Hash",
+  "info_path": "Path",
+  "info_date_created": "Date Created",
+  "info_tags": "Tags",
+  "info_camera": "Camera",
+  "info_lens": "Lens",
+  "info_aperture": "Aperture",
+  "info_focal_length": "Focal Length",
+  "info_exposure_time": "Exposure Time",
+  "info_iso": "ISO"
+}
