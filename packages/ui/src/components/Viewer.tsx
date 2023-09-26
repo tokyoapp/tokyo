@@ -9,14 +9,8 @@ import { Notifications } from './notifications/Notifications.ts';
 import { ErrorNotification } from './notifications/index.ts';
 import { settings } from './Edit.tsx';
 import { IndexEntryMessage } from 'proto';
-import * as wasmViewport from '../lib.rs';
-import type * as Viewport from '.rust/core.d.ts';
+import * as viewport from 'viewport';
 import { t } from '../locales/messages.ts';
-
-const viewport = wasmViewport as {
-  default: () => Promise<void>;
-  init: () => Promise<Viewport.WebHandle>;
-};
 
 const [item, setItem] = createSignal<{
   item: IndexEntryMessage;
@@ -30,6 +24,14 @@ let timeout: number;
 createEffect(() => {
   const setts = settings();
 });
+
+const [app, setApp] = createSignal({
+  zoom: 1,
+});
+
+window.addEventListener('app:state', ((e: CustomEvent) => {
+  setApp(e.detail);
+}) as EventListener);
 
 createEffect(async () => {
   // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
@@ -162,7 +164,7 @@ export default function Preview() {
           </div>
         </Button>
         <Tool>
-          <span>100%</span>
+          <span>{Math.round(app().zoom * 100)}%</span>
         </Tool>
         <Tool class="bg-zinc-900">
           <Icon class="text-base" name="ph-cursor" />

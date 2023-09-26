@@ -28,9 +28,7 @@ export default function Icon(props: Props) {
   const className = `icon ${props.class}`;
 
   if (props.name?.startsWith('ph-')) {
-    return (
-      <i class={`inline-block mb-[-0.175em] align-baseline ph-light ${props.name} ${className}`} />
-    );
+    return <i class={`inline-block align-baseline ph-light ${props.name} ${className}`} />;
   }
 
   if (src.includes('.riv')) {

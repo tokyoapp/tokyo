@@ -88,7 +88,13 @@ function App() {
                 <Tabs.Tab tab="Info" icon="ph-info">
                   <Info file={file()} />
                 </Tabs.Tab>
-                <Tabs.Tab tab="Edit" icon="ph-pencil">
+                <Tabs.Tab tab="Exposure" icon="ph-pencil">
+                  <Edit file={file()} />
+                </Tabs.Tab>
+                <Tabs.Tab tab="Color" icon="ph-pencil">
+                  <Edit file={file()} />
+                </Tabs.Tab>
+                <Tabs.Tab tab="Effects" icon="ph-pencil">
                   <Edit file={file()} />
                 </Tabs.Tab>
               </Tabs>

@@ -44,17 +44,17 @@ pub struct EditSettings {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize, wasm))]
-pub struct TemplateApp {
+pub struct ViewportApp {
   url: String,
   image: Image,
-  zoom: f32,
+  pub zoom: f32,
   position: Pos2,
 
   #[cfg_attr(feature = "serde", serde(skip))]
   promise: Option<Promise<ehttp::Result<Resource>>>,
 }
 
-impl Default for TemplateApp {
+impl Default for ViewportApp {
   fn default() -> Self {
     Self {
       url: "".to_owned(),
@@ -66,7 +66,7 @@ impl Default for TemplateApp {
   }
 }
 
-impl TemplateApp {
+impl ViewportApp {
   pub fn new(cc: &eframe::CreationContext<'_>, url: &str, image: Image) -> Self {
     // if let Some(storage) = cc.storage {
     //     return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
@@ -76,7 +76,7 @@ impl TemplateApp {
     //     log(format!("url: {:?}", image_url()).as_str());
     // }
 
-    let mut app: TemplateApp = Default::default();
+    let mut app: ViewportApp = Default::default();
 
     app.image = image;
     app.url = url.to_string();
@@ -98,7 +98,7 @@ impl TemplateApp {
   }
 }
 
-impl eframe::App for TemplateApp {
+impl eframe::App for ViewportApp {
   // fn save(&mut self, storage: &mut dyn eframe::Storage) {
   //     eframe::set_value(storage, eframe::APP_KEY, self);
   // }
@@ -108,6 +108,8 @@ impl eframe::App for TemplateApp {
   }
 
   fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    super::post_state(self);
+
     ctx.input(|i| {
       self.zoom += i.scroll_delta.y / 1000.0;
       self.zoom = self.zoom.max(0.8);
@@ -161,7 +163,7 @@ impl eframe::App for TemplateApp {
                 let Resource { response, image } = resource;
 
                 if let Some(image) = image {
-                  let mut size = image.size_vec2();
+                  let size = image.size_vec2();
                   image.show_size(ui, size * zoom);
                 }
               }

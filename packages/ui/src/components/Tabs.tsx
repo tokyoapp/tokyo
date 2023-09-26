@@ -7,7 +7,7 @@ export function Tabs(props: ParentProps) {
   const [currentTab, setCurrentTab] = createSignal(children[0].getAttribute('data-tab'));
 
   return (
-    <div class="grid grid-cols-[32px_1fr] h-full">
+    <div class="grid grid-cols-[auto_1fr] h-full">
       <div class="flex flex-col">
         {children.map((child) => {
           const tab = child.getAttribute('data-tab') as string;
@@ -19,7 +19,7 @@ export function Tabs(props: ParentProps) {
               title={tab}
               data-selected={tab === currentTab() || undefined}
               onClick={() => setCurrentTab(tab)}
-              class="data-[selected]:bg-zinc-900 rounded-none rounded-l-md bg-zinc-950 mr-0 mb-1 px-0 py-2 text-sm flex justify-center items-center"
+              class="data-[selected]:bg-zinc-900 rounded-none rounded-l-md bg-zinc-950 mr-0 mb-1 px-2 py-2 text-xl flex justify-center items-center"
             >
               <Icon name={icon} />
             </button>

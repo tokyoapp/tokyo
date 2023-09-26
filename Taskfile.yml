@@ -54,12 +54,25 @@ tasks:
     cmds:
       - git clean -xdf .
 
+  viewport:dev:
+    dir: packages/viewport
+    sources:
+      - src/lib.rs
+      - src/lib.js
+      - src/viewport/mod.rs
+    cmds:
+      - wasm-pack build --target web
+
+  viewport:dev:watch:
+    cmds:
+      - task viewport:dev --watch
+
   dev:
     desc: Run desktop app with library
     vars:
       deps:
         sh: task setup
-    deps: [library:dev, app:dev]
+    deps: [library:dev, app:dev, viewport:dev:watch]
 
   dev:ios:
     desc: Run ios app in simulator
