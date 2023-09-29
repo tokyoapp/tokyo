@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::extract::ws;
 use axum::Router;
 use axum::{
@@ -13,7 +15,7 @@ use phl_proto::library;
 use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use sysinfo::{DiskExt, System, SystemExt};
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, Mutex};
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -51,13 +53,12 @@ async fn main() {
 async fn metadata(file: &String) -> library::Message {
   let p = file;
 
-  let m = phl_library::image::metadat(p.to_string());
+  let meta = phl_library::image::metadat(p.to_string());
 
   let mut msg = library::Message::new();
 
-  if let Some(meta) = m {
+  if let Some(metadata) = meta {
     let root = db::Root::new();
-    let metadata = phl_library::image::metadat(p.to_string()).unwrap();
     let file = Library::get_file(&root, &metadata.hash);
 
     let mut tags: Vec<String> = Vec::new();
@@ -65,27 +66,27 @@ async fn metadata(file: &String) -> library::Message {
     let rating = file
       .clone()
       .and_then(|f| Some(f.rating))
-      .or(Some(meta.rating as i32))
+      .or(Some(metadata.rating as i32))
       .unwrap();
 
     if let Some(f) = file {
       tags.append(&mut f.tags.clone());
     } else {
-      Library::add_file(&root, &metadata.hash, meta.rating as i32).await;
+      Library::add_file(&root, &metadata.hash, metadata.rating as i32).await;
     }
 
     let mut meta_msg = library::MetadataMessage::new();
-    meta_msg.create_date = meta.create_date;
-    meta_msg.exif = serde_json::to_string(&meta.exif).unwrap();
-    meta_msg.hash = meta.hash;
-    meta_msg.height = meta.height as i32;
-    meta_msg.width = meta.width as i32;
-    meta_msg.make = meta.make;
-    meta_msg.name = meta.name;
-    meta_msg.orientation = meta.orientation as i32;
+    meta_msg.create_date = metadata.create_date;
+    meta_msg.exif = serde_json::to_string(&metadata.exif).unwrap();
+    meta_msg.hash = metadata.hash;
+    meta_msg.height = metadata.height as i32;
+    meta_msg.width = metadata.width as i32;
+    meta_msg.make = metadata.make;
+    meta_msg.name = metadata.name;
+    meta_msg.orientation = metadata.orientation as i32;
     meta_msg.rating = rating;
     meta_msg.tags = tags;
-    meta_msg.thumbnail = phl_library::image::cached_thumb(&p.to_string());
+    meta_msg.thumbnail = phl_library::image::cached_thumb(&p.to_string()).await;
 
     msg.set_metadata(meta_msg);
   }
@@ -189,7 +190,9 @@ async fn handle_socket(mut socket: WebSocket) {
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
 
-  let (mut sender, mut receiver) = socket.split();
+  let (sender, mut receiver) = socket.split();
+
+  let arc_sender = Arc::new(Mutex::new(sender));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {
@@ -204,13 +207,9 @@ async fn handle_socket(mut socket: WebSocket) {
     let msg = library::ClientMessage::parse_from_bytes(&data);
 
     if let Ok(ok_msg) = msg {
-      let id = ok_msg.id.clone();
-      println!("process message {:?}", id);
+      let ws = arc_sender.clone();
 
-      // let mut socket = sender;
-
-      // Sender needs to be able to send from spawned task
-      let process = tokio::spawn(async move {
+      tokio::spawn(async move {
         if ok_msg.has_index() {
           let index = ok_msg.index();
           println!("Requested Index {}", index.name);
@@ -219,7 +218,8 @@ async fn handle_socket(mut socket: WebSocket) {
           msg.id = ok_msg.id;
           msg.set_index(get_index_msg(index.name.as_str()));
           let bytes = msg.write_to_bytes().unwrap();
-          return Some(ws::Message::Binary(bytes));
+          let packet = ws::Message::Binary(bytes);
+          ws.lock().await.send(packet).await;
         }
 
         if ok_msg.has_create() {
@@ -231,7 +231,8 @@ async fn handle_socket(mut socket: WebSocket) {
             let mut msg = library::Message::new();
             msg.set_list(get_location_list());
             let bytes = msg.write_to_bytes().unwrap();
-            return Some(ws::Message::Binary(bytes));
+            let packet = ws::Message::Binary(bytes);
+            ws.lock().await.send(packet).await;
           }
         }
 
@@ -240,19 +241,21 @@ async fn handle_socket(mut socket: WebSocket) {
           let mut msg = metadata(file).await;
           msg.id = ok_msg.id;
           let bytes = msg.write_to_bytes().unwrap();
-          return Some(ws::Message::Binary(bytes));
+          let packet = ws::Message::Binary(bytes);
+          ws.lock().await.send(packet).await;
         }
 
         if ok_msg.has_image() {
           let file = &ok_msg.image().file;
-          let image = phl_library::image::cached_thumb(file);
+          let image = phl_library::image::cached_thumb(file).await;
           let mut img_msg = library::ImageMessage::new();
           img_msg.image = image;
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
           msg.set_image(img_msg);
           let bytes = msg.write_to_bytes().unwrap();
-          return Some(ws::Message::Binary(bytes));
+          let packet = ws::Message::Binary(bytes);
+          ws.lock().await.send(packet).await;
         }
 
         if ok_msg.has_postmeta() {
@@ -265,27 +268,18 @@ async fn handle_socket(mut socket: WebSocket) {
           msg.id = ok_msg.id;
           msg.set_index(get_index_msg("default"));
           let bytes = msg.write_to_bytes().unwrap();
-          return Some(ws::Message::Binary(bytes));
+          let packet = ws::Message::Binary(bytes);
+          ws.lock().await.send(packet).await;
         }
-
-        None
       });
-
-      let _ = process
-        .then(|bytes| async {
-          let _ = sender.send(bytes.unwrap().unwrap()).await;
-        })
-        .await;
-
-      println!("{:?} done", id);
-
-      //
     } else {
       let mut error_message = library::Message::new();
       error_message.error = Some(true);
       error_message.message = Some("Something went wrong".to_string());
 
-      if sender
+      if arc_sender
+        .lock()
+        .await
         .send(ws::Message::Binary(
           error_message
             .write_to_bytes()

@@ -7,13 +7,13 @@ use rawler::{
   imgop::{raw, rescale_f32_to_u8},
   RawFile, RawImageData,
 };
-use std::fs;
 use std::{
   fs::File,
   io::{BufReader, Read},
   path::{Path, PathBuf},
 };
 use std::{io::Cursor, time::Instant};
+use tokio::fs;
 
 #[derive(serde::Serialize, Debug)]
 pub struct Metadata {
@@ -122,8 +122,9 @@ pub fn thumbnail(path: String) -> Vec<u8> {
   return bytes;
 }
 
-pub fn cached_thumb(p: &String) -> Vec<u8> {
-  let bytes = std::fs::read(p.to_string()).unwrap(); // Vec<u8>
+pub async fn cached_thumb(p: &String) -> Vec<u8> {
+  // TODO: save the read call here, get better hash
+  let bytes = fs::read(p.to_string()).await.unwrap(); // Vec<u8>
 
   let ext = Path::new(&p).extension().unwrap().to_str().unwrap();
   match ext {
@@ -136,7 +137,6 @@ pub fn cached_thumb(p: &String) -> Vec<u8> {
     &_ => {}
   }
 
-  // content id
   let hash = sha256::digest(&bytes);
 
   println!("hash of {}: {}", p, hash);
@@ -146,9 +146,7 @@ pub fn cached_thumb(p: &String) -> Vec<u8> {
   let thumbnail_path = cache_dir.to_owned() + "/" + &hash + ".jpg";
 
   if Path::new(&thumbnail_path).exists() {
-    println!("thumb exists {}", thumbnail_path);
-
-    return fs::read(&thumbnail_path).unwrap();
+    return fs::read(&thumbnail_path).await.unwrap();
   } else {
     // TODO: this is slow
     let thumb = thumbnail(p.to_string());
