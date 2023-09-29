@@ -109,6 +109,7 @@ pub fn metadat(path: String) -> Option<Metadata> {
 
 pub fn thumbnail(path: String) -> Vec<u8> {
   let mut thumb = extract_thumbnail_pixels(path, RawDecodeParams { image_index: 0 }).unwrap();
+  // TODO: use my own io and use tokio::fs for this
   thumb = thumb.resize(thumb.width() / 5, thumb.height() / 5, FilterType::Nearest);
 
   let mut bytes: Vec<u8> = Vec::new();
@@ -123,7 +124,7 @@ pub fn thumbnail(path: String) -> Vec<u8> {
 }
 
 pub async fn cached_thumb(p: &String) -> Vec<u8> {
-  // TODO: save the read call here, get better hash
+  // TODO: save the read call here, hash in param
   let bytes = fs::read(p.to_string()).await.unwrap(); // Vec<u8>
 
   let ext = Path::new(&p).extension().unwrap().to_str().unwrap();
@@ -151,8 +152,8 @@ pub async fn cached_thumb(p: &String) -> Vec<u8> {
     // TODO: this is slow
     let thumb = thumbnail(p.to_string());
 
-    let _ = fs::create_dir_all(cache_dir);
-    let _ = fs::write(thumbnail_path, &thumb);
+    let _ = fs::create_dir_all(cache_dir).await;
+    let _ = fs::write(thumbnail_path, &thumb).await;
 
     return thumb;
   }

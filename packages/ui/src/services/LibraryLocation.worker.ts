@@ -160,22 +160,17 @@ class LibraryLocation {
   async open(name: string): Promise<void> {
     return new Promise((resolve) => {
       this.ws = new WebSocket('ws://192.168.1.11:8000/ws');
-
       this.ws.onopen = () => {
         this.onConnected(name);
-
         resolve();
       };
-
       this.ws.onerror = (err) => {
         console.error('[WS] Error: ', err);
         this.errorListeners.forEach((cb) => cb(new Error(`[WS] Error: ${err}`)));
       };
-
       this.ws.onmessage = async (msg) => {
         const buf = await (msg.data as Blob).arrayBuffer();
         const message = library.Message.decode(new Uint8Array(buf));
-
         this.handleMessage(message);
       };
     });

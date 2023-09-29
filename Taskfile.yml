@@ -72,6 +72,13 @@ tasks:
     vars:
       deps:
         sh: task setup
+    deps: [app:dev, viewport:dev:watch]
+
+  dev:server:
+    desc: Run desktop app with library
+    vars:
+      deps:
+        sh: task setup
     deps: [library:dev, app:dev, viewport:dev:watch]
 
   dev:ios:

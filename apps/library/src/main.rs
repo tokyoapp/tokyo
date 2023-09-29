@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::extract::ws;
 use axum::Router;
 use axum::{
@@ -7,15 +5,16 @@ use axum::{
   routing::get,
 };
 use futures::sink::SinkExt;
-use futures::{FutureExt, Stream, StreamExt};
+use futures::StreamExt;
 use phl_library::db::Root;
 use phl_library::image::Metadata;
 use phl_library::{db, Library};
 use phl_proto::library;
 use phl_proto::Message;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use sysinfo::{DiskExt, System, SystemExt};
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::Mutex;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -246,8 +245,8 @@ async fn handle_socket(mut socket: WebSocket) {
         }
 
         if ok_msg.has_image() {
-          let file = &ok_msg.image().file;
-          let image = phl_library::image::cached_thumb(file).await;
+          let file = &ok_msg.image().file; // should be the hash,
+          let image = phl_library::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
           let mut img_msg = library::ImageMessage::new();
           img_msg.image = image;
           let mut msg = library::Message::new();

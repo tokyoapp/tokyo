@@ -2,8 +2,7 @@ import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
-import library from '../services/LibraryLocation.worker';
-import { type Location, file, tags } from '../Library.ts';
+import { type Location, file, tags, Library } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -25,7 +24,7 @@ createEffect(() => {
   }
 });
 
-export default function Library(props: { location: Location }) {
+export default function Explorer(props: { location: Location }) {
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
 
   createEffect(() => {
@@ -245,7 +244,7 @@ function Thumbnail(props: ThumbProps) {
     if (tmp && tmp.size > 0) {
       setImg(tmp);
     } else {
-      library.getMetadata(item.path).then((meta) => {
+      Library.metadata(item.path).then((meta) => {
         const blob = new Blob([meta.metadata?.thumbnail]);
         setImg(blob);
       });

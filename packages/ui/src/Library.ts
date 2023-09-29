@@ -4,6 +4,7 @@ import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto
 import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
+import { invoke, Channel } from '@tauri-apps/api/tauri';
 
 export type Location = {
   host?: string;
@@ -48,54 +49,68 @@ export class Library {
     return await library.createLocation();
   }
 
-  static open(name: string) {
-    library.onIndex(
-      Comlink.proxy((msg) => {
-        const index = msg.index?.index;
+  static open(uri: string) {
+    const [host_or_name, path] = uri.split(':');
+    const name = path || host_or_name;
+    const host = path ? host_or_name : undefined;
 
-        if (index && index.length > 1) {
-          const loc = {
-            host: '127.0.0.1:8000',
-            name: name,
-            path: '/',
-            index: index,
-          };
+    console.log('Open:', name, 'at', host);
 
-          setLocation(loc);
-
-          const item = file();
-          const index_item = loc.index.find((entry) => entry.hash === item?.hash);
-          if (index_item) {
-            setFile(index_item);
-          }
-        }
+    invoke('list')
+      .then((res) => {
+        console.log(res);
       })
-    );
+      .catch((err) => {
+        console.error(err);
+      });
 
-    library.onList(
-      Comlink.proxy((list) => {
-        setLibs(list.list?.libraries);
-        setTags(list.list?.tags);
-      })
-    );
+    // library.onIndex(
+    //   Comlink.proxy((msg) => {
+    //     const index = msg.index?.index;
 
-    library.onSystem(
-      Comlink.proxy((msg) => {
-        setSysInfo(msg.system);
-      })
-    );
+    //     if (index && index.length > 1) {
+    //       const loc = {
+    //         host: '127.0.0.1:8000',
+    //         name: name,
+    //         path: '/',
+    //         index: index,
+    //       };
 
-    library.onError(
-      Comlink.proxy((err) => {
-        Notifications.push(
-          new ErrorNotification({
-            message: `Error: ${err.message}`,
-            time: 3000,
-          })
-        );
-      })
-    );
+    //       setLocation(loc);
 
-    return library.open(name);
+    //       const item = file();
+    //       const index_item = loc.index.find((entry) => entry.hash === item?.hash);
+    //       if (index_item) {
+    //         setFile(index_item);
+    //       }
+    //     }
+    //   })
+    // );
+
+    // library.onList(
+    //   Comlink.proxy((list) => {
+    //     setLibs(list.list?.libraries);
+    //     setTags(list.list?.tags);
+    //   })
+    // );
+
+    // library.onSystem(
+    //   Comlink.proxy((msg) => {
+    //     setSysInfo(msg.system);
+    //   })
+    // );
+
+    // library.onError(
+    //   Comlink.proxy((err) => {
+    //     Notifications.push(
+    //       new ErrorNotification({
+    //         message: `Error: ${err.message}`,
+    //         time: 3000,
+    //       })
+    //     );
+    //   })
+    // );
+
+    // return library.open(name);
   }
 }
