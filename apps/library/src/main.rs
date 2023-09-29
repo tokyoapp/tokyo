@@ -1,19 +1,19 @@
-use axum::Router;
-use sysinfo::{DiskExt, NetworkExt, NetworksExt, ProcessExt, System, SystemExt};
-
 use axum::extract::ws;
+use axum::Router;
 use axum::{
   extract::ws::{WebSocket, WebSocketUpgrade},
   routing::get,
 };
-
+use futures::sink::SinkExt;
+use futures::{FutureExt, Stream, StreamExt};
 use phl_library::db::Root;
 use phl_library::image::Metadata;
 use phl_library::{db, Library};
 use phl_proto::library;
 use phl_proto::Message;
-
 use serde::{Deserialize, Serialize};
+use sysinfo::{DiskExt, System, SystemExt};
+use tokio::sync::mpsc;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -48,7 +48,7 @@ async fn main() {
     .unwrap();
 }
 
-fn metadata(file: &String) -> library::Message {
+async fn metadata(file: &String) -> library::Message {
   let p = file;
 
   let m = phl_library::image::metadat(p.to_string());
@@ -71,7 +71,7 @@ fn metadata(file: &String) -> library::Message {
     if let Some(f) = file {
       tags.append(&mut f.tags.clone());
     } else {
-      Library::add_file(&root, &metadata.hash, meta.rating as i32);
+      Library::add_file(&root, &metadata.hash, meta.rating as i32).await;
     }
 
     let mut meta_msg = library::MetadataMessage::new();
@@ -168,6 +168,7 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
 async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
 
+  // send location list
   let mut msg = library::Message::new();
   msg.set_list(get_location_list());
   let _ = socket
@@ -177,6 +178,7 @@ async fn handle_socket(mut socket: WebSocket) {
   let sys = System::new_all();
   let disk = sys.disks().first().unwrap();
 
+  // send system info
   let mut sys_msg = library::Message::new();
   let mut _sys_msg = library::SystemInfo::new();
   _sys_msg.disk_name = disk.name().to_str().unwrap().to_string();
@@ -187,7 +189,10 @@ async fn handle_socket(mut socket: WebSocket) {
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
 
-  while let Some(msg) = socket.recv().await {
+  let (mut sender, mut receiver) = socket.split();
+
+  // Process incoming messages
+  while let Some(msg) = receiver.next().await {
     let msg = if let Ok(msg) = msg {
       msg
     } else {
@@ -198,14 +203,89 @@ async fn handle_socket(mut socket: WebSocket) {
     let data = msg.into_data();
     let msg = library::ClientMessage::parse_from_bytes(&data);
 
-    println!("Rec socket message {:?}", msg);
+    if let Ok(ok_msg) = msg {
+      let id = ok_msg.id.clone();
+      println!("process message {:?}", id);
 
-    if msg.is_err() {
+      // let mut socket = sender;
+
+      // Sender needs to be able to send from spawned task
+      let process = tokio::spawn(async move {
+        if ok_msg.has_index() {
+          let index = ok_msg.index();
+          println!("Requested Index {}", index.name);
+
+          let mut msg = library::Message::new();
+          msg.id = ok_msg.id;
+          msg.set_index(get_index_msg(index.name.as_str()));
+          let bytes = msg.write_to_bytes().unwrap();
+          return Some(ws::Message::Binary(bytes));
+        }
+
+        if ok_msg.has_create() {
+          let root = Root::new();
+          let create = ok_msg.create();
+          let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
+
+          if _cr.is_ok() {
+            let mut msg = library::Message::new();
+            msg.set_list(get_location_list());
+            let bytes = msg.write_to_bytes().unwrap();
+            return Some(ws::Message::Binary(bytes));
+          }
+        }
+
+        if ok_msg.has_meta() {
+          let file = &ok_msg.meta().file;
+          let mut msg = metadata(file).await;
+          msg.id = ok_msg.id;
+          let bytes = msg.write_to_bytes().unwrap();
+          return Some(ws::Message::Binary(bytes));
+        }
+
+        if ok_msg.has_image() {
+          let file = &ok_msg.image().file;
+          let image = phl_library::image::cached_thumb(file);
+          let mut img_msg = library::ImageMessage::new();
+          img_msg.image = image;
+          let mut msg = library::Message::new();
+          msg.id = ok_msg.id;
+          msg.set_image(img_msg);
+          let bytes = msg.write_to_bytes().unwrap();
+          return Some(ws::Message::Binary(bytes));
+        }
+
+        if ok_msg.has_postmeta() {
+          let file = &ok_msg.postmeta().file;
+          let rating = ok_msg.postmeta().rating.unwrap();
+          let root = Root::new();
+          root.set_rating(file, rating).expect("Failed to set rating");
+
+          let mut msg = library::Message::new();
+          msg.id = ok_msg.id;
+          msg.set_index(get_index_msg("default"));
+          let bytes = msg.write_to_bytes().unwrap();
+          return Some(ws::Message::Binary(bytes));
+        }
+
+        None
+      });
+
+      let _ = process
+        .then(|bytes| async {
+          let _ = sender.send(bytes.unwrap().unwrap()).await;
+        })
+        .await;
+
+      println!("{:?} done", id);
+
+      //
+    } else {
       let mut error_message = library::Message::new();
       error_message.error = Some(true);
       error_message.message = Some("Something went wrong".to_string());
 
-      if socket
+      if sender
         .send(ws::Message::Binary(
           error_message
             .write_to_bytes()
@@ -217,74 +297,6 @@ async fn handle_socket(mut socket: WebSocket) {
         // client disconnected
         return;
       }
-    } else if let Ok(ok_msg) = msg {
-      if ok_msg.has_create() {
-        let root = Root::new();
-        let create = ok_msg.create();
-        let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
-
-        if _cr.is_ok() {
-          let mut msg = library::Message::new();
-          msg.set_list(get_location_list());
-          let _ = socket
-            .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
-            .await;
-        }
-      }
-
-      if ok_msg.has_index() {
-        let index = ok_msg.index();
-        println!("Requested Index {}", index.name);
-
-        let mut msg = library::Message::new();
-        msg.id = ok_msg.id;
-        msg.set_index(get_index_msg(index.name.as_str()));
-        let bytes = msg.write_to_bytes().unwrap();
-        let _ = socket.send(ws::Message::Binary(bytes)).await;
-      }
-
-      if ok_msg.has_meta() {
-        let file = &ok_msg.meta().file;
-        let mut msg = metadata(file);
-        msg.id = ok_msg.id;
-        let bytes = msg.write_to_bytes().unwrap();
-        let _ = socket.send(ws::Message::Binary(bytes)).await;
-      }
-
-      if ok_msg.has_image() {
-        let file = &ok_msg.image().file;
-        let image = phl_library::image::cached_thumb(file);
-        let mut img_msg = library::ImageMessage::new();
-        img_msg.image = image;
-        let mut msg = library::Message::new();
-        msg.id = ok_msg.id;
-        msg.set_image(img_msg);
-        let bytes = msg.write_to_bytes().unwrap();
-        let _ = socket.send(ws::Message::Binary(bytes)).await;
-      }
-
-      if ok_msg.has_postmeta() {
-        let file = &ok_msg.postmeta().file;
-        let rating = ok_msg.postmeta().rating.unwrap();
-        let root = Root::new();
-        root.set_rating(file, rating).expect("Failed to set rating");
-
-        let mut msg = library::Message::new();
-        msg.id = ok_msg.id;
-        msg.set_index(get_index_msg("default"));
-        let bytes = msg.write_to_bytes().unwrap();
-        let _ = socket.send(ws::Message::Binary(bytes)).await;
-      }
-    }
-
-    // send message:
-    if socket
-      .send(ws::Message::Binary(data.clone()))
-      .await
-      .is_err()
-    {
-      // client disconnected
-      return;
     }
   }
 }

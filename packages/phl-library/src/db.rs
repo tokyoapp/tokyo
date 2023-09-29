@@ -118,7 +118,7 @@ impl Root {
     return Ok(());
   }
 
-  pub fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
+  pub async fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self

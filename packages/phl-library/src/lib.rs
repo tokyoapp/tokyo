@@ -28,8 +28,8 @@ impl Library {
     None
   }
 
-  pub fn add_file(root: &Root, hash: &str, rating: i32) {
-    let id = root.insert_tag("Test").unwrap();
+  pub async fn add_file(root: &Root, hash: &str, rating: i32) {
+    let id = root.insert_tag("Test").await.unwrap();
 
     let _ = root
       .insert_file(hash, rating)

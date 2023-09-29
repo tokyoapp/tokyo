@@ -54,6 +54,8 @@ class LibraryLocation {
       message.metadata ||
       message.system;
 
+    console.log('[WS]', type);
+
     switch (type) {
       case message.error: {
         console.error('Error response:', message);
@@ -173,6 +175,7 @@ class LibraryLocation {
       this.ws.onmessage = async (msg) => {
         const buf = await (msg.data as Blob).arrayBuffer();
         const message = library.Message.decode(new Uint8Array(buf));
+
         this.handleMessage(message);
       };
     });
