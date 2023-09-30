@@ -2,45 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: Lato, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-
-  overscroll-behavior: none;
-
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-* {
-  user-select: none;
-}
-
-body, html {
-  width: 100%;
-  height: 100%;
-}
-
-body {
-  color: #eee;
-  background: transparent;
-  margin: 0;
-  overscroll-behavior: none;
-}
-
-main {
-  display: grid;
-  grid-template-rows: auto 1fr;
-}
-
 input,
 button {
   border-radius: 8px;

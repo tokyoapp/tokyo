@@ -1,50 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
-    <style>
-      body, html {
-        background: #111;
-      }
+  <style>
+    :root {
+      font-family: Lato, sans-serif;
+      line-height: 1.5;
 
-      main {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        border-radius: 10px;
-        border: 1px solid #111;
-        background: #111;
-      }
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-text-size-adjust: 100%;
 
-      .shell {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-      }
-    </style>
+      overscroll-behavior: none;
 
-    <link rel="stylesheet" href="./index.css">
+      border-radius: 12px;
+      overflow: hidden;
+    }
 
-    <script type="module">
-      import { render } from 'solid-js/web';
-      import App from 'ui';
+    * {
+      user-select: none;
+    }
 
-      main.innerHTML = '';
-      render(App, main);
-    </script>
-  </head>
+    body,
+    html {
+      background: #111;
+      width: 100%;
+      height: 100%;
+    }
 
-  <body>
-    <main id="main">
-      <div class="shell"></div>
-    </main>
-  </body>
+    body {
+      color: #eee;
+      margin: 0;
+      overscroll-behavior: none;
+    }
+
+    main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 10px;
+      border: 1px solid #111;
+      background: #111;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .shell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+  </style>
+
+  <script type="module">
+    import "ui/index.css";
+    import { render } from 'solid-js/web';
+    import App from 'ui';
+
+    main.innerHTML = '';
+    render(App, main);
+  </script>
+</head>
+
+<body>
+  <main id="main">
+    <div class="shell"></div>
+  </main>
+</body>
 
 </html>

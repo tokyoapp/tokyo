@@ -35,3 +35,9 @@ impl<R: Runtime> Library<R> {
       .map_err(Into::into)
   }
 }
+
+impl<R: Runtime> Library<R> {
+  pub fn open(&self) -> crate::Result<Strss> {
+    self.0.run_mobile_plugin("open").map_err(Into::into)
+  }
+}
