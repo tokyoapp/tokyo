@@ -30,13 +30,15 @@ export const [settingsOpen, setSettingOpen] = createSignal(false);
 function App() {
   // const itemCount = () => location.index.length;
 
-  Library.open('default').then(() => {
-    Notifications.push(
-      new Notification({
-        message: t('notification_loaded', ['default']),
-        time: 2000,
-      })
-    );
+  Library.list().then(([loc]) => {
+    Library.open(loc.name).then(() => {
+      Notifications.push(
+        new Notification({
+          message: t('notification_loaded', ['default']),
+          time: 2000,
+        })
+      );
+    });
   });
 
   window.addEventListener('error', (e) => {

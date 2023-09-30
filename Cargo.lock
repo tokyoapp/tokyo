@@ -210,6 +210,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-app",
+ "tauri-plugin-library",
  "tauri-plugin-os",
  "tauri-plugin-window",
 ]
@@ -4794,6 +4795,8 @@ dependencies = [
 name = "tauri-plugin-library"
 version = "0.0.0"
 dependencies = [
+ "phl-library",
+ "phl-proto",
  "serde",
  "tauri",
  "tauri-build",

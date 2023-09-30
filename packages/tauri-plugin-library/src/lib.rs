@@ -40,7 +40,15 @@ impl<R: Runtime, T: Manager<R>> crate::LibraryExt<R> for T {
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("library")
-    .invoke_handler(tauri::generate_handler![commands::execute])
+    .invoke_handler(tauri::generate_handler![
+      commands::list,
+      commands::get_index,
+      commands::get_system,
+      commands::create_library,
+      commands::get_metadata,
+      commands::get_image,
+      commands::post_metadata,
+    ])
     .setup(|app, api| {
       #[cfg(mobile)]
       let library = mobile::init(app, api)?;

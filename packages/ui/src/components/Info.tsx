@@ -1,5 +1,5 @@
 import '@atrium-ui/mono/expandable';
-import { Entry, Library, tags } from '../Library.ts';
+import { Library, tags } from '../Library.ts';
 import Icon from './Icon.tsx';
 import { createEffect, createSignal } from 'solid-js';
 import { t } from '../locales/messages.ts';
@@ -51,7 +51,7 @@ function typeFromFilename(name: string) {
 // });
 
 export default function Info(props: {
-  file?: Entry;
+  file?: any;
 }) {
   const [meta, setMeta] = createSignal();
 

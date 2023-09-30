@@ -1,5 +1,3 @@
-mod commands;
-
 use tauri::App;
 
 #[cfg(mobile)]
@@ -34,15 +32,7 @@ impl AppBuilder {
       .plugin(tauri_plugin_os::init())
       .plugin(tauri_plugin_app::init())
       .plugin(tauri_plugin_window::init())
-      .invoke_handler(tauri::generate_handler![
-        commands::list,
-        // commands::get_index,
-        commands::get_system,
-        commands::create_library,
-        commands::get_metadata,
-        commands::get_image,
-        commands::post_metadata,
-      ])
+      .plugin(tauri_plugin_library::init())
       .setup(move |app| {
         if let Some(setup) = setup {
           (setup)(app)?;

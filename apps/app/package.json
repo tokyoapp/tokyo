@@ -4,7 +4,7 @@
   "description": "",
   "dependencies": {
     "@tauri-apps/api": "2.0.0-alpha.8",
-    "ui": "workspace:packages/ui"
+    "ui": "workspace:*"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.0.0-alpha.14",

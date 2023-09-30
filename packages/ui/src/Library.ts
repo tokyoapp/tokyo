@@ -4,7 +4,7 @@ import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto
 import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
-import { invoke, Channel } from '@tauri-apps/api/tauri';
+import { list } from 'tauri-plugin-library-api';
 
 export type Location = {
   host?: string;
@@ -28,7 +28,25 @@ export const [tags, setTags] = createSignal<TagMessage[]>([]);
 
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-export class Library {
+class LibraryAdapter {
+  static async metadata(file: string): Promise<any> {
+    throw new Error('Adapter does not implement method');
+  }
+
+  static async postMetadata(
+    file: string,
+    metadata: {
+      rating?: number;
+      tags?: string[];
+    }
+  ) {}
+
+  static async create() {}
+
+  static async open(uri: string) {}
+}
+
+export class Library extends LibraryAdapter {
   static async metadata(file: string) {
     return await library.getMetadata(file);
   }
@@ -49,68 +67,66 @@ export class Library {
     return await library.createLocation();
   }
 
+  static async list() {
+    return list().catch((err) => {
+      console.error('error', err);
+    });
+  }
+
   static open(uri: string) {
     const [host_or_name, path] = uri.split(':');
     const name = path || host_or_name;
     const host = path ? host_or_name : undefined;
 
-    console.log('Open:', name, 'at', host);
+    console.log('Open:', name, 'at', host || 'local');
 
-    invoke('list')
-      .then((res) => {
-        console.log(res);
+    library.onIndex(
+      Comlink.proxy((msg) => {
+        const index = msg.index?.index;
+
+        if (index && index.length > 1) {
+          const loc = {
+            host: '127.0.0.1:8000',
+            name: name,
+            path: '/',
+            index: index,
+          };
+
+          setLocation(loc);
+
+          const item = file();
+          const index_item = loc.index.find((entry) => entry.hash === item?.hash);
+          if (index_item) {
+            setFile(index_item);
+          }
+        }
       })
-      .catch((err) => {
-        console.error(err);
-      });
+    );
 
-    // library.onIndex(
-    //   Comlink.proxy((msg) => {
-    //     const index = msg.index?.index;
+    library.onList(
+      Comlink.proxy((list) => {
+        setLibs(list.list?.libraries);
+        setTags(list.list?.tags);
+      })
+    );
 
-    //     if (index && index.length > 1) {
-    //       const loc = {
-    //         host: '127.0.0.1:8000',
-    //         name: name,
-    //         path: '/',
-    //         index: index,
-    //       };
+    library.onSystem(
+      Comlink.proxy((msg) => {
+        setSysInfo(msg.system);
+      })
+    );
 
-    //       setLocation(loc);
+    library.onError(
+      Comlink.proxy((err) => {
+        Notifications.push(
+          new ErrorNotification({
+            message: `Error: ${err.message}`,
+            time: 3000,
+          })
+        );
+      })
+    );
 
-    //       const item = file();
-    //       const index_item = loc.index.find((entry) => entry.hash === item?.hash);
-    //       if (index_item) {
-    //         setFile(index_item);
-    //       }
-    //     }
-    //   })
-    // );
-
-    // library.onList(
-    //   Comlink.proxy((list) => {
-    //     setLibs(list.list?.libraries);
-    //     setTags(list.list?.tags);
-    //   })
-    // );
-
-    // library.onSystem(
-    //   Comlink.proxy((msg) => {
-    //     setSysInfo(msg.system);
-    //   })
-    // );
-
-    // library.onError(
-    //   Comlink.proxy((err) => {
-    //     Notifications.push(
-    //       new ErrorNotification({
-    //         message: `Error: ${err.message}`,
-    //         time: 3000,
-    //       })
-    //     );
-    //   })
-    // );
-
-    // return library.open(name);
+    return library.open(name);
   }
 }
