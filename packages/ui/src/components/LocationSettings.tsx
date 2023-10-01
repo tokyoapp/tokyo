@@ -1,7 +1,7 @@
 import { libs } from '../Library.ts';
 import { langs, language, setLanguage } from '../locales/messages.ts';
 import storage from '../services/ClientStorage.worker.ts';
-import { setSettingOpen } from './App.tsx';
+import { setSettingOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import Select from './Select.tsx';

@@ -4,7 +4,7 @@ import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto
 import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
-import { list } from 'tauri-plugin-library-api';
+import { index, list, system, metadata } from 'tauri-plugin-library-api';
 
 export type Location = {
   host?: string;
@@ -28,27 +28,10 @@ export const [tags, setTags] = createSignal<TagMessage[]>([]);
 
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-class LibraryAdapter {
-  static async metadata(file: string): Promise<any> {
-    throw new Error('Adapter does not implement method');
-  }
-
-  static async postMetadata(
-    file: string,
-    metadata: {
-      rating?: number;
-      tags?: string[];
-    }
-  ) {}
-
-  static async create() {}
-
-  static async open(uri: string) {}
-}
-
-export class Library extends LibraryAdapter {
+export class Library {
   static async metadata(file: string) {
-    return await library.getMetadata(file);
+    return await metadata(file);
+    // return await library.getMetadata(file);
   }
 
   static async postMetadata(
@@ -71,6 +54,40 @@ export class Library extends LibraryAdapter {
     return list().catch((err) => {
       console.error('error', err);
     });
+  }
+
+  static async system() {
+    return system()
+      .then((info) => {
+        setSysInfo({
+          diskName: info.disk_name,
+          diskSize: info.disk_size,
+          diskAvailable: info.disk_available,
+        });
+      })
+      .catch((err) => {
+        console.error('error', err);
+      });
+  }
+
+  static async index(name: string) {
+    return index(name)
+      .then((index) => {
+        const loc = {
+          host: '127.0.0.1:8000',
+          name: name,
+          path: '/',
+          index: index.map((entry) => {
+            entry.createDate = entry.create_date;
+            return entry;
+          }),
+        };
+        console.log(loc);
+        setLocation(loc);
+      })
+      .catch((err) => {
+        console.error('error', err);
+      });
   }
 
   static open(uri: string) {

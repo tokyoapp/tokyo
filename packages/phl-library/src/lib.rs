@@ -3,9 +3,20 @@ pub mod image;
 pub mod db;
 mod images;
 
+use sysinfo::DiskExt;
+use sysinfo::SystemExt;
+
 use db::{File, Tag};
 use db::{Location, Root};
 use rusqlite::Result;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SystemInfo {
+  pub disk_name: String,
+  pub disk_size: i32,
+  pub disk_available: i32,
+}
 
 pub struct Library {}
 
@@ -73,5 +84,16 @@ impl Library {
     }
 
     return Ok(());
+  }
+
+  pub fn sysinfo() -> SystemInfo {
+    let sys = sysinfo::System::new_all();
+    let disk = sys.disks().first().unwrap();
+
+    SystemInfo {
+      disk_name: disk.name().to_str().unwrap().to_string(),
+      disk_size: (disk.total_space() / 1000 / 1000) as i32,
+      disk_available: (disk.available_space() / 1000 / 1000) as i32,
+    }
   }
 }

@@ -27,5 +27,7 @@
   "info_aperture": "Blende",
   "info_focal_length": "Brennweite",
   "info_exposure_time": "Verschlusszeit",
-  "info_iso": "ISO"
+  "info_iso": "ISO",
+
+  "create_library_headline": "Library erstellen"
 }

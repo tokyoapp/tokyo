@@ -2,7 +2,7 @@ import { getCurrent } from '@tauri-apps/plugin-window';
 import { platform } from '@tauri-apps/plugin-os';
 
 import { Library, libs, location } from '../Library.ts';
-import { setSettingOpen, settingsOpen } from './App.tsx';
+import { setSettingOpen, settingsOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import Combobox from './Combobox.tsx';
@@ -65,7 +65,7 @@ export default function Titlebar() {
     <>
       <div
         data-tauri-drag-region
-        class="bg-zinc-900 border-b border-zinc-800 flex justify-between items-start"
+        class="relative z-50 bg-zinc-900 border-b border-zinc-800 flex justify-between items-start"
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">

@@ -2640,7 +2640,6 @@ dependencies = [
  "phl-proto",
  "serde",
  "serde_json",
- "sysinfo",
  "tokio",
  "urlencoding",
 ]
@@ -3400,6 +3399,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "sha256",
+ "sysinfo",
  "tokio",
  "uuid",
  "walkdir",
@@ -3410,6 +3410,7 @@ name = "phl-proto"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "phl-library",
  "protobuf",
  "protobuf-codegen",
 ]

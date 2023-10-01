@@ -13,7 +13,6 @@ use phl_proto::library;
 use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use sysinfo::{DiskExt, System, SystemExt};
 use tokio::sync::Mutex;
 
 #[derive(Deserialize, Serialize)]
@@ -175,16 +174,9 @@ async fn handle_socket(mut socket: WebSocket) {
     .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
     .await;
 
-  let sys = System::new_all();
-  let disk = sys.disks().first().unwrap();
-
   // send system info
   let mut sys_msg = library::Message::new();
-  let mut _sys_msg = library::SystemInfo::new();
-  _sys_msg.disk_name = disk.name().to_str().unwrap().to_string();
-  _sys_msg.disk_size = (disk.total_space() / 1000 / 1000) as i32;
-  _sys_msg.disk_available = (disk.available_space() / 1000 / 1000) as i32;
-  sys_msg.set_system(_sys_msg);
+  sys_msg.set_system(phl_library::Library::sysinfo().into());
   let _ = socket
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;

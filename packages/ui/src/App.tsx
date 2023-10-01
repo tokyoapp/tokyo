@@ -1,18 +1,17 @@
 import { createSignal } from 'solid-js';
-import Titlebar from './Titlebar.tsx';
-import { location } from '../Library.ts';
-import Action from '../actions/Action';
-import Explorer from './Explorer';
-import { Library, file } from '../Library';
-import LocationSettings from './LocationSettings.tsx';
-import Preview from './Viewer';
-import Info from './Info';
-import Edit from './Edit';
-import CreateLibrary from './CreateLibrary.tsx';
-import { Tabs } from './Tabs.tsx';
-import './notifications/index.ts';
-import { ErrorNotification, Notification, Notifications } from './notifications/index.ts';
-import { t } from '../locales/messages.ts';
+import Titlebar from './components/Titlebar.tsx';
+import { location } from './Library.ts';
+import Action from './actions/Action';
+import Explorer from './components/Explorer';
+import { Library, file } from './Library';
+import LocationSettings from './components/LocationSettings.tsx';
+import Preview from './components/Viewer';
+import Info from './components/Info';
+import Edit from './components/Edit';
+import CreateLibrary from './components/CreateLibrary.tsx';
+import { Tabs } from './components/Tabs.tsx';
+import './components/notifications/index.ts';
+import { ErrorNotification, Notifications } from './components/notifications/index.ts';
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -31,14 +30,20 @@ function App() {
   // const itemCount = () => location.index.length;
 
   Library.list().then(([loc]) => {
-    Library.open(loc.name).then(() => {
-      Notifications.push(
-        new Notification({
-          message: t('notification_loaded', ['default']),
-          time: 2000,
-        })
-      );
-    });
+    console.log(loc);
+
+    Library.index(loc.name).then(console.log);
+
+    Library.system().then(console.log);
+
+    // Library.open(loc.name).then(() => {
+    //   Notifications.push(
+    //     new Notification({
+    //       message: t('notification_loaded', ['default']),
+    //       time: 2000,
+    //     })
+    //   );
+    // });
   });
 
   window.addEventListener('error', (e) => {
@@ -62,15 +67,15 @@ function App() {
         }`}
       >
         <div class="relative">
-          <div class="library">
+          <div class="absolute top-0 left-0 w-full h-full">
             {!location().path ? (
-              <div class="absolute top-0 left-0 w-full h-full z-[999]">
+              <div class="absolute top-0 left-0 w-full h-full z-40">
                 <CreateLibrary />
               </div>
             ) : null}
 
             {settingsOpen() ? (
-              <div class="absolute top-0 left-0 w-full h-full z-[999]">
+              <div class="absolute top-0 left-0 w-full h-full z-40">
                 <LocationSettings />
               </div>
             ) : null}

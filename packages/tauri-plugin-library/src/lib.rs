@@ -41,7 +41,7 @@ impl<R: Runtime, T: Manager<R>> crate::LibraryExt<R> for T {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("library")
     .invoke_handler(tauri::generate_handler![
-      commands::list,
+      commands::get_list,
       commands::get_index,
       commands::get_system,
       commands::create_library,
@@ -55,8 +55,6 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
       #[cfg(desktop)]
       let library = desktop::init(app, api)?;
       app.manage(library);
-
-      // manage state so it is accessible by the commands
       app.manage(MyState::default());
       Ok(())
     })

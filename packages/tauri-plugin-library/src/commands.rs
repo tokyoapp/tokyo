@@ -1,6 +1,6 @@
 use tauri::{command, AppHandle, Runtime, State, Window};
 
-use crate::{MyState, Result};
+use crate::{desktop::IndexEntry, LibraryExt, MyState, Result};
 
 // #[command]
 // pub(crate) async fn execute<R: Runtime>(
@@ -8,85 +8,77 @@ use crate::{MyState, Result};
 //   _window: Window<R>,
 //   state: State<'_, MyState>,
 // ) -> Result<String> {
+
 //   state.0.lock().unwrap().insert("key".into(), "value".into());
 //   Ok("success".to_string())
 // }
 
-//
-
-use phl_library::{db, image::Metadata, Library};
-use serde::{Deserialize, Serialize};
+use phl_library::db;
 
 // get local library list
 #[command]
-pub(crate) async fn list() -> Vec<db::Location> {
-  let root = db::Root::new();
-  return root.location_list().unwrap();
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct IndexEntry {
-  pub hash: String,
-  pub name: String,
-  pub path: String,
-  pub create_date: String,
-  pub rating: i32,
-  pub orientation: i32,
-  pub tags: ::std::vec::Vec<String>,
+pub(crate) async fn get_list<R: Runtime>(app: AppHandle<R>) -> Result<Vec<db::Location>> {
+  return Ok(app.library().get_locations().unwrap());
 }
 
 #[command]
-pub(crate) async fn get_index(name: String) -> Vec<IndexEntry> {
-  let root = db::Root::new();
-  let dir = Library::find_library(&root, name.as_str()).unwrap().path;
-  let list = Library::list(dir);
-
-  let mut index: Vec<Metadata> = Vec::new();
-
-  for path in list {
-    let meta = phl_library::image::metadat(path);
-    let _ = meta.is_some_and(|v| {
-      index.push(v);
-      true
-    });
-  }
-
-  let result = index
-    .iter()
-    .map(|meta| {
-      let file = Library::get_file(&root, &meta.hash);
-      let rating = file
-        .clone()
-        .and_then(|f| Some(f.rating))
-        .or(Some(meta.rating as i32))
-        .unwrap();
-
-      IndexEntry {
-        name: meta.name.clone(),
-        create_date: meta.create_date.clone(),
-        hash: meta.hash.clone(),
-        orientation: meta.orientation as i32,
-        path: meta.path.clone(),
-        rating: rating,
-        tags: file
-          .and_then(|f| Some(f.tags))
-          .or(Some(Vec::new()))
-          .unwrap(),
-      }
-    })
-    .collect();
-
-  return result;
+pub async fn get_index<R: Runtime>(app: AppHandle<R>, name: String) -> Result<Vec<IndexEntry>> {
+  return Ok(app.library().get_index(name).await.unwrap());
 }
 
 #[command]
-pub async fn get_system() {}
+pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<phl_library::SystemInfo> {
+  return Ok(app.library().get_system().await.unwrap());
+}
 
 #[command]
 pub async fn create_library() {}
 
 #[command]
-pub async fn get_metadata() {}
+pub async fn get_metadata<R: Runtime>(
+  app: AppHandle<R>,
+  file: String,
+) -> Result<phl_library::image::Metadata> {
+  let meta = phl_library::image::metadat(file);
+
+  let mut msg = library::Message::new();
+
+  if let Some(metadata) = meta {
+    let root = db::Root::new();
+    let file = Library::get_file(&root, &metadata.hash);
+
+    let mut tags: Vec<String> = Vec::new();
+
+    let rating = file
+      .clone()
+      .and_then(|f| Some(f.rating))
+      .or(Some(metadata.rating as i32))
+      .unwrap();
+
+    if let Some(f) = file {
+      tags.append(&mut f.tags.clone());
+    } else {
+      Library::add_file(&root, &metadata.hash, metadata.rating as i32).await;
+    }
+
+    let mut meta_msg = library::MetadataMessage::new();
+    meta_msg.create_date = metadata.create_date;
+    meta_msg.exif = serde_json::to_string(&metadata.exif).unwrap();
+    meta_msg.hash = metadata.hash;
+    meta_msg.height = metadata.height as i32;
+    meta_msg.width = metadata.width as i32;
+    meta_msg.make = metadata.make;
+    meta_msg.name = metadata.name;
+    meta_msg.orientation = metadata.orientation as i32;
+    meta_msg.rating = rating;
+    meta_msg.tags = tags;
+    meta_msg.thumbnail = phl_library::image::cached_thumb(&file.to_string()).await;
+
+    msg.set_metadata(meta_msg);
+  }
+
+  return msg;
+}
 
 #[command]
 pub async fn get_image() {}

@@ -15,5 +15,7 @@
   "system_disk_available": "{} GB 사용 가능",
   "system_photo_count": "사진 {}장",
 
-  "viewer_back": "뒤로"
+  "viewer_back": "뒤로",
+
+  "create_library_headline": "라이브러리를 만듭니다"
 }

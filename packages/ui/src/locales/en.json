@@ -27,5 +27,7 @@
   "info_aperture": "Aperture",
   "info_focal_length": "Focal Length",
   "info_exposure_time": "Exposure Time",
-  "info_iso": "ISO"
+  "info_iso": "ISO",
+
+  "create_library_headline": "Create Library"
 }
