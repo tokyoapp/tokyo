@@ -1,6 +1,9 @@
 {
   "lldb.library": "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
   "lldb.launch.expressions": "native",
-  "apple-swift-format.enable": true
-  // "rust-analyzer.cargo.target": "wasm32-unknown-unknown"
+  "apple-swift-format.enable": true,
+  "tailwindCSS.lint.recommendedVariantOrder": "warning",
+  "tailwindCSS.lint.cssConflict": "warning",
+  "tailwindCSS.suggestions": true,
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass"]
 }

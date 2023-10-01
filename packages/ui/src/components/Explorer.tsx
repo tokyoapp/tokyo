@@ -12,6 +12,7 @@ import Icon from './Icon.tsx';
 import { SystemInfo } from './System.tsx';
 import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
+import { VirtualContainer } from '@minht11/solid-virtual-container';
 
 createEffect(() => {
   if (file()) {
@@ -74,26 +75,9 @@ export default function Explorer(props: { location: Location }) {
     return stacked;
   }
 
-  function entryToThumbnail(items: IndexEntryMessage[], i: number) {
-    const item = items[0];
-    return (
-      <Thumbnail
-        selected={selection().includes(item)}
-        number={(i + 1).toString()}
-        name={viewSettings.showName}
-        tags={viewSettings.showTags}
-        rating={viewSettings.showRating}
-        onClick={() => {
-          setSelection([item]);
-        }}
-        items={items}
-      />
-    );
-  }
-
   const [starFilter, setStarFilter] = createSignal(0);
 
-  function itemFilter(item: Entry) {
+  function itemFilter(item: IndexEntryMessage) {
     if (starFilter() && item.rating < starFilter()) {
       return false;
     }
@@ -101,7 +85,22 @@ export default function Explorer(props: { location: Location }) {
   }
 
   const [sorting, setSorting] = createSignal<keyof typeof sort>('created');
-  const items = () => [...props.location.index];
+
+  const rows = () => {
+    const rs = [];
+    let currRow: any[] = [];
+    const items = stack(props.location.index.filter(itemFilter).sort(sort[sorting()]));
+    for (const entry of items) {
+      if (currRow.length < 4) {
+        currRow.push(entry);
+      } else {
+        rs.push(currRow);
+        currRow = [];
+        currRow.push(entry);
+      }
+    }
+    return rs;
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     const parent = (e.target as HTMLElement).parentNode;
@@ -120,6 +119,35 @@ export default function Explorer(props: { location: Location }) {
         break;
     }
   };
+
+  const ListItem = (props) => {
+    const thumbnails = props.item;
+
+    let i = 0;
+
+    return (
+      <div style={props.style} class="w-full flex gap-1">
+        {thumbnails.map((items) => {
+          return (
+            <Thumbnail
+              class="flex-1 pb-1"
+              selected={selection().includes(items[0])}
+              number={(++i).toString()}
+              name={viewSettings.showName}
+              tags={viewSettings.showTags}
+              rating={viewSettings.showRating}
+              onClick={() => {
+                setSelection(items);
+              }}
+              items={items}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
+  let scrollTargetElement!: HTMLDivElement;
 
   return (
     <div
@@ -188,17 +216,20 @@ export default function Explorer(props: { location: Location }) {
         </div>
       </nav>
 
-      <div class="p-1 overflow-auto w-full overscroll-none">
+      <div class="p-1 overflow-auto w-full overscroll-none" ref={scrollTargetElement}>
         <div class="hidden @5xl:block">
           <SystemInfo />
         </div>
 
-        <div class="pb-24 grid content-start break-all gap-1 overscroll-none grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-4 @7xl:grid-cols-5">
-          {stack(
-            items()
-              .filter(itemFilter)
-              .sort(sort[sorting()])
-          ).map(entryToThumbnail)}
+        <div class="pb-24 overscroll-none">
+          <VirtualContainer
+            scrollTarget={scrollTargetElement}
+            itemSize={{ height: 208 }}
+            overscan={2}
+            items={rows()}
+          >
+            {ListItem}
+          </VirtualContainer>
         </div>
       </div>
 
@@ -230,8 +261,9 @@ type ThumbProps = {
   name: boolean;
   rating: boolean;
   tags: boolean;
-  number: string;
+  number?: string;
   items: IndexEntryMessage[];
+  class?: string;
   onClick: () => void;
 };
 
@@ -257,6 +289,8 @@ function Thumbnail(props: ThumbProps) {
   const useThumb = (blob?: Blob) => {
     const dynimg = new DynamicImage();
     const canvas = dynimg.canvas();
+    canvas.width = 1;
+    canvas.height = 1;
 
     if (blob) {
       const url = URL.createObjectURL(blob);
@@ -304,7 +338,7 @@ function Thumbnail(props: ThumbProps) {
   };
 
   return (
-    <div class="thumbnail z-0 relative h-52 overflow-hidden">
+    <div class={`thumbnail z-0 relative h-52 overflow-hidden ${props.class || ''}`}>
       <div
         data-selected={props.selected || undefined}
         tabIndex={0}
