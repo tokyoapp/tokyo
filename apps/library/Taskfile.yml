@@ -9,7 +9,7 @@ tasks:
     desc: Run library in dev
     prefix: "library"
     cmds:
-      - cargo run
+      - cargo watch -x run
 
   build:
     desc: Build library

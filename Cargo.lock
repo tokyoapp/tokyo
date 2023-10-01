@@ -4799,6 +4799,7 @@ dependencies = [
  "phl-library",
  "phl-proto",
  "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
  "thiserror",

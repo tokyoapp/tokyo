@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
@@ -121,18 +121,14 @@ export default function Explorer(props: { location: Location }) {
   };
 
   const ListItem = (props) => {
-    const thumbnails = props.item;
-
-    let i = 0;
-
     return (
       <div style={props.style} class="w-full flex gap-1">
-        {thumbnails.map((items) => {
+        {props.item.map((items, i) => {
           return (
             <Thumbnail
               class="flex-1 pb-1"
               selected={selection().includes(items[0])}
-              number={(++i).toString()}
+              number={(props.index * 4 + i + 1).toString()}
               name={viewSettings.showName}
               tags={viewSettings.showTags}
               rating={viewSettings.showRating}
@@ -269,28 +265,11 @@ type ThumbProps = {
 
 function Thumbnail(props: ThumbProps) {
   const [img, setImg] = createSignal<Blob>();
-
-  const onView = async (item: IndexEntryMessage) => {
-    const tmp = await storage.readTemp(item.hash);
-
-    if (tmp && tmp.size > 0) {
-      setImg(tmp);
-    } else {
-      Library.metadata(item.path).then((meta) => {
-        const blob = new Blob([meta.metadata?.thumbnail]);
-        setImg(blob);
-      });
-      // get thumbnail from metadata data
-    }
-  };
-
-  let ele: HTMLDivElement;
+  const [loaded, setLoaded] = createSignal(false);
 
   const useThumb = (blob?: Blob) => {
     const dynimg = new DynamicImage();
     const canvas = dynimg.canvas();
-    canvas.width = 1;
-    canvas.height = 1;
 
     if (blob) {
       const url = URL.createObjectURL(blob);
@@ -298,8 +277,11 @@ function Thumbnail(props: ThumbProps) {
       image.onload = () => {
         dynimg.fromDrawable(image, props.items[0]).resizeContain(256);
         const newCanvas = dynimg.canvas();
-
         canvas.parentNode?.replaceChild(newCanvas, canvas);
+        setLoaded(true);
+      };
+      image.onerror = (err) => {
+        console.warn('Error loading thumbnail image', err);
       };
       image.src = url;
     }
@@ -307,27 +289,20 @@ function Thumbnail(props: ThumbProps) {
     return canvas;
   };
 
-  onMount(() => {
-    const observer = new IntersectionObserver(
-      (entires) => {
-        if (!img()) {
-          entires.forEach((entry) => {
-            if (entry.isIntersecting) {
-              onView(props.items[0]);
-            }
-          });
-        }
-      },
-      {
-        rootMargin: '0px 400px',
-      }
-    );
+  createEffect(async () => {
+    const item = props.items[0];
+    const tmp = await storage.readTemp(item.hash);
 
-    observer.observe(ele);
-
-    onCleanup(() => {
-      observer.disconnect();
-    });
+    setLoaded(false);
+    if (tmp && tmp.size > 0) {
+      setImg(tmp);
+    } else {
+      Library.metadata(item.path).then((meta) => {
+        const data = new Uint8Array(meta.metadata?.thumbnail);
+        const blob = new Blob([data]);
+        setImg(blob);
+      });
+    }
   });
 
   const file_tags = () => {
@@ -348,22 +323,24 @@ function Thumbnail(props: ThumbProps) {
           props.selected ? 'border-gray-600' : 'border-transparent',
         ].join(' ')}
         onClick={() => props.onClick()}
-        ref={ele}
       >
-        <div class="w-full h-full flex items-center">
-          {props.items.slice(0, 3).map((item, i) => {
-            return (
-              <div
-                class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+        <div class="w-full h-full flex items-center justify-center">
+          {img()
+            ? props.items.slice(0, 3).map((item, i) => {
+                return (
+                  <div
+                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-              >
-                {useThumb(img())}
-              </div>
-            );
-          })}
+                  >
+                    {useThumb(img())}
+                  </div>
+                );
+              })
+            : null}
+          {!loaded() ? <Icon name="loader" class="opacity-50" /> : null}
         </div>
       </div>
 

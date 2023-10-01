@@ -30,8 +30,6 @@ function App() {
   // const itemCount = () => location.index.length;
 
   Library.list().then(([loc]) => {
-    console.log(loc);
-
     Library.index(loc.name).then(console.log);
 
     Library.system().then(console.log);

@@ -1,6 +1,9 @@
 use tauri::{command, AppHandle, Runtime, State, Window};
 
-use crate::{desktop::IndexEntry, LibraryExt, MyState, Result};
+use crate::{
+  desktop::{IndexEntry, MetadataEntry},
+  LibraryExt, MyState, Result,
+};
 
 // #[command]
 // pub(crate) async fn execute<R: Runtime>(
@@ -35,49 +38,8 @@ pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<phl_library::Sy
 pub async fn create_library() {}
 
 #[command]
-pub async fn get_metadata<R: Runtime>(
-  app: AppHandle<R>,
-  file: String,
-) -> Result<phl_library::image::Metadata> {
-  let meta = phl_library::image::metadat(file);
-
-  // let mut msg = library::Message::new();
-
-  // if let Some(metadata) = meta {
-  //   let root = db::Root::new();
-  //   let file = Library::get_file(&root, &metadata.hash);
-
-  //   let mut tags: Vec<String> = Vec::new();
-
-  //   let rating = file
-  //     .clone()
-  //     .and_then(|f| Some(f.rating))
-  //     .or(Some(metadata.rating as i32))
-  //     .unwrap();
-
-  //   if let Some(f) = file {
-  //     tags.append(&mut f.tags.clone());
-  //   } else {
-  //     Library::add_file(&root, &metadata.hash, metadata.rating as i32).await;
-  //   }
-
-  //   let mut meta_msg = library::MetadataMessage::new();
-  //   meta_msg.create_date = metadata.create_date;
-  //   meta_msg.exif = serde_json::to_string(&metadata.exif).unwrap();
-  //   meta_msg.hash = metadata.hash;
-  //   meta_msg.height = metadata.height as i32;
-  //   meta_msg.width = metadata.width as i32;
-  //   meta_msg.make = metadata.make;
-  //   meta_msg.name = metadata.name;
-  //   meta_msg.orientation = metadata.orientation as i32;
-  //   meta_msg.rating = rating;
-  //   meta_msg.tags = tags;
-  //   meta_msg.thumbnail = phl_library::image::cached_thumb(&file.to_string()).await;
-
-  //   msg.set_metadata(meta_msg);
-  // }
-
-  return Ok(meta.unwrap());
+pub async fn get_metadata<R: Runtime>(app: AppHandle<R>, file: String) -> Result<MetadataEntry> {
+  return Ok(app.library().get_metadata(file).await.unwrap());
 }
 
 #[command]

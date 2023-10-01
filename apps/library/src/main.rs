@@ -51,7 +51,7 @@ async fn main() {
 async fn metadata(file: &String) -> library::Message {
   let p = file;
 
-  let meta = phl_library::image::metadat(p.to_string());
+  let meta = phl_library::image::metadat(&p.to_string());
 
   let mut msg = library::Message::new();
 
@@ -128,7 +128,7 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
   let mut index: Vec<Metadata> = Vec::new();
 
   for path in list {
-    let meta = phl_library::image::metadat(path);
+    let meta = phl_library::image::metadat(&path);
     let _ = meta.is_some_and(|v| {
       index.push(v);
       true

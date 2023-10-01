@@ -28,6 +28,23 @@ pub struct IndexEntry {
   pub tags: ::std::vec::Vec<String>,
 }
 
+// These structs should implement into for the ProtoMessages.
+//  Also they should be owned by the phl_lib
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MetadataEntry {
+  pub create_date: String,
+  pub exif: String,
+  pub hash: String,
+  pub height: i32,
+  pub width: i32,
+  pub make: String,
+  pub name: String,
+  pub orientation: i32,
+  pub rating: i32,
+  pub tags: Vec<String>,
+  pub thumbnail: Vec<u8>,
+}
+
 impl<R: Runtime> Library<R> {
   pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
     Ok(PingResponse {
@@ -50,7 +67,7 @@ impl<R: Runtime> Library<R> {
     let mut index: Vec<phl_library::image::Metadata> = Vec::new();
 
     for path in list {
-      let meta = phl_library::image::metadat(path);
+      let meta = phl_library::image::metadat(&path);
       let _ = meta.is_some_and(|v| {
         index.push(v);
         true
@@ -91,7 +108,40 @@ impl<R: Runtime> Library<R> {
 
   pub async fn create_library(&self) {}
 
-  pub async fn get_metadata(&self) {}
+  pub async fn get_metadata(&self, file_path: String) -> crate::Result<MetadataEntry> {
+    let metadata = phl_library::image::metadat(&file_path).unwrap();
+
+    let root = db::Root::new();
+    let file = phl_library::Library::get_file(&root, &metadata.hash);
+
+    let mut tags: Vec<String> = Vec::new();
+
+    let rating = file
+      .clone()
+      .and_then(|f| Some(f.rating))
+      .or(Some(metadata.rating as i32))
+      .unwrap();
+
+    if let Some(f) = file {
+      tags.append(&mut f.tags.clone());
+    } else {
+      phl_library::Library::add_file(&root, &metadata.hash, metadata.rating as i32).await;
+    }
+
+    Ok(MetadataEntry {
+      create_date: metadata.create_date,
+      exif: serde_json::to_string(&metadata.exif).unwrap(),
+      hash: metadata.hash,
+      height: metadata.height as i32,
+      width: metadata.width as i32,
+      make: metadata.make,
+      name: metadata.name,
+      orientation: metadata.orientation as i32,
+      rating,
+      tags,
+      thumbnail: phl_library::image::cached_thumb(&file_path.clone()).await,
+    })
+  }
 
   pub async fn get_image(&self) {}
 

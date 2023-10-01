@@ -32,7 +32,7 @@
         "transparent": true,
         "fileDropEnabled": true,
         "titleBarStyle": "Overlay",
-        "decorations": false,
+        "decorations": true,
         "hiddenTitle": true,
         "fullscreen": false,
         "resizable": true,

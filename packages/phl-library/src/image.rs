@@ -61,7 +61,7 @@ pub fn get_rating(path: String) -> Option<u32> {
   return None;
 }
 
-pub fn metadat(path: String) -> Option<Metadata> {
+pub fn metadat(path: &String) -> Option<Metadata> {
   let raw_file = File::open(&path);
 
   if raw_file.is_err() {
@@ -97,7 +97,11 @@ pub fn metadat(path: String) -> Option<Metadata> {
         width: 0,
         height: 0,
         exif: metadata.exif.clone(),
-        rating: metadata.rating.or(get_rating(path)).or(Some(0)).unwrap(),
+        rating: metadata
+          .rating
+          .or(get_rating(path.to_string()))
+          .or(Some(0))
+          .unwrap(),
         make: metadata.make,
         create_date: metadata.exif.create_date.unwrap(),
         orientation: metadata.exif.orientation.unwrap(),

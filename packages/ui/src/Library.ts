@@ -5,6 +5,7 @@ import { createSignal } from 'solid-js';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ErrorNotification } from './components/notifications/index.ts';
 import { index, list, system, metadata } from 'tauri-plugin-library-api';
+import storage from './services/ClientStorage.worker.ts';
 
 export type Location = {
   host?: string;
@@ -30,7 +31,18 @@ export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
 export class Library {
   static async metadata(file: string) {
-    return await metadata(file);
+    return await metadata(file).then(async (meta) => {
+      const file = meta?.hash;
+      const thumbnail = meta?.thumbnail;
+      if (file && thumbnail) {
+        const blob = new Blob([new Uint8Array(thumbnail)]);
+        storage.writeTemp(file, await blob.arrayBuffer());
+      }
+
+      return {
+        metadata: meta,
+      };
+    });
     // return await library.getMetadata(file);
   }
 
