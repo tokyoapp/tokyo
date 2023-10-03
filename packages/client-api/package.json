@@ -1,0 +1,10 @@
+{
+  "name": "client-api",
+  "main": "./src/lib.ts",
+  "type": "module",
+  "dependencies": {
+    "comlink": "^4.4.1",
+    "proto": "workspace:*",
+    "tauri-plugin-library-api": "workspace:*"
+  }
+}

@@ -10,6 +10,7 @@ class ExamplePlugin: Plugin {
   }
 
   @objc public func open(_ invoke: Invoke) throws {
+    // https://developer.apple.com/documentation/uikit/view_controllers/providing_access_to_directories
     // Create a document picker for directories.
     let documentPicker =
       UIDocumentPickerViewController(forOpeningContentTypes: [.folder])

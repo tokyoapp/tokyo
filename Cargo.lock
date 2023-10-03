@@ -783,6 +783,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "client-api"
+version = "0.1.0"
+
+[[package]]
 name = "clipboard-win"
 version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

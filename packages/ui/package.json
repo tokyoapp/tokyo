@@ -16,6 +16,7 @@
     "lit": "^2.6.1",
     "postcss": "^8.4.29",
     "proto": "workspace:*",
+    "client-api": "workspace:*",
     "viewport": "workspace:*",
     "tauri-plugin-library-api": "workspace:*",
     "solid-js": "^1.7.8",

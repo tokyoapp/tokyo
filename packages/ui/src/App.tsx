@@ -1,9 +1,8 @@
 import { createSignal } from 'solid-js';
 import Titlebar from './components/Titlebar.tsx';
-import { location } from './Library.ts';
 import Action from './actions/Action';
 import Explorer from './components/Explorer';
-import { Library, file } from './Library';
+import { Library, file, location } from './Library';
 import LocationSettings from './components/LocationSettings.tsx';
 import Preview from './components/Viewer';
 import Info from './components/Info';
@@ -26,24 +25,22 @@ window.addEventListener('keyup', (e) => {
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
+Library.list().then(([loc]) => {
+  Library.index(loc.name).then(console.log);
+
+  Library.system().then(console.log);
+
+  // Library.open(loc.name).then(() => {
+  //   Notifications.push(
+  //     new Notification({
+  //       message: t('notification_loaded', ['default']),
+  //       time: 2000,
+  //     })
+  //   );
+  // });
+});
+
 function App() {
-  // const itemCount = () => location.index.length;
-
-  Library.list().then(([loc]) => {
-    Library.index(loc.name).then(console.log);
-
-    Library.system().then(console.log);
-
-    // Library.open(loc.name).then(() => {
-    //   Notifications.push(
-    //     new Notification({
-    //       message: t('notification_loaded', ['default']),
-    //       time: 2000,
-    //     })
-    //   );
-    // });
-  });
-
   window.addEventListener('error', (e) => {
     Notifications.push(
       new ErrorNotification({
@@ -107,18 +104,6 @@ function App() {
           </>
         ) : null}
       </div>
-
-      {/* <div class="statusbar text-slate-500 grid-cols-[1fr_1fr_auto] grid-flow-col items-center grid gap-3 px-2 text-sm">
-        <div>
-          <span>{itemCount()} items </span>
-        </div>
-
-        <div>
-          <span class="mt-1 text-xs">{file.name} </span>
-        </div>
-
-        <div class="w-7">{Action.runningJobCount() > 0 ? <Icon name="loader" /> : null}</div>
-      </div> */}
     </>
   );
 }

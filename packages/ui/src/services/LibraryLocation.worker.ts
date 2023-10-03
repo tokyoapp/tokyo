@@ -5,7 +5,7 @@ const storage = new ClientStorage();
 
 let msg_count = 1;
 
-class LibraryLocation {
+export class LibraryLocation {
   ws!: WebSocket;
 
   indexListeners = new Set<(arg: library.Message) => void>();

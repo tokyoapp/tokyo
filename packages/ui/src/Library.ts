@@ -1,4 +1,4 @@
-import library from './services/LibraryLocation.worker.ts';
+import library, { type LibraryLocation } from './services/LibraryLocation.worker.ts';
 import * as Comlink from 'comlink';
 import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
@@ -29,24 +29,14 @@ export const [tags, setTags] = createSignal<TagMessage[]>([]);
 
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-export class Library {
-  static async metadata(file: string) {
-    return await metadata(file).then(async (meta) => {
-      const file = meta?.hash;
-      const thumbnail = meta?.thumbnail;
-      if (file && thumbnail) {
-        const blob = new Blob([new Uint8Array(thumbnail)]);
-        storage.writeTemp(file, await blob.arrayBuffer());
-      }
+class RemoteLibrary {
+  #worker: LibraryLocation;
 
-      return {
-        metadata: meta,
-      };
-    });
-    // return await library.getMetadata(file);
+  async getMetadata(file: string) {
+    return await library.getMetadata(file);
   }
 
-  static async postMetadata(
+  async postMetadata(
     file: string,
     metadata: {
       rating?: number;
@@ -58,56 +48,18 @@ export class Library {
     });
   }
 
-  static async create() {
+  async postLocation() {
     return await library.createLocation();
   }
 
-  static async list() {
-    return list().catch((err) => {
-      console.error('error', err);
-    });
-  }
-
-  static async system() {
-    return system()
-      .then((info) => {
-        setSysInfo({
-          diskName: info.disk_name,
-          diskSize: info.disk_size,
-          diskAvailable: info.disk_available,
-        });
-      })
-      .catch((err) => {
-        console.error('error', err);
-      });
-  }
-
-  static async index(name: string) {
-    return index(name)
-      .then((index) => {
-        const loc = {
-          host: '127.0.0.1:8000',
-          name: name,
-          path: '/',
-          index: index.map((entry) => {
-            entry.createDate = entry.create_date;
-            return entry;
-          }),
-        };
-        console.log(loc);
-        setLocation(loc);
-      })
-      .catch((err) => {
-        console.error('error', err);
-      });
-  }
-
-  static open(uri: string) {
+  constructor(uri: string) {
     const [host_or_name, path] = uri.split(':');
     const name = path || host_or_name;
     const host = path ? host_or_name : undefined;
 
     console.log('Open:', name, 'at', host || 'local');
+
+    // TODO: For the local lib use Tuari events here: https://tauri.app/v1/guides/features/events/
 
     library.onIndex(
       Comlink.proxy((msg) => {
@@ -156,6 +108,82 @@ export class Library {
       })
     );
 
-    return library.open(name);
+    library.open(name);
   }
+}
+
+class LocalLibrary {
+  constructor() {}
+
+  async getMetadata(file: string) {
+    return await metadata(file).then(async (meta) => {
+      const file = meta?.hash;
+      const thumbnail = meta?.thumbnail;
+      if (file && thumbnail) {
+        const blob = new Blob([new Uint8Array(thumbnail)]);
+        storage.writeTemp(file, await blob.arrayBuffer());
+      }
+
+      return {
+        metadata: meta,
+      };
+    });
+    // return await library.getMetadata(file);
+  }
+
+  async postMetadata(
+    file: string,
+    metadata: {
+      rating?: number;
+      tags?: string[];
+    }
+  ) {}
+
+  async postLocation() {}
+
+  async getLocations() {
+    return list().catch((err) => {
+      console.error('error', err);
+    });
+  }
+
+  async getSystem() {
+    return system()
+      .then((info) => {
+        setSysInfo({
+          diskName: info.disk_name,
+          diskSize: info.disk_size,
+          diskAvailable: info.disk_available,
+        });
+      })
+      .catch((err) => {
+        console.error('error', err);
+      });
+  }
+
+  async getIndex(name: string) {
+    return index(name)
+      .then((index) => {
+        const loc = {
+          host: '127.0.0.1:8000',
+          name: name,
+          path: '/',
+          index: index.map((entry) => {
+            entry.createDate = entry.create_date;
+            return entry;
+          }),
+        };
+        console.log(loc);
+        setLocation(loc);
+      })
+      .catch((err) => {
+        console.error('error', err);
+      });
+  }
+}
+
+// TODO: this should not be static since we can have multiple libraries from different sources at once.
+//  Like one remote and one local Library.
+export class Libraries {
+  #libraries: Set<Library> = new Set([new LocalLibrary()]);
 }
