@@ -1,4 +1,4 @@
-FROM rust:1.61.0 as builder
+FROM rust:1.72 as builder
 
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
 
