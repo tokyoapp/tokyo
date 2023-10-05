@@ -1,4 +1,4 @@
-FROM rust:1.72 as builder
+FROM luckydye/build-utils as builder
 
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
 
@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN task library:install
+RUN task setup library:install
 
 FROM debian:buster-slim
 
