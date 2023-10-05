@@ -19,6 +19,11 @@ tasks:
       - cargo build -Z unstable-options --out-dir dist
       - chmod +x dist/library
 
+  install:
+    desc: Install Library
+    cmds:
+      - cargo install --path . --root {{.USER_WORKING_DIR}}
+
   start:
     desc: Start compiled library
     deps: [build]

@@ -77,6 +77,8 @@ message RequestLibraryIndex {
   string name = 1;
 }
 
+message RequestLocations {}
+
 message RequestMetadata {
   string file = 1;
 }
@@ -99,5 +101,6 @@ message ClientMessage {
     RequestMetadata meta = 7;
     RequestImage image = 8;
     PostFileMetadata postmeta = 9;
+    RequestLocations locations = 10;
   }
 }

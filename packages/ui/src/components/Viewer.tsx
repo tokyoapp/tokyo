@@ -1,7 +1,7 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
 import { DynamicImage } from '../DynamicImage.ts';
 import { Library, file, setFile } from '../Library.ts';
-import storage from '../services/ClientStorage.worker';
+// import storage from '../services/ClientStorage.worker';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import { Stars } from './Stars.tsx';

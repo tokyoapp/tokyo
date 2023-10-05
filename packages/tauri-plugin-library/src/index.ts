@@ -1,20 +1,46 @@
 import { invoke } from '@tauri-apps/api/tauri';
 
-export async function list() {
+export async function list(): Promise<{
+  id: string;
+  name: string;
+  path: string;
+}> {
   return await invoke('plugin:library|get_list');
 }
 
-export async function index(name: string) {
+export async function index(name: string): Promise<
+  {
+    hash: string;
+    name: string;
+    path: string;
+    create_date: string;
+    rating: number;
+    orientation: number;
+    tags: Array<string>;
+  }[]
+> {
   return await invoke('plugin:library|get_index', {
     name,
   });
 }
 
-export async function system() {
+export async function system(): Promise<{
+  disk_name: string;
+  disk_size: number;
+  disk_available: number;
+}> {
   return await invoke('plugin:library|get_system', {});
 }
 
-export async function metadata(file: string) {
+export async function metadata(file: string): Promise<{
+  hash: string;
+  name: string;
+  path: string;
+  create_date: string;
+  rating: number;
+  orientation: number;
+  tags: string[];
+}> {
   return await invoke('plugin:library|get_metadata', {
     file,
   });

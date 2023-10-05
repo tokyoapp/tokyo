@@ -167,12 +167,12 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
 async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
 
-  // send location list
-  let mut msg = library::Message::new();
-  msg.set_list(get_location_list());
-  let _ = socket
-    .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
-    .await;
+  // // send location list
+  // let mut msg = library::Message::new();
+  // msg.set_list(get_location_list());
+  // let _ = socket
+  //   .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
+  //   .await;
 
   // send system info
   let mut sys_msg = library::Message::new();
@@ -201,6 +201,13 @@ async fn handle_socket(mut socket: WebSocket) {
       let ws = arc_sender.clone();
 
       tokio::spawn(async move {
+        if ok_msg.has_locations() {
+          let mut msg = library::Message::new();
+          msg.set_list(get_location_list());
+          let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
+          ws.lock().await.send(packet).await;
+        }
+
         if ok_msg.has_index() {
           let index = ok_msg.index();
           println!("Requested Index {}", index.name);

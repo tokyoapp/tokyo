@@ -1,7 +1,10 @@
-import * as library from 'proto';
-import { ClientStorage } from './ClientStorage.ts';
+/// <reference lib="webworker" />
 
-const storage = new ClientStorage();
+import * as Comlink from 'comlink';
+import * as library from 'proto';
+// import { ClientStorage } from './ClientStorage.ts';
+
+// const storage = new ClientStorage();
 
 let msg_count = 1;
 
@@ -20,9 +23,20 @@ export class LibraryLocation {
     return () => this.indexListeners.delete(callback);
   }
 
+  public requestIndex(name: string) {}
+
   public onList(callback: (arg: library.Message) => void) {
     this.listListeners.add(callback);
     return () => this.listListeners.delete(callback);
+  }
+
+  public requestLocations() {
+    const msg = library.ClientMessage.create({
+      id: ++msg_count,
+      locations: library.RequestLocations.create({}),
+    });
+    const data = library.ClientMessage.encode(msg).finish();
+    this.ws.send(data);
   }
 
   public onMetadata(callback: (arg: library.Message) => void) {
@@ -71,12 +85,12 @@ export class LibraryLocation {
         break;
       }
       case message.metadata: {
-        const file = message.metadata?.hash;
-        const thumbnail = message.metadata?.thumbnail;
-        if (file && thumbnail) {
-          const blob = new Blob([thumbnail]);
-          storage.writeTemp(file, await blob.arrayBuffer());
-        }
+        // const file = message.metadata?.hash;
+        // const thumbnail = message.metadata?.thumbnail;
+        // if (file && thumbnail) {
+        //   const blob = new Blob([thumbnail]);
+        //   storage.writeTemp(file, await blob.arrayBuffer());
+        // }
 
         if (message.metadata) {
           this.metadataListeners.forEach((cb) => cb(message));
@@ -92,19 +106,6 @@ export class LibraryLocation {
         break;
       }
     }
-  }
-
-  private onConnected(name: string) {
-    console.log('[WS] Connected');
-
-    const msg = library.ClientMessage.create({
-      id: 0,
-      index: library.RequestLibraryIndex.create({
-        name,
-      }),
-    });
-    const data = library.ClientMessage.encode(msg).finish();
-    this.ws.send(data);
   }
 
   postMetadata(
@@ -157,11 +158,14 @@ export class LibraryLocation {
     this.send(msg);
   }
 
-  async open(name: string): Promise<void> {
+  connect(host: string): Promise<void> {
+    console.log('worker', host);
+
     return new Promise((resolve) => {
-      this.ws = new WebSocket('ws://192.168.1.11:8000/ws');
+      this.ws = new WebSocket(`ws://${host}/ws`);
+
       this.ws.onopen = () => {
-        this.onConnected(name);
+        console.log('[WS] Connected');
         resolve();
       };
       this.ws.onerror = (err) => {
@@ -169,12 +173,22 @@ export class LibraryLocation {
         this.errorListeners.forEach((cb) => cb(new Error(`[WS] Error: ${err}`)));
       };
       this.ws.onmessage = async (msg) => {
-        const buf = await (msg.data as Blob).arrayBuffer();
+        console.log(msg.data.buffer);
+        let buf;
+        if (msg.data instanceof Blob) {
+          buf = await (msg.data as Blob).arrayBuffer();
+        } else {
+          buf = msg.data.buffer;
+        }
+
         const message = library.Message.decode(new Uint8Array(buf));
-        this.handleMessage(message);
+        console.log(message);
+        // this.handleMessage(message);
       };
     });
   }
 }
 
-export default new LibraryLocation();
+const worker = new LibraryLocation();
+export default worker;
+Comlink.expose(worker);

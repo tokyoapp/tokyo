@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import storage from '../services/ClientStorage.worker';
+// import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
 import { type Location, file, tags, Library } from '../Library.ts';
 import Action from '../actions/Action.ts';
