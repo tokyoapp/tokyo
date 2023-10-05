@@ -1,11 +1,12 @@
 FROM luckydye/build-utils as builder
 
-RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+RUN apt install unzip
 
 WORKDIR /app
 
 COPY . .
 
+# RUN export PATH=~/.local/share/rtx/shims:$PATH
 RUN task setup library:install
 
 FROM debian:buster-slim

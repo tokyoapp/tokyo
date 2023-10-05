@@ -36,7 +36,7 @@ tasks:
       - Cargo.lock
       - "**/package.json"
     cmds:
-      - rtx install 2> /dev/null || true
+      - rtx install -y
       - bun install
       - cargo install wasm-pack
       - cargo install tauri-cli --version "^2.0.0-alpha"
