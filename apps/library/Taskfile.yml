@@ -22,7 +22,7 @@ tasks:
   install:
     desc: Install Library
     cmds:
-      - cargo install --path . --root {{.USER_WORKING_DIR}}
+      - cargo install --path .
 
   start:
     desc: Start compiled library
