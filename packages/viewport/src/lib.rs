@@ -28,12 +28,14 @@ pub fn post_state(app: &mut ViewportApp) {
   state(serde_wasm_bindgen::to_value(&s).unwrap());
 }
 
+#[cfg(target_arch = "wasm32")]
 #[derive(Clone)]
 #[wasm_bindgen]
 pub struct WebHandle {
   runner: eframe::WebRunner,
 }
 
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl WebHandle {
   /// Installs a panic hook, then returns.
@@ -106,6 +108,7 @@ impl WebHandle {
   }
 }
 
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn init() -> WebHandle {
   let handle = WebHandle::new();
