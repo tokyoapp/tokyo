@@ -2,64 +2,51 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'proto';
-// import { ClientStorage } from './ClientStorage.ts';
-
-// const storage = new ClientStorage();
+import { ClientAPIMessage, LibraryInterface } from './lib';
 
 let msg_count = 1;
 
-export class LibraryLocation {
+export class LibraryLocation implements LibraryInterface {
   ws!: WebSocket;
 
-  indexListeners = new Set<(arg: library.Message) => void>();
-  listListeners = new Set<(arg: library.Message) => void>();
-  metadataListeners = new Set<(arg: library.Message) => void>();
-  imageListeners = new Set<(arg: library.Message) => void>();
-  systemListener = new Set<(arg: library.Message) => void>();
-  errorListeners = new Set<(arg: Error) => void>();
+  messageListeners = new Set<(arg: library.Message) => void>();
 
-  public onIndex(callback: (arg: library.Message) => void) {
-    this.indexListeners.add(callback);
-    return () => this.indexListeners.delete(callback);
+  public async onMessage(callback: (arg: ClientAPIMessage) => void, id?: number) {
+    const listener = async (msg: library.Message) => {
+      if (id != undefined && id !== msg.id) {
+        return;
+      }
+
+      const handledMessage = await this.handleMessage(msg);
+
+      if (handledMessage) {
+        callback(handledMessage);
+      }
+    }
+    this.messageListeners.add(listener);
+    return () => this.messageListeners.delete(listener);
   }
 
-  public requestIndex(name: string) {}
-
-  public onList(callback: (arg: library.Message) => void) {
-    this.listListeners.add(callback);
-    return () => this.listListeners.delete(callback);
-  }
-
-  public requestLocations() {
+  public fetchLocations() {
     const msg = library.ClientMessage.create({
       id: ++msg_count,
       locations: library.RequestLocations.create({}),
     });
     const data = library.ClientMessage.encode(msg).finish();
+
+    const res = new Promise<ClientAPIMessage>(async (resolve) => {
+      const unsub = await this.onMessage(msg => {
+        unsub();
+        resolve(msg);
+      }, msg.id)
+    })
+
     this.ws.send(data);
+
+    return res;
   }
 
-  public onMetadata(callback: (arg: library.Message) => void) {
-    this.metadataListeners.add(callback);
-    return () => this.metadataListeners.delete(callback);
-  }
-
-  public onImage(callback: (arg: library.Message) => void) {
-    this.imageListeners.add(callback);
-    return () => this.imageListeners.delete(callback);
-  }
-
-  public onError(callback: (arg: Error) => void) {
-    this.errorListeners.add(callback);
-    return () => this.errorListeners.delete(callback);
-  }
-
-  public onSystem(callback: (arg: library.Message) => void) {
-    this.systemListener.add(callback);
-    return () => this.systemListener.delete(callback);
-  }
-
-  private async handleMessage(message: library.Message) {
+  private async handleMessage(message: library.Message): Promise<ClientAPIMessage | undefined> {
     const type =
       message.error ||
       message.image ||
@@ -72,16 +59,20 @@ export class LibraryLocation {
 
     switch (type) {
       case message.error: {
-        console.error('Error response:', message);
-        this.errorListeners.forEach((cb) => cb(new Error(`Error: ${message.message}`)));
-        break;
+        throw new Error("Error response, " + JSON.stringify(message));
       }
       case message.index: {
-        this.indexListeners.forEach((cb) => cb(message));
-        break;
+        return {
+          type: "index",
+          data: message.index
+        };
       }
       case message.list: {
-        this.listListeners.forEach((cb) => cb(message));
+        if (message.list)
+          return {
+            type: "locations",
+            data: message.list.libraries
+          };
         break;
       }
       case message.metadata: {
@@ -91,64 +82,34 @@ export class LibraryLocation {
         //   const blob = new Blob([thumbnail]);
         //   storage.writeTemp(file, await blob.arrayBuffer());
         // }
-
-        if (message.metadata) {
-          this.metadataListeners.forEach((cb) => cb(message));
-        }
-        break;
+        //
+        return {
+          type: "metadata",
+          data: message.metadata,
+        };
       }
       case message.image: {
-        this.imageListeners.forEach((cb) => cb(message));
-        break;
+        return {
+          type: "image",
+          data: message.image
+        };
       }
       case message.system: {
-        this.systemListener.forEach((cb) => cb(message));
-        break;
+        return {
+          type: "system",
+          data: message.system
+        };
       }
     }
-  }
 
-  postMetadata(
-    file: string,
-    meta: {
-      rating?: number;
-    }
-  ) {
-    const id = ++msg_count;
-    const msg = library.ClientMessage.create({
-      id: id,
-      postmeta: library.PostFileMetadata.create({
-        file: file,
-        rating: meta.rating,
-      }),
-    });
-    this.send(msg);
-  }
-
-  getMetadata(file: string) {
-    const id = ++msg_count;
-    const msg = library.ClientMessage.create({
-      id: id,
-      meta: library.RequestMetadata.create({
-        file: file,
-      }),
-    });
-    this.send(msg);
-
-    return new Promise<library.Message>((resolve) => {
-      this.onMetadata((msg) => {
-        if (msg.id === id) {
-          resolve(msg);
-        }
-      });
-    });
+    return undefined;
   }
 
   send(msg: library.ClientMessage) {
     this.ws.send(library.ClientMessage.encode(msg).finish());
   }
 
-  createLocation() {
+  postLocation() {
     const msg = library.ClientMessage.create({
       create: library.CreateLibraryMessage.create({
         name: 'Desktop',
@@ -170,7 +131,6 @@ export class LibraryLocation {
       };
       this.ws.onerror = (err) => {
         console.error('[WS] Error: ', err);
-        this.errorListeners.forEach((cb) => cb(new Error(`[WS] Error: ${err}`)));
       };
       this.ws.onmessage = async (msg) => {
         console.log(msg.data.buffer);

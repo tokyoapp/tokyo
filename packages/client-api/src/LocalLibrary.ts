@@ -1,54 +1,20 @@
 /// <reference lib="webworker" />
 import { index, list, system, metadata } from 'tauri-plugin-library-api';
+import { ClientAPIMessage, LibraryInterface } from './lib';
 
-export class LocalLibrary {
-  indexListeners = new Set<(arg: library.Message) => void>();
-  listListeners = new Set<(arg: library.Message) => void>();
-  metadataListeners = new Set<(arg: library.Message) => void>();
-  imageListeners = new Set<(arg: library.Message) => void>();
-  systemListener = new Set<(arg: library.Message) => void>();
-  errorListeners = new Set<(arg: Error) => void>();
+export class LocalLibrary implements LibraryInterface {
 
-  public onIndex(callback: (arg: library.Message) => void) {
-    this.indexListeners.add(callback);
-    return () => this.indexListeners.delete(callback);
+  public async fetchLocations(): Promise<ClientAPIMessage> {
+    return list().then(list => {
+      return {
+        type: "locations",
+        data: [list]
+      }
+    });
   }
 
-  public requestIndex(name: string) {}
-
-  public onList(callback: (arg: library.Message) => void) {
-    this.listListeners.add(callback);
-    return () => this.listListeners.delete(callback);
-  }
-
-  public requestLocations() {
-    list()
-      .then((message) => {
-        this.listListeners.forEach((cb) => cb(message));
-      })
-      .catch((err) => {
-        console.error('error', err);
-      });
-  }
-
-  public onMetadata(callback: (arg: library.Message) => void) {
-    this.metadataListeners.add(callback);
-    return () => this.metadataListeners.delete(callback);
-  }
-
-  public onImage(callback: (arg: library.Message) => void) {
-    this.imageListeners.add(callback);
-    return () => this.imageListeners.delete(callback);
-  }
-
-  public onError(callback: (arg: Error) => void) {
-    this.errorListeners.add(callback);
-    return () => this.errorListeners.delete(callback);
-  }
-
-  public onSystem(callback: (arg: library.Message) => void) {
-    this.systemListener.add(callback);
-    return () => this.systemListener.delete(callback);
+  public async onMessage(cb: (msg: ClientAPIMessage) => void, id?: number | undefined): Promise<() => any> {
+    // 
   }
 
   async getMetadata(file: string) {
@@ -71,9 +37,9 @@ export class LocalLibrary {
       rating?: number;
       tags?: string[];
     }
-  ) {}
+  ) { }
 
-  async postLocation() {}
+  async postLocation() { }
 
   async getSystem() {
     return system()
