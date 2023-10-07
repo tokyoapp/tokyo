@@ -1,7 +1,7 @@
 FROM luckydye/build-utils as builder
 
 RUN apt install unzip
-RUN rtx use rust@latest
+RUN rtx use rust@latest -y
 
 WORKDIR /app
 
