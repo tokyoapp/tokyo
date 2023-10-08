@@ -13,7 +13,7 @@ export class LibraryLocation implements LibraryInterface {
 
   public async onMessage(callback: (arg: ClientAPIMessage) => void, id?: number) {
     const listener = async (msg: library.Message) => {
-      if (id != undefined && id !== msg.id) {
+      if (id !== undefined && id !== msg.id) {
         return;
       }
 
@@ -22,7 +22,7 @@ export class LibraryLocation implements LibraryInterface {
       if (handledMessage) {
         callback(handledMessage);
       }
-    }
+    };
     this.messageListeners.add(listener);
     return () => this.messageListeners.delete(listener);
   }
@@ -35,11 +35,11 @@ export class LibraryLocation implements LibraryInterface {
     const data = library.ClientMessage.encode(msg).finish();
 
     const res = new Promise<ClientAPIMessage>(async (resolve) => {
-      const unsub = await this.onMessage(msg => {
+      const unsub = await this.onMessage((msg) => {
         unsub();
         resolve(msg);
-      }, msg.id)
-    })
+      }, msg.id);
+    });
 
     this.ws.send(data);
 
@@ -59,19 +59,22 @@ export class LibraryLocation implements LibraryInterface {
 
     switch (type) {
       case message.error: {
-        throw new Error("Error response, " + JSON.stringify(message));
+        throw new Error('Error response, ' + JSON.stringify(message));
       }
       case message.index: {
-        return {
-          type: "index",
-          data: message.index
-        };
+        if (message.index) {
+          return {
+            type: 'index',
+            data: message.index,
+          };
+        }
+        break;
       }
       case message.list: {
         if (message.list)
           return {
-            type: "locations",
-            data: message.list.libraries
+            type: 'locations',
+            data: message.list.libraries,
           };
         break;
       }
@@ -83,21 +86,24 @@ export class LibraryLocation implements LibraryInterface {
         //   storage.writeTemp(file, await blob.arrayBuffer());
         // }
         //
-        return {
-          type: "metadata",
-          data: message.metadata,
-        };
+        if (message.metadata) {
+          return {
+            type: 'metadata',
+            data: message.metadata,
+          };
+        }
+        break;
       }
       case message.image: {
         return {
-          type: "image",
-          data: message.image
+          type: 'image',
+          data: message.image,
         };
       }
       case message.system: {
         return {
-          type: "system",
-          data: message.system
+          type: 'system',
+          data: message.system,
         };
       }
     }
@@ -120,7 +126,7 @@ export class LibraryLocation implements LibraryInterface {
   }
 
   connect(host: string): Promise<void> {
-    console.log('worker', host);
+    console.log('worker connecting to', host);
 
     return new Promise((resolve) => {
       this.ws = new WebSocket(`ws://${host}/ws`);

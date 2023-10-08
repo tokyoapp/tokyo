@@ -19,18 +19,20 @@ async function createRemoteLocationWorker(url: string): Promise<LibraryInterface
   return wrappedWorker;
 }
 
-
-type MessageType = "locations";
-type MessageData = library.LibraryMessage[];
+type MessageType = 'locations' | 'index' | 'metadata';
+type MessageData =
+  | library.LibraryMessage[]
+  | library.LibraryIndexMessage
+  | library.IndexEntryMessage[]
+  | library.MetadataMessage;
 
 export interface ClientAPIMessage {
-  type: MessageType,
-  data: MessageData
+  type: MessageType;
+  data: MessageData;
 }
 
 // Interface to a single Libary
 export interface LibraryInterface {
-
   onMessage(cb: (msg: ClientAPIMessage) => void, id?: number): Promise<() => any>;
 
   fetchLocations(): Promise<ClientAPIMessage>;
@@ -45,13 +47,13 @@ class Channel<T> {
 
   #request = (params: string[]) => {
     params;
-  }
+  };
 
   #stream: () => ReadableStream;
 
   constructor(options: {
-    request: (params: string[]) => void
-    stream: () => ReadableStream
+    request: (params: string[]) => void;
+    stream: () => ReadableStream;
   }) {
     this.#request = options.request;
     this.#stream = options.stream;
@@ -69,8 +71,8 @@ class Channel<T> {
     this.#ch.port1.addEventListener('message', cb as EventListener);
 
     return () => {
-      this.#ch.port1.removeEventListener("message", cb as EventListener);
-    }
+      this.#ch.port1.removeEventListener('message', cb as EventListener);
+    };
   }
 
   send(...params: string[]) {
@@ -79,9 +81,7 @@ class Channel<T> {
 }
 
 export class LibraryApi {
-  static connections = new Set<LibraryInterface>([
-    new LocalLibrary()
-  ]);
+  static connections = new Set<LibraryInterface>([new LocalLibrary()]);
 
   static locations = new Channel<{}>({
     request: () => {
@@ -93,20 +93,21 @@ export class LibraryApi {
       return new ReadableStream({
         start: (controller) => {
           Promise.all(
-            [...this.connections].map(conn => {
-              conn.fetchLocations().then(location => {
+            [...this.connections].map((conn) => {
+              conn.fetchLocations().then((location) => {
                 controller.enqueue(location);
-              })
-            })).then(() => {
-              controller.close();
+              });
             })
+          ).then(() => {
+            controller.close();
+          });
         },
         pull(controller) {
           controller;
         },
       });
-    }
-  })
+    },
+  });
 
   static async connect(url: string) {
     // const [host_or_name, path] = url.split(':');
@@ -150,4 +151,3 @@ stream.pipeTo(
     },
   })
 );
-
