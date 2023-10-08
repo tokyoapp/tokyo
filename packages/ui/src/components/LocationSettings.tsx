@@ -1,4 +1,4 @@
-import { libs } from '../Library.ts';
+import { locations } from '../Library.ts';
 import { langs, language, setLanguage } from '../locales/messages.ts';
 // import storage from '../services/ClientStorage.worker.ts';
 import { setSettingOpen } from '../App.tsx';
@@ -6,7 +6,7 @@ import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import Select from './Select.tsx';
 
-export default function () {
+export default function() {
   return (
     <div class="w-full h-full backdrop-blur-xl bg-[#18191BEE] p-8 grid grid-cols-[150px_1fr] grid-rows-[auto_1fr]">
       <div class="flex justify-between items-center pb-8 col-span-2">
@@ -41,7 +41,7 @@ export default function () {
         <button type="button" onClick={() => storage.reset()}>
           Reset Cache
         </button>
-        <pre>{JSON.stringify(libs(), null, '  ')}</pre>
+        <pre>{JSON.stringify(locations, null, '  ')}</pre>
       </div>
     </div>
   );

@@ -2,10 +2,10 @@ import * as Comlink from 'comlink';
 import { LocalLibrary } from './LocalLibrary.js';
 import * as library from 'proto';
 
-type RemoteLibrary = typeof import('./RemoteLibrary.js').default;
+type RemoteLibrary = typeof import('./RemoteLibrary.ts').default;
 
 async function createRemoteLocationWorker(url: string): Promise<LibraryInterface> {
-  const worker = new Worker(new URL('./RemoteLibrary.js', import.meta.url), {
+  const worker = new Worker(new URL('./RemoteLibrary.ts', import.meta.url), {
     type: 'module',
   });
   const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);
@@ -50,11 +50,11 @@ class Channel<T> {
     params;
   };
 
-  #stream: () => ReadableStream<T>;
+  #stream: (self: Channel<T>) => ReadableStream<T>;
 
   constructor(options: {
     request: (params: string[]) => void;
-    stream: () => ReadableStream<T>;
+    stream: (self: Channel<T>) => ReadableStream<T>;
   }) {
     this.#request = options.request;
     this.#stream = options.stream;
@@ -65,7 +65,7 @@ class Channel<T> {
   }
 
   stream() {
-    return this.#stream();
+    return this.#stream(this);
   }
 
   subscribe(cb: (data: T) => void) {
@@ -84,27 +84,50 @@ class Channel<T> {
 export class LibraryApi {
   static connections = new Set<LibraryInterface>([new LocalLibrary()]);
 
+  static connectionListeners = new Set<(conn: LibraryInterface) => void>();
+
+  static onConnection(cb: (conn: LibraryInterface) => void) {
+    this.connectionListeners.add(cb);
+  }
+
   static locations = new Channel<ClientAPIMessage>({
     request: () => {
       for (const conn of this.connections) {
         conn.fetchLocations();
       }
     },
-    stream: () => {
+    stream: (self) => {
       return new ReadableStream({
         start: (controller) => {
+
+          this.onConnection(conn => {
+            conn.fetchLocations().then(locations => {
+              locations.data.forEach(element => {
+                controller.enqueue(element)
+              });
+            })
+          })
+
+          self.subscribe(msg => {
+            console.log(msg)
+          })
+
           Promise.all(
-            [...this.connections].map((conn) => {
-              conn.fetchLocations().then((location) => {
-                controller.enqueue(location);
+            [...this.connections].map(async (conn) => {
+
+              conn.onMessage(Comlink.proxy(msg => {
+                console.log(msg)
+              }));
+
+              return conn.fetchLocations().then((locations) => {
+                locations.data.forEach(element => {
+                  controller.enqueue(element);
+                });
               });
             })
           ).then(() => {
-            controller.close();
+            // controller.close();
           });
-        },
-        pull(controller) {
-          controller;
         },
       });
     },
@@ -122,16 +145,13 @@ export class LibraryApi {
           Promise.all(
             // TOOD: dont request all locations' index, instead by location name
             [...this.connections].map((conn) => {
-              conn.fetchIndex(['default']).then((index) => {
+              return conn.fetchIndex().then((index) => {
                 controller.enqueue(index);
               });
             })
           ).then(() => {
             controller.close();
           });
-        },
-        pull(controller) {
-          controller;
         },
       });
     },
@@ -150,6 +170,11 @@ export class LibraryApi {
     const conn = await createRemoteLocationWorker(url).catch((err) => {
       console.error(err);
     });
-    if (conn) this.connections.add(conn);
+
+    // new connection
+    if (conn) {
+      this.connections.add(conn)
+      this.connectionListeners.forEach(cb => cb(conn));
+    };
   }
 }

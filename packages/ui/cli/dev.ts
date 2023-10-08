@@ -7,6 +7,9 @@ const config = mergeConfig(sharedConfig, {
     host: '0.0.0.0',
     port: 1420,
     strictPort: true,
+    fs: {
+      allow: ["../../../"]
+    }
   },
 });
 

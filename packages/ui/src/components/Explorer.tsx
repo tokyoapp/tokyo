@@ -2,7 +2,7 @@ import { createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 // import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
-import { type Location, file, tags, Library } from '../Library.ts';
+import { index, locations, file, tags, Library } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -25,7 +25,7 @@ createEffect(() => {
   }
 });
 
-export default function Explorer(props: { location: Location }) {
+export default function Explorer(props: {}) {
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
 
   createEffect(() => {
@@ -89,7 +89,7 @@ export default function Explorer(props: { location: Location }) {
   const rows = () => {
     const rs = [];
     let currRow: any[] = [];
-    const items = stack(props.location.index.filter(itemFilter).sort(sort[sorting()]));
+    const items = stack(index.filter(itemFilter).sort(sort[sorting()]));
     for (const entry of items) {
       if (currRow.length < 4) {
         currRow.push(entry);
@@ -327,18 +327,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {img()
             ? props.items.slice(0, 3).map((item, i) => {
-                return (
-                  <div
-                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+              return (
+                <div
+                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                  >
-                    {useThumb(img())}
-                  </div>
-                );
-              })
+                >
+                  {useThumb(img())}
+                </div>
+              );
+            })
             : null}
           {!loaded() ? <Icon name="loader" class="opacity-50" /> : null}
         </div>

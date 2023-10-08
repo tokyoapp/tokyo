@@ -14,12 +14,18 @@ export const [file, setFile] = createSignal<IndexEntryMessage>();
 export const [tags, setTags] = createSignal<TagMessage[]>([]);
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-await LibraryApi.connect('0.0.0.0:8000');
 
-const [locations, setLocations] = createStore<any[]>([]);
-const [index, setIndex] = createStore<any[]>([]);
+export const [locations, setLocations] = createStore<any[]>([]);
+export const [index, setIndex] = createStore<any[]>([]);
 
 class LibraryAccessor {
+
+  constructor() {
+    LibraryApi.connect('0.0.0.0:8000');
+
+    this.locations()
+  }
+
   async locations() {
     const stream = LibraryApi.locations.stream();
 

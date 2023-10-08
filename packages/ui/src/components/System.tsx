@@ -1,4 +1,4 @@
-import { sysinfo, location } from '../Library.ts';
+import { sysinfo, index } from '../Library.ts';
 import { t } from '../locales/messages.ts';
 
 export function SystemInfo() {
@@ -7,7 +7,7 @@ export function SystemInfo() {
       <div>{sysinfo()?.diskName}</div>
       <div>{t('system_disk_total', [Math.round(sysinfo()?.diskSize / 1000)])}</div>
       <div>{t('system_disk_available', [Math.round(sysinfo()?.diskAvailable / 1000)])}</div>
-      <div>{t('system_photo_count', [location()?.index.length])}</div>
+      <div>{t('system_photo_count', [index.length])}</div>
     </div>
   );
 }

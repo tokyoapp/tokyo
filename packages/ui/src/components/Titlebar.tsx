@@ -1,7 +1,7 @@
 import { getCurrent } from '@tauri-apps/plugin-window';
 import { platform } from '@tauri-apps/plugin-os';
 
-import { Library, libs, location } from '../Library.ts';
+import { Library, locations } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -76,25 +76,24 @@ export default function Titlebar() {
               }}
             >
               <div
-                class={`flex items-center justify-center duration-100 transition-transform ${
-                  settingsOpen() ? 'rotate-90' : 'rotate-0'
-                }`}
+                class={`flex items-center justify-center duration-100 transition-transform ${settingsOpen() ? 'rotate-90' : 'rotate-0'
+                  }`}
               >
                 <Icon name="chevron-right" />
               </div>
             </Button>
-            <div>{location().host}</div>
+            <div></div>
             <div>
               <Combobox
                 class="px-1 pointer-events-auto"
-                items={libs().map((lib) => {
-                  return { id: lib.name, value: lib.name, checked: location().name === lib.name };
+                items={locations.map((lib) => {
+                  return { id: lib.id, value: `${lib.name} - ${lib.host}`, checked: true === lib.name };
                 })}
                 title={'Library'}
                 onInput={(values) => {
                   const value = values[0];
                   if (value) {
-                    Library.open(value);
+                    // Library.open(value);
                   } else {
                     Action.run('create');
                   }
@@ -112,27 +111,27 @@ export default function Titlebar() {
                   </div>
                 }
               >
-                <span>{location().name}</span>
+                <span>Location</span>
                 <Icon class="pl-2" name="expand-down" />
               </Combobox>
 
-              {location()
-                .path.split('/')
-                .slice(1)
-                .map((part, i) => {
-                  if (i >= 1) {
-                    return (
-                      <>
-                        <span>/</span>
-                        <Combobox class="px-1 pointer-events-auto" items={[]} title={part}>
-                          <span>{part}</span>
-                          <Icon class="pl-2" name="expand-down" />
-                        </Combobox>
-                      </>
-                    );
-                  }
-                  return <span>/{part}</span>;
-                })}
+              {/* {location() */}
+              {/*   .path.split('/') */}
+              {/*   .slice(1) */}
+              {/*   .map((part, i) => { */}
+              {/*     if (i >= 1) { */}
+              {/*       return ( */}
+              {/*         <> */}
+              {/*           <span>/</span> */}
+              {/*           <Combobox class="px-1 pointer-events-auto" items={[]} title={part}> */}
+              {/*             <span>{part}</span> */}
+              {/*             <Icon class="pl-2" name="expand-down" /> */}
+              {/*           </Combobox> */}
+              {/*         </> */}
+              {/*       ); */}
+              {/*     } */}
+              {/*     return <span>/{part}</span>; */}
+              {/*   })} */}
             </div>
           </div>
           <div class="justify-self-center">

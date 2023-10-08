@@ -18,7 +18,6 @@ export class LibraryLocation implements LibraryInterface {
       }
 
       const handledMessage = await this.handleMessage(msg);
-
       if (handledMessage) {
         callback(handledMessage);
       }
@@ -35,7 +34,7 @@ export class LibraryLocation implements LibraryInterface {
     const data = library.ClientMessage.encode(msg).finish();
 
     const res = new Promise<ClientAPIMessage>(async (resolve) => {
-      const unsub = await this.onMessage((msg) => {
+      const unsub = await this.onMessage(async (msg) => {
         unsub();
         resolve(msg);
       }, msg.id);
@@ -55,8 +54,6 @@ export class LibraryLocation implements LibraryInterface {
       message.metadata ||
       message.system;
 
-    console.log('[WS]', type);
-
     switch (type) {
       case message.error: {
         throw new Error('Error response, ' + JSON.stringify(message));
@@ -71,11 +68,12 @@ export class LibraryLocation implements LibraryInterface {
         break;
       }
       case message.list: {
-        if (message.list)
+        if (message.list) {
           return {
             type: 'locations',
             data: message.list.libraries,
           };
+        }
         break;
       }
       case message.metadata: {
@@ -139,7 +137,6 @@ export class LibraryLocation implements LibraryInterface {
         console.error('[WS] Error: ', err);
       };
       this.ws.onmessage = async (msg) => {
-        console.log(msg.data.buffer);
         let buf;
         if (msg.data instanceof Blob) {
           buf = await (msg.data as Blob).arrayBuffer();
@@ -148,8 +145,7 @@ export class LibraryLocation implements LibraryInterface {
         }
 
         const message = library.Message.decode(new Uint8Array(buf));
-        console.log(message);
-        // this.handleMessage(message);
+        this.messageListeners.forEach(cb => cb(message));
       };
     });
   }

@@ -111,8 +111,10 @@ fn get_location_list() -> library::LibraryListMessage {
     .into_iter()
     .map(|loc| {
       let mut m = library::LibraryMessage::new();
+      m.id = loc.id;
       m.name = loc.name;
       m.path = loc.path;
+      m.library = "".to_string();
       m
     })
     .collect();
@@ -203,7 +205,9 @@ async fn handle_socket(mut socket: WebSocket) {
       tokio::spawn(async move {
         if ok_msg.has_locations() {
           let mut msg = library::Message::new();
-          msg.set_list(get_location_list());
+          let mut list = get_location_list();
+          msg.set_list(list);
+          msg.id = ok_msg.id;
           let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
           ws.lock().await.send(packet).await;
         }

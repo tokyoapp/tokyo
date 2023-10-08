@@ -2,7 +2,7 @@ import { createSignal } from 'solid-js';
 import Titlebar from './components/Titlebar.tsx';
 import Action from './actions/Action';
 import Explorer from './components/Explorer';
-import { Library, file, location } from './Library';
+import { Library, file, locations } from './Library';
 import LocationSettings from './components/LocationSettings.tsx';
 import Preview from './components/Viewer';
 import Info from './components/Info';
@@ -25,6 +25,7 @@ window.addEventListener('keyup', (e) => {
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
+
 function App() {
   window.addEventListener('error', (e) => {
     Notifications.push(
@@ -42,13 +43,12 @@ function App() {
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div
-        class={`relative w-full h-full grid ${
-          file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
-        }`}
+        class={`relative w-full h-full grid ${file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+          }`}
       >
         <div class="relative">
           <div class="absolute top-0 left-0 w-full h-full">
-            {!location().path ? (
+            {!locations.length ? (
               <div class="absolute top-0 left-0 w-full h-full z-40">
                 <CreateLibrary />
               </div>
@@ -60,7 +60,7 @@ function App() {
               </div>
             ) : null}
 
-            <Explorer location={location()} />
+            <Explorer />
           </div>
         </div>
 

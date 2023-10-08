@@ -8,7 +8,14 @@ export class LocalLibrary implements LibraryInterface {
     return list().then(list => {
       return {
         type: "locations",
-        data: [list]
+        data: list.map(loc => {
+          return {
+            name: loc.name,
+            path: loc.path,
+            host: "local",
+            library: "local",
+          }
+        })
       }
     });
   }
