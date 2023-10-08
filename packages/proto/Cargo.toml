@@ -3,6 +3,9 @@ name = "phl-proto"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+protoc = []
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -12,3 +15,7 @@ bytes = "1"
 
 [build-dependencies]
 protobuf-codegen = "3.3.0"
+
+[[bin]]
+name = "force-build"
+path = "build.rs"

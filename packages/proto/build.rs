@@ -21,7 +21,7 @@ fn main() -> std::io::Result<()> {
       dist.to_str().unwrap(),
       input.to_str().unwrap(),
     ])
-    .output()
+    .status()
     .expect("failed to execute process");
 
   Command::new("protoc")
@@ -30,7 +30,7 @@ fn main() -> std::io::Result<()> {
       dist.to_str().unwrap(),
       input.to_str().unwrap(),
     ])
-    .output()
+    .status()
     .expect("failed to execute process");
 
   Ok(())

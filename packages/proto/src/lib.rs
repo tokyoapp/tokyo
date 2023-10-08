@@ -1,8 +1,11 @@
+#[cfg(feature = "protoc")]
 mod gen;
 
+#[cfg(feature = "protoc")]
 pub use gen::library;
 pub use protobuf::Message;
 
+#[cfg(feature = "protoc")]
 impl Into<library::SystemInfo> for phl_library::SystemInfo {
   fn into(self) -> library::SystemInfo {
     let mut _sys_msg = library::SystemInfo::new();

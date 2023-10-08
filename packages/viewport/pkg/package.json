@@ -1,0 +1,14 @@
+{
+  "name": "viewport",
+  "version": "0.1.0",
+  "files": [
+    "viewport_bg.wasm",
+    "viewport.js",
+    "viewport.d.ts"
+  ],
+  "module": "viewport.js",
+  "types": "viewport.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

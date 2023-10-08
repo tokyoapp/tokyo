@@ -9,7 +9,6 @@ dist
 .task
 
 # rust
-**/pkg
 **/target
 
 # firebase

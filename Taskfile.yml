@@ -55,7 +55,7 @@ tasks:
     dir: "./packages/proto"
     cmds:
       - cargo install protobuf-codegen
-      - bun x cargo build
+      - bun x cargo run --bin force-build
 
   reset:
     desc: Reset repository files
