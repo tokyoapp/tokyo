@@ -21,6 +21,7 @@ async function createRemoteLocationWorker(url: string): Promise<LibraryInterface
 
 type MessageType = 'locations' | 'index' | 'metadata';
 type MessageData =
+  | library.LibraryMessage
   | library.LibraryMessage[]
   | library.LibraryIndexMessage
   | library.IndexEntryMessage[]
@@ -49,11 +50,11 @@ class Channel<T> {
     params;
   };
 
-  #stream: () => ReadableStream;
+  #stream: () => ReadableStream<T>;
 
   constructor(options: {
     request: (params: string[]) => void;
-    stream: () => ReadableStream;
+    stream: () => ReadableStream<T>;
   }) {
     this.#request = options.request;
     this.#stream = options.stream;
@@ -83,7 +84,7 @@ class Channel<T> {
 export class LibraryApi {
   static connections = new Set<LibraryInterface>([new LocalLibrary()]);
 
-  static locations = new Channel<{}>({
+  static locations = new Channel<ClientAPIMessage>({
     request: () => {
       for (const conn of this.connections) {
         conn.fetchLocations();
@@ -96,6 +97,33 @@ export class LibraryApi {
             [...this.connections].map((conn) => {
               conn.fetchLocations().then((location) => {
                 controller.enqueue(location);
+              });
+            })
+          ).then(() => {
+            controller.close();
+          });
+        },
+        pull(controller) {
+          controller;
+        },
+      });
+    },
+  });
+
+  static index = new Channel<ClientAPIMessage>({
+    request: () => {
+      for (const conn of this.connections) {
+        conn.fetchIndex();
+      }
+    },
+    stream: () => {
+      return new ReadableStream({
+        start: (controller) => {
+          Promise.all(
+            // TOOD: dont request all locations' index, instead by location name
+            [...this.connections].map((conn) => {
+              conn.fetchIndex(conn.).then((index) => {
+                controller.enqueue(index);
               });
             })
           ).then(() => {
@@ -125,29 +153,3 @@ export class LibraryApi {
     if (conn) this.connections.add(conn);
   }
 }
-
-// # App
-
-// await LibraryApi.connect(); // local
-await LibraryApi.connect('0.0.0.0:8000');
-
-const stream = LibraryApi.locations.stream();
-
-stream.pipeTo(
-  new WritableStream({
-    // UI should display the latest state.
-    //    Some component may merge with old data, some just use the latest.
-
-    // With a Map the data could be deduped. id -> data
-    // Generally need a solution to update a single item in a big list.
-    // Without rerendering the whole list.
-    write(chunk) {
-      // filter
-      console.log(chunk);
-      // sort
-    },
-    close() {
-      // sort
-    },
-  })
-);
