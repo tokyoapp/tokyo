@@ -25,6 +25,14 @@ tasks:
     cmds:
       - task --parallel {{.TASKS}}
 
+  setup:ubuntu:
+    desc: Install system dependencies
+    dir: "."
+    cmds:
+      - sudo apt update
+      - sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsqlite3-dev
+      - task: setup
+
   setup:
     desc: Install dependencies
     dir: "."
@@ -36,7 +44,7 @@ tasks:
       - Cargo.lock
       - "**/package.json"
     cmds:
-      - rtx install -y
+      - rtx install
       - cargo check
       - bun install
       - cargo install wasm-pack
