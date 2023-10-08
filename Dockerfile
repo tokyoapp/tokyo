@@ -19,7 +19,8 @@ WORKDIR /app
 COPY . .
 
 # RUN export PATH=~/.local/share/rtx/shims:$PATH
-RUN task setup library:install
+RUN task setup
+RUN task library:install
 
 FROM debian:buster-slim
 
