@@ -122,7 +122,7 @@ export class LibraryApi {
           Promise.all(
             // TOOD: dont request all locations' index, instead by location name
             [...this.connections].map((conn) => {
-              conn.fetchIndex(conn.).then((index) => {
+              conn.fetchIndex(['default']).then((index) => {
                 controller.enqueue(index);
               });
             })

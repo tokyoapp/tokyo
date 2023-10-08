@@ -10,19 +10,8 @@ export type Location = {
   index: IndexEntryMessage[];
 };
 
-export const [location, setLocation] = createSignal<Location>({
-  host: '',
-  name: 'default',
-  path: '',
-  index: [],
-});
-
 export const [file, setFile] = createSignal<IndexEntryMessage>();
-
-export const [libs, setLibs] = createSignal<LibraryMessage[]>([]);
-
 export const [tags, setTags] = createSignal<TagMessage[]>([]);
-
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
 await LibraryApi.connect('0.0.0.0:8000');
@@ -30,8 +19,8 @@ await LibraryApi.connect('0.0.0.0:8000');
 const [locations, setLocations] = createStore<any[]>([]);
 const [index, setIndex] = createStore<any[]>([]);
 
-export class Library {
-  static async locations() {
+class LibraryAccessor {
+  async locations() {
     const stream = LibraryApi.locations.stream();
 
     stream.pipeTo(
@@ -50,7 +39,7 @@ export class Library {
     return locations;
   }
 
-  static async index() {
+  async index() {
     const stream = LibraryApi.index.stream();
 
     stream.pipeTo(
@@ -69,3 +58,5 @@ export class Library {
     return index;
   }
 }
+
+export const Library = new LibraryAccessor();

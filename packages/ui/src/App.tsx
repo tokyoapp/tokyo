@@ -25,21 +25,6 @@ window.addEventListener('keyup', (e) => {
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
-Library.list().then(([loc]) => {
-  Library.index(loc.name).then(console.log);
-
-  Library.system().then(console.log);
-
-  // Library.open(loc.name).then(() => {
-  //   Notifications.push(
-  //     new Notification({
-  //       message: t('notification_loaded', ['default']),
-  //       time: 2000,
-  //     })
-  //   );
-  // });
-});
-
 function App() {
   window.addEventListener('error', (e) => {
     Notifications.push(
