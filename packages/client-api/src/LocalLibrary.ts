@@ -9,6 +9,10 @@ export class LocalLibrary implements LibraryInterface {
     };
   }
 
+  public async fetchIndex(locations: string[]): Promise<ClientAPIMessage> {
+    return {};
+  }
+
   public async onMessage(
     cb: (msg: ClientAPIMessage) => void,
     id?: number | undefined

@@ -5,7 +5,7 @@ use tauri::{
 };
 
 #[cfg(target_os = "android")]
-const PLUGIN_IDENTIFIER: &str = "com.plugin.library";
+const PLUGIN_IDENTIFIER: &str = "com.luckydye.plugin.library";
 
 #[cfg(target_os = "ios")]
 tauri::ios_plugin_binding!(init_plugin_library);
@@ -26,10 +26,17 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(PluginHandle<R>);
 
 impl<R: Runtime> Library<R> {
-  // pub fn get_locations(&self) -> crate::Result<Vec<phl_library::db::Location>> {
-  //   let root = db::Root::new();
-  //   return Ok(root.location_list().unwrap());
-  // }
+  // TODO: implement mobile methods
+
+  pub fn get_locations(&self) -> crate::Result<Vec<phl_library::db::Location>> {
+    let x = self
+      .0
+      .run_mobile_plugin("get_locations")
+      .map_err(Into::into);
+
+    let root = db::Root::new();
+    return Ok(root.location_list().unwrap());
+  }
 
   // pub async fn get_index(&self, name: String) -> crate::Result<Vec<phl_library::IndexEntry>> {
   //   let root = db::Root::new();

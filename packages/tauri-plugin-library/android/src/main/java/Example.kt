@@ -1,4 +1,4 @@
-package com.plugin.library
+package com.luckydye.plugin.library
 
 import android.util.Log
 

@@ -3,7 +3,6 @@ pub mod image;
 pub mod db;
 mod images;
 
-use serde_json::value::Index;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
 
@@ -167,11 +166,11 @@ impl Library {
       .and_then(|f| Some(f.clone()));
   }
 
-  pub fn find_library(root: &Root, name: &str) -> Result<Location> {
+  pub fn find_library(root: &Root, id: &str) -> Result<Location> {
     let locs = root.location_list()?;
     let loc = locs
       .iter()
-      .find(|lib| lib.name == name)
+      .find(|lib| lib.id == id)
       .expect("Could not find library");
 
     return Ok(loc.clone());

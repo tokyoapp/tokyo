@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.plugin.library"
+    namespace = "com.luckydye.plugin.library"
     compileSdk = 32
 
     defaultConfig {

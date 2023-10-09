@@ -7,8 +7,8 @@ use axum::{
 use futures::sink::SinkExt;
 use futures::StreamExt;
 use phl_library::db::Root;
-use phl_library::{db, Library};
-use phl_proto::library::{self, IndexEntryMessage};
+use phl_library::{db, IndexEntry, Library};
+use phl_proto::library::{self, IndexEntryMessage, LibraryIndexMessage};
 use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -87,14 +87,20 @@ fn get_location_list() -> library::LibraryListMessage {
   list_msg
 }
 
-async fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
+async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
   let root = db::Root::new();
-  let dir = Library::find_library(&root, name).unwrap().path;
 
-  let index = Library::get_index(&root, dir).await;
+  let mut _index: Vec<IndexEntry> = Vec::new();
+
+  // TODO: this should be streamed
+  for id in ids {
+    let dir = Library::find_library(&root, &id).unwrap().path;
+    let mut index = Library::get_index(&root, dir).await;
+    _index.append(&mut index);
+  }
 
   let mut index_msg = library::LibraryIndexMessage::new();
-  index_msg.index = index
+  index_msg.index = _index
     .into_iter()
     .map(|entry| {
       let msg: IndexEntryMessage = entry.into();
@@ -137,20 +143,18 @@ async fn handle_socket(mut socket: WebSocket) {
       tokio::spawn(async move {
         if ok_msg.has_locations() {
           let mut msg = library::Message::new();
-          let list = get_location_list();
-          msg.set_list(list);
           msg.id = ok_msg.id;
+          msg.set_list(get_location_list());
           let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
           ws.lock().await.send(packet).await;
         }
 
         if ok_msg.has_index() {
           let index = ok_msg.index();
-          println!("Requested Index {}", index.name);
-
+          println!("Requested Index {:?}", index.ids);
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_index(get_index_msg(index.name.as_str()).await);
+          msg.set_index(get_index_msg(index.ids).await);
           let bytes = msg.write_to_bytes().unwrap();
           let packet = ws::Message::Binary(bytes);
           ws.lock().await.send(packet).await;

@@ -76,7 +76,7 @@ message CreateLibraryMessage {
 }
 
 message RequestLibraryIndex {
-  string name = 1;
+  repeated string ids = 1;
 }
 
 message RequestLocations {}

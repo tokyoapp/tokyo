@@ -1,6 +1,6 @@
-import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto';
+import { IndexEntryMessage, SystemInfo, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
-import { ClientAPIMessage, LibraryApi } from 'client-api';
+import { LibraryApi } from 'client-api';
 import { createStore } from 'solid-js/store';
 
 export type Location = {
@@ -14,20 +14,18 @@ export const [file, setFile] = createSignal<IndexEntryMessage>();
 export const [tags, setTags] = createSignal<TagMessage[]>([]);
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-
 export const [locations, setLocations] = createStore<any[]>([]);
 export const [index, setIndex] = createStore<any[]>([]);
 
 class LibraryAccessor {
-
   constructor() {
     LibraryApi.connect('0.0.0.0:8000');
 
-    this.locations()
+    this.locations();
   }
 
   async locations() {
-    const stream = LibraryApi.locations.stream();
+    const stream = LibraryApi.locations().stream();
 
     stream.pipeTo(
       new WritableStream({
@@ -35,7 +33,7 @@ class LibraryAccessor {
           setLocations([...locations, chunk]);
         },
         close() {
-          LibraryApi.locations.subscribe((data) => {
+          LibraryApi.locations().subscribe((data) => {
             // TODO: merge new data with cached data
           });
         },
@@ -45,16 +43,17 @@ class LibraryAccessor {
     return locations;
   }
 
-  async index() {
-    const stream = LibraryApi.index.stream();
+  async index(locations: string[]) {
+    const stream = LibraryApi.index(locations).stream();
 
+    // TODO: stream should close when not used anymore
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
           setIndex([...index, chunk]);
         },
         close() {
-          LibraryApi.index.subscribe((data) => {
+          LibraryApi.index(locations).subscribe((data) => {
             // TODO: merge new data with cached data
           });
         },

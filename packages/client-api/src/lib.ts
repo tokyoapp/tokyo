@@ -34,9 +34,10 @@ export interface ClientAPIMessage {
 
 // Interface to a single Libary
 export interface LibraryInterface {
-  onMessage(cb: (msg: ClientAPIMessage) => void, id?: number): Promise<() => any>;
+  onMessage(cb: (msg: ClientAPIMessage) => void, id?: number): Promise<() => void>;
 
   fetchLocations(): Promise<ClientAPIMessage>;
+  fetchIndex(locations: string[]): Promise<ClientAPIMessage>;
 }
 
 // Access to one or multiple libraries, remote and local, through a simple API.
@@ -90,72 +91,83 @@ export class LibraryApi {
     this.connectionListeners.add(cb);
   }
 
-  static locations = new Channel<ClientAPIMessage>({
-    request: () => {
-      for (const conn of this.connections) {
-        conn.fetchLocations();
-      }
-    },
-    stream: (self) => {
-      return new ReadableStream({
-        start: (controller) => {
-
-          this.onConnection(conn => {
-            conn.fetchLocations().then(locations => {
-              locations.data.forEach(element => {
-                controller.enqueue(element)
-              });
-            })
-          })
-
-          self.subscribe(msg => {
-            console.log(msg)
-          })
-
-          Promise.all(
-            [...this.connections].map(async (conn) => {
-
-              conn.onMessage(Comlink.proxy(msg => {
-                console.log(msg)
-              }));
-
-              return conn.fetchLocations().then((locations) => {
-                locations.data.forEach(element => {
+  static locations() {
+    return new Channel<ClientAPIMessage>({
+      request: () => {
+        for (const conn of this.connections) {
+          conn.fetchLocations();
+        }
+      },
+      stream: (self) => {
+        return new ReadableStream({
+          start: (controller) => {
+            this.onConnection((conn) => {
+              conn.fetchLocations().then((locations) => {
+                locations.data.forEach((element) => {
                   controller.enqueue(element);
                 });
               });
-            })
-          ).then(() => {
-            // controller.close();
-          });
-        },
-      });
-    },
-  });
+            });
 
-  static index = new Channel<ClientAPIMessage>({
-    request: () => {
-      for (const conn of this.connections) {
-        conn.fetchIndex();
-      }
-    },
-    stream: () => {
-      return new ReadableStream({
-        start: (controller) => {
-          Promise.all(
-            // TOOD: dont request all locations' index, instead by location name
-            [...this.connections].map((conn) => {
-              return conn.fetchIndex().then((index) => {
-                controller.enqueue(index);
+            // self.subscribe((msg) => {
+            //   console.log(msg);
+            // });
+
+            Promise.all(
+              [...this.connections].map(async (conn) => {
+                conn.onMessage(
+                  Comlink.proxy((msg) => {
+                    console.log(msg);
+                  })
+                );
+
+                return conn.fetchLocations().then((locations) => {
+                  locations.data.forEach((element) => {
+                    controller.enqueue(element);
+                  });
+                });
+              })
+            ).then(() => {
+              // controller.close();
+            });
+          },
+        });
+      },
+    });
+  }
+
+  static index(locations: string[]) {
+    return new Channel<ClientAPIMessage>({
+      request: () => {
+        for (const conn of this.connections) {
+          conn.fetchIndex(locations);
+        }
+      },
+      stream: () => {
+        return new ReadableStream({
+          start: (controller) => {
+            this.onConnection((conn) => {
+              conn.fetchIndex(locations).then((entires) => {
+                entires.data.forEach((entry) => {
+                  controller.enqueue(entry);
+                });
               });
-            })
-          ).then(() => {
-            controller.close();
-          });
-        },
-      });
-    },
-  });
+            });
+
+            Promise.all(
+              [...this.connections].map((conn) => {
+                return conn.fetchIndex(locations).then((index) => {
+                  controller.enqueue(index);
+                });
+              })
+            ).then(() => {
+              controller.close();
+            });
+          },
+        });
+      },
+    });
+  }
 
   static async connect(url: string) {
     // const [host_or_name, path] = url.split(':');
@@ -173,8 +185,8 @@ export class LibraryApi {
 
     // new connection
     if (conn) {
-      this.connections.add(conn)
-      this.connectionListeners.forEach(cb => cb(conn));
-    };
+      this.connections.add(conn);
+      this.connectionListeners.forEach((cb) => cb(conn));
+    }
   }
 }

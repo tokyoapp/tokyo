@@ -45,6 +45,27 @@ export class LibraryLocation implements LibraryInterface {
     return res;
   }
 
+  public fetchIndex(locations: string[]): Promise<ClientAPIMessage> {
+    const msg = library.ClientMessage.create({
+      id: ++msg_count,
+      index: library.RequestLibraryIndex.create({
+        ids: locations,
+      }),
+    });
+    const data = library.ClientMessage.encode(msg).finish();
+
+    const res = new Promise<ClientAPIMessage>(async (resolve) => {
+      const unsub = await this.onMessage(async (msg) => {
+        unsub();
+        resolve(msg);
+      }, msg.id);
+    });
+
+    this.ws.send(data);
+
+    return res;
+  }
+
   private async handleMessage(message: library.Message): Promise<ClientAPIMessage | undefined> {
     const type =
       message.error ||
@@ -145,7 +166,7 @@ export class LibraryLocation implements LibraryInterface {
         }
 
         const message = library.Message.decode(new Uint8Array(buf));
-        this.messageListeners.forEach(cb => cb(message));
+        this.messageListeners.forEach((cb) => cb(message));
       };
     });
   }
