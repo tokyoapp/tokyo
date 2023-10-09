@@ -1,11 +1,14 @@
 import { invoke } from '@tauri-apps/api/tauri';
 
-export async function list(): Promise<{
-  id: string;
-  name: string;
-  path: string;
-}> {
-  return await invoke('plugin:library|get_list');
+export async function locations(): Promise<
+  {
+    id: string;
+    name: string;
+    path: string;
+    library: string;
+  }[]
+> {
+  return await invoke('plugin:library|get_locations');
 }
 
 export async function index(name: string): Promise<

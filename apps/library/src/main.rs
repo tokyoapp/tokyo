@@ -7,9 +7,8 @@ use axum::{
 use futures::sink::SinkExt;
 use futures::StreamExt;
 use phl_library::db::Root;
-use phl_library::image::Metadata;
 use phl_library::{db, Library};
-use phl_proto::library;
+use phl_proto::library::{self, IndexEntryMessage};
 use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -49,46 +48,12 @@ async fn main() {
 }
 
 async fn metadata(file: &String) -> library::Message {
-  let p = file;
-
-  let meta = phl_library::image::metadat(&p.to_string());
-
+  let root = db::Root::new();
+  let meta = phl_library::Library::metadata(&root, &file).await;
   let mut msg = library::Message::new();
-
   if let Some(metadata) = meta {
-    let root = db::Root::new();
-    let file = Library::get_file(&root, &metadata.hash);
-
-    let mut tags: Vec<String> = Vec::new();
-
-    let rating = file
-      .clone()
-      .and_then(|f| Some(f.rating))
-      .or(Some(metadata.rating as i32))
-      .unwrap();
-
-    if let Some(f) = file {
-      tags.append(&mut f.tags.clone());
-    } else {
-      Library::add_file(&root, &metadata.hash, metadata.rating as i32).await;
-    }
-
-    let mut meta_msg = library::MetadataMessage::new();
-    meta_msg.create_date = metadata.create_date;
-    meta_msg.exif = serde_json::to_string(&metadata.exif).unwrap();
-    meta_msg.hash = metadata.hash;
-    meta_msg.height = metadata.height as i32;
-    meta_msg.width = metadata.width as i32;
-    meta_msg.make = metadata.make;
-    meta_msg.name = metadata.name;
-    meta_msg.orientation = metadata.orientation as i32;
-    meta_msg.rating = rating;
-    meta_msg.tags = tags;
-    meta_msg.thumbnail = phl_library::image::cached_thumb(&p.to_string()).await;
-
-    msg.set_metadata(meta_msg);
+    msg.set_metadata(metadata.into());
   }
-
   return msg;
 }
 
@@ -122,43 +87,17 @@ fn get_location_list() -> library::LibraryListMessage {
   list_msg
 }
 
-fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
+async fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
   let root = db::Root::new();
   let dir = Library::find_library(&root, name).unwrap().path;
-  let list = Library::list(dir);
 
-  let mut index: Vec<Metadata> = Vec::new();
-
-  for path in list {
-    let meta = phl_library::image::metadat(&path);
-    let _ = meta.is_some_and(|v| {
-      index.push(v);
-      true
-    });
-  }
+  let index = Library::get_index(&root, dir).await;
 
   let mut index_msg = library::LibraryIndexMessage::new();
   index_msg.index = index
-    .iter()
-    .map(|meta| {
-      let file = Library::get_file(&root, &meta.hash);
-      let rating = file
-        .clone()
-        .and_then(|f| Some(f.rating))
-        .or(Some(meta.rating as i32))
-        .unwrap();
-
-      let mut msg = library::IndexEntryMessage::new();
-      msg.name = meta.name.clone();
-      msg.create_date = meta.create_date.clone();
-      msg.hash = meta.hash.clone();
-      msg.orientation = meta.orientation as i32;
-      msg.path = meta.path.clone();
-      msg.rating = rating;
-      msg.tags = file
-        .and_then(|f| Some(f.tags))
-        .or(Some(Vec::new()))
-        .unwrap();
+    .into_iter()
+    .map(|entry| {
+      let msg: IndexEntryMessage = entry.into();
       msg
     })
     .collect();
@@ -168,13 +107,6 @@ fn get_index_msg(name: &str) -> library::LibraryIndexMessage {
 
 async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
-
-  // // send location list
-  // let mut msg = library::Message::new();
-  // msg.set_list(get_location_list());
-  // let _ = socket
-  //   .send(ws::Message::Binary(msg.write_to_bytes().unwrap()))
-  //   .await;
 
   // send system info
   let mut sys_msg = library::Message::new();
@@ -205,7 +137,7 @@ async fn handle_socket(mut socket: WebSocket) {
       tokio::spawn(async move {
         if ok_msg.has_locations() {
           let mut msg = library::Message::new();
-          let mut list = get_location_list();
+          let list = get_location_list();
           msg.set_list(list);
           msg.id = ok_msg.id;
           let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
@@ -218,7 +150,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_index(get_index_msg(index.name.as_str()));
+          msg.set_index(get_index_msg(index.name.as_str()).await);
           let bytes = msg.write_to_bytes().unwrap();
           let packet = ws::Message::Binary(bytes);
           ws.lock().await.send(packet).await;
@@ -268,7 +200,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_index(get_index_msg("default"));
+          msg.set_index(get_index_msg("default").await);
           let bytes = msg.write_to_bytes().unwrap();
           let packet = ws::Message::Binary(bytes);
           ws.lock().await.send(packet).await;

@@ -1,27 +1,19 @@
-/// <reference lib="webworker" />
-import { index, list, system, metadata } from 'tauri-plugin-library-api';
+import { index, locations, system, metadata } from 'tauri-plugin-library-api';
 import { ClientAPIMessage, LibraryInterface } from './lib';
 
 export class LocalLibrary implements LibraryInterface {
-
   public async fetchLocations(): Promise<ClientAPIMessage> {
-    return list().then(list => {
-      return {
-        type: "locations",
-        data: list.map(loc => {
-          return {
-            name: loc.name,
-            path: loc.path,
-            host: "local",
-            library: "local",
-          }
-        })
-      }
-    });
+    return {
+      type: 'locations' as const,
+      data: await locations(),
+    };
   }
 
-  public async onMessage(cb: (msg: ClientAPIMessage) => void, id?: number | undefined): Promise<() => any> {
-    // 
+  public async onMessage(
+    cb: (msg: ClientAPIMessage) => void,
+    id?: number | undefined
+  ): Promise<() => any> {
+    //
   }
 
   async getMetadata(file: string) {
@@ -44,9 +36,9 @@ export class LocalLibrary implements LibraryInterface {
       rating?: number;
       tags?: string[];
     }
-  ) { }
+  ) {}
 
-  async postLocation() { }
+  async postLocation() {}
 
   async getSystem() {
     return system()

@@ -5,8 +5,6 @@ use tauri::{
 
 use std::{collections::HashMap, sync::Mutex};
 
-pub use models::*;
-
 #[cfg(desktop)]
 mod desktop;
 #[cfg(mobile)]
@@ -14,7 +12,6 @@ mod mobile;
 
 mod commands;
 mod error;
-mod models;
 
 pub use error::{Error, Result};
 
@@ -41,7 +38,7 @@ impl<R: Runtime, T: Manager<R>> crate::LibraryExt<R> for T {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("library")
     .invoke_handler(tauri::generate_handler![
-      commands::get_list,
+      commands::get_locations,
       commands::get_index,
       commands::get_system,
       commands::create_library,

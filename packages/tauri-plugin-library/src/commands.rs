@@ -1,31 +1,20 @@
-use tauri::{command, AppHandle, Runtime, State, Window};
+use tauri::{command, AppHandle, Runtime};
 
-use crate::{
-  desktop::{IndexEntry, MetadataEntry},
-  LibraryExt, MyState, Result,
-};
-
-// #[command]
-// pub(crate) async fn execute<R: Runtime>(
-//   _app: AppHandle<R>,
-//   _window: Window<R>,
-//   state: State<'_, MyState>,
-// ) -> Result<String> {
-
-//   state.0.lock().unwrap().insert("key".into(), "value".into());
-//   Ok("success".to_string())
-// }
+use crate::{LibraryExt, Result};
 
 use phl_library::db;
 
 // get local library list
 #[command]
-pub(crate) async fn get_list<R: Runtime>(app: AppHandle<R>) -> Result<Vec<db::Location>> {
+pub(crate) async fn get_locations<R: Runtime>(app: AppHandle<R>) -> Result<Vec<db::Location>> {
   return Ok(app.library().get_locations().unwrap());
 }
 
 #[command]
-pub async fn get_index<R: Runtime>(app: AppHandle<R>, name: String) -> Result<Vec<IndexEntry>> {
+pub async fn get_index<R: Runtime>(
+  app: AppHandle<R>,
+  name: String,
+) -> Result<Vec<phl_library::IndexEntry>> {
   return Ok(app.library().get_index(name).await.unwrap());
 }
 
@@ -38,7 +27,10 @@ pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<phl_library::Sy
 pub async fn create_library() {}
 
 #[command]
-pub async fn get_metadata<R: Runtime>(app: AppHandle<R>, file: String) -> Result<MetadataEntry> {
+pub async fn get_metadata<R: Runtime>(
+  app: AppHandle<R>,
+  file: String,
+) -> Result<phl_library::MetadataEntry> {
   return Ok(app.library().get_metadata(file).await.unwrap());
 }
 
