@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "main": "./src/App.tsx",
+  "main": "./index.tsx",
   "type": "module",
   "bin": {
     "ui": "./cli/main.ts"

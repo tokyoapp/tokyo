@@ -10,3 +10,6 @@ eframe = { version = "*", features = [
   "__screenshot", # __screenshot is so we can dump a screenshot using EFRAME_SCREENSHOT_TO
 ] }
 env_logger = "0.10"
+
+[profile.release]
+opt-level = 3

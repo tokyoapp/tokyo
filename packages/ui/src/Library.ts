@@ -1,66 +1,57 @@
-import { IndexEntryMessage, SystemInfo, TagMessage } from 'proto';
+import { IndexEntryMessage, LibraryMessage, SystemInfo, TagMessage } from 'proto';
 import { createSignal } from 'solid-js';
 import { LibraryApi } from 'client-api';
-import { createStore } from 'solid-js/store';
 
-export type Location = {
-  name: string;
-  host?: string;
-  path: string;
-  index: IndexEntryMessage[];
-};
-
+// these should not be exported. Have em get by the accessor.
 export const [file, setFile] = createSignal<IndexEntryMessage>();
 export const [tags, setTags] = createSignal<TagMessage[]>([]);
 export const [sysinfo, setSysInfo] = createSignal<SystemInfo>();
 
-export const [locations, setLocations] = createStore<any[]>([]);
-export const [index, setIndex] = createStore<any[]>([]);
+export const [locations, setLocations] = createSignal<LibraryMessage[]>([]);
+export const [index, setIndex] = createSignal<IndexEntryMessage[]>([]);
 
 class LibraryAccessor {
   constructor() {
     LibraryApi.connect('0.0.0.0:8000');
-
-    this.locations();
   }
 
   async locations() {
-    const stream = LibraryApi.locations().stream();
+    const channel = LibraryApi.locations();
+    const stream = channel.stream();
+    const locs = locations();
 
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
-          setLocations([...locations, chunk]);
-        },
-        close() {
-          LibraryApi.locations().subscribe((data) => {
-            // TODO: merge new data with cached data
-          });
+          setLocations([...locs, chunk]);
         },
       })
     );
 
-    return locations;
+    return channel;
   }
 
   async index(locations: string[]) {
-    const stream = LibraryApi.index(locations).stream();
+    const channel = LibraryApi.index(locations);
+    const stream = channel.stream();
+    const indx = index();
 
     // TODO: stream should close when not used anymore
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
-          setIndex([...index, chunk]);
-        },
-        close() {
-          LibraryApi.index(locations).subscribe((data) => {
-            // TODO: merge new data with cached data
-          });
+          setIndex([...indx, chunk]);
         },
       })
     );
 
-    return index;
+    return channel;
+  }
+
+  async metadata(id: string) {
+    // const channel = LibraryApi.metadata(locations);
+    // const stream = channel.stream();
+    // const indx = index();
   }
 }
 

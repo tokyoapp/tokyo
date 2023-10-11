@@ -94,6 +94,7 @@ async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
 
   // TODO: this should be streamed
   for id in ids {
+    println!("{}", id);
     let dir = Library::find_library(&root, &id).unwrap().path;
     let mut index = Library::get_index(&root, dir).await;
     _index.append(&mut index);
@@ -151,10 +152,10 @@ async fn handle_socket(mut socket: WebSocket) {
 
         if ok_msg.has_index() {
           let index = ok_msg.index();
-          println!("Requested Index {:?}", index.ids);
+          println!("Requested Index {:?}", index);
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_index(get_index_msg(index.ids).await);
+          msg.set_index(get_index_msg(index.ids.clone()).await);
           let bytes = msg.write_to_bytes().unwrap();
           let packet = ws::Message::Binary(bytes);
           ws.lock().await.send(packet).await;
@@ -204,7 +205,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_index(get_index_msg("default").await);
+          msg.set_index(get_index_msg(["default".to_string()].to_vec()).await);
           let bytes = msg.write_to_bytes().unwrap();
           let packet = ws::Message::Binary(bytes);
           ws.lock().await.send(packet).await;

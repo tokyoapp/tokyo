@@ -1,7 +1,7 @@
 import { getCurrent } from '@tauri-apps/plugin-window';
 import { platform } from '@tauri-apps/plugin-os';
 
-import { Library, locations } from '../Library.ts';
+import { locations } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -11,11 +11,6 @@ import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
 import Action from '../actions/Action.ts';
 import { t } from '../locales/messages.ts';
-
-const os = await platform().catch((err) => {
-  console.error(err);
-  return undefined;
-});
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
@@ -60,6 +55,21 @@ const WindowsTitle = () => {
 
 export const [cmdOpen, setCmdOpen] = createSignal(false);
 
+const [os, setOS] = createSignal('');
+
+if (window.__TAURI_INVOKE__) {
+  platform()
+    .then((os) => {
+      setOS(os);
+    })
+    .catch((err) => {
+      console.error(err);
+      return undefined;
+    });
+} else {
+  setOS('browser');
+}
+
 export default function Titlebar() {
   return (
     <>
@@ -69,15 +79,16 @@ export default function Titlebar() {
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
-            {os === 'macos' ? <MacTitle /> : null}
+            {os() === 'macos' ? <MacTitle /> : null}
             <Button
               onClick={() => {
                 setSettingOpen(!settingsOpen());
               }}
             >
               <div
-                class={`flex items-center justify-center duration-100 transition-transform ${settingsOpen() ? 'rotate-90' : 'rotate-0'
-                  }`}
+                class={`flex items-center justify-center duration-100 transition-transform ${
+                  settingsOpen() ? 'rotate-90' : 'rotate-0'
+                }`}
               >
                 <Icon name="chevron-right" />
               </div>
@@ -86,8 +97,12 @@ export default function Titlebar() {
             <div>
               <Combobox
                 class="px-1 pointer-events-auto"
-                items={locations.map((lib) => {
-                  return { id: lib.id, value: `${lib.name} - ${lib.host}`, checked: true === lib.name };
+                items={locations().map((lib) => {
+                  return {
+                    id: lib.id,
+                    value: `${lib.name} - ${lib.host}`,
+                    checked: true === lib.name,
+                  };
                 })}
                 title={'Library'}
                 onInput={(values) => {
@@ -147,7 +162,7 @@ export default function Titlebar() {
           <div />
         </div>
 
-        {os === 'windows' ? <WindowsTitle /> : null}
+        {os() === 'windows' ? <WindowsTitle /> : null}
       </div>
 
       {cmdOpen() ? (

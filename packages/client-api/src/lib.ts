@@ -27,17 +27,17 @@ type MessageData =
   | library.IndexEntryMessage[]
   | library.MetadataMessage;
 
-export interface ClientAPIMessage {
+export interface ClientAPIMessage<T> {
   type: MessageType;
-  data: MessageData;
+  data: T;
 }
 
 // Interface to a single Libary
 export interface LibraryInterface {
-  onMessage(cb: (msg: ClientAPIMessage) => void, id?: number): Promise<() => void>;
+  onMessage(cb: (msg: ClientAPIMessage<MessageData>) => void, id?: number): Promise<() => void>;
 
-  fetchLocations(): Promise<ClientAPIMessage>;
-  fetchIndex(locations: string[]): Promise<ClientAPIMessage>;
+  fetchLocations(): Promise<ClientAPIMessage<library.LibraryMessage[]>>;
+  fetchIndex(locations: string[]): Promise<ClientAPIMessage<library.IndexEntryMessage[]>>;
 }
 
 // Access to one or multiple libraries, remote and local, through a simple API.
@@ -69,7 +69,13 @@ class Channel<T> {
     return this.#stream(this);
   }
 
+  emit(data: T) {
+    this.#ch.port2.postMessage(data);
+  }
+
   subscribe(cb: (data: T) => void) {
+    this.#ch.port1.onmessage = (msg) => {};
+
     this.#ch.port1.addEventListener('message', cb as EventListener);
 
     return () => {
@@ -83,7 +89,9 @@ class Channel<T> {
 }
 
 export class LibraryApi {
-  static connections = new Set<LibraryInterface>([new LocalLibrary()]);
+  static connections = new Set<LibraryInterface>(
+    window.__TAURI_INVOKE__ ? [new LocalLibrary()] : []
+  );
 
   static connectionListeners = new Set<(conn: LibraryInterface) => void>();
 
@@ -92,7 +100,7 @@ export class LibraryApi {
   }
 
   static locations() {
-    return new Channel<ClientAPIMessage>({
+    return new Channel<library.LibraryMessage>({
       request: () => {
         for (const conn of this.connections) {
           conn.fetchLocations();
@@ -115,14 +123,16 @@ export class LibraryApi {
 
             Promise.all(
               [...this.connections].map(async (conn) => {
-                conn.onMessage(
-                  Comlink.proxy((msg) => {
-                    console.log(msg);
-                  })
-                );
+                // TODO: handle subscription
+                // conn.onMessage(
+                //   Comlink.proxy((msg) => {
+                //     console.log('msg', msg);
+                //   })
+                // );
 
                 return conn.fetchLocations().then((locations) => {
                   locations.data.forEach((element) => {
+                    self.emit(element);
                     controller.enqueue(element);
                   });
                 });
@@ -137,7 +147,7 @@ export class LibraryApi {
   }
 
   static index(locations: string[]) {
-    return new Channel<ClientAPIMessage>({
+    return new Channel<library.IndexEntryMessage>({
       request: () => {
         for (const conn of this.connections) {
           conn.fetchIndex(locations);
@@ -157,7 +167,9 @@ export class LibraryApi {
             Promise.all(
               [...this.connections].map((conn) => {
                 return conn.fetchIndex(locations).then((index) => {
-                  controller.enqueue(index);
+                  index.data?.index?.forEach((entry) => {
+                    controller.enqueue(entry);
+                  });
                 });
               })
             ).then(() => {
@@ -168,6 +180,8 @@ export class LibraryApi {
       },
     });
   }
+
+  static async metadata(id: string) {}
 
   static async connect(url: string) {
     // const [host_or_name, path] = url.split(':');

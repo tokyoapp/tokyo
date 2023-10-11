@@ -35,7 +35,7 @@
       overflow: hidden;
     }
 
-    main {
+    body {
       position: absolute;
       top: 0;
       left: 0;
@@ -48,29 +48,21 @@
       display: grid;
       grid-template-rows: auto 1fr;
     }
-
-    .shell {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    }
   </style>
 
   <script type="module">
     import "ui/index.css";
     import { render } from 'solid-js/web';
-    import App from 'ui';
+    import { App, Title } from 'ui';
 
-    main.innerHTML = '';
+    render(Title, titlebar);
     render(App, main);
   </script>
 </head>
 
 <body>
-  <main id="main">
-    <div class="shell"></div>
-  </main>
+  <div id="titlebar"></div>
+  <main id="main"></main>
 </body>
 
 </html>
