@@ -1,12 +1,11 @@
 [package]
-name = "hello_world_simple"
+name = "preview"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.70"
-publish = false
-
 
 [dependencies]
+shadow = { path = "../../packages/shadow" }
 eframe = { version = "*", features = [
   "__screenshot", # __screenshot is so we can dump a screenshot using EFRAME_SCREENSHOT_TO
 ] }

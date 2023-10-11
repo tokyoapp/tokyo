@@ -181,39 +181,6 @@ impl eframe::App for ViewportApp {
         } else {
           // no image selected
         }
-
-        // ui.label(format!("pos: {:?} zoom: {:?}", self.position, zoom));
-
-        // ctx.inspection_ui(ui);
-
-        // ui.image(texture_id, size)
-        // ui.strong("Bold text");
-
-        // // Create a "canvas" for drawing on that's 100% x 300px
-        // let (response, painter) =
-        //     ui.allocate_painter(Vec2::new(ui.available_width(), 300.0), egui::Sense::hover());
-
-        // // Get the relative position of our "canvas"
-        // let to_screen = RectTransform::from_to(
-        //     Rect::from_min_size(Pos2::ZERO, response.rect.size()),
-        //     response.rect,
-        // );
-
-        // // The line we want to draw represented as 2 points
-        // let first_point = Pos2 { x: 0.0, y: 0.0 };
-        // let second_point = Pos2 { x: 300.0, y: 300.0 };
-        // // Make the points relative to the "canvas"
-        // let first_point_in_screen = to_screen.transform_pos(first_point);
-        // let second_point_in_screen = to_screen.transform_pos(second_point);
-
-        // // Paint the line!
-        // painter.add(Shape::LineSegment {
-        //     points: [first_point_in_screen, second_point_in_screen],
-        //     stroke: Stroke {
-        //         width: 10.0,
-        //         color: Color32::BLUE,
-        //     },
-        // });
       });
   }
 }
