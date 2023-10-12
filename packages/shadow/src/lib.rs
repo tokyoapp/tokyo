@@ -1,19 +1,13 @@
 use core::panic;
-use image::Pixel;
 pub use image::{DynamicImage, ImageBuffer};
+use imagepipe::{ImageSource, Pipeline};
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
   get_decoder,
   imgop::raw,
   RawFile, RawImageData,
 };
-use std::{
-  fs::File,
-  io::{BufReader, Read},
-  path::Path,
-  path::PathBuf,
-  str::FromStr,
-};
+use std::{fs::File, io::BufReader, path::Path};
 // use xmp_toolkit;
 
 // pub fn get_xmp_data(path: &Path) {
@@ -24,6 +18,28 @@ use std::{
 //   let xmp = xmp_toolkit::XmpMeta::from_str(xmp_file_path).unwrap();
 //   xmp.property("http://ns.adobe.com/xap/1.0/", "Rating");
 // }
+//
+
+pub struct Edits {
+  pub gamma: f32,
+  pub exposure: f32,
+  pub curve: Vec<(f32, f32)>,
+}
+
+pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
+  let source = ImageSource::Other(img.clone());
+  let mut pipeline = Pipeline::new_from_source(source).unwrap();
+
+  // pipeline.ops.gamma. = edits.gamma;
+  pipeline.ops.basecurve.exposure = edits.exposure;
+  pipeline.ops.basecurve.points = edits.curve.clone();
+
+  let out = pipeline.output_16bit(None).unwrap();
+
+  return DynamicImage::ImageRgb16(
+    ImageBuffer::from_raw(out.width as u32, out.height as u32, out.data).expect("F"),
+  );
+}
 
 pub fn get_image(path: &Path) -> DynamicImage {
   let raw_file = File::open(&path).unwrap();
