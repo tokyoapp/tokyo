@@ -74,7 +74,7 @@ class Channel<T> {
   }
 
   subscribe(cb: (data: T) => void) {
-    this.#ch.port1.onmessage = (msg) => {};
+    this.#ch.port1.onmessage = (msg) => { };
 
     this.#ch.port1.addEventListener('message', cb as EventListener);
 
@@ -156,18 +156,18 @@ export class LibraryApi {
       stream: () => {
         return new ReadableStream({
           start: (controller) => {
-            this.onConnection((conn) => {
-              conn.fetchIndex(locations).then((entires) => {
-                entires.data.forEach((entry) => {
-                  controller.enqueue(entry);
-                });
-              });
-            });
+            // this.onConnection((conn) => {
+            //   conn.fetchIndex(locations).then((entires) => {
+            //     entires.data.forEach((entry) => {
+            //       controller.enqueue(entry);
+            //     });
+            //   });
+            // });
 
             Promise.all(
               [...this.connections].map((conn) => {
                 return conn.fetchIndex(locations).then((index) => {
-                  index.data?.index?.forEach((entry) => {
+                  index.data?.forEach((entry) => {
                     controller.enqueue(entry);
                   });
                 });
@@ -181,7 +181,7 @@ export class LibraryApi {
     });
   }
 
-  static async metadata(id: string) {}
+  static async metadata(id: string) { }
 
   static async connect(url: string) {
     // const [host_or_name, path] = url.split(':');

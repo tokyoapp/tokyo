@@ -10,7 +10,10 @@ export class LocalLibrary implements LibraryInterface {
   }
 
   public async fetchIndex(locations: string[]): Promise<ClientAPIMessage> {
-    return {};
+    return {
+      type: 'index' as const,
+      data: await index(locations[0]),
+    };
   }
 
   public async onMessage(
@@ -40,9 +43,9 @@ export class LocalLibrary implements LibraryInterface {
       rating?: number;
       tags?: string[];
     }
-  ) {}
+  ) { }
 
-  async postLocation() {}
+  async postLocation() { }
 
   async getSystem() {
     return system()

@@ -75,7 +75,7 @@ export default function Titlebar() {
     <>
       <div
         data-tauri-drag-region
-        class="relative z-50 bg-zinc-900 border-b border-zinc-800 flex justify-between items-start"
+        class="relative z-50 bg-[rgba(24,24,27,0.9)] border-b border-zinc-800 flex justify-between items-start"
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
@@ -86,9 +86,8 @@ export default function Titlebar() {
               }}
             >
               <div
-                class={`flex items-center justify-center duration-100 transition-transform ${
-                  settingsOpen() ? 'rotate-90' : 'rotate-0'
-                }`}
+                class={`flex items-center justify-center duration-100 transition-transform ${settingsOpen() ? 'rotate-90' : 'rotate-0'
+                  }`}
               >
                 <Icon name="chevron-right" />
               </div>

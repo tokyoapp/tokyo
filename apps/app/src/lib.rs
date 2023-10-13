@@ -1,4 +1,5 @@
-use tauri::App;
+use tauri::{App, Manager};
+use window_vibrancy::{apply_blur, apply_vibrancy, NSVisualEffectMaterial};
 
 #[cfg(mobile)]
 mod mobile;
@@ -37,6 +38,18 @@ impl AppBuilder {
         if let Some(setup) = setup {
           (setup)(app)?;
         }
+
+        // https://github.com/tauri-apps/window-vibrancy
+        let window = app.get_window("main").unwrap();
+
+        #[cfg(target_os = "macos")]
+        apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(2.0))
+          .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+
+        #[cfg(target_os = "windows")]
+        apply_blur(&window, Some((18, 18, 18, 125)))
+          .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+
         Ok(())
       })
       .run(tauri::generate_context!())

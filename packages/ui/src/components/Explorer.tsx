@@ -2,7 +2,7 @@ import { createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 // import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
-import { index, locations, file, tags, Library } from '../Library.ts';
+import { file, tags, Library } from '../Library.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -25,7 +25,9 @@ createEffect(() => {
   }
 });
 
-export default function Explorer(props: {}) {
+export default function Explorer(props: {
+  index: IndexEntryMessage[]
+}) {
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
 
   createEffect(() => {
@@ -35,16 +37,18 @@ export default function Explorer(props: {}) {
     }
   });
 
+  console.log(props.index);
+
   const sort = {
     rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
       return +b.rating - +a.rating;
     },
     created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-      const dateASlice = a.createDate.split(' ');
+      const dateASlice = a.create_date.split(' ');
       dateASlice[0] = dateASlice[0].replaceAll(':', '-');
       const dateA = new Date(dateASlice.join(' '));
 
-      const dateBSlice = b.createDate.split(' ');
+      const dateBSlice = b.create_date.split(' ');
       dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
       const dateB = new Date(dateBSlice.join(' '));
 
@@ -90,7 +94,7 @@ export default function Explorer(props: {}) {
     const rs = [];
     let currRow: any[] = [];
     const items = stack(
-      index()
+      props.index
         .filter(itemFilter)
         .sort(sort[sorting()])
     );
@@ -219,9 +223,9 @@ export default function Explorer(props: {}) {
       </nav>
 
       <div class="p-1 overflow-auto w-full overscroll-none" ref={scrollTargetElement}>
-        <div class="hidden @5xl:block">
-          <SystemInfo />
-        </div>
+        {/* <div class="hidden @5xl:block"> */}
+        {/*   <SystemInfo /> */}
+        {/* </div> */}
 
         <div class="pb-24 overscroll-none">
           <VirtualContainer
@@ -297,18 +301,19 @@ function Thumbnail(props: ThumbProps) {
 
   createEffect(async () => {
     const item = props.items[0];
-    const tmp = await storage.readTemp(item.hash);
+    // const tmp = await storage.readTemp(item.hash);
 
     setLoaded(false);
-    if (tmp && tmp.size > 0) {
-      setImg(tmp);
-    } else {
-      Library.metadata(item.path).then((meta) => {
-        const data = new Uint8Array(meta.metadata?.thumbnail);
-        const blob = new Blob([data]);
-        setImg(blob);
-      });
-    }
+    // if (tmp && tmp.size > 0) {
+    //   setImg(tmp);
+    // } else {
+    Library.metadata(item.path).then((meta) => {
+      console.log(meta);
+      // const data = new Uint8Array(meta.metadata?.thumbnail);
+      // const blob = new Blob([data]);
+      // setImg(blob);
+    });
+    // }
   });
 
   const file_tags = () => {
@@ -333,18 +338,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {img()
             ? props.items.slice(0, 3).map((item, i) => {
-                return (
-                  <div
-                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+              return (
+                <div
+                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                  >
-                    {useThumb(img())}
-                  </div>
-                );
-              })
+                >
+                  {useThumb(img())}
+                </div>
+              );
+            })
             : null}
           {!loaded() ? <Icon name="loader" class="opacity-50" /> : null}
         </div>

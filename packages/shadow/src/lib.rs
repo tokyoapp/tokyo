@@ -27,6 +27,7 @@ pub struct Edits {
 }
 
 pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
+  println!("process image");
   let source = ImageSource::Other(img.clone());
   let mut pipeline = Pipeline::new_from_source(source).unwrap();
 
@@ -34,7 +35,11 @@ pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   pipeline.ops.basecurve.exposure = edits.exposure;
   pipeline.ops.basecurve.points = edits.curve.clone();
 
+  println!("generate ouput");
+
   let out = pipeline.output_16bit(None).unwrap();
+
+  println!("convert ouput");
 
   return DynamicImage::ImageRgb16(
     ImageBuffer::from_raw(out.width as u32, out.height as u32, out.data).expect("F"),

@@ -12,18 +12,17 @@ export const [index, setIndex] = createSignal<IndexEntryMessage[]>([]);
 
 class LibraryAccessor {
   constructor() {
-    LibraryApi.connect('0.0.0.0:8000');
+    // LibraryApi.connect('0.0.0.0:8000');
   }
 
   async locations() {
     const channel = LibraryApi.locations();
     const stream = channel.stream();
-    const locs = locations();
 
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
-          setLocations([...locs, chunk]);
+          setLocations([...locations(), chunk]);
         },
       })
     );
@@ -34,13 +33,12 @@ class LibraryAccessor {
   async index(locations: string[]) {
     const channel = LibraryApi.index(locations);
     const stream = channel.stream();
-    const indx = index();
 
     // TODO: stream should close when not used anymore
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
-          setIndex([...indx, chunk]);
+          setIndex([...index(), chunk]);
         },
       })
     );
@@ -52,6 +50,8 @@ class LibraryAccessor {
     // const channel = LibraryApi.metadata(locations);
     // const stream = channel.stream();
     // const indx = index();
+    console.warn("metadata not implementd");
+
   }
 }
 
