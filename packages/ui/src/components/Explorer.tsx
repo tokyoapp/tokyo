@@ -14,6 +14,26 @@ import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 
+class ExplorerModel {
+  filterSettings = {};
+  sortSettings = {};
+  items = [];
+
+  constructor() {
+    
+  }
+
+  sortItems(settings) {}
+
+  filterItems(settings) {}
+  
+  async fetchIndex(id: string) {}
+  
+  async openFile(id: string) {}
+
+  async getThumbnail(id: string) {}
+}
+
 createEffect(() => {
   if (file()) {
     setTimeout(() => {
@@ -25,7 +45,7 @@ createEffect(() => {
   }
 });
 
-export default function Explorer(props: {
+export default function ExplorerView(props: {
   index: IndexEntryMessage[]
 }) {
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
