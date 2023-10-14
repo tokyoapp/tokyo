@@ -7,33 +7,29 @@ import { createSignal, createEffect, For } from "solid-js";
 
 function createSource() {
   let reset = false;
+  let source_id = Math.floor(Math.random() * 100).toString();
   let id: undefined | string;
 
   function start(controller) {
-    let count = 0;
-    setInterval(
-      () => {
-        if (id) {
-          count++;
-          // Part of list
-          const chunk = [
-            {
-              id: id,
-              value: Math.random(),
-            },
-          ];
-          controller.enqueue(chunk);
+    setInterval(() => {
+      if (id) {
+        // Part of list
+        const chunk = [
+          {
+            id: id,
+            source_id,
+            value: Math.random(),
+          },
+        ];
+        controller.enqueue(chunk);
 
-          if (reset) {
-            reset = false;
-            // Invalidate old data
-            controller.enqueue(null);
-            count = 0;
-          }
+        if (reset) {
+          reset = false;
+          // Invalidate old data
+          controller.enqueue(null);
         }
-      },
-      (1000 / 135) * 32 * 2,
-    );
+      }
+    }, 500);
   }
 
   const read = new ReadableStream({
@@ -51,12 +47,10 @@ function createSource() {
   return [read, write] as const;
 }
 
-const [list, setList] = createStore<{ value: number; id: string }[]>([]);
-
 class Subscriptions<T> extends TransformStream {
   constructor(arr: Set<(chunk: T) => void>) {
     super({
-      start() { },
+      start() {},
       transform(chunk, controller) {
         for (let cb of arr) {
           cb(chunk);
@@ -68,27 +62,46 @@ class Subscriptions<T> extends TransformStream {
 }
 
 class Channel<P, T> {
-  #write: WritableStreamDefaultWriter<any>;
+  #writers = new Set<WritableStreamDefaultWriter<any>>();
 
   #subscriptions = new Set<(chunk: T) => void>();
 
-  constructor() {
+  #requestHistory: Record<string, any>[] = [];
+
+  connect() {
     const [read, write] = createSource();
     // local.pipeTo(writable)
     // remote.pipeTo(writable)
 
     const writer = write.getWriter();
-    this.#write = writer;
+    this.#writers.add(writer);
 
     read
       .pipeThrough(new Subscriptions(this.#subscriptions))
       .pipeTo(new WritableStream());
+
+    const lastReq = this.#requestHistory[0];
+    if (lastReq) {
+      writer.write(lastReq);
+    }
   }
 
-  request(params: P) { }
+  constructor() {
+    for (let x of [1]) {
+      this.connect();
+    }
 
-  async send(data: any) {
-    if (this.#write) await this.#write.write(data);
+    setTimeout(() => {
+      this.connect();
+    }, 4843);
+  }
+
+  async send(data: Record<string, string | number | undefined>) {
+    this.#requestHistory.unshift(data);
+
+    for (let writer of this.#writers) {
+      if (writer) await writer.write(data);
+    }
   }
 
   subscribe(cb: (msg: MessageEvent["data"]) => void) {
@@ -97,6 +110,10 @@ class Channel<P, T> {
   }
 
   static accessor() {
+    const [list, setList] = createStore<
+      { value: number; id: string; source_id: string }[]
+    >([]);
+
     const channel = new Channel();
 
     let data: any[] = [];
@@ -112,31 +129,43 @@ class Channel<P, T> {
     });
 
     return {
-      request(params: { id: string }) {
+      request: (params: { id: string | undefined }) => {
         channel.send({
           id: params.id,
         });
       },
-      list,
+      destroy() {
+        currentSub();
+      },
+      data: list,
     };
   }
 }
 
-function Counter(props: { id: string }) {
+function Counter(props: { id: string | undefined }) {
   const d = Channel.accessor();
 
   createEffect(() => {
-    d.request({
-      id: props.id,
-    });
+    if (props.id)
+      d.request({
+        id: props.id,
+      });
   });
 
   // For comp doesnt rerender every child on item change
   return (
     <div>
-      <For each={d.list}>
+      <For each={d.data}>
         {(v) => {
-          return <div>{v.id + " - " + (Date.now().valueOf() + v.value)}</div>;
+          return (
+            <div>
+              {v.source_id +
+                " | " +
+                v.id +
+                " - " +
+                (Date.now().valueOf() + v.value)}
+            </div>
+          );
         }}
       </For>
     </div>
@@ -144,7 +173,7 @@ function Counter(props: { id: string }) {
 }
 
 render(() => {
-  const [id, setId] = createSignal("123");
+  const [id, setId] = createSignal("1");
 
   setInterval(() => {
     setId(Math.floor(Math.random() * 10000).toString());
@@ -152,4 +181,3 @@ render(() => {
 
   return <Counter id={id()} />;
 }, document.getElementById("app")!);
-
