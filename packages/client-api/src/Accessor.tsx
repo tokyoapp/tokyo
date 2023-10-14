@@ -84,6 +84,10 @@ class Channel<P, T> {
     if (lastReq) {
       writer.write(lastReq);
     }
+
+    // TODO: sync issue, when one source sends a null to reset, the other ones dont know about it.
+    // Maybe need to do one channel per source.
+    console.log("new connection");
   }
 
   constructor() {
@@ -177,7 +181,7 @@ render(() => {
 
   setInterval(() => {
     setId(Math.floor(Math.random() * 10000).toString());
-  }, 8000);
+  }, 16000);
 
   return <Counter id={id()} />;
 }, document.getElementById("app")!);
