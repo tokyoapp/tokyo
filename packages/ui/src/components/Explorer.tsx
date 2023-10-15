@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, useContext } from 'solid-js';
+import { For, createEffect, createSignal, onMount, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 // import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
@@ -14,15 +14,13 @@ import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 
-
 function createFieldStore() {
   // use getter setter pair?
 }
 
 class ExplorerModel {
-
   filterSettings = createStore({
-    stars: 0,
+    rating: 0,
   });
 
   // private sortStore;
@@ -32,31 +30,56 @@ class ExplorerModel {
 
   sortSettings = createStore({
     rating: false,
-    created: false,
+    created: true,
   });
 
   selection = createStore<IndexEntryMessage[]>([]);
 
-  constructor() { }
+  index = createStore<IndexEntryMessage[]>([]);
+  // TODO: this should be a "View" into index.
+  stacks = createStore<IndexEntryMessage[][]>([]);
 
-  setFilter(options) {
-    if (options.stars != undefined) {
-      this.filterSettings[0].stars = options.stars;
+  constructor() {
+    createEffect(() => {
+      const stacks = this.stack(this.index[0].filter(this.filterItems).sort(this.sortItems));
+      this.stacks[1](stacks);
+    });
+  }
+
+  setIndex(index: IndexEntryMessage[]) {
+    this.index[1](index);
+    const stacks = this.stack(index.filter(this.filterItems).sort(this.sortItems));
+    this.stacks[1](stacks);
+  }
+
+  setFilter(options: {
+    rating: number;
+  }) {
+    if (options.rating != null) {
+      this.filterSettings[1]({
+        rating: options.rating,
+      });
     }
   }
 
-  setSorting(options) {
-    if (options.rating != undefined) {
-      this.sortSettings[0].rating = options.rating;
+  setSorting(options: {
+    rating: boolean;
+    created: boolean;
+  }) {
+    if (options.rating != null) {
+      this.sortSettings[1]({
+        rating: options.rating,
+      });
     }
-    if (options.created != undefined) {
-      this.sortSettings[0].created = options.created;
+    if (options.created != null) {
+      this.sortSettings[1]({
+        created: options.created,
+      });
     }
   }
 
   setSelection(entires: IndexEntryMessage[]) {
-    this.selection[1]([]);
-    this.selection[0].push(...entires);
+    this.selection[1](entires);
     if (entires[0]) this.openFile(entires[0]);
   }
 
@@ -73,13 +96,9 @@ class ExplorerModel {
       dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
       const dateB = new Date(dateBSlice.join(' '));
 
-      return dateA.valueOf() - dateB.valueOf();
+      return Math.sign(dateA.valueOf() - dateB.valueOf());
     },
   };
-
-  private sortItems(itemA: IndexEntryMessage, itemB: IndexEntryMessage) {
-    return this.sort.created(itemA, itemB);
-  }
 
   private stack(items: IndexEntryMessage[]) {
     const stacked = [];
@@ -98,67 +117,48 @@ class ExplorerModel {
     return stacked;
   }
 
-  private filterItems(item: IndexEntryMessage) {
-    if (this.filterSettings[0].stars && item.rating < this.filterSettings[0].stars) {
+  private sortItems = (itemA: IndexEntryMessage, itemB: IndexEntryMessage) => {
+    const score =
+      (this.sortSettings[0].created ? this.sort.created(itemA, itemB) : 0) +
+      (this.sortSettings[0].rating ? this.sort.rating(itemA, itemB) : 0);
+    return score;
+  };
+
+  private filterItems = (item: IndexEntryMessage) => {
+    if (this.filterSettings[0].rating && item.rating < this.filterSettings[0].rating) {
       return false;
     }
     return true;
-  }
-
-  rows(index: IndexEntryMessage[]) {
-    const rs = [];
-    let currRow: any[] = [];
-    const items = this.stack(
-      index
-        .filter(this.filterItems)
-        .sort(this.sortItems)
-    );
-    for (const entry of items) {
-      if (currRow.length < 4) {
-        currRow.push(entry);
-      } else {
-        rs.push(currRow);
-        currRow = [];
-        currRow.push(entry);
-      }
-    }
-    rs.push(currRow);
-
-    return rs;
-  }
+  };
 
   async openFile(entry: IndexEntryMessage) {
     Action.run('open', [entry]);
   }
 
   async getThumbnail(entry: IndexEntryMessage) {
-
-    const useThumb = (blob?: Blob) => {
-      const dynimg = new DynamicImage();
-      const canvas = dynimg.canvas();
-
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const image = new Image();
-        image.onload = () => {
-          dynimg.fromDrawable(image, entry).resizeContain(256);
-          const newCanvas = dynimg.canvas();
-          canvas.parentNode?.replaceChild(newCanvas, canvas);
-        };
-        image.onerror = (err) => {
-          console.warn('Error loading thumbnail image', err);
-        };
-        image.src = url;
-      }
-
-      return canvas;
-    };
-
-    return Library.metadata(entry.path).then((meta) => {
-      const data = new Uint8Array(meta.metadata?.thumbnail);
-      const blob = new Blob([data]);
-      return useThumb(blob);
-    });
+    // const useThumb = (blob?: Blob) => {
+    //   const dynimg = new DynamicImage();
+    //   const canvas = dynimg.canvas();
+    //   if (blob) {
+    //     const url = URL.createObjectURL(blob);
+    //     const image = new Image();
+    //     image.onload = () => {
+    //       dynimg.fromDrawable(image, entry).resizeContain(256);
+    //       const newCanvas = dynimg.canvas();
+    //       canvas.parentNode?.replaceChild(newCanvas, canvas);
+    //     };
+    //     image.onerror = (err) => {
+    //       console.warn('Error loading thumbnail image', err);
+    //     };
+    //     image.src = url;
+    //   }
+    //   return canvas;
+    // };
+    // return Library.metadata(entry.path).then((meta) => {
+    //   const data = new Uint8Array(meta.metadata?.thumbnail);
+    //   const blob = new Blob([data]);
+    //   return useThumb(blob);
+    // });
   }
 
   tags(entry: IndexEntryMessage) {
@@ -169,12 +169,32 @@ class ExplorerModel {
   }
 }
 
-
 export default function ExplorerView(props: {
-  index: IndexEntryMessage[]
+  index: IndexEntryMessage[];
 }) {
-
   const explorer = new ExplorerModel();
+
+  createEffect(() => {
+    explorer.setIndex(props.index);
+  });
+
+  const rows = (width = 4) => {
+    const rs = [];
+    let currRow: any[] = [];
+    const items = explorer.stacks[0];
+    for (const entry of items) {
+      if (currRow.length < width) {
+        currRow.push(entry);
+      } else {
+        rs.push(currRow);
+        currRow = [];
+        currRow.push(entry);
+      }
+    }
+    rs.push(currRow);
+
+    return rs;
+  };
 
   createEffect(() => {
     if (file()) {
@@ -189,8 +209,8 @@ export default function ExplorerView(props: {
 
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
-    showName: false,
-    showTags: false,
+    showName: true,
+    showTags: true,
   });
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -211,30 +231,6 @@ export default function ExplorerView(props: {
     }
   };
 
-  const ListItem = (props: { index: number, style: string, item: IndexEntryMessage[][] }) => {
-    return (
-      <div style={props.style} class="w-full flex gap-1">
-        {props.item.map((items, i) => {
-          return (
-            <Thumbnail
-              class="flex-1 pb-1"
-              selected={explorer.selection[0].includes(items[0])}
-              number={(props.index * 4 + i + 1).toString()}
-              name={viewSettings.showName}
-              tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
-              rating={viewSettings.showRating ? items[0].rating : undefined}
-              image={explorer.getThumbnail(items[0])}
-              onClick={() => {
-                explorer.setSelection(items);
-              }}
-              items={items}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
   let scrollTargetElement!: HTMLDivElement;
 
   return (
@@ -247,9 +243,12 @@ export default function ExplorerView(props: {
           <div>
             <Combobox
               title="Sort"
+              multiple
               onInput={(values) => {
-                const value = values[0];
-                if (value in explorer.sort) explorer.setSorting(value);
+                explorer.setSorting({
+                  created: values.includes('created'),
+                  rating: values.includes('rating'),
+                });
               }}
               items={[
                 {
@@ -257,7 +256,11 @@ export default function ExplorerView(props: {
                   value: t('explorer_sort_created'),
                   checked: explorer.sortSettings[0].created,
                 },
-                { id: 'rating', value: t('explorer_sort_rating'), checked: explorer.sortSettings[0].rating },
+                {
+                  id: 'rating',
+                  value: t('explorer_sort_rating'),
+                  checked: explorer.sortSettings[0].rating,
+                },
               ]}
             >
               <div class="flex items-center">
@@ -272,11 +275,14 @@ export default function ExplorerView(props: {
                 <span>Tags</span>
             </FilterCombobox> */}
 
-            <Stars value={starFilter()} onChange={(v) => explorer.setFilter({ stars: v })} />
+            <Stars
+              value={explorer.filterSettings[0].stars}
+              onChange={(v) => explorer.setFilter({ rating: v })}
+            />
 
             <Combobox
-              multiple
               title="View settings"
+              multiple
               onInput={(value) => {
                 setViewSettings({
                   showRating: value.includes('showRating'),
@@ -305,18 +311,41 @@ export default function ExplorerView(props: {
       </nav>
 
       <div class="p-1 overflow-auto w-full overscroll-none" ref={scrollTargetElement}>
-        {/* <div class="hidden @5xl:block"> */}
-        {/*   <SystemInfo /> */}
-        {/* </div> */}
+        <div class="hidden @5xl:block">{/* <SystemInfo /> */}</div>
 
         <div class="pb-24 overscroll-none">
           <VirtualContainer
             scrollTarget={scrollTargetElement}
             itemSize={{ height: 208 }}
             overscan={2}
-            items={explorer.rows(props.index)}
+            items={rows(file() ? 1 : 4)}
           >
-            {ListItem}
+            {(props: { index: number; style: string; item: IndexEntryMessage[][] }) => {
+              return (
+                <div style={props.style} class="w-full flex gap-1">
+                  <For each={props.item}>
+                    {(items, i) => {
+                      return (
+                        <Thumbnail
+                          class="flex-1 pb-1"
+                          selected={explorer.selection[0].includes(items[0])}
+                          number={(props.index * 4 + i() + 1).toString()}
+                          name={viewSettings.showName}
+                          tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
+                          rating={viewSettings.showRating ? items[0].rating : undefined}
+                          // image={explorer.getThumbnail(items[0])}
+                          image={new Promise(() => {})}
+                          onClick={() => {
+                            explorer.setSelection(items);
+                          }}
+                          items={items}
+                        />
+                      );
+                    }}
+                  </For>
+                </div>
+              );
+            }}
           </VirtualContainer>
         </div>
       </div>
@@ -364,10 +393,10 @@ function Thumbnail(props: ThumbProps) {
     if (props.image) {
       setLoaded(false);
 
-      props.image?.then(canv => {
+      props.image?.then((canv) => {
         setImg(canv);
         setLoaded(true);
-      })
+      });
     }
   });
 
@@ -386,24 +415,24 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {img()
             ? props.items.slice(0, 3).map((item, i) => {
-              return (
-                <div
-                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+                return (
+                  <div
+                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                >
-                  {img()}
-                </div>
-              );
-            })
+                  >
+                    {img()}
+                  </div>
+                );
+              })
             : null}
-          {!loaded() ? <Icon name="loader" class="opacity-50" /> : null}
+          {!loaded() ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>
       </div>
 
-      <div class="z-40 absolute top-0 left-0 p-1 h-full w-full grid grid-rows-[auto_1fr_auto] opacity-70 pointer-events-none">
+      <div class="z-40 absolute top-0 left-0 p-1 h-full w-full grid grid-rows-[1fr_auto_auto] gap-1 opacity-70 pointer-events-none">
         <div class="absolute text-7xl opacity-5 leading-none">{props.number}</div>
 
         <div class="text-xs">{props.name ? props.items[0].name : null}</div>

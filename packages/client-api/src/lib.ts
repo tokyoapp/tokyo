@@ -74,7 +74,7 @@ class Channel<T> {
   }
 
   subscribe(cb: (data: T) => void) {
-    this.#ch.port1.onmessage = (msg) => { };
+    this.#ch.port1.onmessage = (msg) => {};
 
     this.#ch.port1.addEventListener('message', cb as EventListener);
 
@@ -147,7 +147,7 @@ export class LibraryApi {
   }
 
   static index(locations: string[]) {
-    return new Channel<library.IndexEntryMessage>({
+    return new Channel<library.IndexEntryMessage[]>({
       request: () => {
         for (const conn of this.connections) {
           conn.fetchIndex(locations);
@@ -167,9 +167,7 @@ export class LibraryApi {
             Promise.all(
               [...this.connections].map((conn) => {
                 return conn.fetchIndex(locations).then((index) => {
-                  index.data?.forEach((entry) => {
-                    controller.enqueue(entry);
-                  });
+                  controller.enqueue(index.data);
                 });
               })
             ).then(() => {
@@ -181,7 +179,7 @@ export class LibraryApi {
     });
   }
 
-  static async metadata(id: string) { }
+  static async metadata(id: string) {}
 
   static async connect(url: string) {
     // const [host_or_name, path] = url.split(':');

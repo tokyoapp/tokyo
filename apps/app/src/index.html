@@ -48,23 +48,17 @@
     }
 
     #main {
-      background: #111;
+      background: rgba(24, 24, 27, 0.98);
     }
   </style>
 
-  <script type="module">
-    import "ui/index.css";
-    import { render } from 'solid-js/web';
-    import { App, Title } from 'ui';
-
-    render(Title, titlebar);
-    render(App, main);
-  </script>
 </head>
 
 <body>
   <div id="titlebar"></div>
   <main id="main"></main>
+
+  <script type="module" src="./index.ts"></script>
 </body>
 
 </html>

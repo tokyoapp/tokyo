@@ -38,7 +38,7 @@ class LibraryAccessor {
     stream.pipeTo(
       new WritableStream({
         write(chunk) {
-          setIndex([...index(), chunk]);
+          setIndex([...index(), ...chunk]);
         },
       })
     );
@@ -50,8 +50,7 @@ class LibraryAccessor {
     // const channel = LibraryApi.metadata(locations);
     // const stream = channel.stream();
     // const indx = index();
-    console.warn("metadata not implementd");
-
+    console.warn('metadata not implementd');
   }
 }
 

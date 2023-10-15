@@ -86,13 +86,14 @@ export default function Titlebar() {
               }}
             >
               <div
-                class={`flex items-center justify-center duration-100 transition-transform ${settingsOpen() ? 'rotate-90' : 'rotate-0'
-                  }`}
+                class={`flex items-center justify-center duration-100 transition-transform ${
+                  settingsOpen() ? 'rotate-90' : 'rotate-0'
+                }`}
               >
                 <Icon name="chevron-right" />
               </div>
             </Button>
-            <div></div>
+            <div />
             <div>
               <Combobox
                 class="px-1 pointer-events-auto"

@@ -22,6 +22,20 @@ type Props = {
   class?: string;
 };
 
+const cache = new Map<string, ArrayBuffer>();
+
+async function cachedRiveIcon(src: string): Promise<ArrayBuffer | undefined> {
+  if (cache.has(src)) {
+    return cache.get(src);
+  }
+  return fetch(src)
+    .then((res) => res.arrayBuffer())
+    .then((buffer) => {
+      cache.set(src, buffer);
+      return buffer;
+    });
+}
+
 export default function Icon(props: Props) {
   // @ts-ignore
   const src = icons[props.name || 'unknown']?.default;
@@ -36,14 +50,18 @@ export default function Icon(props: Props) {
     canvas.width = 32;
     canvas.height = 32;
 
-    const riveInstance = new Rive({
-      src: src,
-      autoplay: true,
-      canvas: canvas,
+    let riveInstance: Rive | undefined;
+
+    cachedRiveIcon(src).then((buffer) => {
+      riveInstance = new Rive({
+        buffer: buffer,
+        autoplay: true,
+        canvas: canvas,
+      });
     });
 
     onCleanup(() => {
-      riveInstance.cleanup();
+      riveInstance?.cleanup();
     });
 
     return <div class={`inline-block mb-[-0.175em] align-baseline ${className}`}>{canvas}</div>;
