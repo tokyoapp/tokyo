@@ -6,7 +6,7 @@ export function Stars(props: { value: number; onChange?: (value: number) => void
       {new Array(5).fill(props.value).map((_, i) => {
         return (
           <div
-            class={`cursor-pointer p-1 ${props.value > i ? '' : 'opacity-25'} hover:opacity-60`}
+            class={` p-1 ${props.value > i ? '' : 'opacity-25'} hover:opacity-60`}
             onClick={() => {
               if (i === props.value - 1) {
                 props.onChange && props.onChange(0);

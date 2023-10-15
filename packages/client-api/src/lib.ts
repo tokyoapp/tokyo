@@ -4,21 +4,6 @@ import * as library from 'proto';
 
 type RemoteLibrary = typeof import('./RemoteLibrary.ts').default;
 
-async function createRemoteLocationWorker(url: string): Promise<LibraryInterface> {
-  const worker = new Worker(new URL('./RemoteLibrary.ts', import.meta.url), {
-    type: 'module',
-  });
-  const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);
-
-  worker.onerror = (err) => {
-    throw new Error(err.message);
-  };
-
-  await wrappedWorker.connect(url);
-
-  return wrappedWorker;
-}
-
 type MessageType = 'locations' | 'index' | 'metadata';
 type MessageData =
   | library.LibraryMessage
@@ -40,40 +25,46 @@ export interface LibraryInterface {
   fetchIndex(locations: string[]): Promise<ClientAPIMessage<library.IndexEntryMessage[]>>;
 }
 
+export function createRemoteSource(url: string): LibraryInterface {
+  const worker = new Worker(new URL('./RemoteLibrary.ts', import.meta.url), {
+    type: 'module',
+  });
+  const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);
+
+  worker.onerror = (err) => {
+    throw new Error(err.message);
+  };
+
+  wrappedWorker.connect(url);
+
+  return wrappedWorker;
+}
+
 export function createLocalSource() {
   const lib = new LocalLibrary();
 
-  let reset = false;
-  let id: undefined | string;
+  let controller: ReadableStreamDefaultController<any>;
 
   const read = new ReadableStream({
-    start(controller) {
-      onmessage = () => {
-        if (id) {
-          // Part of list
-          controller.enqueue({
-            id: id,
-            data: [
-              {
-                value: Math.random(),
-              },
-            ],
-          });
-
-          if (reset) {
-            reset = false;
-            // Invalidate old data
-            controller.enqueue({ id: id, data: null });
-          }
-        }
-      };
+    start(ctlr) {
+      controller = ctlr;
     },
   });
 
   const write = new WritableStream({
     write(chunk) {
-      id = chunk.id;
-      reset = true;
+      switch (chunk.type) {
+        case 'locations':
+          lib.fetchLocations().then((msg) => {
+            controller.enqueue(msg);
+          });
+          break;
+        case 'index':
+          lib.fetchIndex(chunk.locations).then((msg) => {
+            if (msg) controller.enqueue(msg);
+          });
+          break;
+      }
     },
   });
 

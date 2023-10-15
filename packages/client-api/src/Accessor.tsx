@@ -52,10 +52,10 @@ export class Channel<P, T> {
     return source_id;
   }
 
-  async send(data: Record<string, string | number | undefined>) {
+  async send(data: Record<string, string | number | undefined | Array<string | number>>) {
     this.#requestHistory.unshift(data);
 
-    for (let writer of this.#writers) {
+    for (const writer of this.#writers) {
       if (writer) await writer.write(data);
     }
   }

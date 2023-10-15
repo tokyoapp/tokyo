@@ -26,7 +26,7 @@ export default function Select(
         title={props.title}
         type="button"
         slot="input"
-        class="cursor-pointer bg-zinc-800 rounded-md px-2 py-1 text-left shadow-none"
+        class=" bg-zinc-800 rounded-md px-2 py-1 text-left shadow-none"
       >
         {props.children}
       </button>
@@ -37,7 +37,7 @@ export default function Select(
             <a-option
               type="button"
               value={item.id}
-              class="outline-none group cursor-pointer w-full flex items-center justify-start px-2 py-1 shadow-none
+              class="outline-none group  w-full flex items-center justify-start px-2 py-1 shadow-none
                     rounded-md bg-transparent hover:bg-zinc-700 active:bg-zinc-800"
             >
               <div class="opacity-0 group-[&[selected]]:opacity-100 ml-1 mr-2">

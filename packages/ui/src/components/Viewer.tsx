@@ -27,7 +27,7 @@ const Tool = (props: ParentProps & { class: string }) => {
   return (
     <div
       class={`inline-flex h-8 justify-center items-center px-2 py-2 rounded-lg
-            bg-black hover:bg-zinc-900 cursor-pointer ${props.class}`}
+            bg-black hover:bg-zinc-900  ${props.class}`}
     >
       {props.children}
     </div>

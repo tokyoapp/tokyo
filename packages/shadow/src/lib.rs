@@ -54,7 +54,7 @@ pub struct Edits {
   pub curve: Vec<(f32, f32)>,
 }
 
-fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
+pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   println!("process image");
   let source = ImageSource::Other(img.clone());
   let mut pipeline = Pipeline::new_from_source(source).unwrap();
@@ -74,7 +74,7 @@ fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   );
 }
 
-fn get_image(path: &Path) -> DynamicImage {
+pub fn get_image(path: &Path) -> DynamicImage {
   let raw_file = File::open(&path).unwrap();
   let mut rawfile = RawFile::new(path, BufReader::new(raw_file));
 

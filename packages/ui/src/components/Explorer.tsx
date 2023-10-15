@@ -87,11 +87,11 @@ class ExplorerModel {
       return +b.rating - +a.rating;
     },
     created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-      const dateASlice = a.createDate.split(' ');
+      const dateASlice = a.create_date.split(' ');
       dateASlice[0] = dateASlice[0].replaceAll(':', '-');
       const dateA = new Date(dateASlice.join(' '));
 
-      const dateBSlice = b.createDate.split(' ');
+      const dateBSlice = b.create_date.split(' ');
       dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
       const dateB = new Date(dateBSlice.join(' '));
 
@@ -165,7 +165,7 @@ class ExplorerModel {
 
   tags(entry: IndexEntryMessage) {
     const arr = entry.tags.filter(Boolean).map((tag) => {
-      return tags().find((t) => t.id === tag)?.name || tag;
+      return [].find((t) => t.id === tag)?.name || tag;
     });
     return arr || [];
   }
@@ -279,8 +279,10 @@ export default function ExplorerView(props: {
             </FilterCombobox> */}
 
             <Stars
-              value={explorer.filterSettings[0].stars}
-              onChange={(v) => explorer.setFilter({ rating: v })}
+              value={explorer.filterSettings[0].rating}
+              onChange={(v) =>
+                explorer.setFilter({ rating: v === explorer.filterSettings[0].rating ? 0 : v })
+              }
             />
 
             <Combobox

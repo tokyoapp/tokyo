@@ -14,6 +14,7 @@ import { IndexEntryMessage, LibraryMessage } from 'proto';
 import { platform } from '@tauri-apps/plugin-os';
 import { ErrorNotification, Notifications } from './components/notifications/index.ts';
 import Action from './actions/Action.ts';
+import { indexAccessor } from './accessors/index.ts';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
@@ -43,35 +44,31 @@ function App() {
     );
   });
 
-  const [params, setParams] = createStore({
-    id: '1',
-  });
+  const [os, setOS] = createSignal('browser');
 
-  const [os, setOS] = createSignal('');
-
-  if (window.__TAURI_INVOKE__) {
+  if ('__TAURI_INVOKE__' in window) {
     platform()
       .then((os) => {
         setOS(os);
       })
       .catch((err) => {
-        console.error(err);
+        console.error('Platform Error', err);
         return undefined;
       });
-  } else {
-    setOS('browser');
   }
 
-  setParams({
-    id: Math.floor(Math.random() * 10000).toString(),
+  const locations = locationsAccessor();
+
+  const [params, setParams] = createStore({
+    locations: [] as string[],
   });
 
-  const d = locationsAccessor(params);
-
-  const index = createStore<IndexEntryMessage[]>([]);
+  const index = indexAccessor(params);
 
   createEffect(() => {
-    console.log(d.data);
+    setParams({
+      locations: locations.data.map((loc) => loc.id),
+    });
   });
 
   return (
@@ -81,7 +78,7 @@ function App() {
         return err;
       }}
     >
-      <Titlebar locations={d.data} os={os()} />
+      <Titlebar locations={locations.data} os={os()} />
 
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
@@ -92,7 +89,7 @@ function App() {
       >
         <div class="relative">
           <div class="absolute top-0 left-0 w-full h-full">
-            {!locations().length ? (
+            {!locations.data.length ? (
               <div class="absolute top-0 left-0 w-full h-full z-40">
                 <CreateLibrary />
               </div>
@@ -104,7 +101,7 @@ function App() {
               </div>
             ) : null}
 
-            <Explorer index={index[0]} small={!!file()} />
+            <Explorer index={index.data} small={!!file()} />
           </div>
         </div>
 
