@@ -17,9 +17,7 @@ button {
 input,
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
   color: #0f0f0f;
-  transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -27,12 +25,7 @@ button > * {
   pointer-events: none;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-
 button:active {
-  border-color: #396cd8;
   background-color: #e8e8e8;
 }
 

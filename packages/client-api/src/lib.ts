@@ -40,165 +40,44 @@ export interface LibraryInterface {
   fetchIndex(locations: string[]): Promise<ClientAPIMessage<library.IndexEntryMessage[]>>;
 }
 
-// Access to one or multiple libraries, remote and local, through a simple API.
-// This also includes local caching of thumbnails.
+export function createLocalSource() {
+  const lib = new LocalLibrary();
 
-class Channel<T> {
-  // ports can be transferred over threads
-  #ch = new MessageChannel();
+  let reset = false;
+  let id: undefined | string;
 
-  #request = (params: string[]) => {
-    params;
-  };
+  const read = new ReadableStream({
+    start(controller) {
+      onmessage = () => {
+        if (id) {
+          // Part of list
+          controller.enqueue({
+            id: id,
+            data: [
+              {
+                value: Math.random(),
+              },
+            ],
+          });
 
-  #stream: (self: Channel<T>) => ReadableStream<T>;
+          if (reset) {
+            reset = false;
+            // Invalidate old data
+            controller.enqueue({ id: id, data: null });
+          }
+        }
+      };
+    },
+  });
 
-  constructor(options: {
-    request: (params: string[]) => void;
-    stream: (self: Channel<T>) => ReadableStream<T>;
-  }) {
-    this.#request = options.request;
-    this.#stream = options.stream;
-  }
+  const write = new WritableStream({
+    write(chunk) {
+      id = chunk.id;
+      reset = true;
+    },
+  });
 
-  onConnect() {
-    // TOOD: auto fetch data from newly connected sources
-  }
-
-  stream() {
-    return this.#stream(this);
-  }
-
-  emit(data: T) {
-    this.#ch.port2.postMessage(data);
-  }
-
-  subscribe(cb: (data: T) => void) {
-    this.#ch.port1.onmessage = (msg) => {};
-
-    this.#ch.port1.addEventListener('message', cb as EventListener);
-
-    return () => {
-      this.#ch.port1.removeEventListener('message', cb as EventListener);
-    };
-  }
-
-  send(...params: string[]) {
-    this.#request(params);
-  }
+  return [read, write] as const;
 }
 
-export class LibraryApi {
-  static connections = new Set<LibraryInterface>(
-    window.__TAURI_INVOKE__ ? [new LocalLibrary()] : []
-  );
-
-  static connectionListeners = new Set<(conn: LibraryInterface) => void>();
-
-  static onConnection(cb: (conn: LibraryInterface) => void) {
-    this.connectionListeners.add(cb);
-  }
-
-  static locations() {
-    return new Channel<library.LibraryMessage>({
-      request: () => {
-        for (const conn of this.connections) {
-          conn.fetchLocations();
-        }
-      },
-      stream: (self) => {
-        return new ReadableStream({
-          start: (controller) => {
-            this.onConnection((conn) => {
-              conn.fetchLocations().then((locations) => {
-                locations.data.forEach((element) => {
-                  controller.enqueue(element);
-                });
-              });
-            });
-
-            // self.subscribe((msg) => {
-            //   console.log(msg);
-            // });
-
-            Promise.all(
-              [...this.connections].map(async (conn) => {
-                // TODO: handle subscription
-                // conn.onMessage(
-                //   Comlink.proxy((msg) => {
-                //     console.log('msg', msg);
-                //   })
-                // );
-
-                return conn.fetchLocations().then((locations) => {
-                  locations.data.forEach((element) => {
-                    self.emit(element);
-                    controller.enqueue(element);
-                  });
-                });
-              })
-            ).then(() => {
-              // controller.close();
-            });
-          },
-        });
-      },
-    });
-  }
-
-  static index(locations: string[]) {
-    return new Channel<library.IndexEntryMessage[]>({
-      request: () => {
-        for (const conn of this.connections) {
-          conn.fetchIndex(locations);
-        }
-      },
-      stream: () => {
-        return new ReadableStream({
-          start: (controller) => {
-            // this.onConnection((conn) => {
-            //   conn.fetchIndex(locations).then((entires) => {
-            //     entires.data.forEach((entry) => {
-            //       controller.enqueue(entry);
-            //     });
-            //   });
-            // });
-
-            Promise.all(
-              [...this.connections].map((conn) => {
-                return conn.fetchIndex(locations).then((index) => {
-                  controller.enqueue(index.data);
-                });
-              })
-            ).then(() => {
-              controller.close();
-            });
-          },
-        });
-      },
-    });
-  }
-
-  static async metadata(id: string) {}
-
-  static async connect(url: string) {
-    // const [host_or_name, path] = url.split(':');
-    // const name = path || host_or_name;
-    // const host = path ? host_or_name : undefined;
-
-    // console.log('Open:', name, 'at', host || 'local');
-
-    // if (host) {
-    // }
-    console.log('Connecting to', url);
-    const conn = await createRemoteLocationWorker(url).catch((err) => {
-      console.error(err);
-    });
-
-    // new connection
-    if (conn) {
-      this.connections.add(conn);
-      this.connectionListeners.forEach((cb) => cb(conn));
-    }
-  }
-}
+export { Channel } from './Accessor.tsx';

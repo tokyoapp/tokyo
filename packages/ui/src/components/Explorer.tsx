@@ -1,8 +1,7 @@
 import { For, createEffect, createSignal, onMount, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 // import storage from '../services/ClientStorage.worker';
-import { DynamicImage } from '../DynamicImage.ts';
-import { file, tags, Library } from '../Library.ts';
+import { DynamicImage } from '../image/DynamicImage.ts';
 import Action from '../actions/Action.ts';
 import Rating from './Rating.tsx';
 import Combobox from './Combobox.tsx';
@@ -88,11 +87,11 @@ class ExplorerModel {
       return +b.rating - +a.rating;
     },
     created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-      const dateASlice = a.create_date.split(' ');
+      const dateASlice = a.createDate.split(' ');
       dateASlice[0] = dateASlice[0].replaceAll(':', '-');
       const dateA = new Date(dateASlice.join(' '));
 
-      const dateBSlice = b.create_date.split(' ');
+      const dateBSlice = b.createDate.split(' ');
       dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
       const dateB = new Date(dateBSlice.join(' '));
 
@@ -118,9 +117,12 @@ class ExplorerModel {
   }
 
   private sortItems = (itemA: IndexEntryMessage, itemB: IndexEntryMessage) => {
-    const score =
-      (this.sortSettings[0].created ? this.sort.created(itemA, itemB) : 0) +
-      (this.sortSettings[0].rating ? this.sort.rating(itemA, itemB) : 0);
+    let score = 0;
+    if (itemA && itemB) {
+      score =
+        (this.sortSettings[0].created ? this.sort.created(itemA, itemB) : 0) +
+        (this.sortSettings[0].rating ? this.sort.rating(itemA, itemB) : 0);
+    }
     return score;
   };
 
@@ -171,6 +173,7 @@ class ExplorerModel {
 
 export default function ExplorerView(props: {
   index: IndexEntryMessage[];
+  small: boolean;
 }) {
   const explorer = new ExplorerModel();
 
@@ -197,7 +200,7 @@ export default function ExplorerView(props: {
   };
 
   createEffect(() => {
-    if (file()) {
+    if (props.small) {
       setTimeout(() => {
         const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
         if (ele) {
@@ -318,7 +321,7 @@ export default function ExplorerView(props: {
             scrollTarget={scrollTargetElement}
             itemSize={{ height: 208 }}
             overscan={2}
-            items={rows(file() ? 1 : 4)}
+            items={rows(props.small ? 1 : 4)}
           >
             {(props: { index: number; style: string; item: IndexEntryMessage[][] }) => {
               return (

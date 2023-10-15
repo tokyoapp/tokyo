@@ -34,7 +34,7 @@
       overflow: hidden;
     }
 
-    body {
+    main {
       position: absolute;
       top: 0;
       left: 0;
@@ -45,9 +45,6 @@
       border: 1px solid #111;
       display: grid;
       grid-template-rows: auto 1fr;
-    }
-
-    #main {
       background: rgba(24, 24, 27, 0.98);
     }
   </style>
@@ -55,8 +52,7 @@
 </head>
 
 <body>
-  <div id="titlebar"></div>
-  <main id="main"></main>
+  <main></main>
 
   <script type="module" src="./index.ts"></script>
 </body>

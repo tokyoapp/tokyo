@@ -1,6 +1,5 @@
 import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
-import { DynamicImage } from '../DynamicImage.ts';
-import { Library, file, setFile } from '../Library.ts';
+import { DynamicImage } from '../image/DynamicImage.ts';
 // import storage from '../services/ClientStorage.worker';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -11,15 +10,6 @@ import { settings } from './Edit.tsx';
 import { IndexEntryMessage } from 'proto';
 import * as viewport from 'viewport';
 import { t } from '../locales/messages.ts';
-
-const [item, setItem] = createSignal<{
-  item: IndexEntryMessage;
-  url: string;
-}>();
-const [loading, setLoading] = createSignal(false);
-
-let controller: AbortController;
-let timeout: number;
 
 createEffect(() => {
   const setts = settings();
@@ -32,51 +22,6 @@ const [app, setApp] = createSignal({
 window.addEventListener('app:state', ((e: CustomEvent) => {
   setApp(e.detail);
 }) as EventListener);
-
-createEffect(async () => {
-  // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
-  const _item = file();
-
-  clearTimeout(timeout);
-
-  if (controller) controller.abort();
-
-  controller = new AbortController();
-
-  if (_item && _item.hash !== item()?.item.hash) {
-    const meta = await Library.metadata(_item.path);
-
-    setLoading(true);
-
-    const tmp = await storage.readTemp(_item.hash);
-
-    const prevImg = new Image();
-    prevImg.onload = () => {
-      const img = new DynamicImage(prevImg, meta.metadata);
-
-      img
-        .resizeContain(1024)
-        .canvas()
-        .toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            setLoading(true);
-            setItem({
-              item: _item,
-              url,
-            });
-          }
-        });
-    };
-
-    if (tmp && tmp.size > 0) {
-      prevImg.src = URL.createObjectURL(tmp);
-    } else {
-      const thumb = new Blob([meta.metadata?.thumbnail]);
-      prevImg.src = URL.createObjectURL(thumb);
-    }
-  }
-});
 
 const Tool = (props: ParentProps & { class: string }) => {
   return (
@@ -94,7 +39,61 @@ viewportCanvas.id = 'viewport_canvas';
 viewportCanvas.style.width = '100%';
 viewportCanvas.style.position = 'absolute';
 
-export default function Preview() {
+export default function Preview(props: { file: any; onClose?: () => void }) {
+  const [item, setItem] = createSignal<{
+    item: IndexEntryMessage;
+    url: string;
+  }>();
+  const [loading, setLoading] = createSignal(false);
+
+  let controller: AbortController;
+  let timeout: number;
+
+  createEffect(async () => {
+    // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
+    const _item = props.file;
+
+    clearTimeout(timeout);
+
+    if (controller) controller.abort();
+
+    controller = new AbortController();
+
+    if (_item && _item.hash !== item()?.item.hash) {
+      // const meta = await Library.metadata(_item.path);
+
+      setLoading(true);
+
+      const tmp = await storage.readTemp(_item.hash);
+
+      const prevImg = new Image();
+      prevImg.onload = () => {
+        const img = new DynamicImage(prevImg, meta.metadata);
+
+        img
+          .resizeContain(1024)
+          .canvas()
+          .toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              setLoading(true);
+              setItem({
+                item: _item,
+                url,
+              });
+            }
+          });
+      };
+
+      if (tmp && tmp.size > 0) {
+        prevImg.src = URL.createObjectURL(tmp);
+      } else {
+        const thumb = new Blob([meta.metadata?.thumbnail]);
+        prevImg.src = URL.createObjectURL(thumb);
+      }
+    }
+  });
+
   const resize = () => {
     const parent = viewportCanvas.parentNode as HTMLElement;
     viewportCanvas.width = parent?.clientWidth * 2;
@@ -155,7 +154,7 @@ export default function Preview() {
         <Button
           variant="ghost"
           onClick={() => {
-            setFile(undefined);
+            props.onClose?.();
           }}
         >
           <div class="flex items-center">
@@ -173,13 +172,14 @@ export default function Preview() {
 
       <div class="z-20 absolute bottom-2 left-3 right-3 w-auto flex gap-3 justify-center items-center">
         <Stars
-          value={file()?.rating || 0}
+          value={props.file?.rating || 0}
           onChange={(value) => {
-            const f = file()?.hash;
+            const f = props.file?.hash;
             if (f) {
-              Library.postMetadata(f, {
-                rating: value,
-              });
+              console.warn('not implemented');
+              // Library.postMetadata(f, {
+              //   rating: value,
+              // });
             }
           }}
         />

@@ -1,5 +1,4 @@
 import '@atrium-ui/mono/expandable';
-import { Library, tags } from '../Library.ts';
 import Icon from './Icon.tsx';
 import { createEffect, createSignal } from 'solid-js';
 import { t } from '../locales/messages.ts';
@@ -57,9 +56,10 @@ export default function Info(props: {
 
   createEffect(() => {
     if (props.file) {
-      Library.metadata(props.file.path).then((meta) => {
-        setMeta(meta.metadata);
-      });
+      // Library.metadata(props.file.path).then((meta) => {
+      //   setMeta(meta.metadata);
+      // });
+      console.warn('not implemented');
     }
   });
 
@@ -68,10 +68,11 @@ export default function Info(props: {
   };
 
   const file_tags = () => {
-    const arr = meta()?.tags.map((tag) => {
-      return tags().find((t) => t.id === tag)?.name || tag;
-    });
-    return arr || [];
+    // const arr = meta()?.tags.map((tag) => {
+    //   return tags().find((t) => t.id === tag)?.name || tag;
+    // });
+    // return arr || [];
+    return [];
   };
 
   return (

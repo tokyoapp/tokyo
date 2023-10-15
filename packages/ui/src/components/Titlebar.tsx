@@ -1,7 +1,3 @@
-import { getCurrent } from '@tauri-apps/plugin-window';
-import { platform } from '@tauri-apps/plugin-os';
-
-import { locations } from '../Library.ts';
 import { setSettingOpen, settingsOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
@@ -11,12 +7,13 @@ import '@atrium-ui/mono/blur';
 import { createSignal } from 'solid-js';
 import Action from '../actions/Action.ts';
 import { t } from '../locales/messages.ts';
+import { LibraryMessage } from 'proto';
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
   return (
     <div class="w-20 flex gap-[6px] px-2 pointer-events-auto">
-      <button
+      {/* <button
         type="button"
         class={`${dot} hover:bg-red-700`}
         onClick={() => getCurrent().close()}
@@ -30,7 +27,7 @@ const MacTitle = () => {
         type="button"
         class={`${dot} hover:bg-green-700`}
         onClick={() => getCurrent().toggleMaximize()}
-      />
+      /> */}
     </div>
   );
 };
@@ -55,22 +52,7 @@ const WindowsTitle = () => {
 
 export const [cmdOpen, setCmdOpen] = createSignal(false);
 
-const [os, setOS] = createSignal('');
-
-if (window.__TAURI_INVOKE__) {
-  platform()
-    .then((os) => {
-      setOS(os);
-    })
-    .catch((err) => {
-      console.error(err);
-      return undefined;
-    });
-} else {
-  setOS('browser');
-}
-
-export default function Titlebar() {
+export default function Titlebar(props: { os: string; locations: LibraryMessage[] }) {
   return (
     <>
       <div
@@ -79,7 +61,7 @@ export default function Titlebar() {
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
-            {os() === 'macos' ? <MacTitle /> : null}
+            {props.os === 'macos' ? <MacTitle /> : null}
             <Button
               onClick={() => {
                 setSettingOpen(!settingsOpen());
@@ -97,7 +79,7 @@ export default function Titlebar() {
             <div>
               <Combobox
                 class="px-1 pointer-events-auto"
-                items={locations().map((lib) => {
+                items={props.locations.map((lib) => {
                   return {
                     id: lib.id,
                     value: `${lib.name} - ${lib.host}`,
@@ -162,7 +144,7 @@ export default function Titlebar() {
           <div />
         </div>
 
-        {os() === 'windows' ? <WindowsTitle /> : null}
+        {props.os === 'windows' ? <WindowsTitle /> : null}
       </div>
 
       {cmdOpen() ? (
