@@ -1,5 +1,8 @@
+use std::path::Path;
+
 use phl_library::db;
 use serde::de::DeserializeOwned;
+use shadow::MyImage;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
@@ -42,7 +45,10 @@ impl<R: Runtime> Library<R> {
 
   pub async fn create_library(&self) {}
 
-  pub async fn get_image(&self) {}
+  pub async fn get_image(&self, path: String) -> crate::Result<Vec<u16>> {
+    let mut my_image = MyImage::new(&Path::new(&path));
+    Ok(my_image.render().to_rgb16().to_vec())
+  }
 
   pub async fn post_metadata(&self) {}
 }

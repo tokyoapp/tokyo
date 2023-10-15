@@ -20,13 +20,41 @@ use std::{fs::File, io::BufReader, path::Path};
 // }
 //
 
+pub struct MyImage {
+  pub image: DynamicImage,
+  pub edits: Edits,
+}
+
+impl MyImage {
+  pub fn new(path: &Path) -> MyImage {
+    let image = get_image(path);
+
+    MyImage {
+      image,
+      edits: Edits {
+        gamma: 2.2,
+        exposure: 0.0,
+        curve: vec![(0.00, 0.00), (1.0, 1.0)],
+      },
+    }
+  }
+
+  pub fn render(&mut self) -> DynamicImage {
+    println!("{:?}", self.edits.exposure);
+
+    let img = process(&self.image, &self.edits);
+
+    img
+  }
+}
+
 pub struct Edits {
   pub gamma: f32,
   pub exposure: f32,
   pub curve: Vec<(f32, f32)>,
 }
 
-pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
+fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   println!("process image");
   let source = ImageSource::Other(img.clone());
   let mut pipeline = Pipeline::new_from_source(source).unwrap();
@@ -46,7 +74,7 @@ pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   );
 }
 
-pub fn get_image(path: &Path) -> DynamicImage {
+fn get_image(path: &Path) -> DynamicImage {
   let raw_file = File::open(&path).unwrap();
   let mut rawfile = RawFile::new(path, BufReader::new(raw_file));
 

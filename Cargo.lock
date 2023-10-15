@@ -5166,6 +5166,7 @@ dependencies = [
  "phl-proto",
  "serde",
  "serde_json",
+ "shadow",
  "tauri",
  "tauri-build",
  "thiserror",

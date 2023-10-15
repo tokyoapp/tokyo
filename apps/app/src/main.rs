@@ -7,7 +7,7 @@ use phl_library::db;
 
 pub fn main() {
   let root = db::Root::new();
-  let _ = root.init_db();
+  root.init_db().expect("Error at init db");
 
   app::AppBuilder::new().run();
 }
