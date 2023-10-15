@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount } from 'solid-js';
+import { createEffect, createSignal, onMount, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 // import storage from '../services/ClientStorage.worker';
 import { DynamicImage } from '../DynamicImage.ts';
@@ -14,52 +14,53 @@ import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 
-class ExplorerModel {
-  filterSettings = {};
-  sortSettings = {};
-  items = [];
 
-  constructor() {
-    
-  }
-
-  sortItems(settings) {}
-
-  filterItems(settings) {}
-  
-  async fetchIndex(id: string) {}
-  
-  async openFile(id: string) {}
-
-  async getThumbnail(id: string) {}
+function createFieldStore() {
+  // use getter setter pair?
 }
 
-createEffect(() => {
-  if (file()) {
-    setTimeout(() => {
-      const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
-      if (ele) {
-        ele.scrollIntoView({ inline: 'center', block: 'center' });
-      }
-    }, 100);
-  }
-});
+class ExplorerModel {
 
-export default function ExplorerView(props: {
-  index: IndexEntryMessage[]
-}) {
-  const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
-
-  createEffect(() => {
-    const [selected] = selection();
-    if (selected) {
-      Action.run('open', [selected]);
-    }
+  filterSettings = createStore({
+    stars: 0,
   });
 
-  console.log(props.index);
+  // private sortStore;
+  // get sort() {
+  //   return this.sortStore[0];
+  // }
 
-  const sort = {
+  sortSettings = createStore({
+    rating: false,
+    created: false,
+  });
+
+  selection = createStore<IndexEntryMessage[]>([]);
+
+  constructor() { }
+
+  setFilter(options) {
+    if (options.stars != undefined) {
+      this.filterSettings[0].stars = options.stars;
+    }
+  }
+
+  setSorting(options) {
+    if (options.rating != undefined) {
+      this.sortSettings[0].rating = options.rating;
+    }
+    if (options.created != undefined) {
+      this.sortSettings[0].created = options.created;
+    }
+  }
+
+  setSelection(entires: IndexEntryMessage[]) {
+    this.selection[1]([]);
+    this.selection[0].push(...entires);
+    if (entires[0]) this.openFile(entires[0]);
+  }
+
+  sort = {
     rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
       return +b.rating - +a.rating;
     },
@@ -76,13 +77,11 @@ export default function ExplorerView(props: {
     },
   };
 
-  const [viewSettings, setViewSettings] = createStore({
-    showRating: true,
-    showName: false,
-    showTags: false,
-  });
+  private sortItems(itemA: IndexEntryMessage, itemB: IndexEntryMessage) {
+    return this.sort.created(itemA, itemB);
+  }
 
-  function stack(items: IndexEntryMessage[]) {
+  private stack(items: IndexEntryMessage[]) {
     const stacked = [];
 
     _stack: for (const item of items) {
@@ -99,24 +98,20 @@ export default function ExplorerView(props: {
     return stacked;
   }
 
-  const [starFilter, setStarFilter] = createSignal(0);
-
-  function itemFilter(item: IndexEntryMessage) {
-    if (starFilter() && item.rating < starFilter()) {
+  private filterItems(item: IndexEntryMessage) {
+    if (this.filterSettings[0].stars && item.rating < this.filterSettings[0].stars) {
       return false;
     }
     return true;
   }
 
-  const [sorting, setSorting] = createSignal<keyof typeof sort>('created');
-
-  const rows = () => {
+  rows(index: IndexEntryMessage[]) {
     const rs = [];
     let currRow: any[] = [];
-    const items = stack(
-      props.index
-        .filter(itemFilter)
-        .sort(sort[sorting()])
+    const items = this.stack(
+      index
+        .filter(this.filterItems)
+        .sort(this.sortItems)
     );
     for (const entry of items) {
       if (currRow.length < 4) {
@@ -130,7 +125,73 @@ export default function ExplorerView(props: {
     rs.push(currRow);
 
     return rs;
-  };
+  }
+
+  async openFile(entry: IndexEntryMessage) {
+    Action.run('open', [entry]);
+  }
+
+  async getThumbnail(entry: IndexEntryMessage) {
+
+    const useThumb = (blob?: Blob) => {
+      const dynimg = new DynamicImage();
+      const canvas = dynimg.canvas();
+
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const image = new Image();
+        image.onload = () => {
+          dynimg.fromDrawable(image, entry).resizeContain(256);
+          const newCanvas = dynimg.canvas();
+          canvas.parentNode?.replaceChild(newCanvas, canvas);
+        };
+        image.onerror = (err) => {
+          console.warn('Error loading thumbnail image', err);
+        };
+        image.src = url;
+      }
+
+      return canvas;
+    };
+
+    return Library.metadata(entry.path).then((meta) => {
+      const data = new Uint8Array(meta.metadata?.thumbnail);
+      const blob = new Blob([data]);
+      return useThumb(blob);
+    });
+  }
+
+  tags(entry: IndexEntryMessage) {
+    const arr = entry.tags.filter(Boolean).map((tag) => {
+      return tags().find((t) => t.id === tag)?.name || tag;
+    });
+    return arr || [];
+  }
+}
+
+
+export default function ExplorerView(props: {
+  index: IndexEntryMessage[]
+}) {
+
+  const explorer = new ExplorerModel();
+
+  createEffect(() => {
+    if (file()) {
+      setTimeout(() => {
+        const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
+        if (ele) {
+          ele.scrollIntoView({ inline: 'center', block: 'center' });
+        }
+      }, 100);
+    }
+  });
+
+  const [viewSettings, setViewSettings] = createStore({
+    showRating: true,
+    showName: false,
+    showTags: false,
+  });
 
   const onKeyDown = (e: KeyboardEvent) => {
     const parent = (e.target as HTMLElement).parentNode;
@@ -150,20 +211,21 @@ export default function ExplorerView(props: {
     }
   };
 
-  const ListItem = (props) => {
+  const ListItem = (props: { index: number, style: string, item: IndexEntryMessage[][] }) => {
     return (
       <div style={props.style} class="w-full flex gap-1">
         {props.item.map((items, i) => {
           return (
             <Thumbnail
               class="flex-1 pb-1"
-              selected={selection().includes(items[0])}
+              selected={explorer.selection[0].includes(items[0])}
               number={(props.index * 4 + i + 1).toString()}
               name={viewSettings.showName}
-              tags={viewSettings.showTags}
-              rating={viewSettings.showRating}
+              tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
+              rating={viewSettings.showRating ? items[0].rating : undefined}
+              image={explorer.getThumbnail(items[0])}
               onClick={() => {
-                setSelection(items);
+                explorer.setSelection(items);
               }}
               items={items}
             />
@@ -187,20 +249,20 @@ export default function ExplorerView(props: {
               title="Sort"
               onInput={(values) => {
                 const value = values[0];
-                if (value in sort) setSorting(value);
+                if (value in explorer.sort) explorer.setSorting(value);
               }}
               items={[
                 {
                   id: 'created',
                   value: t('explorer_sort_created'),
-                  checked: sorting() === 'created',
+                  checked: explorer.sortSettings[0].created,
                 },
-                { id: 'rating', value: t('explorer_sort_rating'), checked: sorting() === 'rating' },
+                { id: 'rating', value: t('explorer_sort_rating'), checked: explorer.sortSettings[0].rating },
               ]}
             >
               <div class="flex items-center">
                 <Icon name="ph-sort-ascending" class="mr-1" />
-                <span>{t('explorer_sort_' + sorting())}</span>
+                <span>{t('explorer_sort_created')}</span>
               </div>
             </Combobox>
           </div>
@@ -210,7 +272,7 @@ export default function ExplorerView(props: {
                 <span>Tags</span>
             </FilterCombobox> */}
 
-            <Stars value={starFilter()} onChange={(v) => setStarFilter(v)} />
+            <Stars value={starFilter()} onChange={(v) => explorer.setFilter({ stars: v })} />
 
             <Combobox
               multiple
@@ -252,17 +314,17 @@ export default function ExplorerView(props: {
             scrollTarget={scrollTargetElement}
             itemSize={{ height: 208 }}
             overscan={2}
-            items={rows()}
+            items={explorer.rows(props.index)}
           >
             {ListItem}
           </VirtualContainer>
         </div>
       </div>
 
-      {selection().length > 0 ? (
+      {explorer.selection[0].length > 0 ? (
         <div class="z-40 absolute bottom-3 left-3 right-3 w-auto">
           <div class="bg-zinc-900 px-3 py-1 border-zinc-800 border rounded-md text-sm">
-            <span class="text-zinc-700">{selection()[0].name}</span>
+            <span class="text-zinc-700">{explorer.selection[0][0].name}</span>
             <span class="px-2" />
             <button type="button" class="p-1 px-2">
               <Icon name="close" />
@@ -285,63 +347,29 @@ export default function ExplorerView(props: {
 type ThumbProps = {
   selected: boolean;
   name: boolean;
-  rating: boolean;
-  tags: boolean;
+  rating?: number;
+  tags: string[];
   number?: string;
   items: IndexEntryMessage[];
+  image: Promise<HTMLCanvasElement>;
   class?: string;
   onClick: () => void;
 };
 
 function Thumbnail(props: ThumbProps) {
-  const [img, setImg] = createSignal<Blob>();
+  const [img, setImg] = createSignal<HTMLCanvasElement>();
   const [loaded, setLoaded] = createSignal(false);
 
-  const useThumb = (blob?: Blob) => {
-    const dynimg = new DynamicImage();
-    const canvas = dynimg.canvas();
+  createEffect(() => {
+    if (props.image) {
+      setLoaded(false);
 
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      const image = new Image();
-      image.onload = () => {
-        dynimg.fromDrawable(image, props.items[0]).resizeContain(256);
-        const newCanvas = dynimg.canvas();
-        canvas.parentNode?.replaceChild(newCanvas, canvas);
+      props.image?.then(canv => {
+        setImg(canv);
         setLoaded(true);
-      };
-      image.onerror = (err) => {
-        console.warn('Error loading thumbnail image', err);
-      };
-      image.src = url;
+      })
     }
-
-    return canvas;
-  };
-
-  createEffect(async () => {
-    const item = props.items[0];
-    // const tmp = await storage.readTemp(item.hash);
-
-    setLoaded(false);
-    // if (tmp && tmp.size > 0) {
-    //   setImg(tmp);
-    // } else {
-    Library.metadata(item.path).then((meta) => {
-      console.log(meta);
-      // const data = new Uint8Array(meta.metadata?.thumbnail);
-      // const blob = new Blob([data]);
-      // setImg(blob);
-    });
-    // }
   });
-
-  const file_tags = () => {
-    const arr = props.items[0].tags.filter(Boolean).map((tag) => {
-      return tags().find((t) => t.id === tag)?.name || tag;
-    });
-    return arr || [];
-  };
 
   return (
     <div class={`thumbnail z-0 relative h-52 overflow-hidden ${props.class || ''}`}>
@@ -366,7 +394,7 @@ function Thumbnail(props: ThumbProps) {
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
                 >
-                  {useThumb(img())}
+                  {img()}
                 </div>
               );
             })
@@ -382,14 +410,14 @@ function Thumbnail(props: ThumbProps) {
 
         <div class="flex flex-wrap justify-items-start items-start text-xs">
           {props.tags
-            ? file_tags().map((tag) => <div class="rounded-md bg-zinc-700 p-[2px_6px]">{tag}</div>)
+            ? props.tags.map((tag) => <div class="rounded-md bg-zinc-700 p-[2px_6px]">{tag}</div>)
             : null}
         </div>
 
         <div class="text-xs">
           {props.rating ? (
             <div class="pb-1">
-              <Rating rating={props.items[0].rating} />
+              <Rating rating={props.rating} />
             </div>
           ) : null}
         </div>
