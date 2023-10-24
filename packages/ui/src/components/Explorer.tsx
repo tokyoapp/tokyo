@@ -137,30 +137,30 @@ class ExplorerModel {
     Action.run('open', [entry]);
   }
 
-  async getThumbnail(entry: IndexEntryMessage) {
-    // const useThumb = (blob?: Blob) => {
-    //   const dynimg = new DynamicImage();
-    //   const canvas = dynimg.canvas();
-    //   if (blob) {
-    //     const url = URL.createObjectURL(blob);
-    //     const image = new Image();
-    //     image.onload = () => {
-    //       dynimg.fromDrawable(image, entry).resizeContain(256);
-    //       const newCanvas = dynimg.canvas();
-    //       canvas.parentNode?.replaceChild(newCanvas, canvas);
-    //     };
-    //     image.onerror = (err) => {
-    //       console.warn('Error loading thumbnail image', err);
-    //     };
-    //     image.src = url;
-    //   }
-    //   return canvas;
-    // };
-    // return Library.metadata(entry.path).then((meta) => {
-    //   const data = new Uint8Array(meta.metadata?.thumbnail);
-    //   const blob = new Blob([data]);
-    //   return useThumb(blob);
-    // });
+  async getThumbnail(entry: IndexEntryMessage): Promise<HTMLCanvasElement> {
+    const useThumb = (blob?: Blob) => {
+      const dynimg = new DynamicImage();
+      const canvas = dynimg.canvas();
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const image = new Image();
+        image.onload = () => {
+          dynimg.fromDrawable(image, entry).resizeContain(256);
+          const newCanvas = dynimg.canvas();
+          canvas.parentNode?.replaceChild(newCanvas, canvas);
+        };
+        image.onerror = (err) => {
+          console.warn('Error loading thumbnail image', err);
+        };
+        image.src = url;
+      }
+      return canvas;
+    };
+    return Library.metadata(entry.path).then((meta) => {
+      const data = new Uint8Array(meta.metadata?.thumbnail);
+      const blob = new Blob([data]);
+      return useThumb(blob);
+    });
   }
 
   tags(entry: IndexEntryMessage) {
@@ -338,8 +338,7 @@ export default function ExplorerView(props: {
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
-                          // image={explorer.getThumbnail(items[0])}
-                          image={new Promise(() => {})}
+                          image={explorer.getThumbnail(items[0])}
                           onClick={() => {
                             explorer.setSelection(items);
                           }}
@@ -420,18 +419,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {img()
             ? props.items.slice(0, 3).map((item, i) => {
-                return (
-                  <div
-                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+              return (
+                <div
+                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                  >
-                    {img()}
-                  </div>
-                );
-              })
+                >
+                  {img()}
+                </div>
+              );
+            })
             : null}
           {!loaded() ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>

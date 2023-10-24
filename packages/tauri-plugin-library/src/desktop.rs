@@ -16,6 +16,11 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
+  pub fn get_thumbnails(&self, id: String) -> crate::Result<Vec<u16>> {
+    let mut my_image = MyImage::new(&Path::new(&id));
+    Ok(my_image.render().to_rgb16().to_vec())
+  }
+
   pub fn get_locations(&self) -> crate::Result<Vec<phl_library::db::Location>> {
     let root = db::Root::new();
     return Ok(root.location_list().unwrap());

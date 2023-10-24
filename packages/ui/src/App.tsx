@@ -65,6 +65,8 @@ function App() {
 
   const index = indexAccessor(params);
 
+  const thumbnails = thumbnailsAccessor();
+
   createEffect(() => {
     setParams({
       locations: locations.data.map((loc) => loc.id),
@@ -83,9 +85,8 @@ function App() {
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div
-        class={`relative w-full h-full grid ${
-          file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
-        }`}
+        class={`relative w-full h-full grid ${file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+          }`}
       >
         <div class="relative">
           <div class="absolute top-0 left-0 w-full h-full">
