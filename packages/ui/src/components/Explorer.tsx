@@ -12,6 +12,8 @@ import { SystemInfo } from './System.tsx';
 import { IndexEntryMessage } from 'proto';
 import { t } from '../locales/messages.ts';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
+import { thumbnailsAccessor } from '../accessors/thumbnails.ts';
+import { metadataAccessor } from '../accessors/metadata.ts';
 
 function createFieldStore() {
   // use getter setter pair?
@@ -38,6 +40,14 @@ class ExplorerModel {
   // TODO: this should be a "View" into index.
   stacks = createStore<IndexEntryMessage[][]>([]);
 
+  thumbnailAccessor = thumbnailsAccessor({
+    ids: createSignal<string[]>([])
+  });
+
+  metadataAccessor = metadataAccessor({
+    ids: createSignal<string[]>([])
+  });
+
   constructor() {
     createEffect(() => {
       const stacks = this.stack(this.index[0].filter(this.filterItems).sort(this.sortItems));
@@ -49,6 +59,10 @@ class ExplorerModel {
     this.index[1](index);
     const stacks = this.stack(index.filter(this.filterItems).sort(this.sortItems));
     this.stacks[1](stacks);
+
+    // this.thumbnailAccessor.params.ids[1](index.slice(0, 40).map(entry => entry.path));
+    // TODO: should load metadata incrementally, not all at once.
+    this.metadataAccessor.params.ids[1](index.map(entry => entry.path));
   }
 
   setFilter(options: {
@@ -135,32 +149,6 @@ class ExplorerModel {
 
   async openFile(entry: IndexEntryMessage) {
     Action.run('open', [entry]);
-  }
-
-  async getThumbnail(entry: IndexEntryMessage): Promise<HTMLCanvasElement> {
-    const useThumb = (blob?: Blob) => {
-      const dynimg = new DynamicImage();
-      const canvas = dynimg.canvas();
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const image = new Image();
-        image.onload = () => {
-          dynimg.fromDrawable(image, entry).resizeContain(256);
-          const newCanvas = dynimg.canvas();
-          canvas.parentNode?.replaceChild(newCanvas, canvas);
-        };
-        image.onerror = (err) => {
-          console.warn('Error loading thumbnail image', err);
-        };
-        image.src = url;
-      }
-      return canvas;
-    };
-    return Library.metadata(entry.path).then((meta) => {
-      const data = new Uint8Array(meta.metadata?.thumbnail);
-      const blob = new Blob([data]);
-      return useThumb(blob);
-    });
   }
 
   tags(entry: IndexEntryMessage) {
@@ -338,7 +326,7 @@ export default function ExplorerView(props: {
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
-                          image={explorer.getThumbnail(items[0])}
+                          image={explorer.metadataAccessor.data.find(item => item.id === items[0].path)?.thumbnail}
                           onClick={() => {
                             explorer.setSelection(items);
                           }}
@@ -384,7 +372,7 @@ type ThumbProps = {
   tags: string[];
   number?: string;
   items: IndexEntryMessage[];
-  image: Promise<HTMLCanvasElement>;
+  image?: HTMLCanvasElement;
   class?: string;
   onClick: () => void;
 };
@@ -395,12 +383,8 @@ function Thumbnail(props: ThumbProps) {
 
   createEffect(() => {
     if (props.image) {
-      setLoaded(false);
-
-      props.image?.then((canv) => {
-        setImg(canv);
-        setLoaded(true);
-      });
+      setLoaded(true);
+      setImg(props.image);
     }
   });
 

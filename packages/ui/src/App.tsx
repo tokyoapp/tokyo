@@ -65,8 +65,6 @@ function App() {
 
   const index = indexAccessor(params);
 
-  const thumbnails = thumbnailsAccessor();
-
   createEffect(() => {
     setParams({
       locations: locations.data.map((loc) => loc.id),

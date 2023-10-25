@@ -16,9 +16,13 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
-  pub fn get_thumbnails(&self, id: String) -> crate::Result<Vec<u16>> {
-    let mut my_image = MyImage::new(&Path::new(&id));
-    Ok(my_image.render().to_rgb16().to_vec())
+  pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
+    let root = db::Root::new();
+    let meta = phl_library::Library::metadata(&root, &id).await;
+    if let Some(metadata) = meta {
+      return Ok(metadata.thumbnail);
+    }
+    Err(crate::Error::Unknown("thumbnail".to_string()))
   }
 
   pub fn get_locations(&self) -> crate::Result<Vec<phl_library::db::Location>> {

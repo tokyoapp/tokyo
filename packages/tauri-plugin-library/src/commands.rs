@@ -11,6 +11,11 @@ pub(crate) async fn get_locations<R: Runtime>(app: AppHandle<R>) -> Result<Vec<d
 }
 
 #[command]
+pub(crate) async fn get_thumbnail<R: Runtime>(app: AppHandle<R>, id: String) -> Result<Vec<u8>> {
+  return Ok(app.library().get_thumbnail(id).await.unwrap());
+}
+
+#[command]
 pub async fn get_index<R: Runtime>(
   app: AppHandle<R>,
   name: String,

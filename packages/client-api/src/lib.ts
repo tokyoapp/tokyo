@@ -65,8 +65,18 @@ export function createLocalSource() {
           });
           break;
         case "thumbnails":
-          lib.fetchThumbmails(chunk.ids);
+          lib.fetchThumbmails(chunk.ids).then((msg) => {
+            if (msg) controller.enqueue(msg);
+          });
+
           break;
+        case "metadata":
+          lib.fetchMetadata(chunk.ids).then((msg) => {
+            if (msg) controller.enqueue(msg);
+          });
+
+          break;
+
       }
     },
   });

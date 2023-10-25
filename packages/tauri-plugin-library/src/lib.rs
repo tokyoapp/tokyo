@@ -39,6 +39,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("library")
     .invoke_handler(tauri::generate_handler![
       commands::get_locations,
+      commands::get_thumbnail,
       commands::get_index,
       commands::get_system,
       commands::create_library,

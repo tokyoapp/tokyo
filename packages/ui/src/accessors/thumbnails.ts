@@ -1,12 +1,13 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { Signal, createEffect, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Channel, createLocalSource } from 'client-api';
+import { DynamicImage } from '../image/DynamicImage';
 
 export function thumbnailsAccessor(params: {
-  ids: string[];
+  ids: Signal<string[]>;
 }) {
   createEffect(() => {
-    request(params.ids);
+    request(params.ids[0]());
   });
 
   const [list, setList] = createStore<{ value: number; source_id: string }[]>([]);
@@ -33,12 +34,36 @@ export function thumbnailsAccessor(params: {
         }))
       );
     }
-    setList(data.map((d) => d.data));
+    const thumbs = data.map((d) => {
+      const buff = new Uint8Array(d.data.thumbnail);
+      const blob = new Blob([buff]);
+      return { thumbnail: makeThumbnail(blob), id: d.data.id }
+    });
+    setList(thumbs);
   });
 
   onCleanup(() => {
     currentSub();
   });
+
+  const makeThumbnail = (blob?: Blob) => {
+    const dynimg = new DynamicImage();
+    const canvas = dynimg.canvas();
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.onload = () => {
+        dynimg.fromDrawable(image, {}).resizeContain(256);
+        const newCanvas = dynimg.canvas();
+        canvas.parentNode?.replaceChild(newCanvas, canvas);
+      };
+      image.onerror = (err) => {
+        console.warn('Error loading thumbnail image', err);
+      };
+      image.src = url;
+    }
+    return canvas;
+  };
 
   const request = (ids: string[]) => {
     // place where the request message is created
@@ -50,6 +75,7 @@ export function thumbnailsAccessor(params: {
 
   return {
     request,
+    params,
     data: list,
   };
 }

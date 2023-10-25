@@ -1,4 +1,4 @@
-import { index, locations, thumbnails, system, metadata } from 'tauri-plugin-library-api';
+import { index, locations, thumbnail, system, metadata } from 'tauri-plugin-library-api';
 import { ClientAPIMessage, LibraryInterface } from './lib';
 
 export class LocalLibrary implements LibraryInterface {
@@ -23,7 +23,17 @@ export class LocalLibrary implements LibraryInterface {
     if (ids.length > 0) {
       const res = {
         type: 'thumbnails' as const,
-        data: await thumbnails(ids[0]),
+        data: await Promise.all(ids.map(async id => { return { thumbnail: await thumbnail(id), id } })),
+      };
+      return res;
+    }
+  }
+
+  public async fetchMetadata(ids: string[]): Promise<ClientAPIMessage> {
+    if (ids.length > 0) {
+      const res = {
+        type: 'metadata' as const,
+        data: await Promise.all(ids.map(async id => { return { metadata: await metadata(id), id } })),
       };
       return res;
     }

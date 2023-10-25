@@ -1,9 +1,6 @@
 import { invoke } from '@tauri-apps/api/tauri';
 
-export async function thumbnail(id: string): Promise<{
-  id: string,
-  thumbnail: Blob
-}[]> {
+export async function thumbnail(id: string): Promise<Uint8Array> {
   return await invoke("plugin:library|get_thumbnail", { id });
 }
 
