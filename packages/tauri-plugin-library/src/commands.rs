@@ -44,3 +44,8 @@ pub async fn get_image() {}
 
 #[command]
 pub async fn post_metadata() {}
+
+#[command]
+pub async fn post_location() {
+  println!("fuck");
+}

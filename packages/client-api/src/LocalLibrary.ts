@@ -1,4 +1,11 @@
-import { index, locations, thumbnail, system, metadata } from 'tauri-plugin-library-api';
+import {
+  index,
+  locations,
+  thumbnail,
+  system,
+  metadata,
+  createLocation,
+} from 'tauri-plugin-library-api';
 import { ClientAPIMessage, LibraryInterface } from './lib';
 
 export class LocalLibrary implements LibraryInterface {
@@ -23,7 +30,11 @@ export class LocalLibrary implements LibraryInterface {
     if (ids.length > 0) {
       const res = {
         type: 'thumbnails' as const,
-        data: await Promise.all(ids.map(async id => { return { thumbnail: await thumbnail(id), id } })),
+        data: await Promise.all(
+          ids.map(async (id) => {
+            return { thumbnail: await thumbnail(id), id };
+          })
+        ),
       };
       return res;
     }
@@ -33,17 +44,20 @@ export class LocalLibrary implements LibraryInterface {
     if (ids.length > 0) {
       const res = {
         type: 'metadata' as const,
-        data: await Promise.all(ids.map(async id => { return { metadata: await metadata(id), id } })),
+        data: await Promise.all(
+          ids.map(async (id) => {
+            return { metadata: await metadata(id), id };
+          })
+        ),
       };
       return res;
     }
   }
 
-  public async onMessage(
-    cb: (msg: ClientAPIMessage) => void,
-    id?: number | undefined
-  ): Promise<() => any> {
-    //
+  onMessage(cb: (msg: ClientAPIMessage) => void, id?: number): Promise<() => void> {
+    return new Promise((res, rej) => {
+      rej('not implemented');
+    });
   }
 
   async getMetadata(file: string) {
@@ -66,9 +80,13 @@ export class LocalLibrary implements LibraryInterface {
       rating?: number;
       tags?: string[];
     }
-  ) { }
+  ) {}
 
-  async postLocation() { }
+  async postLocation(name: string, path: string) {
+    return await createLocation(name, path).catch((err) => {
+      console.error('error', err);
+    });
+  }
 
   async getSystem() {
     return system()

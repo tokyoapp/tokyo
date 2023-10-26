@@ -45,6 +45,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
       commands::create_library,
       commands::get_metadata,
       commands::get_image,
+      commands::post_location,
       commands::post_metadata,
     ])
     .setup(|app, api| {

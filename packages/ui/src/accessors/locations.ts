@@ -1,14 +1,14 @@
-import { createEffect, onCleanup } from 'solid-js';
-import { createStore } from 'solid-js/store';
 import { Channel, createLocalSource } from 'client-api';
 import { LibraryMessage } from 'proto';
+import { createEffect, onCleanup } from 'solid-js';
+import { createStore } from 'solid-js/store';
 
 export function locationsAccessor() {
   createEffect(() => {
     request();
   });
 
-  const [list, setList] = createStore<LibraryMessage[]>([]);
+  const [store, setStore] = createStore<Array<LibraryMessage & { source_id: string }>>([]);
 
   const channel = new Channel();
 
@@ -16,23 +16,25 @@ export function locationsAccessor() {
 
   channel.connect(read, write);
 
-  let data: any[] = [];
-
-  const currentSub = channel.subscribe((chunk) => {
+  const currentSub = channel.subscribe(async (chunk) => {
     if (chunk.data === null) {
-      data = data.filter((entry) => {
-        return entry.source_id !== chunk.source_id;
-      });
-    } else {
-      // there can be duplicate items in these chunks, should dedupe them here.
-      data.push(
-        ...chunk.data.map((d) => ({
-          data: d,
-          source_id: chunk.source_id,
-        }))
+      setStore(
+        store.filter((entry) => {
+          return entry.source_id !== chunk.source_id;
+        })
       );
+    } else {
+      // TODO: there can be duplicate items in these chunks, should dedupe them here.
+      setStore([
+        ...store,
+        ...chunk.data.map((entry: LibraryMessage) => {
+          return {
+            ...entry,
+            source_id: chunk.source_id,
+          };
+        }),
+      ]);
     }
-    setList(data.map((e) => e.data));
   });
 
   onCleanup(() => {
@@ -40,14 +42,25 @@ export function locationsAccessor() {
   });
 
   const request = () => {
-    // place where the request message is created
     channel.send({
       type: 'locations',
     });
   };
 
+  const create = (data: {
+    path: string;
+    name: string;
+  }) => {
+    channel.send({
+      type: 'locations.mutate',
+      path: data.path,
+      name: data.name,
+    });
+  };
+
   return {
     request,
-    data: list,
+    create,
+    store,
   };
 }

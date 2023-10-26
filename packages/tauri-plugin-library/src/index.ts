@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/tauri';
 
 export async function thumbnail(id: string): Promise<Uint8Array> {
-  return await invoke("plugin:library|get_thumbnail", { id });
+  return await invoke('plugin:library|get_thumbnail', { id });
 }
 
 export async function locations(): Promise<
@@ -13,6 +13,21 @@ export async function locations(): Promise<
   }[]
 > {
   return await invoke('plugin:library|get_locations');
+}
+
+export async function createLocation(
+  name: string,
+  path: string
+): Promise<{
+  id: string;
+  name: string;
+  path: string;
+  library: string;
+}> {
+  return await invoke('plugin:library|post_location', {
+    name,
+    path,
+  });
 }
 
 export async function index(name: string): Promise<

@@ -1,5 +1,6 @@
 import { IndexEntryMessage } from 'proto';
+import { setFile } from '../App.tsx';
 
 export default async function open(item: IndexEntryMessage) {
-  console.warn('not implemented');
+  setFile(item);
 }

@@ -1,15 +1,16 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { Signal, createEffect, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Channel, createLocalSource } from 'client-api';
+import { IndexEntryMessage } from 'proto';
 
 export function indexAccessor(params: {
-  locations: string[];
+  locations: Signal<string[]>;
 }) {
   createEffect(() => {
-    request(params.locations);
+    request(params.locations[0]());
   });
 
-  const [list, setList] = createStore<{ value: number; source_id: string }[]>([]);
+  const [store, setStore] = createStore<Array<{ source_id: string } & IndexEntryMessage>>([]);
 
   const channel = new Channel();
 
@@ -17,23 +18,25 @@ export function indexAccessor(params: {
 
   channel.connect(read, write);
 
-  let data: any[] = [];
-
-  const currentSub = channel.subscribe((chunk) => {
+  const currentSub = channel.subscribe(async (chunk) => {
     if (chunk.data === null) {
-      data = data.filter((entry) => {
-        return entry.source_id !== chunk.source_id;
-      });
-    } else {
-      // there can be duplicate items in these chunks, should dedupe them here.
-      data.push(
-        ...chunk.data.map((d) => ({
-          data: d,
-          source_id: chunk.source_id,
-        }))
+      setStore(
+        store.filter((entry) => {
+          return entry.source_id !== chunk.source_id;
+        })
       );
+    } else {
+      // TODO: there can be duplicate items in these chunks, should dedupe them here.
+      setStore([
+        ...store,
+        ...chunk.data.map((entry) => {
+          return {
+            ...entry,
+            source_id: chunk.source_id,
+          };
+        }),
+      ]);
     }
-    setList(data.map((d) => d.data));
   });
 
   onCleanup(() => {
@@ -41,7 +44,6 @@ export function indexAccessor(params: {
   });
 
   const request = (locations: string[]) => {
-    // place where the request message is created
     channel.send({
       type: 'index',
       locations,
@@ -50,6 +52,7 @@ export function indexAccessor(params: {
 
   return {
     request,
-    data: list,
+    params,
+    store,
   };
 }

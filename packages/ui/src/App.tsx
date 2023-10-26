@@ -1,27 +1,26 @@
+import { platform } from '@tauri-apps/plugin-os';
+import { IndexEntryMessage } from 'proto';
 import { ErrorBoundary, createEffect, createSignal } from 'solid-js';
+import { locationsAccessor } from './accessors/locations.ts';
+import Action from './actions/Action.ts';
+import Combobox from './components/Combobox.tsx';
 import CreateLibrary from './components/CreateLibrary.tsx';
 import Edit from './components/Edit';
 import Explorer from './components/Explorer';
+import Icon from './components/Icon.tsx';
 import Info from './components/Info';
 import LocationSettings from './components/LocationSettings.tsx';
 import { Tabs } from './components/Tabs.tsx';
+import Titlebar from './components/Titlebar.tsx';
 import Preview from './components/Viewer';
 import './components/notifications/index.ts';
-import { createStore } from 'solid-js/store';
-import { locationsAccessor } from './accessors/locations.ts';
-import Titlebar from './components/Titlebar.tsx';
-import { IndexEntryMessage, LibraryMessage } from 'proto';
-import { platform } from '@tauri-apps/plugin-os';
 import { ErrorNotification, Notifications } from './components/notifications/index.ts';
-import Action from './actions/Action.ts';
-import { indexAccessor } from './accessors/index.ts';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
 // selected locations
 
-const [file, setFile] = createSignal<IndexEntryMessage>();
-const [locations, setLocations] = createSignal<LibraryMessage[]>([]);
+export const [file, setFile] = createSignal<IndexEntryMessage>();
 
 const shortcuts: Record<string, () => void> = {
   r: Action.map('reload'),
@@ -58,17 +57,13 @@ function App() {
   }
 
   const locations = locationsAccessor();
-
-  const [params, setParams] = createStore({
-    locations: [] as string[],
-  });
-
-  const index = indexAccessor(params);
+  const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {
-    setParams({
-      locations: locations.data.map((loc) => loc.id),
-    });
+    const locs = locations.store;
+    if (selectedLocations().length === 0) {
+      setSelectedLocations([locs[0].id]);
+    }
   });
 
   return (
@@ -78,17 +73,58 @@ function App() {
         return err;
       }}
     >
-      <Titlebar locations={locations.data} os={os()} />
+      <Titlebar style={os()}>
+        <Combobox
+          class="px-1 pointer-events-auto"
+          items={locations.store.map((lib) => {
+            return {
+              id: lib.id,
+              value: `${lib.name}`,
+              get checked() {
+                return selectedLocations().includes(lib.id);
+              },
+            };
+          })}
+          title={'Library'}
+          onInput={(values) => {
+            setSelectedLocations(values);
+          }}
+          content={
+            <div>
+              <hr class="my-2" />
+              <button
+                type="button"
+                onMouseUp={(e) => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  e.preventDefault();
+                  Action.run('create', [locations]);
+                }}
+                class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
+              >
+                <Icon name="plus" class="mr-2" />
+                <span>Create new</span>
+              </button>
+            </div>
+          }
+        >
+          {selectedLocations().map((loc) => {
+            return <span>{locations.store.find((l) => l.id === loc)?.name}</span>;
+          })}
+          <Icon class="pl-2" name="expand-down" />
+        </Combobox>
+      </Titlebar>
 
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div
-        class={`relative w-full h-full grid ${file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
-          }`}
+        class={`relative w-full h-full grid ${
+          file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+        }`}
       >
         <div class="relative">
           <div class="absolute top-0 left-0 w-full h-full">
-            {!locations.data.length ? (
+            {!locations.store.length ? (
               <div class="absolute top-0 left-0 w-full h-full z-40">
                 <CreateLibrary />
               </div>
@@ -100,7 +136,7 @@ function App() {
               </div>
             ) : null}
 
-            <Explorer index={index.data} small={!!file()} />
+            <Explorer locations={selectedLocations} small={!!file()} />
           </div>
         </div>
 

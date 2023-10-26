@@ -4,7 +4,14 @@ import * as library from 'proto';
 
 type RemoteLibrary = typeof import('./RemoteLibrary.ts').default;
 
-type MessageType = 'locations' | 'index' | 'metadata';
+type MessageType =
+  | 'locations'
+  | 'locations.mutate'
+  | 'index'
+  | 'metadata'
+  | 'metadata.mutate'
+  | 'thumbnails';
+
 type MessageData =
   | library.LibraryMessage
   | library.LibraryMessage[]
@@ -53,7 +60,10 @@ export function createLocalSource() {
 
   const write = new WritableStream({
     write(chunk) {
-      switch (chunk.type) {
+      switch (chunk.type as MessageType) {
+        case 'locations.mutate':
+          lib.postLocation(chunk.name, chunk.path);
+          break;
         case 'locations':
           lib.fetchLocations().then((msg) => {
             controller.enqueue(msg);
@@ -64,19 +74,21 @@ export function createLocalSource() {
             if (msg) controller.enqueue(msg);
           });
           break;
-        case "thumbnails":
+        case 'thumbnails':
           lib.fetchThumbmails(chunk.ids).then((msg) => {
             if (msg) controller.enqueue(msg);
           });
-
           break;
-        case "metadata":
+        case 'metadata':
           lib.fetchMetadata(chunk.ids).then((msg) => {
             if (msg) controller.enqueue(msg);
           });
-
           break;
-
+        case 'metadata.mutate':
+          console.warn('not implemented');
+          break;
+        default:
+          console.error('chunk.type', chunk.type, 'no handled.');
       }
     },
   });

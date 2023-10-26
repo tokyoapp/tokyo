@@ -1,7 +1,7 @@
 class Subscriptions<T> extends TransformStream {
   constructor(arr: Set<(chunk: T) => void>) {
     super({
-      start() { },
+      start() {},
       transform(chunk, controller) {
         for (let cb of arr) {
           cb(chunk);
@@ -15,7 +15,7 @@ class Subscriptions<T> extends TransformStream {
 class MessageTransform<T> extends TransformStream {
   constructor(id: string) {
     super({
-      start() { },
+      start() {},
       transform(chunk, controller) {
         controller.enqueue({
           source_id: id,
@@ -52,7 +52,11 @@ export class Channel<P, T> {
     return source_id;
   }
 
-  async send(data: Record<string, string | number | undefined | Array<string | number>>) {
+  async send(
+    data: {
+      type: string;
+    } & Record<string, string | number | undefined | Array<string | number>>
+  ) {
     this.#requestHistory.unshift(data);
 
     for (const writer of this.#writers) {
@@ -66,8 +70,7 @@ export class Channel<P, T> {
           resolve(msg);
         }
       });
-    })
-
+    });
   }
 
   subscribe(cb: (msg: MessageEvent['data']) => void) {

@@ -1,23 +1,15 @@
-import { For, createEffect, createSignal, onMount, useContext } from 'solid-js';
+import { Accessor, For, Signal, createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-// import storage from '../services/ClientStorage.worker';
-import { DynamicImage } from '../image/DynamicImage.ts';
-import Action from '../actions/Action.ts';
-import Rating from './Rating.tsx';
-import Combobox from './Combobox.tsx';
-import FilterCombobox from './FilterCombobox.tsx';
-import { Stars } from './Stars.tsx';
-import Icon from './Icon.tsx';
-import { SystemInfo } from './System.tsx';
-import { IndexEntryMessage } from 'proto';
-import { t } from '../locales/messages.ts';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
-import { thumbnailsAccessor } from '../accessors/thumbnails.ts';
+import { IndexEntryMessage } from 'proto';
+import { indexAccessor } from '../accessors/index.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
-
-function createFieldStore() {
-  // use getter setter pair?
-}
+import Action from '../actions/Action.ts';
+import { t } from '../locales/messages.ts';
+import Combobox from './Combobox.tsx';
+import Icon from './Icon.tsx';
+import Rating from './Rating.tsx';
+import { Stars } from './Stars.tsx';
 
 class ExplorerModel {
   filterSettings = createStore({
@@ -40,17 +32,19 @@ class ExplorerModel {
   // TODO: this should be a "View" into index.
   stacks = createStore<IndexEntryMessage[][]>([]);
 
-  thumbnailAccessor = thumbnailsAccessor({
-    ids: createSignal<string[]>([])
+  indexAccessor = indexAccessor({
+    locations: createSignal<string[]>([]),
   });
 
   metadataAccessor = metadataAccessor({
-    ids: createSignal<string[]>([])
+    ids: createSignal<string[]>([]),
   });
 
   constructor() {
     createEffect(() => {
-      const stacks = this.stack(this.index[0].filter(this.filterItems).sort(this.sortItems));
+      const stacks = this.stack(
+        this.indexAccessor.store.filter(this.filterItems).sort(this.sortItems)
+      );
       this.stacks[1](stacks);
     });
   }
@@ -59,10 +53,6 @@ class ExplorerModel {
     this.index[1](index);
     const stacks = this.stack(index.filter(this.filterItems).sort(this.sortItems));
     this.stacks[1](stacks);
-
-    // this.thumbnailAccessor.params.ids[1](index.slice(0, 40).map(entry => entry.path));
-    // TODO: should load metadata incrementally, not all at once.
-    this.metadataAccessor.params.ids[1](index.map(entry => entry.path));
   }
 
   setFilter(options: {
@@ -160,13 +150,14 @@ class ExplorerModel {
 }
 
 export default function ExplorerView(props: {
-  index: IndexEntryMessage[];
+  locations: Accessor<string[]>;
   small: boolean;
 }) {
   const explorer = new ExplorerModel();
 
+  explorer.indexAccessor.params.locations[1](props.locations);
   createEffect(() => {
-    explorer.setIndex(props.index);
+    explorer.indexAccessor.params.locations[1](props.locations);
   });
 
   const rows = (width = 4) => {
@@ -201,7 +192,7 @@ export default function ExplorerView(props: {
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
     showName: true,
-    showTags: true,
+    showTags: false,
   });
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -320,13 +311,22 @@ export default function ExplorerView(props: {
                     {(items, i) => {
                       return (
                         <Thumbnail
+                          onMount={() => {
+                            const ids = explorer.metadataAccessor.params.ids[0]();
+                            const id = items[0].path;
+                            if (!ids.includes(id))
+                              explorer.metadataAccessor.params.ids[1]([...ids, items[0].path]);
+                          }}
                           class="flex-1 pb-1"
                           selected={explorer.selection[0].includes(items[0])}
                           number={(props.index * 4 + i() + 1).toString()}
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
-                          image={explorer.metadataAccessor.data.find(item => item.id === items[0].path)?.thumbnail}
+                          image={
+                            explorer.metadataAccessor.data.find((item) => item.id === items[0].path)
+                              ?.thumbnail
+                          }
                           onClick={() => {
                             explorer.setSelection(items);
                           }}
@@ -375,6 +375,7 @@ type ThumbProps = {
   image?: HTMLCanvasElement;
   class?: string;
   onClick: () => void;
+  onMount: () => void;
 };
 
 function Thumbnail(props: ThumbProps) {
@@ -386,6 +387,10 @@ function Thumbnail(props: ThumbProps) {
       setLoaded(true);
       setImg(props.image);
     }
+  });
+
+  onMount(() => {
+    props.onMount?.();
   });
 
   return (
@@ -403,18 +408,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {img()
             ? props.items.slice(0, 3).map((item, i) => {
-              return (
-                <div
-                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+                return (
+                  <div
+                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                >
-                  {img()}
-                </div>
-              );
-            })
+                  >
+                    {img()}
+                  </div>
+                );
+              })
             : null}
           {!loaded() ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>

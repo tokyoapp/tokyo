@@ -4,7 +4,7 @@ import Icon from './Icon.tsx';
 import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
-import { createSignal } from 'solid-js';
+import { ParentProps, createSignal } from 'solid-js';
 import Action from '../actions/Action.ts';
 import { t } from '../locales/messages.ts';
 import { LibraryMessage } from 'proto';
@@ -52,7 +52,7 @@ const WindowsTitle = () => {
 
 export const [cmdOpen, setCmdOpen] = createSignal(false);
 
-export default function Titlebar(props: { os: string; locations: LibraryMessage[] }) {
+export default function Titlebar(props: { style: string } & ParentProps) {
   return (
     <>
       <div
@@ -61,7 +61,7 @@ export default function Titlebar(props: { os: string; locations: LibraryMessage[
       >
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
-            {props.os === 'macos' ? <MacTitle /> : null}
+            {props.style === 'macos' ? <MacTitle /> : null}
             <Button
               onClick={() => {
                 setSettingOpen(!settingsOpen());
@@ -77,40 +77,7 @@ export default function Titlebar(props: { os: string; locations: LibraryMessage[
             </Button>
             <div />
             <div>
-              <Combobox
-                class="px-1 pointer-events-auto"
-                items={props.locations.map((lib) => {
-                  return {
-                    id: lib.id,
-                    value: `${lib.name} - ${lib.host}`,
-                    checked: true === lib.name,
-                  };
-                })}
-                title={'Library'}
-                onInput={(values) => {
-                  const value = values[0];
-                  if (value) {
-                    // Library.open(value);
-                  } else {
-                    Action.run('create');
-                  }
-                }}
-                content={
-                  <div>
-                    <hr class="my-2" />
-                    <button
-                      type="button"
-                      class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
-                    >
-                      <Icon name="plus" class="mr-2" />
-                      <span>Create new</span>
-                    </button>
-                  </div>
-                }
-              >
-                <span>Location</span>
-                <Icon class="pl-2" name="expand-down" />
-              </Combobox>
+              {props.children}
 
               {/* {location() */}
               {/*   .path.split('/') */}
@@ -144,7 +111,7 @@ export default function Titlebar(props: { os: string; locations: LibraryMessage[
           <div />
         </div>
 
-        {props.os === 'windows' ? <WindowsTitle /> : null}
+        {props.style === 'windows' ? <WindowsTitle /> : null}
       </div>
 
       {cmdOpen() ? (
