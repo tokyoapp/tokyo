@@ -65,16 +65,14 @@ export class DynamicImage {
 
     const imgData = this.#context.getImageData(0, 0, width, height);
 
-    for (let i = 0; i < data.length; i += 3) {
-      imgData.data[i + 0] = data[i + 0];
-      imgData.data[i + 1] = data[i + 1];
-      imgData.data[i + 2] = data[i + 2];
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      imgData.data[i + 0] = data[(i / 4) * 3 + 0];
+      imgData.data[i + 1] = data[(i / 4) * 3 + 1];
+      imgData.data[i + 2] = data[(i / 4) * 3 + 2];
       imgData.data[i + 3] = 255;
     }
 
     this.#context.putImageData(imgData, 0, 0);
-
-    console.log(imgData);
 
     return this;
   }

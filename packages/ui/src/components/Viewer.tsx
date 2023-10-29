@@ -90,8 +90,21 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
             getImage(_item.path).then((image) => {
               const img = new DynamicImage();
               img.fromRaw(image.data, image.width, image.height);
-              console.log(img.canvas());
+
+              if (meta.orientation)
+                switch (meta.orientation) {
+                  case 5:
+                  case 6:
+                    img.rotate90();
+                    break;
+                  case 7:
+                  case 8:
+                    img.rotate270();
+                    break;
+                }
+
               document.querySelector('#viewport')?.appendChild(img.canvas());
+              setLoading(false);
             });
 
             // const img = new DynamicImage(meta.thumbnail, meta);
