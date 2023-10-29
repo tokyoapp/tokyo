@@ -19,6 +19,7 @@ WORKDIR /app
 COPY . .
 
 # RUN export PATH=~/.local/share/rtx/shims:$PATH
+RUN rtx install -y
 RUN task setup
 RUN task library:install
 
