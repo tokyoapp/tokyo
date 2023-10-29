@@ -1,7 +1,7 @@
-import { Accessor, For, Signal, createEffect, createSignal, onMount } from 'solid-js';
-import { createStore } from 'solid-js/store';
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 import { IndexEntryMessage } from 'proto';
+import { For, createEffect, createSignal, on, onMount } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import { indexAccessor } from '../accessors/index.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
 import Action from '../actions/Action.ts';
@@ -10,6 +10,7 @@ import Combobox from './Combobox.tsx';
 import Icon from './Icon.tsx';
 import Rating from './Rating.tsx';
 import { Stars } from './Stars.tsx';
+import { locationsAccessor } from '../accessors/locations.ts';
 
 class ExplorerModel {
   filterSettings = createStore({
@@ -32,9 +33,7 @@ class ExplorerModel {
   // TODO: this should be a "View" into index.
   stacks = createStore<IndexEntryMessage[][]>([]);
 
-  indexAccessor = indexAccessor({
-    locations: createSignal<string[]>([]),
-  });
+  indexAccessor = indexAccessor();
 
   metadataAccessor = metadataAccessor({
     ids: createSignal<string[]>([]),
@@ -150,15 +149,36 @@ class ExplorerModel {
 }
 
 export default function ExplorerView(props: {
-  locations: Accessor<string[]>;
   small: boolean;
 }) {
   const explorer = new ExplorerModel();
 
-  explorer.indexAccessor.params.locations[1](props.locations);
+  const locations = locationsAccessor();
+  const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
+
   createEffect(() => {
-    explorer.indexAccessor.params.locations[1](props.locations);
+    const locs = selectedLocations();
+    explorer.indexAccessor.locations = locs;
+
+    // const locs = locations.store;
+    // console.log(locs);
+
+    // if (selectedLocations().length === 0) {
+    //   setSelectedLocations([locs[0].id]);
+    // }
   });
+
+  createEffect(
+    on(
+      () => [...locations.store],
+      () => {
+        if (selectedLocations().length === 0) {
+          const locs = locations.store;
+          if (locs[0]) setSelectedLocations([locs[0].id]);
+        }
+      }
+    )
+  );
 
   const rows = (width = 4) => {
     const rs = [];
@@ -222,7 +242,48 @@ export default function ExplorerView(props: {
     >
       <nav class="bg-[#111]">
         <div class="px-2 py-2 box-content h-[34px] text-xs flex justify-between items-center">
-          <div>
+          <div class="flex gap-2 ">
+            <Combobox
+              multiple
+              class="px-1 pointer-events-auto hidden @5xl:block"
+              items={locations.store.map((lib) => {
+                return {
+                  id: lib.id,
+                  value: `${lib.name}`,
+                  get checked() {
+                    return selectedLocations().includes(lib.id);
+                  },
+                };
+              })}
+              title={'Library'}
+              onInput={(values) => {
+                setSelectedLocations(values);
+              }}
+              content={
+                <div>
+                  <hr class="my-2" />
+                  <button
+                    type="button"
+                    onMouseUp={(e) => {
+                      e.stopImmediatePropagation();
+                      e.stopPropagation();
+                      e.preventDefault();
+                      Action.run('create', [locations]);
+                    }}
+                    class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
+                  >
+                    <Icon name="plus" class="mr-2" />
+                    <span>Create new</span>
+                  </button>
+                </div>
+              }
+            >
+              {selectedLocations().map((loc) => {
+                return <span>{locations.store.find((l) => l.id === loc)?.name}, </span>;
+              })}
+              <Icon class="pl-2" name="expand-down" />
+            </Combobox>
+
             <Combobox
               title="Sort"
               multiple
@@ -324,8 +385,9 @@ export default function ExplorerView(props: {
                           tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
                           image={
-                            explorer.metadataAccessor.data.find((item) => item.id === items[0].path)
-                              ?.thumbnail
+                            explorer.metadataAccessor.store.find(
+                              (item) => item.id === items[0].path
+                            )?.thumbnail
                           }
                           onClick={() => {
                             explorer.setSelection(items);

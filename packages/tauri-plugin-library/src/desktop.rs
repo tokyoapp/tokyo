@@ -52,7 +52,13 @@ impl<R: Runtime> Library<R> {
     return Ok(phl_library::Library::sysinfo());
   }
 
-  pub async fn create_library(&self) {}
+  pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
+    let root = db::Root::new();
+    root
+      .insert_location(&name.as_str(), &path.as_str())
+      .expect("Error while inserting location");
+    Ok(())
+  }
 
   pub async fn get_image(&self, path: String) -> crate::Result<Vec<u16>> {
     let mut my_image = MyImage::new(&Path::new(&path));

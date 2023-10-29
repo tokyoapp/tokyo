@@ -1,4 +1,4 @@
-import { ParentProps, createEffect, createSignal, onMount } from 'solid-js';
+import { ParentProps, createEffect, createSignal, on, onMount } from 'solid-js';
 import { DynamicImage } from '../image/DynamicImage.ts';
 // import storage from '../services/ClientStorage.worker';
 import Button from './Button.tsx';
@@ -10,6 +10,7 @@ import { settings } from './Edit.tsx';
 import { IndexEntryMessage } from 'proto';
 import * as viewport from 'viewport';
 import { t } from '../locales/messages.ts';
+import { metadataAccessor } from '../accessors/metadata.ts';
 
 createEffect(() => {
   const setts = settings();
@@ -44,10 +45,18 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
     item: IndexEntryMessage;
     url: string;
   }>();
-  const [loading, setLoading] = createSignal(false);
+  const [loading, setLoading] = createSignal(true);
 
   let controller: AbortController;
   let timeout: number;
+
+  const resize = () => {
+    const parent = viewportCanvas.parentNode as HTMLElement;
+    viewportCanvas.width = parent?.clientWidth * 2;
+    viewportCanvas.height = parent?.clientHeight * 2;
+  };
+
+  let vp: Viewport.WebHandle;
 
   createEffect(async () => {
     // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
@@ -59,85 +68,67 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
 
     controller = new AbortController();
 
-    if (_item && _item.hash !== item()?.item.hash) {
-      // const meta = await Library.metadata(_item.path);
+    const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
+    metadata.params.ids[1]([_item.path]);
 
-      setLoading(true);
-
-      const tmp = await storage.readTemp(_item.hash);
-
-      const prevImg = new Image();
-      prevImg.onload = () => {
-        const img = new DynamicImage(prevImg, meta.metadata);
-
-        img
-          .resizeContain(1024)
-          .canvas()
-          .toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              setLoading(true);
-              setItem({
-                item: _item,
-                url,
-              });
-            }
-          });
-      };
-
-      if (tmp && tmp.size > 0) {
-        prevImg.src = URL.createObjectURL(tmp);
-      } else {
-        const thumb = new Blob([meta.metadata?.thumbnail]);
-        prevImg.src = URL.createObjectURL(thumb);
+    createEffect(() => {
+      const edit = settings();
+      if (vp) {
+        vp.apply_edit(edit);
       }
-    }
-  });
-
-  const resize = () => {
-    const parent = viewportCanvas.parentNode as HTMLElement;
-    viewportCanvas.width = parent?.clientWidth * 2;
-    viewportCanvas.height = parent?.clientHeight * 2;
-  };
-
-  window.addEventListener('resize', resize);
-
-  let vp: Viewport.WebHandle;
-
-  viewport
-    .default()
-    .then(async () => {
-      const handle = await viewport.init();
-      vp = handle;
-      return handle;
-    })
-    .catch((err) => {
-      console.error('Viewport Error: ', err);
-      Notifications.push(
-        new ErrorNotification({
-          message: `Error: ${err.message}`,
-          time: 3000,
-        })
-      );
     });
 
-  createEffect(() => {
-    const edit = settings();
-    if (vp) {
-      vp.apply_edit(edit);
-    }
-  });
+    createEffect(
+      on(
+        () => [...metadata.store],
+        () => {
+          const meta = metadata.store[0];
+          if (meta) {
+            const img = new DynamicImage(meta.thumbnail, meta);
 
-  createEffect(() => {
-    const i = item();
+            // document.querySelector('#viewport')?.appendChild(img.canvas());
 
-    if (vp && i) {
-      vp.destroy();
-      vp.start(viewportCanvas.id, i.url, {
-        orientation: i.item.orientation,
+            img
+              .resizeContain(1024)
+              .canvas()
+              .toBlob((blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+
+                  console.log(url, vp);
+
+                  if (vp) {
+                    vp.destroy();
+                    vp.start(viewportCanvas.id, url, {
+                      orientation: _item.orientation,
+                    });
+                  }
+                  setLoading(false);
+                }
+              });
+          }
+        }
+      )
+    );
+
+    window.addEventListener('resize', resize);
+
+    viewport
+      .default()
+      .then(async () => {
+        const handle = await viewport.init();
+        vp = handle;
+        return handle;
+      })
+      .catch((err) => {
+        console.error('Viewport Error: ', err);
+        Notifications.push(
+          new ErrorNotification({
+            message: `Error: ${err.message}`,
+            time: 3000,
+          })
+        );
       });
-    }
-    setLoading(false);
   });
 
   onMount(() => {
@@ -185,7 +176,9 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
         />
       </div>
 
-      <div class="relative z-10 w-full h-full">{viewportCanvas}</div>
+      <div class="relative z-10 w-full h-full" id="viewport">
+        {viewportCanvas}
+      </div>
     </div>
   );
 }

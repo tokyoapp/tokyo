@@ -1,13 +1,9 @@
 import { platform } from '@tauri-apps/plugin-os';
 import { IndexEntryMessage } from 'proto';
-import { ErrorBoundary, createEffect, createSignal } from 'solid-js';
-import { locationsAccessor } from './accessors/locations.ts';
+import { ErrorBoundary, createSignal } from 'solid-js';
 import Action from './actions/Action.ts';
-import Combobox from './components/Combobox.tsx';
-import CreateLibrary from './components/CreateLibrary.tsx';
 import Edit from './components/Edit';
 import Explorer from './components/Explorer';
-import Icon from './components/Icon.tsx';
 import Info from './components/Info';
 import LocationSettings from './components/LocationSettings.tsx';
 import { Tabs } from './components/Tabs.tsx';
@@ -56,64 +52,30 @@ function App() {
       });
   }
 
-  const locations = locationsAccessor();
-  const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
-
-  createEffect(() => {
-    const locs = locations.store;
-    if (selectedLocations().length === 0) {
-      setSelectedLocations([locs[0].id]);
-    }
-  });
-
   return (
     <ErrorBoundary
-      fallback={(err) => {
+      fallback={(err: Error) => {
         console.error(err);
-        return err;
+        return (
+          <>
+            <Titlebar style={os()} />
+            <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
+            <div
+              class={`p-10 relative w-full h-full grid ${
+                file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+              }`}
+            >
+              <div>
+                <h1 class="text-2xl pb-4">Unknown Error</h1>
+                <pre class="pb-2">{err.toString()}</pre>
+                <pre class="text-xs">{err.stack}</pre>
+              </div>
+            </div>
+          </>
+        );
       }}
     >
-      <Titlebar style={os()}>
-        <Combobox
-          class="px-1 pointer-events-auto"
-          items={locations.store.map((lib) => {
-            return {
-              id: lib.id,
-              value: `${lib.name}`,
-              get checked() {
-                return selectedLocations().includes(lib.id);
-              },
-            };
-          })}
-          title={'Library'}
-          onInput={(values) => {
-            setSelectedLocations(values);
-          }}
-          content={
-            <div>
-              <hr class="my-2" />
-              <button
-                type="button"
-                onMouseUp={(e) => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                  e.preventDefault();
-                  Action.run('create', [locations]);
-                }}
-                class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
-              >
-                <Icon name="plus" class="mr-2" />
-                <span>Create new</span>
-              </button>
-            </div>
-          }
-        >
-          {selectedLocations().map((loc) => {
-            return <span>{locations.store.find((l) => l.id === loc)?.name}</span>;
-          })}
-          <Icon class="pl-2" name="expand-down" />
-        </Combobox>
-      </Titlebar>
+      <Titlebar style={os()} />
 
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
@@ -124,19 +86,13 @@ function App() {
       >
         <div class="relative">
           <div class="absolute top-0 left-0 w-full h-full">
-            {!locations.store.length ? (
-              <div class="absolute top-0 left-0 w-full h-full z-40">
-                <CreateLibrary />
-              </div>
-            ) : null}
-
             {settingsOpen() ? (
               <div class="absolute top-0 left-0 w-full h-full z-40">
                 <LocationSettings />
               </div>
             ) : null}
 
-            <Explorer locations={selectedLocations} small={!!file()} />
+            <Explorer small={!!file()} />
           </div>
         </div>
 

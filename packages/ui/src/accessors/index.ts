@@ -1,14 +1,10 @@
-import { Signal, createEffect, onCleanup } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Channel, createLocalSource } from 'client-api';
 import { IndexEntryMessage } from 'proto';
 
-export function indexAccessor(params: {
-  locations: Signal<string[]>;
-}) {
-  createEffect(() => {
-    request(params.locations[0]());
-  });
+export function indexAccessor() {
+  const locations = new Set<string>();
 
   const [store, setStore] = createStore<Array<{ source_id: string } & IndexEntryMessage>>([]);
 
@@ -51,8 +47,15 @@ export function indexAccessor(params: {
   };
 
   return {
-    request,
-    params,
+    // request,
+    get locations(): string[] {
+      return [...locations];
+    },
+    set locations(ids: string[]) {
+      locations.clear();
+      ids.forEach((id) => locations.add(id));
+      request([...locations]);
+    },
     store,
   };
 }

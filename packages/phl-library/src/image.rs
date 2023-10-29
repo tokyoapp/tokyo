@@ -3,16 +3,14 @@ pub use image::{DynamicImage, ImageBuffer};
 use rawler::{
   analyze::extract_thumbnail_pixels,
   decoders::{RawDecodeParams, RawMetadata},
-  get_decoder,
-  imgop::{raw, rescale_f32_to_u8},
-  RawFile, RawImageData,
+  get_decoder, RawFile,
 };
+use std::io::Cursor;
 use std::{
   fs::File,
   io::{BufReader, Read},
   path::{Path, PathBuf},
 };
-use std::{io::Cursor, time::Instant};
 use tokio::fs;
 
 #[derive(serde::Serialize, Debug)]
@@ -36,6 +34,7 @@ pub fn get_rating(path: String) -> Option<u32> {
     PathBuf::from(p.parent().unwrap().to_str().unwrap().to_owned() + "/" + filename + ".xmp");
 
   if xmp_file_path.exists() {
+    // TODO: use tokio File::open
     let mut xmp_file = File::open(&xmp_file_path).unwrap();
     let mut buffer = String::new();
     let _ = xmp_file.read_to_string(&mut buffer);
@@ -85,28 +84,53 @@ pub fn metadat(path: &String) -> Option<Metadata> {
   };
 
   match meta {
-    Some(metadata) => {
-      let hash = sha256::digest(
-        metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
-      );
+    Some(metadata) => Some(Metadata {
+      hash: file_hash(path).unwrap(),
+      name: String::from(p.file_name().unwrap().to_str().unwrap()),
+      path: String::from(p.to_str().unwrap()),
+      width: 0,
+      height: 0,
+      exif: metadata.exif.clone(),
+      rating: metadata
+        .rating
+        .or(get_rating(path.to_string()))
+        .or(Some(0))
+        .unwrap(),
+      make: metadata.make,
+      create_date: metadata.exif.create_date.unwrap(),
+      orientation: metadata.exif.orientation.unwrap(),
+    }),
+    None => None,
+  }
+}
 
-      Some(Metadata {
-        hash,
-        name: String::from(p.file_name().unwrap().to_str().unwrap()),
-        path: String::from(p.to_str().unwrap()),
-        width: 0,
-        height: 0,
-        exif: metadata.exif.clone(),
-        rating: metadata
-          .rating
-          .or(get_rating(path.to_string()))
-          .or(Some(0))
-          .unwrap(),
-        make: metadata.make,
-        create_date: metadata.exif.create_date.unwrap(),
-        orientation: metadata.exif.orientation.unwrap(),
-      })
+pub fn file_hash(path: &String) -> Option<String> {
+  let p = Path::new(&path);
+  let raw_file = File::open(&path);
+
+  if raw_file.is_err() {
+    return None;
+  }
+
+  let reader = BufReader::new(raw_file.unwrap());
+  let mut rawfile = RawFile::new(&p, reader);
+
+  let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
+    Ok(decoder) => Some(
+      decoder
+        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+        .unwrap(),
+    ),
+    Err(error) => {
+      println!("Error reading metadata {}", error.to_string());
+      None
     }
+  };
+
+  match meta {
+    Some(metadata) => Some(sha256::digest(
+      metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
+    )),
     None => None,
   }
 }
@@ -128,21 +152,18 @@ pub fn thumbnail(path: String) -> Vec<u8> {
 }
 
 pub async fn cached_thumb(p: &String) -> Vec<u8> {
-  // TODO: save the read call here, hash in param
-  let bytes = fs::read(p.to_string()).await.unwrap(); // Vec<u8>
-
   let ext = Path::new(&p).extension().unwrap().to_str().unwrap();
   match ext {
     "jpg" => {
-      return bytes;
+      return fs::read(p.to_string()).await.unwrap();
     }
     "png" => {
-      return bytes;
+      return fs::read(p.to_string()).await.unwrap();
     }
     &_ => {}
   }
 
-  let hash = sha256::digest(&bytes);
+  let hash = file_hash(p).unwrap();
 
   println!("hash of {}: {}", p, hash);
 

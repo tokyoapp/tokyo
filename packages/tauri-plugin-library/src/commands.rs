@@ -46,6 +46,10 @@ pub async fn get_image() {}
 pub async fn post_metadata() {}
 
 #[command]
-pub async fn post_location() {
-  println!("fuck");
+pub async fn post_location<R: Runtime>(
+  app: AppHandle<R>,
+  name: String,
+  path: String,
+) -> Result<()> {
+  app.library().post_location(name, path).await
 }

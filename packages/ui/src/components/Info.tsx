@@ -1,7 +1,8 @@
 import '@atrium-ui/mono/expandable';
-import Icon from './Icon.tsx';
-import { createEffect, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
+import { metadataAccessor } from '../accessors/metadata.ts';
 import { t } from '../locales/messages.ts';
+import Icon from './Icon.tsx';
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -52,20 +53,8 @@ function typeFromFilename(name: string) {
 export default function Info(props: {
   file?: any;
 }) {
-  const [meta, setMeta] = createSignal();
-
-  createEffect(() => {
-    if (props.file) {
-      // Library.metadata(props.file.path).then((meta) => {
-      //   setMeta(meta.metadata);
-      // });
-      console.warn('not implemented');
-    }
-  });
-
-  const exif = () => {
-    return JSON.parse(meta()?.exif);
-  };
+  const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
+  if (props.file) metadata.params.ids[1]([props.file.path]);
 
   const file_tags = () => {
     // const arr = meta()?.tags.map((tag) => {
@@ -73,6 +62,15 @@ export default function Info(props: {
     // });
     // return arr || [];
     return [];
+  };
+
+  const meta = () => {
+    return metadata.store[0];
+  };
+
+  const exif = () => {
+    const meta = metadata.store[0];
+    return JSON.parse(meta?.exif);
   };
 
   return (

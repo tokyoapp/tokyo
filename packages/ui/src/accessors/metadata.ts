@@ -4,17 +4,20 @@ import { Channel, createLocalSource } from 'client-api';
 import { DynamicImage } from '../image/DynamicImage';
 import { MetadataMessage } from 'proto';
 
+// TODO: AbortController
 export function metadataAccessor(params: {
   ids: Signal<string[]>;
 }) {
   const [list, setList] = createStore<{ value: number; source_id: string }[]>([]);
 
-  createEffect(on(params.ids[0], ids => {
-    const cache = list;
-    for (let i = 0; i < ids.length; i += 2) {
-      request(ids.slice(i, i + 2).filter(id => !cache.find(entry => entry.id === id)));
-    }
-  }));
+  createEffect(
+    on(params.ids[0], (ids) => {
+      const cache = list;
+      for (let i = 0; i < ids.length; i += 2) {
+        request(ids.slice(i, i + 2).filter((id) => !cache.find((entry) => entry.id === id)));
+      }
+    })
+  );
 
   const channel = new Channel();
 
@@ -24,19 +27,28 @@ export function metadataAccessor(params: {
 
   const currentSub = channel.subscribe(async (chunk) => {
     if (chunk.data === null) {
-      setList(list.filter((entry) => {
-        return entry.source_id !== chunk.source_id;
-      }))
+      setList(
+        list.filter((entry) => {
+          return entry.source_id !== chunk.source_id;
+        })
+      );
     } else {
       // TODO: there can be duplicate items in these chunks, should dedupe them here.
       setList([
         ...list,
-        ...await Promise.all(chunk.data.map(async (entry) => {
-          const buff = new Uint8Array(entry.metadata.thumbnail);
-          const blob = new Blob([buff]);
-          return { ...entry.metadata, thumbnail: await makeThumbnail(blob, entry.metadata), id: entry.id, source_id: chunk.source_id }
-        }))
-      ])
+        ...(await Promise.all(
+          chunk.data.map(async (entry) => {
+            const buff = new Uint8Array(entry.metadata.thumbnail);
+            const blob = new Blob([buff]);
+            return {
+              ...entry.metadata,
+              thumbnail: await makeThumbnail(blob, entry.metadata),
+              id: entry.id,
+              source_id: chunk.source_id,
+            };
+          })
+        )),
+      ]);
     }
   });
 
@@ -52,11 +64,11 @@ export function metadataAccessor(params: {
         image.onload = null;
       };
       image.onerror = (err) => {
-        reject("Error loading image");
+        reject('Error loading image');
       };
       image.src = src;
-    })
-  }
+    });
+  };
 
   const makeThumbnail = async (blob: Blob, meta: MetadataMessage) => {
     const dynimg = new DynamicImage();
@@ -77,6 +89,6 @@ export function metadataAccessor(params: {
   return {
     request,
     params,
-    data: list,
+    store: list,
   };
 }
