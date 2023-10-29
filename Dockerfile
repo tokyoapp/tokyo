@@ -29,8 +29,8 @@ FROM debian:buster-slim
 
 RUN apt-get update & apt-get install -y extra-runtime-dependencies & rm -rf /var/lib/apt/lists/*
 
+# COPY --from=builder /app/bin/library /usr/local/bin/library
+COPY --from=builder /app /app
 RUN ls -la /app
-
-COPY --from=builder /app/bin/library /usr/local/bin/library
 
 CMD ["library"]
