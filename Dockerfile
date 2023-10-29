@@ -1,7 +1,7 @@
 FROM luckydye/build-utils as builder
 
 RUN apt update
-RUN apt install libwebkit2gtk-4.0-dev \
+RUN apt install -y libwebkit2gtk-4.0-dev \
     build-essential \
     curl \
     wget \
