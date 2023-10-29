@@ -16,9 +16,9 @@ jobs:
         with:
           version: 3.30.1
       - uses: jdx/rtx-action@v1
-      - name: Build the Docker image
-        run: task build:docker
-      - name: Tag image
-        run: docker tag tokyo/library:latest registry.luckydye.de/tokyo/library:latest
-      - name: Push registry
-        run: docker push registry.luckydye.de/tokyo/library:latest
+      # - name: Build the Docker image
+      #   run: task build:docker
+      # - name: Tag image
+      #   run: docker tag tokyo/library:latest registry.luckydye.de/tokyo/library:latest
+      # - name: Push registry
+      #   run: docker push registry.luckydye.de/tokyo/library:latest

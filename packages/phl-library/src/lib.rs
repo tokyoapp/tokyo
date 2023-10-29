@@ -1,8 +1,13 @@
+pub mod db;
 pub mod image;
 
-pub mod db;
+mod edit;
 mod images;
 
+use std::path::Path;
+
+use ::image::imageops::FilterType;
+use edit::EditedImage;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
 
@@ -44,9 +49,29 @@ pub struct MetadataEntry {
   pub thumbnail: Vec<u8>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Image {
+  pub height: u32,
+  pub width: u32,
+  pub data: Vec<u8>,
+}
+
 pub struct Library {}
 
 impl Library {
+  pub fn render_image(path: String) -> Image {
+    let mut img = edit::EditedImage::new(&Path::new(&path));
+    let resized = img
+      .render()
+      .resize_to_fill(1024, 1024, FilterType::Lanczos3);
+
+    Image {
+      width: resized.width(),
+      height: resized.height(),
+      data: resized.to_rgb8().to_vec(),
+    }
+  }
+
   pub fn list(dir: String) -> Vec<String> {
     return images::list(dir);
   }

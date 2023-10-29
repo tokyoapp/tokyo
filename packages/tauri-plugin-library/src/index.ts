@@ -67,3 +67,13 @@ export async function metadata(file: string): Promise<{
     file,
   });
 }
+
+export async function getImage(path: string): Promise<{
+  width: number;
+  height: number;
+  data: Uint8Array;
+}> {
+  return await invoke('plugin:library|get_image', {
+    path,
+  });
+}

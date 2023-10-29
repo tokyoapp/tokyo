@@ -59,6 +59,26 @@ export class DynamicImage {
     if (image) this.fromDrawable(image, meta);
   }
 
+  fromRaw(data: Uint8Array, width: number, height: number) {
+    this.#canvas.width = width;
+    this.#canvas.height = height;
+
+    const imgData = this.#context.getImageData(0, 0, width, height);
+
+    for (let i = 0; i < data.length; i += 3) {
+      imgData.data[i + 0] = data[i + 0];
+      imgData.data[i + 1] = data[i + 1];
+      imgData.data[i + 2] = data[i + 2];
+      imgData.data[i + 3] = 255;
+    }
+
+    this.#context.putImageData(imgData, 0, 0);
+
+    console.log(imgData);
+
+    return this;
+  }
+
   fromDrawable(image: Drawable, meta?: ImageMeta) {
     this.#canvas.width = image.width;
     this.#canvas.height = image.height;

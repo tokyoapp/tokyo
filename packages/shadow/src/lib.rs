@@ -27,7 +27,7 @@ pub struct MyImage {
 
 impl MyImage {
   pub fn new(path: &Path) -> MyImage {
-    let image = get_image(path);
+    let image = get_image(path).unwrap();
 
     MyImage {
       image,
@@ -74,21 +74,21 @@ pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
   );
 }
 
-pub fn get_image(path: &Path) -> DynamicImage {
+pub fn get_image(path: &Path) -> Option<DynamicImage> {
   let raw_file = File::open(&path).unwrap();
   let mut rawfile = RawFile::new(path, BufReader::new(raw_file));
 
-  let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
-    Ok(decoder) => Some(
-      decoder
-        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
-        .unwrap(),
-    ),
-    Err(error) => {
-      println!("Error reading metadata {}", error.to_string());
-      None
-    }
-  };
+  // let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
+  //   Ok(decoder) => Some(
+  //     decoder
+  //       .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+  //       .unwrap(),
+  //   ),
+  //   Err(error) => {
+  //     println!("Error reading metadata {}", error.to_string());
+  //     None
+  //   }
+  // };
 
   let raw_params = RawDecodeParams { image_index: 0 };
   let decoder = get_decoder(&mut rawfile).unwrap();
@@ -111,14 +111,13 @@ pub fn get_image(path: &Path) -> DynamicImage {
       ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).expect("Invalid ImageBuffer size"),
     );
 
-    img = match metadata.unwrap().exif.orientation.unwrap() {
-      5 | 6 => img.rotate90(),
-      7 | 8 => img.rotate270(),
-      _ => img,
-    };
+    // img = match metadata.unwrap().exif.orientation.unwrap() {
+    //   5 | 6 => img.rotate90(),
+    //   7 | 8 => img.rotate270(),
+    //   _ => img,
+    // };
 
-    return img;
+    return Some(img);
   }
-
-  panic!("Fuck");
+  return None;
 }

@@ -11,6 +11,7 @@ import { IndexEntryMessage } from 'proto';
 import * as viewport from 'viewport';
 import { t } from '../locales/messages.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
+import { getImage } from 'tauri-plugin-library-api';
 
 createEffect(() => {
   const setts = settings();
@@ -84,28 +85,36 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
         () => {
           const meta = metadata.store[0];
           if (meta) {
-            const img = new DynamicImage(meta.thumbnail, meta);
+            console.log('Load', _item.path);
 
+            getImage(_item.path).then((image) => {
+              const img = new DynamicImage();
+              img.fromRaw(image.data, image.width, image.height);
+              console.log(img.canvas());
+              document.querySelector('#viewport')?.appendChild(img.canvas());
+            });
+
+            // const img = new DynamicImage(meta.thumbnail, meta);
             // document.querySelector('#viewport')?.appendChild(img.canvas());
 
-            img
-              .resizeContain(1024)
-              .canvas()
-              .toBlob((blob) => {
-                if (blob) {
-                  const url = URL.createObjectURL(blob);
+            // img
+            //   .resizeContain(1024)
+            //   .canvas()
+            //   .toBlob((blob) => {
+            //     if (blob) {
+            //       const url = URL.createObjectURL(blob);
 
-                  console.log(url, vp);
+            //       console.log(url, vp);
 
-                  if (vp) {
-                    vp.destroy();
-                    vp.start(viewportCanvas.id, url, {
-                      orientation: _item.orientation,
-                    });
-                  }
-                  setLoading(false);
-                }
-              });
+            //       if (vp) {
+            //         vp.destroy();
+            //         vp.start(viewportCanvas.id, url, {
+            //           orientation: _item.orientation,
+            //         });
+            //       }
+            //       setLoading(false);
+            //     }
+            //   });
           }
         }
       )

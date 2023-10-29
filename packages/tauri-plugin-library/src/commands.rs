@@ -1,8 +1,6 @@
-use tauri::{command, AppHandle, Runtime};
-
 use crate::{LibraryExt, Result};
-
-use phl_library::db;
+use phl_library::{db, Image};
+use tauri::{command, AppHandle, Runtime};
 
 // get local library list
 #[command]
@@ -40,7 +38,10 @@ pub async fn get_metadata<R: Runtime>(
 }
 
 #[command]
-pub async fn get_image() {}
+pub async fn get_image(path: String) -> Image {
+  let img = phl_library::Library::render_image(path);
+  img
+}
 
 #[command]
 pub async fn post_metadata() {}
