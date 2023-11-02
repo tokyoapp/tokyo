@@ -11,6 +11,7 @@ import Titlebar from './components/Titlebar.tsx';
 import Preview from './components/Viewer';
 import './components/notifications/index.ts';
 import { ErrorNotification, Notifications } from './components/notifications/index.ts';
+import Button from './components/Button.tsx';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
@@ -39,7 +40,7 @@ function App() {
     );
   });
 
-  const [os, setOS] = createSignal('browser');
+  const [os, setOS] = createSignal('macos');
 
   if ('__TAURI_INVOKE__' in window) {
     platform()
@@ -79,47 +80,53 @@ function App() {
 
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
-      <div
-        class={`relative w-full h-full grid ${
-          file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
-        }`}
-      >
-        <div class="relative">
-          <div class="absolute top-0 left-0 w-full h-full">
-            {settingsOpen() ? (
-              <div class="absolute top-0 left-0 w-full h-full z-40">
-                <LocationSettings />
-              </div>
-            ) : null}
-
-            <Explorer small={!!file()} />
-          </div>
+      <div class="grid grid-cols-[auto_1fr]">
+        <div class="activity-bar w-[52px] p-2 border-r border-zinc-800">
+          <Button>X</Button>
         </div>
 
-        {file() ? (
-          <>
-            <div class="relative flex flex-col justify-center items-center">
-              <Preview file={file()} onClose={() => setFile(undefined)} />
-            </div>
+        <div
+          class={`relative w-full h-full grid ${
+            file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
+          }`}
+        >
+          <div class="relative">
+            <div class="absolute top-0 left-0 w-full h-full">
+              {settingsOpen() ? (
+                <div class="absolute top-0 left-0 w-full h-full z-40">
+                  <LocationSettings />
+                </div>
+              ) : null}
 
-            <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
-              <Tabs>
-                <Tabs.Tab tab="Info" icon="ph-info">
-                  <Info file={file()} />
-                </Tabs.Tab>
-                <Tabs.Tab tab="Exposure" icon="ph-pencil">
-                  <Edit file={file()} />
-                </Tabs.Tab>
-                <Tabs.Tab tab="Color" icon="ph-pencil">
-                  <Edit file={file()} />
-                </Tabs.Tab>
-                <Tabs.Tab tab="Effects" icon="ph-pencil">
-                  <Edit file={file()} />
-                </Tabs.Tab>
-              </Tabs>
+              <Explorer small={!!file()} />
             </div>
-          </>
-        ) : null}
+          </div>
+
+          {file() ? (
+            <>
+              <div class="relative flex flex-col justify-center items-center">
+                <Preview file={file()} onClose={() => setFile(undefined)} />
+              </div>
+
+              <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
+                <Tabs>
+                  <Tabs.Tab tab="Info" icon="ph-info">
+                    <Info file={file()} />
+                  </Tabs.Tab>
+                  <Tabs.Tab tab="Exposure" icon="ph-pencil">
+                    <Edit file={file()} />
+                  </Tabs.Tab>
+                  <Tabs.Tab tab="Color" icon="ph-pencil">
+                    <Edit file={file()} />
+                  </Tabs.Tab>
+                  <Tabs.Tab tab="Effects" icon="ph-pencil">
+                    <Edit file={file()} />
+                  </Tabs.Tab>
+                </Tabs>
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
     </ErrorBoundary>
   );

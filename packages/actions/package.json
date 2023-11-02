@@ -1,0 +1,5 @@
+{
+  "name": "actions",
+  "module": "index.ts",
+  "type": "module"
+}
