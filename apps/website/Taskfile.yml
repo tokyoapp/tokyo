@@ -1,0 +1,27 @@
+# https://taskfile.dev
+
+version: "3"
+
+silent: true
+
+tasks:
+  dev:
+    desc: Run website dev server
+    prefix: "library"
+    cmds:
+      - bun x astro dev
+
+  build:
+    desc: Build website
+    sources:
+      - "src/**/*.astro"
+      - "src/**/*.ts"
+    cmds:
+      - bun x astro check
+      - bun x astro build
+
+  start:
+    desc: Run website preview
+    deps: [build]
+    cmds:
+      - bun x astro preview

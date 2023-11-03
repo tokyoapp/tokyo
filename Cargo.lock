@@ -6010,6 +6010,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "website"
+version = "0.1.0"
+
+[[package]]
 name = "webview2-com"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -15,6 +15,11 @@ includes:
     dir: apps/app
     taskfile: apps/app/Taskfile.yml
 
+  website:
+    aliases: [web]
+    dir: apps/website
+    taskfile: apps/website/Taskfile.yml
+
 tasks:
   run:
     desc: Run a task recursivly in all included Taskfiles.
