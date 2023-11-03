@@ -1,7 +1,7 @@
 {
   "build": {
     "devPath": "http://localhost:1420",
-    "distDir": "../dist",
+    "distDir": "./dist",
     "withGlobalTauri": false
   },
   "package": {

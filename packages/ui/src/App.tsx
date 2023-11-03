@@ -12,6 +12,7 @@ import Preview from './components/Viewer';
 import './components/notifications/index.ts';
 import { ErrorNotification, Notifications } from './components/notifications/index.ts';
 import Button from './components/Button.tsx';
+import { ActivityBar } from './components/Activitybar.tsx';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
@@ -81,9 +82,7 @@ function App() {
       <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div class="grid grid-cols-[auto_1fr]">
-        <div class="activity-bar w-[52px] p-2 border-r border-zinc-800">
-          <Button>X</Button>
-        </div>
+        <ActivityBar />
 
         <div
           class={`relative w-full h-full grid ${

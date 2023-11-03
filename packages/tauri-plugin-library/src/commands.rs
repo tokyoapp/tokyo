@@ -38,8 +38,8 @@ pub async fn get_metadata<R: Runtime>(
 }
 
 #[command]
-pub async fn get_image(path: String) -> Image {
-  let img = phl_library::Library::render_image(path);
+pub async fn get_image(path: String, exposure: f32) -> Image {
+  let img = phl_library::Library::render_image(path, exposure);
   img
 }
 

@@ -363,7 +363,7 @@ export default function ExplorerView(props: {
             scrollTarget={scrollTargetElement}
             itemSize={{ height: 208 }}
             overscan={2}
-            items={rows(props.small ? 1 : 4)}
+            items={rows(props.small ? 1 : 5)}
           >
             {(props: { index: number; style: string; item: IndexEntryMessage[][] }) => {
               return (

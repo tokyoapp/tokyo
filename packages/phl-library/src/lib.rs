@@ -56,14 +56,24 @@ pub struct Image {
   pub data: Vec<u8>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Edits {
+  pub exposure: u32,
+}
+
 pub struct Library {}
 
 impl Library {
-  pub fn render_image(path: String) -> Image {
-    let mut img = edit::EditedImage::new(&Path::new(&path));
-    let resized = img
-      .render()
-      .resize_to_fill(1024, 1024, FilterType::Lanczos3);
+  pub fn render_image(path: String, exposure: f32) -> Image {
+    let mut img = edit::EditedImage::new(
+      &Path::new(&path),
+      shadow::Edits {
+        gamma: 2.4,
+        exposure,
+        curve: vec![(0.00, 0.00), (1.0, 1.0)],
+      },
+    );
+    let resized = img.render().resize(1024, 1024, FilterType::Lanczos3);
 
     Image {
       width: resized.width(),

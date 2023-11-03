@@ -6,6 +6,9 @@ import autoprefixer from 'autoprefixer';
 
 export const config = defineConfig({
   root: path.resolve('src'),
+  build: {
+    outDir: '../dist',
+  },
   envPrefix: ['VITE_', 'TAURI_'],
   plugins: [require('vite-plugin-wasm').default(), solidPlugin()],
   css: {

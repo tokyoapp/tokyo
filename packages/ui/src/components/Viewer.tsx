@@ -57,10 +57,11 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
     viewportCanvas.height = parent?.clientHeight * 2;
   };
 
-  let vp: Viewport.WebHandle;
+  let vp: viewport.WebHandle;
+
+  const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
 
   createEffect(async () => {
-    // loadImage(`http://127.0.0.1:8000/api/local/thumbnail?file=${id}`, metadata);
     const _item = props.file;
 
     clearTimeout(timeout);
@@ -69,7 +70,6 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
 
     controller = new AbortController();
 
-    const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
     metadata.params.ids[1]([_item.path]);
 
     createEffect(() => {
@@ -81,14 +81,17 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
 
     createEffect(
       on(
-        () => [...metadata.store],
+        () => [...metadata.store, settings()],
         () => {
           const meta = metadata.store[0];
           if (meta) {
-            console.log('Load', _item.path);
+            console.log('Load', _item.path, settings());
 
-            getImage(_item.path).then((image) => {
+            getImage(_item.path, {
+              exposure: settings().exposure,
+            }).then((image) => {
               const img = new DynamicImage();
+              console.log(image);
               img.fromRaw(image.data, image.width, image.height);
 
               if (meta.orientation)
@@ -103,31 +106,19 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
                     break;
                 }
 
-              document.querySelector('#viewport')?.appendChild(img.canvas());
+              const v = document.querySelector('#viewport');
+              v?.childNodes.forEach((node) => node.remove());
+              v?.appendChild(img.canvas());
+
+              // if (vp) {
+              //   vp.destroy();
+              //   vp.start(viewportCanvas.id, img.canvas().toDataURL(), {
+              //     orientation: _item.orientation,
+              //   });
+              // }
+
               setLoading(false);
             });
-
-            // const img = new DynamicImage(meta.thumbnail, meta);
-            // document.querySelector('#viewport')?.appendChild(img.canvas());
-
-            // img
-            //   .resizeContain(1024)
-            //   .canvas()
-            //   .toBlob((blob) => {
-            //     if (blob) {
-            //       const url = URL.createObjectURL(blob);
-
-            //       console.log(url, vp);
-
-            //       if (vp) {
-            //         vp.destroy();
-            //         vp.start(viewportCanvas.id, url, {
-            //           orientation: _item.orientation,
-            //         });
-            //       }
-            //       setLoading(false);
-            //     }
-            //   });
           }
         }
       )
@@ -190,15 +181,17 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
             const f = props.file?.hash;
             if (f) {
               console.warn('not implemented');
-              // Library.postMetadata(f, {
-              //   rating: value,
-              // });
+              /*
+              metadata.mutate(f, {
+                rating: value,
+              });
+              */
             }
           }}
         />
       </div>
 
-      <div class="relative z-10 w-full h-full" id="viewport">
+      <div class="relative z-10 w-full h-full flex justify-center items-center" id="viewport">
         {viewportCanvas}
       </div>
     </div>

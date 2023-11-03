@@ -9,16 +9,12 @@ pub struct EditedImage {
 }
 
 impl EditedImage {
-  pub fn new(path: &Path) -> EditedImage {
+  pub fn new(path: &Path, edits: Edits) -> EditedImage {
     let image = shadow::get_image(path);
 
     EditedImage {
       image: image.unwrap(),
-      edits: Edits {
-        gamma: 2.2,
-        exposure: 0.1,
-        curve: vec![(0.00, 0.00), (1.0, 1.0)],
-      },
+      edits,
     }
   }
 
