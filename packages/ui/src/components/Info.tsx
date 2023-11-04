@@ -74,7 +74,7 @@ export default function Info(props: {
   };
 
   return (
-    <div class="bg-zinc-900 w-full h-full overflow-auto absolute">
+    <div class="overflow-auto">
       {!props.file ? (
         <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
       ) : (
@@ -82,7 +82,7 @@ export default function Info(props: {
           <Property title={t('info_name')} value={props.file.name} />
           <Property title={t('info_hash')} value={props.file.hash} />
           <Property title={t('info_path')} value={props.file.path} />
-          <Property title={t('info_date_created')} value={props.file.createDate} />
+          <Property title={t('info_date_created')} value={props.file.create_date} />
           <Property
             title={t('info_tags')}
             value={[typeFromFilename(props.file.name), ...file_tags()]}

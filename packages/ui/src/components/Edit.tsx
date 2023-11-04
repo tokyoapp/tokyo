@@ -16,7 +16,7 @@ export default function Info(props: {
   file?: IndexEntryMessage;
 }) {
   return (
-    <div class="bg-zinc-900 w-full h-full overflow-auto absolute">
+    <div class="overflow-auto">
       {!props.file ? (
         <div class="p-3 text-center text-xs opacity-50 mt-10">No file selected</div>
       ) : (

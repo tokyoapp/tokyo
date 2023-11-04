@@ -107,21 +107,23 @@ function App() {
                 <Preview file={file()} onClose={() => setFile(undefined)} />
               </div>
 
-              <div class="relative mt-2 mr-2 rounded-t-md overflow-hidden">
-                <Tabs>
-                  <Tabs.Tab tab="Info" icon="ph-info">
-                    <Info file={file()} />
-                  </Tabs.Tab>
-                  <Tabs.Tab tab="Exposure" icon="ph-pencil">
-                    <Edit file={file()} />
-                  </Tabs.Tab>
-                  <Tabs.Tab tab="Color" icon="ph-pencil">
-                    <Edit file={file()} />
-                  </Tabs.Tab>
-                  <Tabs.Tab tab="Effects" icon="ph-pencil">
-                    <Edit file={file()} />
-                  </Tabs.Tab>
-                </Tabs>
+              <div class="relative mt-2 mr-2 overflow-hidden">
+                <div class="absolute top-0 bottom-0 right-0 h-auto overflow-auto">
+                  <Tabs>
+                    <Tabs.Tab title="Info" icon="ph-info" open>
+                      <Info file={file()} />
+                    </Tabs.Tab>
+                    <Tabs.Tab title="Exposure" icon="ph-pencil" open>
+                      <Edit file={file()} />
+                    </Tabs.Tab>
+                    <Tabs.Tab title="Color" icon="ph-pencil">
+                      <Edit file={file()} />
+                    </Tabs.Tab>
+                    <Tabs.Tab title="Effects" icon="ph-pencil">
+                      <Edit file={file()} />
+                    </Tabs.Tab>
+                  </Tabs>
+                </div>
               </div>
             </>
           ) : null}

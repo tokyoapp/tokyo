@@ -34,21 +34,20 @@ export function metadataAccessor(params: {
       );
     } else {
       // TODO: there can be duplicate items in these chunks, should dedupe them here.
-      setList([
-        ...list,
-        ...(await Promise.all(
-          chunk.data.map(async (entry) => {
-            const buff = new Uint8Array(entry.metadata.thumbnail);
-            const blob = new Blob([buff]);
-            return {
-              ...entry.metadata,
-              thumbnail: await makeThumbnail(blob, entry.metadata),
-              id: entry.id,
-              source_id: chunk.source_id,
-            };
-          })
-        )),
-      ]);
+      const items = await Promise.all(
+        chunk.data.map(async (entry) => {
+          const buff = new Uint8Array(entry.metadata.thumbnail);
+          const blob = new Blob([buff]);
+          return {
+            ...entry.metadata,
+            thumbnail: await makeThumbnail(blob, entry.metadata),
+            id: entry.id,
+            source_id: chunk.source_id,
+          };
+        })
+      );
+      const newList = [...list, ...items];
+      setList(newList.filter((item) => newList.find((i) => i.id === item.id)));
     }
   });
 

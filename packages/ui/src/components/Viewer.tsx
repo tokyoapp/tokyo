@@ -13,10 +13,6 @@ import { t } from '../locales/messages.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
 import { getImage } from 'tauri-plugin-library-api';
 
-createEffect(() => {
-  const setts = settings();
-});
-
 const [app, setApp] = createSignal({
   zoom: 1,
 });

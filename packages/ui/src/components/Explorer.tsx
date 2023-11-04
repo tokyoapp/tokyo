@@ -235,9 +235,15 @@ export default function ExplorerView(props: {
 
   let scrollTargetElement!: HTMLDivElement;
 
+  console.log(explorer.metadataAccessor.store);
+
+  const image = (id: string) => {
+    return explorer.metadataAccessor.store.find((item) => item.id === id)?.thumbnail;
+  };
+
   return (
     <div
-      class="@container relative grid grid-rows-[auto_1fr] overflow-auto h-full bg-transparent"
+      class="@container bg-[#111] relative grid grid-rows-[auto_1fr] overflow-auto h-full"
       onKeyDown={onKeyDown}
     >
       <nav class="bg-[#111]">
@@ -384,11 +390,7 @@ export default function ExplorerView(props: {
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
-                          image={
-                            explorer.metadataAccessor.store.find(
-                              (item) => item.id === items[0].path
-                            )?.thumbnail
-                          }
+                          image={image(items[0].path)}
                           onClick={() => {
                             explorer.setSelection(items);
                           }}
@@ -441,16 +443,6 @@ type ThumbProps = {
 };
 
 function Thumbnail(props: ThumbProps) {
-  const [img, setImg] = createSignal<HTMLCanvasElement>();
-  const [loaded, setLoaded] = createSignal(false);
-
-  createEffect(() => {
-    if (props.image) {
-      setLoaded(true);
-      setImg(props.image);
-    }
-  });
-
   onMount(() => {
     props.onMount?.();
   });
@@ -461,14 +453,14 @@ function Thumbnail(props: ThumbProps) {
         data-selected={props.selected || undefined}
         tabIndex={0}
         class={[
-          `h-full bg-transparent bg-zinc-900 focus:bg-zinc-800 focus:border-gray-600
+          `h-full bg-transparent focus:bg-zinc-800 focus:border-gray-600
           border shadow-none`,
           props.selected ? 'border-gray-600' : 'border-transparent',
         ].join(' ')}
         onClick={() => props.onClick()}
       >
         <div class="w-full h-full flex items-center justify-center">
-          {img()
+          {props.image
             ? props.items.slice(0, 3).map((item, i) => {
                 return (
                   <div
@@ -478,12 +470,12 @@ function Thumbnail(props: ThumbProps) {
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
                   >
-                    {img()}
+                    {props.image}
                   </div>
                 );
               })
             : null}
-          {!loaded() ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
+          {!props.image ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>
       </div>
 
