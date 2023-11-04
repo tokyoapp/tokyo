@@ -7,6 +7,7 @@ import autoprefixer from 'autoprefixer';
 export const config = defineConfig({
   root: path.resolve('src'),
   build: {
+    target: 'esnext',
     outDir: '../dist',
   },
   envPrefix: ['VITE_', 'TAURI_'],
