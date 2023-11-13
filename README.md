@@ -5,4 +5,5 @@
 Required tools:
 - task
 - rtx
+- protoc
 - rust (install using rustup)
