@@ -1,5 +1,5 @@
 {
-  "name": "ui",
+  "name": "@tokyo/ui",
   "main": "./index.tsx",
   "type": "module",
   "bin": {
@@ -16,10 +16,10 @@
     "comlink": "^4.4.1",
     "lit": "^2.6.1",
     "postcss": "^8.4.29",
-    "proto": "workspace:*",
-    "client-api": "workspace:*",
-    "viewport": "workspace:*",
-    "tauri-plugin-library-api": "workspace:*",
+    "@toyko/properties": "workspace:",
+    "@toyko/proto": "workspace:",
+    "@toyko/client-api": "workspace:",
+    "tauri-plugin-library-api": "workspace:",
     "solid-js": "^1.7.8",
     "@minht11/solid-virtual-container": "^0.2.1",
     "tailwindcss": "^3.3.3",

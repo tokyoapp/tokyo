@@ -1,5 +1,5 @@
 {
-  "name": "client-api",
+  "name": "@tokyo/client-api",
   "main": "./src/lib.ts",
   "type": "module",
   "dependencies": {

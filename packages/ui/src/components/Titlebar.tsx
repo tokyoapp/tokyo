@@ -5,7 +5,7 @@ import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { ParentProps, createSignal } from 'solid-js';
-import Action from '../actions/Action.ts';
+import Jobs from '../actions/Action.ts';
 import { t } from '../locales/messages.ts';
 import { LibraryMessage } from 'proto';
 

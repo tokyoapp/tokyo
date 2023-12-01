@@ -1,6 +1,6 @@
 {
-	"name": "@visio/log",
-	"description": "Just a pretty log function.",
-	"main": "src/lib.ts",
-	"type": "module"
+  "name": "@tokyo/log",
+  "description": "Just a pretty log function.",
+  "main": "src/lib.ts",
+  "type": "module"
 }

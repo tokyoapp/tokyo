@@ -1,7 +1,7 @@
 import { platform } from '@tauri-apps/plugin-os';
 import { IndexEntryMessage } from 'proto';
 import { ErrorBoundary, createSignal } from 'solid-js';
-import Action from './actions/Action.ts';
+import Jobs from './actions/Action.ts';
 import Edit from './components/Edit';
 import Explorer from './components/Explorer';
 import Info from './components/Info';
@@ -21,8 +21,8 @@ export const [settingsOpen, setSettingOpen] = createSignal(false);
 export const [file, setFile] = createSignal<IndexEntryMessage>();
 
 const shortcuts: Record<string, () => void> = {
-  r: Action.map('reload'),
-  p: Action.map('search'),
+  r: Jobs.map('reload'),
+  p: Jobs.map('search'),
 };
 
 window.addEventListener('keyup', (e) => {

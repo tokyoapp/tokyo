@@ -67,9 +67,7 @@ export type PropertyType =
   | ReturnType<typeof Property['Float']>
   | ReturnType<typeof Property['DateRange']>
   | ReturnType<typeof Property['Range']>
-  | ReturnType<typeof Property['ColorPalette']>
   | ReturnType<typeof Property['Boolean']>
-  | ReturnType<typeof Property['BooleanGroup']>
   | ReturnType<typeof Property['Vector']>;
 
 export class Property<
@@ -117,17 +115,6 @@ export class Property<
    */
   static get Boolean() {
     return (attr: PropertyAttributes<boolean>) => new Property(PropertyTag.Boolean, attr);
-  }
-
-  /**
-   * A group of booleans like: [true, false, false, true].
-   */
-  static get BooleanGroup() {
-    return (
-      attr: PropertyAttributes<Record<string, boolean>> & {
-        labels: Record<string, string>;
-      }
-    ) => new Property(PropertyTag.BooleanGroup, attr);
   }
 
   /**

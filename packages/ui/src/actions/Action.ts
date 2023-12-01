@@ -15,7 +15,7 @@ const [runningJobCount, setRunningJobCount] = createSignal(0);
 
 type ActionFunction = (...args: any[]) => Promise<void>;
 
-export default class Action {
+export default class Jobs {
   static actions = {
     reload: reload as ActionFunction,
     open: open as ActionFunction,
@@ -46,7 +46,7 @@ export default class Action {
 
   static map(action: keyof typeof this.actions) {
     return () => {
-      Action.run(action);
+      Jobs.run(action);
     };
   }
 }

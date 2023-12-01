@@ -9,7 +9,7 @@
     "url": "git@gitlab.luckydye.de:apps/evolution.git"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.0.0"
+    "@biomejs/biome": "^1.4.1"
   },
-  "workspaces": ["packages/*", "packages/viewport/pkg", "apps/*"]
+  "workspaces": ["packages/*", "apps/*"]
 }

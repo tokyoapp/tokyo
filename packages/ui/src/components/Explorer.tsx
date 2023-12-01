@@ -4,7 +4,7 @@ import { For, createEffect, createSignal, on, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { indexAccessor } from '../accessors/index.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
-import Action from '../actions/Action.ts';
+import Jobs from '../actions/Action.ts';
 import { t } from '../locales/messages.ts';
 import Combobox from './Combobox.tsx';
 import Icon from './Icon.tsx';
@@ -137,7 +137,7 @@ class ExplorerModel {
   };
 
   async openFile(entry: IndexEntryMessage) {
-    Action.run('open', [entry]);
+    Jobs.run('open', [entry]);
   }
 
   tags(entry: IndexEntryMessage) {
@@ -274,7 +274,7 @@ export default function ExplorerView(props: {
                       e.stopImmediatePropagation();
                       e.stopPropagation();
                       e.preventDefault();
-                      Action.run('create', [locations]);
+                      Jobs.run('create', [locations]);
                     }}
                     class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
                   >
