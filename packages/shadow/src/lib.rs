@@ -1,13 +1,19 @@
 use core::panic;
+use image::Pixel;
 pub use image::{DynamicImage, ImageBuffer};
-use imagepipe::{ImageSource, Pipeline};
+use imagepipe::{gamma::OpGamma, ImageSource, Pipeline};
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
   get_decoder,
   imgop::raw,
   RawFile, RawImageData,
 };
-use std::{fs::File, io::BufReader, path::Path};
+use std::{
+  fs::File,
+  io::BufReader,
+  ops::{Deref, Mul},
+  path::Path,
+};
 // use xmp_toolkit;
 
 // pub fn get_xmp_data(path: &Path) {
@@ -33,91 +39,108 @@ impl MyImage {
       image,
       edits: Edits {
         gamma: 2.2,
+        contrast: 0.0,
         exposure: 0.0,
-        curve: vec![(0.00, 0.00), (1.0, 1.0)],
+        curve: vec![(0.0, 0.0), (1.0, 1.0)],
       },
     }
   }
 
   pub fn render(&mut self) -> DynamicImage {
-    println!("{:?}", self.edits.exposure);
+    process(&mut self.image)
+  }
+}
 
-    let img = process(&self.image, &self.edits);
+//
+//
+//
+//
+//
 
-    img
+struct Nodes {
+  input: Node,
+  output: Node,
+}
+
+impl Nodes {
+  fn new() -> Nodes {
+    let mut output = Node::new();
+    let mut input = Node::new();
+
+    input.connect(output);
+
+    Nodes { output, input }
+  }
+
+  fn process(&self, input: Vec<u8>) {
+    println!("process {:?}", input);
+  }
+}
+
+struct Node {
+  edits: Option<Edits>,
+  input: Option<Box<Node>>,
+  output: Option<Box<Node>>,
+}
+
+impl Node {
+  fn new() -> Node {
+    Node {
+      edits: None,
+      input: None,
+      output: None,
+    }
+  }
+
+  fn connect(&mut self, node2: Node) {
+    self.output = Some(Box::new(node2));
   }
 }
 
 pub struct Edits {
   pub gamma: f32,
   pub exposure: f32,
+  pub contrast: f32,
   pub curve: Vec<(f32, f32)>,
 }
 
-pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
-  println!("process image");
-  let source = ImageSource::Other(img.clone());
-  let mut pipeline = Pipeline::new_from_source(source).unwrap();
+pub fn process(img: &mut DynamicImage) -> DynamicImage {
+  let buffer = img.as_mut_rgb32f().unwrap();
 
-  // pipeline.ops.gamma. = edits.gamma;
-  pipeline.ops.basecurve.exposure = edits.exposure;
-  pipeline.ops.basecurve.points = edits.curve.clone();
+  let mut nodes = Nodes::new();
 
-  println!("generate ouput");
+  let n1 = Node::new();
+  nodes.input.connect(n1);
 
-  let out = pipeline.output_16bit(None).unwrap();
+  for pixel in buffer.pixels_mut() {
+    pixel.apply_without_alpha(|p| p.mul(1.5));
+  }
 
-  println!("convert ouput");
-
-  return DynamicImage::ImageRgb16(
-    ImageBuffer::from_raw(out.width as u32, out.height as u32, out.data).expect("F"),
-  );
+  DynamicImage::from(DynamicImage::ImageRgb32F(buffer.deref().clone()).to_rgb16())
 }
 
 pub fn get_image(path: &Path) -> Option<DynamicImage> {
   let raw_file = File::open(&path).unwrap();
   let mut rawfile = RawFile::new(path, BufReader::new(raw_file));
-
-  // let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
-  //   Ok(decoder) => Some(
-  //     decoder
-  //       .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
-  //       .unwrap(),
-  //   ),
-  //   Err(error) => {
-  //     println!("Error reading metadata {}", error.to_string());
-  //     None
-  //   }
-  // };
-
   let raw_params = RawDecodeParams { image_index: 0 };
   let decoder = get_decoder(&mut rawfile).unwrap();
   let rawimage = decoder
     .raw_image(&mut rawfile, raw_params.clone(), false)
     .unwrap();
 
-  if let Ok(mut params) = rawimage.develop_params() {
-    // params.gamma = 1.8;
-
+  if let Ok(params) = rawimage.develop_params() {
     let buf = match &rawimage.data {
       RawImageData::Integer(buf) => buf,
       RawImageData::Float(_) => todo!(),
     };
 
-    println!("Develop image");
     let (srgbf, dim) = raw::develop_raw_srgb(buf, &params).unwrap();
 
-    let mut img = DynamicImage::ImageRgb32F(
+    let img = DynamicImage::ImageRgb32F(
       ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).expect("Invalid ImageBuffer size"),
     );
 
-    // img = match metadata.unwrap().exif.orientation.unwrap() {
-    //   5 | 6 => img.rotate90(),
-    //   7 | 8 => img.rotate270(),
-    //   _ => img,
-    // };
-
     return Some(img);
   }
-  return None;
+  None
 }
