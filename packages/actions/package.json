@@ -1,5 +1,5 @@
 {
   "name": "actions",
-  "module": "index.ts",
+  "module": "src/lib.ts",
   "type": "module"
 }

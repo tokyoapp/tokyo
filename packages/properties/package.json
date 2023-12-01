@@ -1,0 +1,8 @@
+{
+  "name": "@visio/properties",
+  "description": "Reactive property library.",
+  "main": "src/lib.ts",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {}
+}

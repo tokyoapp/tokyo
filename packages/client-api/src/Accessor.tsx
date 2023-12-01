@@ -1,80 +1,171 @@
-class Subscriptions<T> extends TransformStream {
-  constructor(arr: Set<(chunk: T) => void>) {
-    super({
-      start() {},
-      transform(chunk, controller) {
-        for (let cb of arr) {
-          cb(chunk);
-        }
-        controller.enqueue(chunk);
-      },
-    });
-  }
-}
+import { Channel } from './Channel.js';
+import * as Comlink from 'comlink';
 
-class MessageTransform<T> extends TransformStream {
-  constructor(id: string) {
-    super({
-      start() {},
-      transform(chunk, controller) {
-        controller.enqueue({
-          source_id: id,
-          data: chunk.data,
-        });
-      },
-    });
-  }
-}
+export type AccessorParams = {
+  /**
+   * The query parameters that will be used to fetch the data.
+   */
+  query: Record<string, number | string | undefined | string[] | number[] | Date>;
 
-export class Channel<P, T> {
-  #writers = new Set<WritableStreamDefaultWriter<any>>();
+  [key: string]: any;
+};
 
-  #subscriptions = new Set<(chunk: T) => void>();
+/**
+ * This class is responsible for handling the communication with the GeoApi, caching that data and keeping the data up to date with the given parameters.
+ */
+export class Accessor<Params extends AccessorParams, Cache, Data> {
+  public params?: Params;
 
-  #requestHistory: Record<string, any>[] = [];
+  public error?: Error;
 
-  connect(read: ReadableStream, write: WritableStream) {
-    const source_id = Math.floor(Math.random() * 100000).toString();
+  /**
+   * Indicates if the accessor is currently fetching or filtering data.
+   */
+  public pending = false;
 
-    const writer = write.getWriter();
-    this.#writers.add(writer);
+  private _cacheKey: string[] = [];
+  private _cache: (Cache | undefined)[] = [];
 
-    read
-      .pipeThrough(new MessageTransform(source_id))
-      .pipeThrough(new Subscriptions(this.#subscriptions))
-      .pipeTo(new WritableStream());
+  /**
+   * Set the params for this accessor. This will trigger a new request to the GeoApi when needed.
+   */
+  public setParams(params: Params) {
+    const req = this._strategy.createRequest(params);
 
-    const lastReq = this.#requestHistory[0];
-    if (lastReq) {
-      writer.write(lastReq);
+    if (Array.isArray(req)) {
+      throw new Error('Multiple requests are not supported yet');
     }
 
-    return source_id;
-  }
+    if (req) {
+      const messageId = 0;
+      const cacheKey = JSON.stringify(req);
 
-  async send(
-    data: {
-      type: string;
-    } & Record<string, string | number | undefined | Array<string | number>>
-  ) {
-    this.#requestHistory.unshift(data);
-
-    for (const writer of this.#writers) {
-      if (writer) await writer.write(data);
+      if (cacheKey !== this._cacheKey[messageId]) {
+        this._cacheKey[messageId] = cacheKey;
+        this._cache[messageId] = undefined;
+        this.setPending(true);
+        req._nonce = messageId;
+        this._channel.send(req);
+        this.dispatch('request', params);
+      } else if (this._cache[messageId] && params !== this.params) {
+        this.params = params;
+        this.dispatch('data', this.processData());
+        this.setPending(false);
+      }
     }
 
-    return new Promise((resolve) => {
-      const finish = this.subscribe((msg) => {
-        if (msg.id === data.id) {
-          finish();
-          resolve(msg);
-        }
+    this.params = params;
+
+    this.clearError();
+  }
+
+  /**
+   * Returns the filtered data if available.
+   */
+  public processData() {
+    if (this._strategy.filter) {
+      return this._strategy.filter(this._cache, this.params);
+    }
+  }
+
+  private target = new EventTarget();
+
+  // public on(event: 'data', callback: (payload?: Data) => void): () => void;
+  // public on(event: 'pending', callback: (payload?: undefined) => void): () => void;
+  // public on(event: 'error', callback: (payload?: undefined) => void): () => void;
+  public on(event: 'data' | 'pending' | 'error' | 'request', callback: (payload?: any) => void) {
+    const listener = ((ev: CustomEvent) => callback(ev.detail)) as EventListener;
+
+    this.target.addEventListener(event, listener);
+
+    if ('WorkerGlobalScope' in globalThis) {
+      return Comlink.proxy(() => {
+        this.target.removeEventListener(event, listener);
       });
-    });
+    }
+    return () => {
+      this.target.removeEventListener(event, listener);
+    };
   }
 
-  subscribe(cb: (msg: MessageEvent['data']) => void) {
-    this.#subscriptions.add(cb);
-    return () => this.#subscriptions.delete(cb);
+  private dispatch(event: 'data', payload?: Data): void;
+  private dispatch(event: 'request', payload?: Params): void;
+  private dispatch(event: 'pending', payload?: undefined): void;
+  private dispatch(event: 'error', payload?: undefined): void;
+  private dispatch(event: string, payload?: undefined) {
+    this.target.dispatchEvent(new CustomEvent(event, { detail: payload }));
+  }
+
+  private _channel: Channel<RequestMessage, ResponseMessage>;
+
+  constructor(
+    client: {
+      toStream(): readonly [ReadableStream, WritableStream];
+    },
+    private _strategy: {
+      /**
+       * Create request message from params.
+       */
+      createRequest(params: Params): RequestMessage | RequestMessage[] | undefined;
+      /**
+       * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
+       */
+      handleMessage(msg: ResponseMessage, params?: Params): Cache | undefined;
+      /**
+       * Filtered cached data before returning it to the user.
+       */
+      filter: (cache: (Cache | undefined)[], params?: Params) => Data;
+    }
+  ) {
+    this._channel = new Channel<RequestMessage, ResponseMessage>();
+    this._channel.connect(...client.toStream());
+    this._channel.rx?.pipeTo(
+      new WritableStream({
+        write: (msg) => {
+          this.onMessage(msg);
+        },
+      })
+    );
+  }
+
+  /**
+   * Handles responses from the api.
+   */
+  private onMessage(msg: ResponseMessage) {
+    if (msg._type === MessageType.Error) {
+      console.error('ohno an error, this should be handled!', msg.error);
+
+      if (msg.error) {
+        this.onError(msg.error);
+      }
+    } else {
+      const res = this._strategy.handleMessage(msg, this.params);
+      if (res) {
+        const messageId = msg._nonce ? msg._nonce : 0;
+        this._cache[messageId] = res;
+      }
+
+      this.dispatch('data', this.processData());
+      this.setPending(false);
+
+      return res;
+    }
+
+    return msg;
+  }
+
+  private clearError() {
+    this.error = undefined;
+  }
+
+  private onError(err: Error) {
+    this.error = err;
+    this.dispatch('error');
+    this.setPending(false);
+  }
+
+  private setPending(pending: boolean) {
+    this.pending = pending;
+    this.dispatch('pending');
   }
 }
