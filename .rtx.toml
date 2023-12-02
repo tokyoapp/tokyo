@@ -1,4 +1,6 @@
 [tools]
-bun = "1.0.14"
+bun = "1.0.15"
+pnpm = "8"
+node = "20"
 task = "3"
 protoc = "21.12"
