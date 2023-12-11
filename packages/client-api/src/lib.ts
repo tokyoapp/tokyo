@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import { LocalLibrary } from './LocalLibrary.js';
+import { LocalLibrary } from './api/LocalLibrary.js';
 import * as library from 'proto';
 
 type RemoteLibrary = typeof import('./RemoteLibrary.ts').default;
