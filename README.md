@@ -1,11 +1,8 @@
 ![Preview](./docs/Inspect_View.png)
 
-<center>
-  <h1>
-    TOKYO
-    <span style="font-size: 12px">(working title)</span>
-  </h1>
-</center>
+<p align="center">
+	<h1 align="center"><b>TOKYO</b> <small>(working title)</small></h1>
+</p>
 
 Tokyo is a Work in Progress professional Photo Editor built on Rust and Solid.JS. It runs on all platforms including iOS, Mac, Windows, Linux.
 
