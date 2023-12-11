@@ -18,7 +18,7 @@ tasks:
   ui:dev:
     dir: ./
     cmds:
-      - bun x @tokyo/ui dev
+      - bun x tokyo-ui dev
 
   tauri:build:
     dir: ./
@@ -28,7 +28,7 @@ tasks:
   ui:build:
     dir: ./
     cmds:
-      - bun x @tokyo/ui build
+      - bun x tokyo-ui build
 
   dev:ios:
     desc: Dev ios

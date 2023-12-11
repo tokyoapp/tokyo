@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { Accessor } from '@tokyo/client-api';
+import { Accessor } from 'tokyo-client-api';
 import * as Comlink from 'comlink';
 
 /**

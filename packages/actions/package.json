@@ -1,5 +1,5 @@
 {
-  "name": "@tokyo/actions",
+  "name": "tokyo-actions",
   "module": "src/lib.ts",
   "type": "module"
 }
