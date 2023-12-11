@@ -1,6 +1,6 @@
 import '@atrium-ui/mono/expandable';
 import Icon from './Icon.tsx';
-import { IndexEntryMessage } from 'proto';
+import { IndexEntryMessage } from 'tokyo-proto';
 import './FluidInput.ts';
 import { createSignal } from 'solid-js';
 

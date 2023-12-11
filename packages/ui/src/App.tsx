@@ -1,5 +1,5 @@
 import { platform } from '@tauri-apps/plugin-os';
-import { IndexEntryMessage } from 'proto';
+import { IndexEntryMessage } from 'tokyo-proto';
 import { ErrorBoundary, createSignal } from 'solid-js';
 import Jobs from './actions/Action.ts';
 import Edit from './components/Edit';

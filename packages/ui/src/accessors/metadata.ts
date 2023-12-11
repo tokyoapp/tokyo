@@ -1,8 +1,8 @@
 import { Signal, createEffect, on, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Channel, createLocalSource } from 'client-api';
+import { Channel, createLocalSource } from 'tokyo-client-api';
 import { DynamicImage } from '../image/DynamicImage';
-import { MetadataMessage } from 'proto';
+import { MetadataMessage } from 'tokyo-proto';
 
 // TODO: AbortController
 export function metadataAccessor(params: {

@@ -1,9 +1,9 @@
 {
-  "name": "@tokyo/ui",
+  "name": "tokyo-ui",
   "main": "./index.tsx",
   "type": "module",
   "bin": {
-    "@tokyo/ui": "./cli/main.ts"
+    "tokyo-ui": "./cli/main.ts"
   },
   "dependencies": {
     "@tauri-apps/plugin-os": "^2.0.0-alpha.2",
@@ -16,9 +16,9 @@
     "comlink": "^4.4.1",
     "lit": "^2.6.1",
     "postcss": "^8.4.29",
-    "@tokyo/properties": "workspace:",
-    "@tokyo/proto": "workspace:",
-    "@tokyo/client-api": "workspace:",
+    "tokyo-properties": "workspace:",
+    "tokyo-proto": "workspace:",
+    "tokyo-client-api": "workspace:",
     "tauri-plugin-library-api": "workspace:",
     "solid-js": "^1.7.8",
     "@minht11/solid-virtual-container": "^0.2.1",

@@ -1,17 +1,14 @@
 ![Preview](./docs/Inspect_View.png)
 
-<center>
-  <h1>
-    TOKYO
-    <span style="font-size: 12px">(working title)</span>
-  </h1>
-</center>
+<p align="center">
+	<h1 align="center"><b>TOKYO</b> <small>(working title)</small></h1>
+</p>
 
 Tokyo is a Work in Progress professional Photo Editor built on Rust and Solid.JS. It runs on all platforms including iOS, Mac, Windows, Linux.
 
 Tokyo does not care about where your photos are stored, accessing them should be easy and fast. They can be on your local machine or on a NAS, escaping from the Cloud-only solutions, without leaving its benefits behind. Tokyo will still sync all your edits and presets between devices.
 
-Tokyo tykes you from accessing your photos to editing them, to exporting them, all in one place, from any device.
+Tokyo takes you from accessing your photos to editing them, to exporting them, all in one place, from any device.
 
 ## Architecture
 
@@ -27,14 +24,13 @@ Requirements:
 
 - [bun](https://bun.sh/)
 - [rust](https://rustup.rs/)
-- [pnpm](https://pnpm.io/)
 - [task](https://taskfile.dev/)
 - [protoc](https://grpc.io/docs/protoc-installation/)
 
 All can automatically be installed using [RTX](https://github.com/jdx/rtx) with:
 
 ```sh
-task setup
+rtx install
 ```
 
 #### Running the desktop app:
