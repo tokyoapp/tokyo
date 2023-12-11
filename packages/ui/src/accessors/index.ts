@@ -1,7 +1,7 @@
 import { onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Channel, createLocalSource } from 'client-api';
-import { IndexEntryMessage } from 'proto';
+import { Channel, createLocalSource } from '@tokyo/client-api';
+import { IndexEntryMessage } from '@tokyo/proto';
 
 export function indexAccessor() {
   const locations = new Set<string>();

@@ -1,5 +1,5 @@
 import { VirtualContainer } from '@minht11/solid-virtual-container';
-import { IndexEntryMessage } from 'proto';
+import { IndexEntryMessage } from '@tokyo/proto';
 import { For, createEffect, createSignal, on, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { indexAccessor } from '../accessors/index.ts';

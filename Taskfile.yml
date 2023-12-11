@@ -68,30 +68,19 @@ tasks:
     prompt: Do you really want to reset the repository?
     cmd: git clean -xdf .
 
-  viewport:dev:
-    dir: packages/viewport
-    sources:
-      - src/lib.rs
-      - src/lib.js
-      - src/viewport/mod.rs
-    cmd: wasm-pack build --target web
-
-  viewport:dev:watch:
-    cmd: task viewport:dev --watch
-
   dev:
     desc: Run desktop app with library
     vars:
       deps:
         sh: task setup
-    cmd: task --parallel app:dev viewport:dev:watch
+    cmd: task --parallel app:dev
 
   dev:server:
     desc: Run desktop app with library
     vars:
       deps:
         sh: task setup
-    cmd: task --parallel library:dev app:dev viewport:dev:watch
+    cmd: task --parallel library:dev app:dev
 
   dev:ios:
     desc: Run ios app in simulator

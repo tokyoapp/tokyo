@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Model, PropertyModel } from '@visio/properties';
+import { Model, PropertyModel } from '@tokyo/properties';
 
 export function useProperties<T extends PropertyModel, R>(model: T, result: (model: T) => R) {
   const [value, setValue] = useState(result(model));

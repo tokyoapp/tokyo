@@ -1,5 +1,5 @@
-import { Channel, createLocalSource } from 'client-api';
-import { LibraryMessage } from 'proto';
+import { Channel, createLocalSource } from '@tokyo/client-api';
+import { LibraryMessage } from '@tokyo/proto';
 import { createEffect, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
