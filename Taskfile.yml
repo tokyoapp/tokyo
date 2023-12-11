@@ -66,8 +66,7 @@ tasks:
   reset:
     desc: Reset repository files
     prompt: Do you really want to reset the repository?
-    cmds:
-      - git clean -xdf .
+    cmd: git clean -xdf .
 
   viewport:dev:
     dir: packages/viewport
@@ -75,40 +74,38 @@ tasks:
       - src/lib.rs
       - src/lib.js
       - src/viewport/mod.rs
-    cmds:
-      - wasm-pack build --target web
+    cmd: wasm-pack build --target web
 
   viewport:dev:watch:
-    cmds:
-      - task viewport:dev --watch
+    cmd: task viewport:dev --watch
 
   dev:
     desc: Run desktop app with library
     vars:
       deps:
         sh: task setup
-    deps: [app:dev, viewport:dev:watch]
+    cmd: task --parallel app:dev viewport:dev:watch
 
   dev:server:
     desc: Run desktop app with library
     vars:
       deps:
         sh: task setup
-    deps: [library:dev, app:dev, viewport:dev:watch]
+    cmd: task --parallel library:dev app:dev viewport:dev:watch
 
   dev:ios:
     desc: Run ios app in simulator
     vars:
       deps:
         sh: task setup
-    deps: [library:dev, app:dev:ios]
+    cmd: task --parallel library:dev app:dev:ios
 
   build:
     desc: Build app
     vars:
       deps:
         sh: task setup
-    deps: [library:build, app:build]
+    cmd: task --parallel library:build app:build
 
   build:docker:
     desc: Build docker image for library server
