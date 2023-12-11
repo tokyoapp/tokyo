@@ -1,5 +1,5 @@
 {
-  "name": "@tokyo/proto",
+  "name": "tokyo-proto",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/lib.ts",

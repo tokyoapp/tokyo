@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { Accessor } from '@visio/api';
+import { Accessor } from 'tokyo-client-api';
 import * as Comlink from 'comlink';
 
 /**
@@ -12,7 +12,7 @@ export function useAccessor<T extends Accessor<any, any, any>>(
   params: T['params']
 ) {
   const accessor = useMemo(() => accessorFn(), []);
-  const [data, setData] = useState<ReturnType<typeof accessor['processData']>>();
+  const [data, setData] = useState<ReturnType<(typeof accessor)['processData']>>();
 
   const error = useSyncExternalStore(
     (callback) => accessor.on('error', callback),

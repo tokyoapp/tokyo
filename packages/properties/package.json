@@ -1,5 +1,5 @@
 {
-  "name": "@tokyo/properties",
+  "name": "tokyo-properties",
   "description": "Reactive property library.",
   "main": "src/lib.ts",
   "type": "module",

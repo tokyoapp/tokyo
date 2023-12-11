@@ -24,14 +24,13 @@ Requirements:
 
 - [bun](https://bun.sh/)
 - [rust](https://rustup.rs/)
-- [pnpm](https://pnpm.io/)
 - [task](https://taskfile.dev/)
 - [protoc](https://grpc.io/docs/protoc-installation/)
 
 All can automatically be installed using [RTX](https://github.com/jdx/rtx) with:
 
 ```sh
-task setup
+rtx install
 ```
 
 #### Running the desktop app:
