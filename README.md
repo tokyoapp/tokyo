@@ -8,7 +8,7 @@ Tokyo is a Work in Progress professional Photo Editor built on Rust and Solid.JS
 
 Tokyo does not care about where your photos are stored, accessing them should be easy and fast. They can be on your local machine or on a NAS, escaping from the Cloud-only solutions, without leaving its benefits behind. Tokyo will still sync all your edits and presets between devices.
 
-Tokyo tykes you from accessing your photos to editing them, to exporting them, all in one place, from any device.
+Tokyo takes you from accessing your photos to editing them, to exporting them, all in one place, from any device.
 
 ## Architecture
 
