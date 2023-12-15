@@ -1,6 +1,6 @@
 import { Signal, createEffect, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Channel, createLocalSource } from 'tokyo-client-api';
+import { Channel, createLocalSource } from 'tokyo-api';
 import { DynamicImage } from '../image/DynamicImage';
 
 export function thumbnailsAccessor(params: {

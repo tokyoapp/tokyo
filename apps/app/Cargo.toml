@@ -13,7 +13,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.0.0-alpha.8", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-alpha.14", features = ["macos-private-api", "devtools"] }
+tauri = { version = "2.0.0-alpha.14", features = [
+  "macos-private-api",
+  "devtools",
+] }
 tauri-plugin-os = "2.0.0-alpha.2"
 tauri-plugin-app = "2.0.0-alpha.2"
 tauri-plugin-window = "2.0.0-alpha.2"
@@ -21,7 +24,7 @@ tauri-plugin-library = { path = "../../packages/tauri-plugin-library" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 phl-proto = { path = "../../packages/proto", features = ["protoc"] }
-phl-library = { path = "../../packages/phl-library" }
+files = { path = "../../packages/files" }
 window-vibrancy = "0.4.2"
 
 [features]

@@ -86,10 +86,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 
 [[package]]
+name = "api"
+version = "0.1.0"
+
+[[package]]
 name = "app"
 version = "0.0.0"
 dependencies = [
- "phl-library",
+ "files",
  "phl-proto",
  "serde",
  "serde_json",
@@ -662,10 +666,6 @@ dependencies = [
 
 [[package]]
 name = "client-actions"
-version = "0.1.0"
-
-[[package]]
-name = "client-api"
 version = "0.1.0"
 
 [[package]]
@@ -1260,6 +1260,26 @@ checksum = "38e2275cc4e4fc009b0669731a1e5ab7ebf11f469eaede2bab9309a5b4d6057f"
 dependencies = [
  "memoffset 0.9.0",
  "rustc_version",
+]
+
+[[package]]
+name = "files"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "image",
+ "rawler",
+ "rawloader",
+ "roxmltree",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha256",
+ "shadow",
+ "sysinfo",
+ "tokio",
+ "uuid",
+ "walkdir",
 ]
 
 [[package]]
@@ -2341,8 +2361,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
+ "files",
  "futures",
- "phl-library",
  "phl-proto",
  "serde",
  "serde_json",
@@ -3152,31 +3172,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "phl-library"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "image",
- "rawler",
- "rawloader",
- "roxmltree",
- "rusqlite",
- "serde",
- "serde_json",
- "sha256",
- "shadow",
- "sysinfo",
- "tokio",
- "uuid",
- "walkdir",
-]
-
-[[package]]
 name = "phl-proto"
 version = "0.1.0"
 dependencies = [
  "bytes",
- "phl-library",
+ "files",
  "protobuf",
  "protobuf-codegen",
 ]
@@ -4668,7 +4668,7 @@ name = "tauri-plugin-library"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "phl-library",
+ "files",
  "phl-proto",
  "serde",
  "serde_json",
