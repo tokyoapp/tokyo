@@ -1,6 +1,7 @@
-use rusqlite::params;
-use rusqlite::Connection;
+use anyhow::Result;
+use libsql_client::{args, Client, Config, Statement};
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::{fs, path::Path};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -44,61 +45,55 @@ pub struct File {
 }
 
 pub struct Root {
-  connection: Connection,
+  client: libsql_client::Client,
 }
 
 unsafe impl Sync for Root {}
 
 impl Root {
-  pub fn new() -> Self {
+  pub async fn new() -> Self {
     if !Path::exists(&Path::new("./data/")) {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 
-    let connection = Connection::open("./data/db.sqlite").expect("Failed to open db");
-    let root = Root { connection };
+    let client = Client::from_config(Config {
+      url: url::Url::parse(env::var("DATABASE").expect("No Database").as_str()).unwrap(),
+      auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
+    })
+    .await
+    .unwrap();
+
+    let root = Root { client };
 
     return root;
   }
 
-  pub fn init_db(self: &Self) -> Result<(), rusqlite::Error> {
-    let con = &self.connection;
-
-    // table: locations
-    con.execute(
-      "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
-      (),
-    )?;
-
-    // table: files
-    con.execute(
-      "create table if not exists files (hash TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
-      (),
-    )?;
-
-    // table: presets
-    con.execute(
-      "create table if not exists presets (id TEXT PRIMARY KEY, edits INTEGER);",
-      (),
-    )?;
-
-    // table: edits
-    con.execute(
-      "create table if not exists edits (id TEXT PRIMARY KEY, edits TEXT, file TEXT);",
-      (),
-    )?;
-
-    // table: set
-    con.execute(
-      "create table if not exists sets (id TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
-      (),
-    )?;
-
-    // table: tags
-    con.execute(
-      "create table if not exists tags (id TEXT PRIMARY KEY, name TEXT);",
-      (),
-    )?;
+  pub async fn init_db(self: &Self) -> Result<()> {
+    self
+      .client
+      .batch([
+        // table: locations
+        Statement::from(
+          "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
+        ),
+        // table: files
+        Statement::from(
+          "create table if not exists files (hash TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
+        ),
+        // table: presets
+        Statement::from("create table if not exists presets (id TEXT PRIMARY KEY, edits INTEGER);"),
+        // table: edits
+        Statement::from(
+          "create table if not exists edits (id TEXT PRIMARY KEY, edits TEXT, file TEXT);",
+        ),
+        // table: set
+        Statement::from(
+          "create table if not exists sets (id TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
+        ),
+        // table: tags
+        Statement::from("create table if not exists tags (id TEXT PRIMARY KEY, name TEXT);"),
+      ])
+      .await?;
 
     let list = self.location_list()?;
     if list.len() == 0 {
@@ -108,20 +103,20 @@ impl Root {
     return Ok(());
   }
 
-  pub async fn insert_tag(self: &Self, name: &str) -> Result<String, rusqlite::Error> {
+  pub async fn insert_tag(self: &Self, name: &str) -> Result<String> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
-      .connection
+      .client
       .execute("insert into tags (id, name) values (?1, ?2)", (&uid, &name))?;
 
     Ok(uid)
   }
 
-  pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<(), rusqlite::Error> {
+  pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.connection.execute(
+    self.client.execute(
       "insert into edits (id, edits, file) values (?1, ?2, ?3)",
       (&uid, &edits, &hash),
     )?;
@@ -129,8 +124,8 @@ impl Root {
     Ok(())
   }
 
-  pub fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
-    self.connection.execute(
+  pub fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<()> {
+    self.client.execute(
       "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
       (&hash, &rating, &""),
     )?;
@@ -138,8 +133,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn get_edits(self: &Self, hash: &str) -> Result<Vec<Edit>, rusqlite::Error> {
-    let con = &self.connection;
+  pub async fn get_edits(self: &Self, hash: &str) -> Result<Vec<Edit>> {
+    let con = &self.client;
     let mut stmt = con.prepare("select id, edits, file from edits where file = :hash")?;
 
     let rows = stmt.query_map(&[(":hash", &hash)], |row| {
@@ -154,8 +149,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub fn get_file(self: &Self, hash: &str) -> Result<Vec<File>, rusqlite::Error> {
-    let con = &self.connection;
+  pub fn get_file(self: &Self, hash: &str) -> Result<Vec<File>> {
+    let con = &self.client;
     let mut stmt = con.prepare("select hash, tags, rating from files where hash = :hash")?;
 
     let rows = stmt.query_map(&[(":hash", &hash)], |row| {
@@ -172,8 +167,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<(), rusqlite::Error> {
-    self.connection.execute(
+  pub fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<()> {
+    self.client.execute(
       "update files SET rating = ?1 where hash = ?2",
       params![rating, hash],
     )?;
@@ -181,10 +176,10 @@ impl Root {
     Ok(())
   }
 
-  pub fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<(), rusqlite::Error> {
+  pub fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<()> {
     let ts = tags.join(",");
 
-    self.connection.execute(
+    self.client.execute(
       "update files SET tags = ?1 where hash = ?2",
       params![ts, hash],
     )?;
@@ -192,10 +187,10 @@ impl Root {
     Ok(())
   }
 
-  pub fn insert_location(self: &Self, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+  pub fn insert_location(self: &Self, name: &str, path: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.connection.execute(
+    self.client.execute(
       "insert into locations (id, name, path) values (?1, ?2, ?3)",
       (&uid, &name, &path),
     )?;
@@ -203,8 +198,8 @@ impl Root {
     Ok(())
   }
 
-  pub fn location_list(self: &Self) -> Result<Vec<Location>, rusqlite::Error> {
-    let con = &self.connection;
+  pub fn location_list(self: &Self) -> Result<Vec<Location>> {
+    let con = &self.client;
     let mut stmt = con.prepare("select id, name, path from locations")?;
 
     let rows = stmt.query_map([], |row| {
@@ -219,8 +214,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub fn tags_list(self: &Self) -> Result<Vec<Tag>, rusqlite::Error> {
-    let con = &self.connection;
+  pub fn tags_list(self: &Self) -> Result<Vec<Tag>> {
+    let con = &self.client;
     let mut stmt = con.prepare("select id, name from tags")?;
 
     let rows = stmt.query_map([], |row| {
