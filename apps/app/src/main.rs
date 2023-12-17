@@ -3,7 +3,7 @@
   windows_subsystem = "windows"
 )]
 
-use phl_library::db;
+use tokyo_db;
 
 pub fn main() {
   let root = db::Root::new();

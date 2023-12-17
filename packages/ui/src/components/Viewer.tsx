@@ -11,7 +11,7 @@ import { IndexEntryMessage } from 'tokyo-proto';
 // import * as viewport from 'tokyo-viewport';
 import { t } from '../locales/messages.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
-import { getImage } from 'tauri-plugin-library-api';
+import { getImage } from 'tauri-plugin-tokyo';
 
 const [app, setApp] = createSignal({
   zoom: 1,

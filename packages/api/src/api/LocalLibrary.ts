@@ -1,12 +1,5 @@
-import {
-  index,
-  locations,
-  thumbnail,
-  system,
-  metadata,
-  createLocation,
-} from 'tauri-plugin-library-api';
-import { ClientAPIMessage, LibraryInterface } from './lib';
+import { index, locations, thumbnail, system, metadata, createLocation } from 'tauri-plugin-tokyo';
+import { ClientAPIMessage, LibraryInterface } from '../lib';
 
 export class LocalLibrary implements LibraryInterface {
   public async fetchLocations(): Promise<ClientAPIMessage> {

@@ -49,16 +49,6 @@ pub struct Root {
 
 unsafe impl Sync for Root {}
 
-// trait Summary {
-//     fn summarize(&self) -> String;
-// }
-
-// impl Summary for Root {
-//     fn summarize(&self) -> String {
-//         return String::from("Text");
-//     }
-// }
-
 impl Root {
   pub fn new() -> Self {
     if !Path::exists(&Path::new("./data/")) {

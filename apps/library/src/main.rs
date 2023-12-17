@@ -6,13 +6,13 @@ use axum::{
 };
 use futures::sink::SinkExt;
 use futures::StreamExt;
-use phl_library::db::Root;
-use phl_library::{db, IndexEntry, Library};
-use phl_proto::library::{self, IndexEntryMessage, LibraryIndexMessage};
-use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokyo_db::Root;
+use tokyo_files::{db, IndexEntry, Library};
+use tokyo_proto::library::{self, IndexEntryMessage, LibraryIndexMessage};
+use tokyo_proto::Message;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -49,7 +49,7 @@ async fn main() {
 
 async fn metadata(file: &String) -> library::Message {
   let root = db::Root::new();
-  let meta = phl_library::Library::metadata(&root, &file).await;
+  let meta = tokyo_files::Library::metadata(&root, &file).await;
   let mut msg = library::Message::new();
   if let Some(metadata) = meta {
     msg.set_metadata(metadata.into());
@@ -117,7 +117,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
   // send system info
   let mut sys_msg = library::Message::new();
-  sys_msg.set_system(phl_library::Library::sysinfo().into());
+  sys_msg.set_system(tokyo_files::Library::sysinfo().into());
   let _ = socket
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
@@ -186,7 +186,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
         if ok_msg.has_image() {
           let file = &ok_msg.image().file; // should be the hash,
-          let image = phl_library::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
+          let image = tokyo_files::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
           let mut img_msg = library::ImageMessage::new();
           img_msg.image = image;
           let mut msg = library::Message::new();

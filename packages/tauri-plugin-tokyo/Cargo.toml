@@ -1,12 +1,12 @@
 [package]
-name = "tauri-plugin-library"
+name = "tauri-plugin-tokyo"
 version = "0.0.0"
 authors = ["You"]
 description = ""
 edition = "2021"
 rust-version = "1.65"
 exclude = ["/examples", "/webview-dist", "/webview-src", "/node_modules"]
-links = "tauri-plugin-library"
+links = "tauri-plugin-tokyo"
 
 [target]
 
@@ -15,9 +15,10 @@ tauri = { version = "2.0.0-alpha.14" }
 serde = "1.0"
 serde_json = "1.0.105"
 thiserror = "1.0"
-phl-proto = { path = "../proto", features = ["protoc"] }
-files = { path = "../files" }
-shadow = { path = "../shadow" }
+tokyo-proto = { path = "../proto", features = ["protoc"] }
+tokyo-files = { path = "../files" }
+tokyo-shadow = { path = "../shadow" }
+tokyo-db = { path = "../db" }
 anyhow = "1.0.75"
 
 [build-dependencies]

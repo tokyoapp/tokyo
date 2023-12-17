@@ -1,6 +1,6 @@
 use crate::{LibraryExt, Result};
-use phl_library::{db, Image};
 use tauri::{command, AppHandle, Runtime};
+use tokyo_files::{db, Image};
 
 // get local library list
 #[command]
@@ -17,12 +17,12 @@ pub(crate) async fn get_thumbnail<R: Runtime>(app: AppHandle<R>, id: String) -> 
 pub async fn get_index<R: Runtime>(
   app: AppHandle<R>,
   name: String,
-) -> Result<Vec<phl_library::IndexEntry>> {
+) -> Result<Vec<tokyo_files::IndexEntry>> {
   return Ok(app.library().get_index(name).await.unwrap());
 }
 
 #[command]
-pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<phl_library::SystemInfo> {
+pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<tokyo_files::SystemInfo> {
   return Ok(app.library().get_system().await.unwrap());
 }
 
@@ -33,13 +33,13 @@ pub async fn create_library() {}
 pub async fn get_metadata<R: Runtime>(
   app: AppHandle<R>,
   file: String,
-) -> Result<phl_library::MetadataEntry> {
+) -> Result<tokyo_files::MetadataEntry> {
   return Ok(app.library().get_metadata(file).await.unwrap());
 }
 
 #[command]
 pub async fn get_image(path: String, exposure: f32) -> Image {
-  let img = phl_library::Library::render_image(path, exposure);
+  let img = tokyo_files::Library::render_image(path, exposure);
   img
 }
 

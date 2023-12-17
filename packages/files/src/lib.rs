@@ -1,20 +1,19 @@
-pub mod db;
 pub mod image;
 
 mod edit;
 mod images;
 
+use anyhow::Result;
+
 use std::path::Path;
 
 use ::image::imageops::FilterType;
-use edit::EditedImage;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
 
-use db::{File, Tag};
-use db::{Location, Root};
-use rusqlite::Result;
 use serde::{Deserialize, Serialize};
+use tokyo_db::{File, Tag};
+use tokyo_db::{Location, Root};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SystemInfo {
@@ -67,7 +66,7 @@ impl Library {
   pub fn render_image(path: String, exposure: f32) -> Image {
     let mut img = edit::EditedImage::new(
       &Path::new(&path),
-      shadow::Edits {
+      tokyo_shadow::Edits {
         gamma: 2.4,
         exposure,
         curve: vec![(0.00, 0.00), (1.0, 1.0)],
@@ -211,7 +210,7 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub fn create_library(root: &Root, name: &str, path: &str) -> Result<(), rusqlite::Error> {
+  pub fn create_library(root: &Root, name: &str, path: &str) -> Result<()> {
     root.insert_location(name, path)?;
     Ok(())
   }

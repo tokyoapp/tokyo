@@ -28,7 +28,7 @@ pub struct Library<R: Runtime>(PluginHandle<R>);
 impl<R: Runtime> Library<R> {
   // TODO: implement mobile methods
 
-  pub fn get_locations(&self) -> crate::Result<Vec<phl_library::db::Location>> {
+  pub fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
     let x = self
       .0
       .run_mobile_plugin("get_locations")
@@ -38,26 +38,26 @@ impl<R: Runtime> Library<R> {
     return Ok(root.location_list().unwrap());
   }
 
-  // pub async fn get_index(&self, name: String) -> crate::Result<Vec<phl_library::IndexEntry>> {
+  // pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
   //   let root = db::Root::new();
-  //   let dir = phl_library::Library::find_library(&root, name.as_str())
+  //   let dir = tokyo_files::Library::find_library(&root, name.as_str())
   //     .unwrap()
   //     .path;
-  //   let index = phl_library::Library::get_index(&root, dir).await;
+  //   let index = tokyo_files::Library::get_index(&root, dir).await;
   //   return Ok(index);
   // }
 
-  // pub async fn get_metadata(&self, file_path: String) -> crate::Result<phl_library::MetadataEntry> {
+  // pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
   //   let root = db::Root::new();
-  //   let meta = phl_library::Library::metadata(&root, &file_path).await;
+  //   let meta = tokyo_files::Library::metadata(&root, &file_path).await;
   //   if let Some(metadata) = meta {
   //     return Ok(metadata);
   //   }
   //   Err(crate::Error::Unknown("metadata".to_string()))
   // }
 
-  // pub async fn get_system(&self) -> crate::Result<phl_library::SystemInfo> {
-  //   return Ok(phl_library::Library::sysinfo());
+  // pub async fn get_system(&self) -> crate::Result<tokyo_files::SystemInfo> {
+  //   return Ok(tokyo_files::Library::sysinfo());
   // }
 
   pub async fn create_library(&self) {}

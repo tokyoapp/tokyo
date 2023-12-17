@@ -1,8 +1,8 @@
 /// <reference lib="webworker" />
 
 import * as Comlink from 'comlink';
-import * as library from 'proto';
-import { ClientAPIMessage, LibraryInterface } from './lib';
+import * as library from 'tokyo-proto';
+import { ClientAPIMessage, LibraryInterface } from '../lib';
 
 let msg_count = 1;
 

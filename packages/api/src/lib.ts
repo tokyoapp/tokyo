@@ -1,8 +1,8 @@
 import * as Comlink from 'comlink';
 import { LocalLibrary } from './api/LocalLibrary.js';
-import * as library from 'proto';
+import * as library from 'tokyo-proto';
 
-type RemoteLibrary = typeof import('./RemoteLibrary.ts').default;
+type RemoteLibrary = typeof import('./api/RemoteLibrary.ts').default;
 
 type MessageType =
   | 'locations'

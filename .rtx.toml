@@ -1,4 +1,4 @@
 [tools]
-bun = "1.0.16"
+bun = "latest"
 task = "3.32"
 protoc = "21.12"
