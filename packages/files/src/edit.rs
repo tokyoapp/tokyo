@@ -1,15 +1,12 @@
 use std::path::Path;
 
-use tokyo_shadow::DynamicImage;
-use tokyo_shadow::Edits;
-
 pub struct EditedImage {
-  image: DynamicImage,
-  edits: Edits,
+  image: tokyo_shadow::DynamicImage,
+  edits: tokyo_shadow::Edits,
 }
 
 impl EditedImage {
-  pub fn new(path: &Path, edits: Edits) -> EditedImage {
+  pub fn new(path: &Path, edits: tokyo_shadow::Edits) -> EditedImage {
     let image = tokyo_shadow::get_image(path);
 
     EditedImage {
@@ -18,7 +15,7 @@ impl EditedImage {
     }
   }
 
-  pub fn render(&mut self) -> DynamicImage {
+  pub fn render(&mut self) -> tokyo_shadow::DynamicImage {
     let img = tokyo_shadow::process(&self.image, &self.edits);
     img
   }

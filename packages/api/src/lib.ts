@@ -33,7 +33,7 @@ export interface LibraryInterface {
 }
 
 export function createRemoteSource(url: string): LibraryInterface {
-  const worker = new Worker(new URL('./RemoteLibrary.ts', import.meta.url), {
+  const worker = new Worker(new URL('./api/RemoteLibrary.ts', import.meta.url), {
     type: 'module',
   });
   const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);

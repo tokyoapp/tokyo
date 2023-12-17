@@ -2,7 +2,6 @@ use std::path::Path;
 
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
-use tokyo_db;
 use tokyo_shadow::MyImage;
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
@@ -17,7 +16,7 @@ pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
   pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
-    let root = db::Root::new();
+    let root = tokyo_db::Root::new();
     let meta = tokyo_files::Library::metadata(&root, &id).await;
     if let Some(metadata) = meta {
       return Ok(metadata.thumbnail);
@@ -26,12 +25,12 @@ impl<R: Runtime> Library<R> {
   }
 
   pub fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
-    let root = db::Root::new();
+    let root = tokyo_db::Root::new();
     return Ok(root.location_list().unwrap());
   }
 
   pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
-    let root = db::Root::new();
+    let root = tokyo_db::Root::new();
     let dir = tokyo_files::Library::find_library(&root, name.as_str())
       .unwrap()
       .path;
@@ -40,7 +39,7 @@ impl<R: Runtime> Library<R> {
   }
 
   pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
-    let root = db::Root::new();
+    let root = tokyo_db::Root::new();
     let meta = tokyo_files::Library::metadata(&root, &file_path).await;
     if let Some(metadata) = meta {
       return Ok(metadata);
@@ -53,7 +52,7 @@ impl<R: Runtime> Library<R> {
   }
 
   pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
-    let root = db::Root::new();
+    let root = tokyo_db::Root::new();
     root
       .insert_location(&name.as_str(), &path.as_str())
       .expect("Error while inserting location");

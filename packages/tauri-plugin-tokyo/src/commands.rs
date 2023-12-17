@@ -1,10 +1,12 @@
 use crate::{LibraryExt, Result};
 use tauri::{command, AppHandle, Runtime};
-use tokyo_files::{db, Image};
+use tokyo_files::Image;
 
 // get local library list
 #[command]
-pub(crate) async fn get_locations<R: Runtime>(app: AppHandle<R>) -> Result<Vec<db::Location>> {
+pub(crate) async fn get_locations<R: Runtime>(
+  app: AppHandle<R>,
+) -> Result<Vec<tokyo_db::Location>> {
   return Ok(app.library().get_locations().unwrap());
 }
 

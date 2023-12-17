@@ -9,9 +9,8 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_db::Root;
-use tokyo_files::{db, IndexEntry, Library};
-use tokyo_proto::library::{self, IndexEntryMessage, LibraryIndexMessage};
+use tokyo_files::{IndexEntry, Library};
+use tokyo_proto::library::{self, IndexEntryMessage};
 use tokyo_proto::Message;
 
 #[derive(Deserialize, Serialize)]
@@ -31,7 +30,7 @@ struct OkResponse {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-  let root = db::Root::new();
+  let root = tokyo_db::Root::new();
   let _ = root.init_db();
 
   let router = Router::new().route(
@@ -48,7 +47,7 @@ async fn main() {
 }
 
 async fn metadata(file: &String) -> library::Message {
-  let root = db::Root::new();
+  let root = tokyo_db::Root::new();
   let meta = tokyo_files::Library::metadata(&root, &file).await;
   let mut msg = library::Message::new();
   if let Some(metadata) = meta {
@@ -58,7 +57,7 @@ async fn metadata(file: &String) -> library::Message {
 }
 
 fn get_location_list() -> library::LibraryListMessage {
-  let root = db::Root::new();
+  let root = tokyo_db::Root::new();
   let list = root.location_list().unwrap();
   let tags = root.tags_list().unwrap();
 
@@ -88,7 +87,7 @@ fn get_location_list() -> library::LibraryListMessage {
 }
 
 async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
-  let root = db::Root::new();
+  let root = tokyo_db::Root::new();
 
   let mut _index: Vec<IndexEntry> = Vec::new();
 
@@ -162,7 +161,7 @@ async fn handle_socket(mut socket: WebSocket) {
         }
 
         if ok_msg.has_create() {
-          let root = Root::new();
+          let root = tokyo_db::Root::new();
           let create = ok_msg.create();
           let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
 
@@ -200,7 +199,7 @@ async fn handle_socket(mut socket: WebSocket) {
         if ok_msg.has_postmeta() {
           let file = &ok_msg.postmeta().file;
           let rating = ok_msg.postmeta().rating.unwrap();
-          let root = Root::new();
+          let root = tokyo_db::Root::new();
           root.set_rating(file, rating).expect("Failed to set rating");
 
           let mut msg = library::Message::new();

@@ -1,11 +1,14 @@
 use anyhow::Result;
 use libsql_client::{args, Client, Config, Statement};
+use std::env;
 
 async fn run() -> Result<()> {
   let remote_config = Config {
-    url: url::Url::parse("libsql://clean-cannonball-luckydye.turso.io").unwrap(),
-    auth_token: Some("eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOiIyMDIzLTEyLTE1VDEyOjIwOjE3LjQxNTgyNTIzOFoiLCJpZCI6ImQxNWE2ZDQyLTIxOGUtMTFlZS1hMzc1LTU2NGE0NjNkNjZmMSJ9.ICHp7zQB10lGAshwDe9HmEZaULdT9_f6MJ0gEv3xYgOH1C6qJePgBX_XnjHP_oIrgyQ4ODt5MIhd2lceXYw4Cg".to_string()),
+    url: url::Url::parse(env::var("DATABASE").expect("No Database").as_str()).unwrap(),
+    auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
   };
+
+  print!("{:?}", remote_config);
 
   let local_config = Config {
     url: url::Url::parse("file:////tmp/example.db").unwrap(),

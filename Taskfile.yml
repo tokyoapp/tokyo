@@ -48,14 +48,20 @@ tasks:
       - Cargo.toml
       - Cargo.lock
       - "**/package.json"
+      - .env
+      - .env.example
+    generates:
+      - node_modules/**
+      - target/**
     cmds:
-      - rtx install
+      - cp -n .env.example .env 2> /dev/null || true
+      - rtx install 2> /dev/null || true
       - task: codegen
-      - cargo check
       - bun install
       - cargo install cargo-watch
       - cargo install wasm-pack
       - cargo install tauri-cli --version "^2.0.0-alpha"
+      - cargo check
 
   codegen:
     dir: "./packages/proto"
