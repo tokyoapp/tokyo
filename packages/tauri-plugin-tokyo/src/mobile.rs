@@ -34,12 +34,12 @@ impl<R: Runtime> Library<R> {
       .run_mobile_plugin("get_locations")
       .map_err(Into::into);
 
-    let root = db::Root::new();
-    return Ok(root.location_list().unwrap());
+    let root = db::Root::new().await;
+    return Ok(root.location_list().await.unwrap());
   }
 
   // pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
-  //   let root = db::Root::new();
+  //   let root = db::Root::new().await;
   //   let dir = tokyo_files::Library::find_library(&root, name.as_str())
   //     .unwrap()
   //     .path;
@@ -48,7 +48,7 @@ impl<R: Runtime> Library<R> {
   // }
 
   // pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
-  //   let root = db::Root::new();
+  //   let root = db::Root::new().await;
   //   let meta = tokyo_files::Library::metadata(&root, &file_path).await;
   //   if let Some(metadata) = meta {
   //     return Ok(metadata);

@@ -4,8 +4,8 @@
 )]
 
 pub fn main() {
-  let root = tokyo_db::Root::new();
-  root.init_db().expect("Error at init db");
+  let root = tokyo_db::Root::new().await;
+  root.init_db().await.expect("Error at init db");
 
   app::AppBuilder::new().run();
 }

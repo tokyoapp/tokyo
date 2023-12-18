@@ -11,6 +11,8 @@ use ::image::imageops::FilterType;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
 
+use futures::future::join_all;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -83,12 +85,15 @@ impl Library {
     return images::list(dir);
   }
 
-  pub fn list_tags(root: &tokyo_db::Root) -> Vec<tokyo_db::Tag> {
-    root.tags_list().unwrap()
+  pub async fn list_tags(root: &tokyo_db::Root) -> Vec<tokyo_db::Tag> {
+    root.tags_list().await.unwrap()
   }
 
-  pub fn default_library(root: &tokyo_db::Root) -> Option<tokyo_db::Location> {
-    let locs = root.location_list().expect("Failed to list locations");
+  pub async fn default_library(root: &tokyo_db::Root) -> Option<tokyo_db::Location> {
+    let locs = root
+      .location_list()
+      .await
+      .expect("Failed to list locations");
     let first = locs.first();
 
     if let Some(location) = first {
@@ -101,7 +106,7 @@ impl Library {
     let meta = image::metadat(&p.to_string());
 
     if let Some(metadata) = meta {
-      let file = Library::get_file(&root, &metadata.hash);
+      let file = Library::get_file(&root, &metadata.hash).await;
 
       let mut tags: Vec<String> = Vec::new();
 
@@ -149,30 +154,29 @@ impl Library {
       });
     }
 
-    index
-      .iter()
-      .map(|meta| {
-        let file = Library::get_file(&root, &meta.hash);
-        let rating = file
-          .clone()
-          .and_then(|f| Some(f.rating))
-          .or(Some(meta.rating as i32))
-          .unwrap();
+    let idx = index.iter().map(|meta| async {
+      let file = Library::get_file(&root, &meta.hash).await;
+      let rating = file
+        .clone()
+        .and_then(|f| Some(f.rating))
+        .or(Some(meta.rating as i32))
+        .unwrap();
 
-        IndexEntry {
-          name: meta.name.clone(),
-          create_date: meta.create_date.clone(),
-          hash: meta.hash.clone(),
-          orientation: meta.orientation as i32,
-          path: meta.path.clone(),
-          rating,
-          tags: file
-            .and_then(|f| Some(f.tags))
-            .or(Some(Vec::new()))
-            .unwrap(),
-        }
-      })
-      .collect()
+      IndexEntry {
+        name: meta.name.clone(),
+        create_date: meta.create_date.clone(),
+        hash: meta.hash.clone(),
+        orientation: meta.orientation as i32,
+        path: meta.path.clone(),
+        rating,
+        tags: file
+          .and_then(|f| Some(f.tags))
+          .or(Some(Vec::new()))
+          .unwrap(),
+      }
+    });
+
+    join_all(idx).await
   }
 
   pub async fn add_file(root: &tokyo_db::Root, hash: &str, rating: i32) {
@@ -180,26 +184,28 @@ impl Library {
 
     let _ = root
       .insert_file(hash, rating)
+      .await
       .expect("Failed to insert file");
 
-    let mut f = root.get_file(hash).unwrap();
+    let mut f = root.get_file(hash).await.unwrap();
     let tags = &mut f.first_mut().unwrap().tags;
 
     tags.push(id);
 
-    let _ = root.set_tags(hash, tags.as_ref());
+    let _ = root.set_tags(hash, tags.as_ref()).await;
   }
 
-  pub fn get_file(root: &tokyo_db::Root, hash: &str) -> Option<tokyo_db::File> {
+  pub async fn get_file(root: &tokyo_db::Root, hash: &str) -> Option<tokyo_db::File> {
     return root
       .get_file(hash)
+      .await
       .expect("Failed to get file")
       .first()
       .and_then(|f| Some(f.clone()));
   }
 
-  pub fn find_library(root: &tokyo_db::Root, id: &str) -> Result<tokyo_db::Location> {
-    let locs = root.location_list()?;
+  pub async fn find_library(root: &tokyo_db::Root, id: &str) -> Result<tokyo_db::Location> {
+    let locs = root.location_list().await?;
     let loc = locs
       .iter()
       .find(|lib| lib.id == id)
@@ -208,15 +214,17 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub fn create_library(root: &tokyo_db::Root, name: &str, path: &str) -> Result<()> {
-    root.insert_location(name, path)?;
+  pub async fn create_library(root: &tokyo_db::Root, name: &str, path: &str) -> Result<()> {
+    root.insert_location(name, path).await?;
     Ok(())
   }
 
   pub async fn create_root_library(root: &tokyo_db::Root) -> Result<()> {
-    let list = root.location_list()?;
+    let list = root.location_list().await?;
     if list.len() == 0 {
-      root.insert_location("default", "/Users/tihav/Pictures")?;
+      root
+        .insert_location("default", "/Users/tihav/Pictures")
+        .await?;
     }
 
     return Ok(());

@@ -30,8 +30,8 @@ struct OkResponse {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-  let root = tokyo_db::Root::new();
-  let _ = root.init_db();
+  let root = tokyo_db::Root::new().await;
+  let _ = root.init_db().await;
 
   let router = Router::new().route(
     "/ws",
@@ -47,7 +47,7 @@ async fn main() {
 }
 
 async fn metadata(file: &String) -> library::Message {
-  let root = tokyo_db::Root::new();
+  let root = tokyo_db::Root::new().await;
   let meta = tokyo_files::Library::metadata(&root, &file).await;
   let mut msg = library::Message::new();
   if let Some(metadata) = meta {
@@ -56,10 +56,10 @@ async fn metadata(file: &String) -> library::Message {
   return msg;
 }
 
-fn get_location_list() -> library::LibraryListMessage {
-  let root = tokyo_db::Root::new();
-  let list = root.location_list().unwrap();
-  let tags = root.tags_list().unwrap();
+async fn get_location_list() -> library::LibraryListMessage {
+  let root = tokyo_db::Root::new().await;
+  let list = root.location_list().await.unwrap();
+  let tags = root.tags_list().await.unwrap();
 
   let mut list_msg = library::LibraryListMessage::new();
   list_msg.tags = tags
@@ -87,7 +87,7 @@ fn get_location_list() -> library::LibraryListMessage {
 }
 
 async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
-  let root = tokyo_db::Root::new();
+  let root = tokyo_db::Root::new().await;
 
   let mut _index: Vec<IndexEntry> = Vec::new();
 
@@ -144,7 +144,7 @@ async fn handle_socket(mut socket: WebSocket) {
         if ok_msg.has_locations() {
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;
-          msg.set_list(get_location_list());
+          msg.set_list(get_location_list().await);
           let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
           ws.lock().await.send(packet).await;
         }
@@ -161,13 +161,13 @@ async fn handle_socket(mut socket: WebSocket) {
         }
 
         if ok_msg.has_create() {
-          let root = tokyo_db::Root::new();
+          let root = tokyo_db::Root::new().await;
           let create = ok_msg.create();
           let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
 
           if _cr.is_ok() {
             let mut msg = library::Message::new();
-            msg.set_list(get_location_list());
+            msg.set_list(get_location_list().await);
             let bytes = msg.write_to_bytes().unwrap();
             let packet = ws::Message::Binary(bytes);
             ws.lock().await.send(packet).await;
@@ -199,8 +199,11 @@ async fn handle_socket(mut socket: WebSocket) {
         if ok_msg.has_postmeta() {
           let file = &ok_msg.postmeta().file;
           let rating = ok_msg.postmeta().rating.unwrap();
-          let root = tokyo_db::Root::new();
-          root.set_rating(file, rating).expect("Failed to set rating");
+          let root = tokyo_db::Root::new().await;
+          root
+            .set_rating(file, rating)
+            .await
+            .expect("Failed to set rating");
 
           let mut msg = library::Message::new();
           msg.id = ok_msg.id;

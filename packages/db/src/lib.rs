@@ -95,9 +95,11 @@ impl Root {
       ])
       .await?;
 
-    let list = self.location_list()?;
+    let list = self.location_list().await?;
     if list.len() == 0 {
-      self.insert_location("default", "/Users/tihav/Pictures")?;
+      self
+        .insert_location("default", "/Users/tihav/Pictures")
+        .await?;
     }
 
     return Ok(());
@@ -108,7 +110,11 @@ impl Root {
 
     self
       .client
-      .execute("insert into tags (id, name) values (?1, ?2)", (&uid, &name))?;
+      .execute(Statement::with_args(
+        "insert into tags (id, name) values (?, ?)",
+        &[&uid, &name.to_string()],
+      ))
+      .await?;
 
     Ok(uid)
   }
@@ -116,116 +122,139 @@ impl Root {
   pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.client.execute(
-      "insert into edits (id, edits, file) values (?1, ?2, ?3)",
-      (&uid, &edits, &hash),
-    )?;
+    self
+      .client
+      .execute(Statement::with_args(
+        "insert into edits (id, edits, file) values (?, ?, ?)",
+        &[&uid, &edits.to_string(), &hash.to_string()],
+      ))
+      .await?;
 
     Ok(())
   }
 
-  pub fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<()> {
-    self.client.execute(
-      "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
-      (&hash, &rating, &""),
-    )?;
+  pub async fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<()> {
+    self
+      .client
+      .execute(Statement::with_args(
+        "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
+        &[&hash.to_string(), &rating.to_string(), &"".to_string()],
+      ))
+      .await?;
 
     Ok(())
   }
 
   pub async fn get_edits(self: &Self, hash: &str) -> Result<Vec<Edit>> {
-    let con = &self.client;
-    let mut stmt = con.prepare("select id, edits, file from edits where file = :hash")?;
+    let rs = self
+      .client
+      .execute(Statement::with_args(
+        "select id, edits, file from edits where file = ?",
+        &[&hash.to_string()],
+      ))
+      .await?;
 
-    let rows = stmt.query_map(&[(":hash", &hash)], |row| {
-      Ok(Edit {
-        id: row.get(0)?,
-        edits: row.get(1)?,
-        file: row.get(2)?,
-      })
-    })?;
+    let rows = rs.rows.iter().map(|row| Edit {
+      id: row.values.get(0).unwrap().to_string(),
+      edits: row.values.get(1).unwrap().to_string(),
+      file: row.values.get(2).unwrap().to_string(),
+    });
 
-    let list: Vec<Edit> = rows.map(|v| v.unwrap()).collect();
+    let list: Vec<Edit> = rows.collect();
     return Ok(list);
   }
 
-  pub fn get_file(self: &Self, hash: &str) -> Result<Vec<File>> {
-    let con = &self.client;
-    let mut stmt = con.prepare("select hash, tags, rating from files where hash = :hash")?;
+  pub async fn get_file(self: &Self, hash: &str) -> Result<Vec<File>> {
+    let rs = self
+      .client
+      .execute(Statement::with_args(
+        "select hash, tags, rating from files where hash = ?",
+        &[&hash.to_string()],
+      ))
+      .await?;
 
-    let rows = stmt.query_map(&[(":hash", &hash)], |row| {
-      let tags: String = row.get(1)?;
+    let rows = rs.rows.iter().map(|row| {
+      let tags: String = row.values.get(1).unwrap().to_string();
 
-      Ok(File {
-        hash: row.get(0)?,
+      File {
+        hash: row.values.get(0).unwrap().to_string(),
         tags: tags.split(",").map(|str| String::from(str)).collect(),
-        rating: row.get(2)?,
-      })
-    })?;
+        rating: row.values.get(2).unwrap().try_into().unwrap(),
+      }
+    });
 
-    let list: Vec<File> = rows.map(|v| v.unwrap()).collect();
+    let list: Vec<File> = rows.collect();
     return Ok(list);
   }
 
-  pub fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<()> {
-    self.client.execute(
-      "update files SET rating = ?1 where hash = ?2",
-      params![rating, hash],
-    )?;
+  pub async fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<()> {
+    self
+      .client
+      .execute(Statement::with_args(
+        "update files SET rating = ?1 where hash = ?2",
+        &[rating.to_string(), hash.to_string()],
+      ))
+      .await?;
 
     Ok(())
   }
 
-  pub fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<()> {
+  pub async fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<()> {
     let ts = tags.join(",");
 
-    self.client.execute(
-      "update files SET tags = ?1 where hash = ?2",
-      params![ts, hash],
-    )?;
+    self
+      .client
+      .execute(Statement::with_args(
+        "update files SET tags = ?1 where hash = ?2",
+        &[ts, hash.to_string()],
+      ))
+      .await?;
 
     Ok(())
   }
 
-  pub fn insert_location(self: &Self, name: &str, path: &str) -> Result<()> {
+  pub async fn insert_location(self: &Self, name: &str, path: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self.client.execute(
-      "insert into locations (id, name, path) values (?1, ?2, ?3)",
-      (&uid, &name, &path),
-    )?;
+    self
+      .client
+      .execute(Statement::with_args(
+        "insert into locations (id, name, path) values (?1, ?2, ?3)",
+        &[&uid, &name.to_string(), &path.to_string()],
+      ))
+      .await?;
 
     Ok(())
   }
 
-  pub fn location_list(self: &Self) -> Result<Vec<Location>> {
-    let con = &self.client;
-    let mut stmt = con.prepare("select id, name, path from locations")?;
+  pub async fn location_list(self: &Self) -> Result<Vec<Location>> {
+    let rs = self
+      .client
+      .execute(Statement::from("select id, name, path from locations"))
+      .await?;
 
-    let rows = stmt.query_map([], |row| {
-      Ok(Location {
-        id: row.get(0)?,
-        name: row.get(1)?,
-        path: row.get(2)?,
-      })
-    })?;
+    let rows = rs.rows.iter().map(|row| Location {
+      id: row.values.get(0).unwrap().to_string(),
+      name: row.values.get(1).unwrap().to_string(),
+      path: row.values.get(2).unwrap().to_string(),
+    });
 
-    let list: Vec<Location> = rows.map(|v| v.unwrap()).collect();
+    let list: Vec<Location> = rows.collect();
     return Ok(list);
   }
 
-  pub fn tags_list(self: &Self) -> Result<Vec<Tag>> {
-    let con = &self.client;
-    let mut stmt = con.prepare("select id, name from tags")?;
+  pub async fn tags_list(self: &Self) -> Result<Vec<Tag>> {
+    let rs = self
+      .client
+      .execute(Statement::from("select id, name from tags"))
+      .await?;
 
-    let rows = stmt.query_map([], |row| {
-      Ok(Tag {
-        id: row.get(0)?,
-        name: row.get(1)?,
-      })
-    })?;
+    let rows = rs.rows.iter().map(|row| Tag {
+      id: row.values.get(0).unwrap().to_string(),
+      name: row.values.get(1).unwrap().to_string(),
+    });
 
-    let list: Vec<Tag> = rows.map(|v| v.unwrap()).collect();
+    let list: Vec<Tag> = rows.collect();
     return Ok(list);
   }
 }

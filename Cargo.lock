@@ -5039,6 +5039,7 @@ name = "tokyo-files"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "futures",
  "image",
  "rawler",
  "rawloader",
