@@ -22,3 +22,7 @@ tmp
 
 # env
 .env
+
+# vscode
+!.vscode/tokyo.code-workspace
+.vscode

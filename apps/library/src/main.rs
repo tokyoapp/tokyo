@@ -94,7 +94,7 @@ async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
   // TODO: this should be streamed
   for id in ids {
     println!("{}", id);
-    let dir = Library::find_library(&root, &id).unwrap().path;
+    let dir = Library::find_library(&root, &id).await.unwrap().path;
     let mut index = Library::get_index(&root, dir).await;
     _index.append(&mut index);
   }
