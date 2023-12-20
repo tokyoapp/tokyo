@@ -76,36 +76,28 @@ tasks:
 
   dev:
     desc: Run desktop app with library
-    vars:
-      deps:
-        sh: task setup
-    cmd: task --parallel app:dev
+    deps: [setup]
+    cmds:
+      - task: app:dev
 
   dev:server:
     desc: Run desktop app with library
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:dev app:dev
 
   dev:ios:
     desc: Run ios app in simulator
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:dev app:dev:ios
 
   build:
     desc: Build app
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:build app:build
 
   build:docker:
     desc: Build docker image for library server
-    cmds:
-      - docker buildx build --platform linux/amd64 . --tag tokyo/library:latest
+    cmd: docker buildx build --platform linux/amd64 -f apps/library/Dockerfile --tag luckydye/tokyo:latest .
 
   check:
     desc: Check files

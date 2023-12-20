@@ -1,16 +1,36 @@
-FROM rust:1.61.0 as builder
+FROM luckydye/build-utils as builder
 
-WORKDIR /usr/src/library
+RUN apt update
+RUN apt install -y libwebkit2gtk-4.1-dev \
+    libjavascriptcoregtk-4.1-dev \
+    libsoup-3.0-dev \
+    build-essential \
+    curl \
+    wget \
+    file \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    unzip
+
+RUN rtx use rust@latest -y
+
+WORKDIR /app
 
 COPY . .
 
-RUN cargo build --release
-
+# RUN export PATH=~/.local/share/rtx/shims:$PATH
+RUN rtx install -y
+RUN task setup
+RUN task library:install
 
 FROM debian:buster-slim
 
-RUN apt-get update & rm -rf /var/lib/apt/lists/*
+RUN apt-get update & apt-get install -y extra-runtime-dependencies & rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/local/cargo/bin/library /usr/local/bin/library
+# COPY --from=builder /app/bin/library /usr/local/bin/library
+COPY --from=builder /app /app
+RUN ls -la /app
 
 CMD ["library"]
