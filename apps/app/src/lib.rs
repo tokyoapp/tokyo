@@ -33,7 +33,7 @@ impl AppBuilder {
       .plugin(tauri_plugin_os::init())
       .plugin(tauri_plugin_app::init())
       .plugin(tauri_plugin_window::init())
-      .plugin(tauri_plugin_tokyo::init())
+      // .plugin(tauri_plugin_tokyo::init())
       .setup(move |app| {
         if let Some(setup) = setup {
           (setup)(app)?;
