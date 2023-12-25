@@ -9,6 +9,8 @@ use tokyo_db::Root;
 
 use std::path::Path;
 
+use std::sync::{Arc, Mutex};
+
 use ::image::imageops::FilterType;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
@@ -103,11 +105,12 @@ impl Library {
     None
   }
 
-  pub async fn metadata(client: &Client, p: &String) -> Option<MetadataEntry> {
+  pub async fn metadata(client: &Arc<Mutex<Client>>, p: &String) -> Option<MetadataEntry> {
     let meta = image::metadat(&p.to_string());
 
     if let Some(metadata) = meta {
-      let file = Library::get_file(client, &metadata.hash).await;
+      let client = client.lock().unwrap();
+      let file = Library::get_file(&client, &metadata.hash).await;
 
       let mut tags: Vec<String> = Vec::new();
 
@@ -120,7 +123,7 @@ impl Library {
       if let Some(f) = file {
         tags.append(&mut f.tags.clone());
       } else {
-        Library::add_file(client, &metadata.hash, metadata.rating as i32).await;
+        Library::add_file(&client, &metadata.hash, metadata.rating as i32).await;
       }
 
       let meta_data = MetadataEntry {

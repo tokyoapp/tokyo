@@ -1,43 +1,63 @@
-use std::path::Path;
+use std::{
+  path::Path,
+  sync::{Arc, Mutex},
+};
 
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 use tokyo_db::{Client, Root};
 use tokyo_shadow::MyImage;
 
-pub fn init<R: Runtime, C: DeserializeOwned>(
+pub async fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
   tokio::spawn(async move {
-    let client = Root::client().await;
-    Root::init_db(&client).await.expect("Error at init db");
+    Root::init_db(&Root::client().await)
+      .await
+      .expect("Error at init db");
   });
 
-  Ok(Library(app.clone()))
+  let lib = Library::new(app.clone()).await;
+  Ok(lib)
 }
 
 /// Access to the library APIs.
-pub struct Library<R: Runtime>(AppHandle<R>);
+pub struct Library<R: Runtime> {
+  app: AppHandle<R>,
+  db: Arc<Mutex<Client>>,
+}
 
 impl<R: Runtime> Library<R> {
-  pub async fn get_thumbnail(&self, client: &Client, id: String) -> crate::Result<Vec<u8>> {
-    let meta = tokyo_files::Library::metadata(client, &id).await;
+  pub async fn new(handle: AppHandle<R>) -> Library<R> {
+    Library {
+      app: handle,
+      db: Arc::new(Mutex::new(Root::client().await)),
+    }
+  }
+
+  pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
+    let meta = tokyo_files::Library::metadata(&self.db, &id).await;
     if let Some(metadata) = meta {
       return Ok(metadata.thumbnail);
     }
     Err(crate::Error::Unknown("thumbnail".to_string()))
   }
 
-  pub async fn get_locations(&self, client: &Client) -> crate::Result<Vec<tokyo_db::Location>> {
-    return Ok(Root::location_list(client).await.unwrap());
+  pub async fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
+    return Ok(Root::location_list(&self.db.lock().unwrap()).await.unwrap());
   }
 
-  pub async fn get_index(
-    &self,
-    client: &Client,
-    name: String,
-  ) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
+  pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
+    let client = &self.db.lock().unwrap();
+    Root::insert_location(client, &name.as_str(), &path.as_str())
+      .await
+      .expect("Error while inserting location");
+    Ok(())
+  }
+
+  pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
+    let client = &self.db.lock().unwrap();
     let dir = tokyo_files::Library::find_library(client, name.as_str())
       .await
       .unwrap()
@@ -46,12 +66,9 @@ impl<R: Runtime> Library<R> {
     return Ok(index);
   }
 
-  pub async fn get_metadata(
-    &self,
-    client: &Client,
-    file_path: String,
-  ) -> crate::Result<tokyo_files::MetadataEntry> {
-    let meta = tokyo_files::Library::metadata(client, &file_path).await;
+  pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
+    let client = self.db.lock().unwrap();
+    let meta = tokyo_files::Library::metadata(&client, &file_path).await;
     if let Some(metadata) = meta {
       return Ok(metadata);
     }
@@ -60,18 +77,6 @@ impl<R: Runtime> Library<R> {
 
   pub async fn get_system(&self) -> crate::Result<tokyo_files::SystemInfo> {
     return Ok(tokyo_files::Library::sysinfo());
-  }
-
-  pub async fn post_location(
-    &self,
-    client: &Client,
-    name: String,
-    path: String,
-  ) -> crate::Result<()> {
-    Root::insert_location(client, &name.as_str(), &path.as_str())
-      .await
-      .expect("Error while inserting location");
-    Ok(())
   }
 
   pub async fn get_image(&self, path: String) -> crate::Result<Vec<u16>> {

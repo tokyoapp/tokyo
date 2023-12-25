@@ -21,8 +21,8 @@ use desktop::Library;
 #[cfg(mobile)]
 use mobile::Library;
 
-#[derive(Default)]
-struct MyState(Mutex<HashMap<String, String>>);
+// #[derive(Default)]
+// struct MyState(Mutex<HashMap<String, String>>);
 
 /// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the library APIs.
 pub trait LibraryExt<R: Runtime> {
@@ -51,11 +51,11 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     ])
     .setup(|app, api| {
       #[cfg(mobile)]
-      let library = mobile::init(app, api)?;
+      let library = mobile::init(app, api);
       #[cfg(desktop)]
-      let library = desktop::init(app, api)?;
+      let library = desktop::init(app, api);
       app.manage(library);
-      app.manage(MyState::default());
+      // app.manage(MyState::default());
       Ok(())
     })
     .build()
