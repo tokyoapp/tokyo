@@ -4695,6 +4695,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "thiserror",
+ "tokio",
  "tokyo-db",
  "tokyo-files",
  "tokyo-proto",

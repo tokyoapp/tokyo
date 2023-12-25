@@ -9,7 +9,7 @@ import { ErrorNotification } from './notifications/index.ts';
 import { settings } from './Edit.tsx';
 import { IndexEntryMessage } from 'tokyo-proto';
 // import * as viewport from 'tokyo-viewport';
-import { t } from '../locales/messages.ts';
+import { t } from 'tokyo-locales';
 import { metadataAccessor } from '../accessors/metadata.ts';
 import { getImage } from 'tauri-plugin-tokyo';
 

@@ -2,7 +2,7 @@ import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
 import { LocalLibrary } from '../api/LocalLibrary.js';
 
-export function createLocationsAccessor(hosts: string[]) {
+export function createIndexAccessor(hosts: string[]) {
   // TODO: for hosts, create api instance(s)
 
   const api = new LocalLibrary();
@@ -10,22 +10,17 @@ export function createLocationsAccessor(hosts: string[]) {
   return new Accessor(api, {
     createRequest(params: {
       query: {
-        path: string;
-        name: string;
+        locations: string[];
       };
     }) {
       return {
-        _type: MessageType.Locations,
+        _type: MessageType.Index,
+        locations: params.query.locations,
       };
-      // return {
-      //   _type: MessageType.MutateLocations,
-      //   path: params.path,
-      //   name: params.name,
-      // };
     },
 
     handleMessage(msg) {
-      if (msg._type === MessageType.Locations) return msg;
+      if (msg._type === MessageType.Index) return msg;
     },
 
     filter: ([data]) => data,

@@ -2,12 +2,18 @@ use std::path::Path;
 
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
+use tokyo_db::{Client, Root};
 use tokyo_shadow::MyImage;
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
+  tokio::spawn(async move {
+    let client = Root::client().await;
+    Root::init_db(&client).await.expect("Error at init db");
+  });
+
   Ok(Library(app.clone()))
 }
 
@@ -15,32 +21,37 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
-  pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
-    let root = tokyo_db::Root::new().await;
-    let meta = tokyo_files::Library::metadata(&root, &id).await;
+  pub async fn get_thumbnail(&self, client: &Client, id: String) -> crate::Result<Vec<u8>> {
+    let meta = tokyo_files::Library::metadata(client, &id).await;
     if let Some(metadata) = meta {
       return Ok(metadata.thumbnail);
     }
     Err(crate::Error::Unknown("thumbnail".to_string()))
   }
 
-  pub fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
-    let root = tokyo_db::Root::new().await;
-    return Ok(root.location_list().await.unwrap());
+  pub async fn get_locations(&self, client: &Client) -> crate::Result<Vec<tokyo_db::Location>> {
+    return Ok(Root::location_list(client).await.unwrap());
   }
 
-  pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
-    let root = tokyo_db::Root::new().await;
-    let dir = tokyo_files::Library::find_library(&root, name.as_str())
+  pub async fn get_index(
+    &self,
+    client: &Client,
+    name: String,
+  ) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
+    let dir = tokyo_files::Library::find_library(client, name.as_str())
+      .await
       .unwrap()
       .path;
-    let index = tokyo_files::Library::get_index(&root, dir).await;
+    let index = tokyo_files::Library::get_index(client, dir).await;
     return Ok(index);
   }
 
-  pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
-    let root = tokyo_db::Root::new().await;
-    let meta = tokyo_files::Library::metadata(&root, &file_path).await;
+  pub async fn get_metadata(
+    &self,
+    client: &Client,
+    file_path: String,
+  ) -> crate::Result<tokyo_files::MetadataEntry> {
+    let meta = tokyo_files::Library::metadata(client, &file_path).await;
     if let Some(metadata) = meta {
       return Ok(metadata);
     }
@@ -51,10 +62,13 @@ impl<R: Runtime> Library<R> {
     return Ok(tokyo_files::Library::sysinfo());
   }
 
-  pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
-    let root = tokyo_db::Root::new().await;
-    root
-      .insert_location(&name.as_str(), &path.as_str())
+  pub async fn post_location(
+    &self,
+    client: &Client,
+    name: String,
+    path: String,
+  ) -> crate::Result<()> {
+    Root::insert_location(client, &name.as_str(), &path.as_str())
       .await
       .expect("Error while inserting location");
     Ok(())

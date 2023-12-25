@@ -1,6 +1,6 @@
-import en from './en.json';
-import de from './de.json';
-import kr from './kr.json';
+import en from '../locales/en.json';
+import de from '../locales/de.json';
+import kr from '../locales/kr.json';
 import { createSignal } from 'solid-js';
 
 export const langs = {

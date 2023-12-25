@@ -1,5 +1,6 @@
 use crate::{LibraryExt, Result};
 use tauri::{command, AppHandle, Runtime};
+use tokyo_db::Root;
 use tokyo_files::Image;
 
 // get local library list
@@ -7,12 +8,18 @@ use tokyo_files::Image;
 pub(crate) async fn get_locations<R: Runtime>(
   app: AppHandle<R>,
 ) -> Result<Vec<tokyo_db::Location>> {
-  return Ok(app.library().get_locations().unwrap());
+  let lib = app.library();
+  let client = Root::client().await;
+  let r = lib.get_locations(&client).await;
+  return Ok(r.unwrap());
 }
 
 #[command]
 pub(crate) async fn get_thumbnail<R: Runtime>(app: AppHandle<R>, id: String) -> Result<Vec<u8>> {
-  return Ok(app.library().get_thumbnail(id).await.unwrap());
+  let lib = app.library();
+  let client = Root::client().await;
+  let r = app.library().get_thumbnail(&client, id).await;
+  return Ok(r.unwrap());
 }
 
 #[command]
@@ -20,7 +27,10 @@ pub async fn get_index<R: Runtime>(
   app: AppHandle<R>,
   name: String,
 ) -> Result<Vec<tokyo_files::IndexEntry>> {
-  return Ok(app.library().get_index(name).await.unwrap());
+  let lib = app.library();
+  let client = Root::client().await;
+  let r = app.library().get_index(&client, name).await;
+  return Ok(r.unwrap());
 }
 
 #[command]
@@ -36,7 +46,10 @@ pub async fn get_metadata<R: Runtime>(
   app: AppHandle<R>,
   file: String,
 ) -> Result<tokyo_files::MetadataEntry> {
-  return Ok(app.library().get_metadata(file).await.unwrap());
+  let lib = app.library();
+  let client = Root::client().await;
+  let r = app.library().get_metadata(&client, file).await;
+  return Ok(r.unwrap());
 }
 
 #[command]
@@ -54,5 +67,7 @@ pub async fn post_location<R: Runtime>(
   name: String,
   path: String,
 ) -> Result<()> {
-  app.library().post_location(name, path).await
+  let lib = app.library();
+  let client = Root::client().await;
+  app.library().post_location(&client, name, path).await
 }

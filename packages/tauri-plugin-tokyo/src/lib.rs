@@ -2,8 +2,9 @@ use tauri::{
   plugin::{Builder, TauriPlugin},
   Manager, Runtime,
 };
+use tokyo_db::{Client, Root};
 
-use std::{collections::HashMap, sync::Mutex};
+use std::{collections::HashMap, future::Future, sync::Mutex};
 
 #[cfg(desktop)]
 mod desktop;

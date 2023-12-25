@@ -1,4 +1,4 @@
-import { langs, language, setLanguage } from '../locales/messages.ts';
+import { langs, language, setLanguage } from 'tokyo-locales';
 // import storage from '../services/ClientStorage.worker.ts';
 import { setSettingOpen } from '../App.tsx';
 import Button from './Button.tsx';

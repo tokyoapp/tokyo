@@ -20,6 +20,7 @@ tokyo-files = { path = "../files" }
 tokyo-shadow = { path = "../shadow" }
 tokyo-db = { path = "../db" }
 anyhow = "1.0.75"
+tokio = { version = "1.35.0", features = ["rt", "rt-multi-thread", "macros"] }
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-alpha.8" }

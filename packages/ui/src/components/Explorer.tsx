@@ -5,7 +5,7 @@ import { createStore } from 'solid-js/store';
 import { indexAccessor } from '../accessors/index.ts';
 import { metadataAccessor } from '../accessors/metadata.ts';
 import Jobs from '../actions/Action.ts';
-import { t } from '../locales/messages.ts';
+import { t } from 'tokyo-locales';
 import Combobox from './Combobox.tsx';
 import Icon from './Icon.tsx';
 import Rating from './Rating.tsx';

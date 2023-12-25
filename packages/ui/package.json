@@ -19,6 +19,7 @@
     "tokyo-properties": "workspace:",
     "tokyo-proto": "workspace:",
     "tokyo-api": "workspace:",
+    "tokyo-locales": "workspace:",
     "tauri-plugin-tokyo": "workspace:",
     "solid-js": "^1.7.8",
     "@minht11/solid-virtual-container": "^0.2.1",

@@ -1,7 +1,7 @@
 import '@atrium-ui/mono/expandable';
 import { createSignal } from 'solid-js';
 import { metadataAccessor } from '../accessors/metadata.ts';
-import { t } from '../locales/messages.ts';
+import { t } from 'tokyo-locales';
 import Icon from './Icon.tsx';
 
 function Seperator() {

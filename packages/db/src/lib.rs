@@ -1,5 +1,5 @@
 use anyhow::Result;
-use libsql_client::{args, Client, Config, Statement};
+pub use libsql_client::{Client, Config, Statement};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::{fs, path::Path};
@@ -44,33 +44,24 @@ pub struct File {
   pub tags: Vec<String>,
 }
 
-pub struct Root {
-  client: libsql_client::Client,
-}
-
-unsafe impl Sync for Root {}
+pub struct Root {}
 
 impl Root {
-  pub async fn new() -> Self {
+  pub async fn client() -> Client {
+    Client::from_config(Config {
+      url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
+      auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
+    })
+    .await
+    .expect("Failed to create db client")
+  }
+
+  pub async fn init_db(client: &Client) -> Result<()> {
     if !Path::exists(&Path::new("./data/")) {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 
-    let client = Client::from_config(Config {
-      url: url::Url::parse(env::var("DATABASE").expect("No Database").as_str()).unwrap(),
-      auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
-    })
-    .await
-    .unwrap();
-
-    let root = Root { client };
-
-    return root;
-  }
-
-  pub async fn init_db(self: &Self) -> Result<()> {
-    self
-      .client
+    client
       .batch([
         // table: locations
         Statement::from(
@@ -95,21 +86,18 @@ impl Root {
       ])
       .await?;
 
-    let list = self.location_list().await?;
+    let list = Root::location_list(client).await?;
     if list.len() == 0 {
-      self
-        .insert_location("default", "/Users/tihav/Pictures")
-        .await?;
+      Root::insert_location(client, "default", "/Users/tihav/Pictures").await?;
     }
 
     return Ok(());
   }
 
-  pub async fn insert_tag(self: &Self, name: &str) -> Result<String> {
+  pub async fn insert_tag(client: &Client, name: &str) -> Result<String> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self
-      .client
+    client
       .execute(Statement::with_args(
         "insert into tags (id, name) values (?, ?)",
         &[&uid, &name.to_string()],
@@ -119,11 +107,10 @@ impl Root {
     Ok(uid)
   }
 
-  pub async fn insert_edit(self: &Self, hash: &str, edits: &str) -> Result<()> {
+  pub async fn insert_edit(client: &Client, hash: &str, edits: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self
-      .client
+    client
       .execute(Statement::with_args(
         "insert into edits (id, edits, file) values (?, ?, ?)",
         &[&uid, &edits.to_string(), &hash.to_string()],
@@ -133,9 +120,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn insert_file(self: &Self, hash: &str, rating: i32) -> Result<()> {
-    self
-      .client
+  pub async fn insert_file(client: &Client, hash: &str, rating: i32) -> Result<()> {
+    client
       .execute(Statement::with_args(
         "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
         &[&hash.to_string(), &rating.to_string(), &"".to_string()],
@@ -145,9 +131,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn get_edits(self: &Self, hash: &str) -> Result<Vec<Edit>> {
-    let rs = self
-      .client
+  pub async fn get_edits(client: &Client, hash: &str) -> Result<Vec<Edit>> {
+    let rs = client
       .execute(Statement::with_args(
         "select id, edits, file from edits where file = ?",
         &[&hash.to_string()],
@@ -164,9 +149,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn get_file(self: &Self, hash: &str) -> Result<Vec<File>> {
-    let rs = self
-      .client
+  pub async fn get_file(client: &Client, hash: &str) -> Result<Vec<File>> {
+    let rs = client
       .execute(Statement::with_args(
         "select hash, tags, rating from files where hash = ?",
         &[&hash.to_string()],
@@ -187,9 +171,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn set_rating(self: &Self, hash: &str, rating: i32) -> Result<()> {
-    self
-      .client
+  pub async fn set_rating(client: &Client, hash: &str, rating: i32) -> Result<()> {
+    client
       .execute(Statement::with_args(
         "update files SET rating = ?1 where hash = ?2",
         &[rating.to_string(), hash.to_string()],
@@ -199,11 +182,10 @@ impl Root {
     Ok(())
   }
 
-  pub async fn set_tags(self: &Self, hash: &str, tags: &Vec<String>) -> Result<()> {
+  pub async fn set_tags(client: &Client, hash: &str, tags: &Vec<String>) -> Result<()> {
     let ts = tags.join(",");
 
-    self
-      .client
+    client
       .execute(Statement::with_args(
         "update files SET tags = ?1 where hash = ?2",
         &[ts, hash.to_string()],
@@ -213,11 +195,10 @@ impl Root {
     Ok(())
   }
 
-  pub async fn insert_location(self: &Self, name: &str, path: &str) -> Result<()> {
+  pub async fn insert_location(client: &Client, name: &str, path: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    self
-      .client
+    client
       .execute(Statement::with_args(
         "insert into locations (id, name, path) values (?1, ?2, ?3)",
         &[&uid, &name.to_string(), &path.to_string()],
@@ -227,9 +208,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn location_list(self: &Self) -> Result<Vec<Location>> {
-    let rs = self
-      .client
+  pub async fn location_list(client: &Client) -> Result<Vec<Location>> {
+    let rs = client
       .execute(Statement::from("select id, name, path from locations"))
       .await?;
 
@@ -243,9 +223,8 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn tags_list(self: &Self) -> Result<Vec<Tag>> {
-    let rs = self
-      .client
+  pub async fn tags_list(client: &Client) -> Result<Vec<Tag>> {
+    let rs = client
       .execute(Statement::from("select id, name from tags"))
       .await?;
 

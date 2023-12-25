@@ -1,7 +1,7 @@
 import { setSettingOpen } from '../App.tsx';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
-import { t } from '../locales/messages.ts';
+import { t } from 'tokyo-locales';
 
 export default function () {
   return (
