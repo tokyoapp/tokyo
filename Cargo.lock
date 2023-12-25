@@ -5057,6 +5057,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokyo-locales"
+version = "0.1.0"
+
+[[package]]
 name = "tokyo-proto"
 version = "0.1.0"
 dependencies = [
