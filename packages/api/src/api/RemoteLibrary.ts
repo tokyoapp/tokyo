@@ -2,11 +2,11 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'tokyo-proto';
-import { ClientAPIMessage, LibraryInterface } from '../lib';
+import { ClientAPIMessage, LibraryInterface, RequestMessage } from '../lib';
 
 let msg_count = 1;
 
-export class LibraryLocation implements LibraryInterface {
+export class RemoteLibrary implements LibraryInterface {
   ws!: WebSocket;
 
   messageListeners = new Set<(arg: library.Message) => void>();
@@ -147,6 +147,18 @@ export class LibraryLocation implements LibraryInterface {
   connect(host: string): Promise<void> {
     console.log('worker connecting to', host);
 
+    const trx = new TransformStream({
+      start(controller) {
+        this.ws = new WebSocket(`ws://${host}/ws`);
+        this.ws.onmessage = async (msg) => {
+          controller.enqueue(msg);
+        };
+      },
+      transform(req_msg) {
+        this.ws.send(req_msg);
+      }
+    })
+
     return new Promise((resolve) => {
       this.ws = new WebSocket(`ws://${host}/ws`);
 
@@ -170,8 +182,24 @@ export class LibraryLocation implements LibraryInterface {
       };
     });
   }
+
+  stream() {
+    const worker = new Worker(new URL('./api/RemoteLibrary.ts', import.meta.url), {
+      type: 'module',
+    });
+    const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);
+
+    worker.onerror = (err) => {
+      throw new Error(err.message);
+    };
+
+    wrappedWorker.connect(url);
+
+    // TODO: actually send request to worker.
+    return wrappedWorker;
+  }
 }
 
-const worker = new LibraryLocation();
+const worker = new RemoteLibrary();
 export default worker;
 Comlink.expose(worker);

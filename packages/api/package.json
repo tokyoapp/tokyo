@@ -5,7 +5,6 @@
   "dependencies": {
     "comlink": "^4.4.1",
     "tokyo-proto": "workspace:",
-    "solid-js": "^1.7.8",
     "tauri-plugin-tokyo": "workspace:"
   }
 }
