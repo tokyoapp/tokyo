@@ -47,20 +47,24 @@ pub struct File {
   pub tags: Vec<String>,
 }
 
-pub struct Root {}
+pub struct Database {
+  client: Client,
+}
 
-impl Root {
-  pub async fn client() -> Client {
-    Client::from_config(Config {
-      url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
-      auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
-    })
-    .await
-    .expect("Failed to create db client")
+impl Database {
+  pub async fn new(&self) -> Database {
+    Database {
+      client: Client::from_config(Config {
+        url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
+        auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
+      })
+      .await
+      .expect("Failed to create db client"),
+    }
   }
 
   pub async fn init_db() -> Result<()> {
-    let client = Root::client().await;
+    let client = Database::client().await;
 
     if !Path::exists(&Path::new("./data/")) {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
@@ -91,9 +95,9 @@ impl Root {
       ])
       .await?;
 
-    let list = Root::location_list().await?;
+    let list = Database::location_list().await?;
     if list.len() == 0 {
-      Root::insert_location("default", "/Users/tihav/Pictures").await?;
+      Database::insert_location("default", "/Users/tihav/Pictures").await?;
     }
 
     return Ok(());
@@ -201,7 +205,7 @@ impl Root {
   }
 
   pub async fn insert_location(name: &str, path: &str) -> Result<()> {
-    let client = Root::client().await;
+    let client = Database::client().await;
     let uid = uuid::Uuid::new_v4().to_string();
 
     client
@@ -215,7 +219,7 @@ impl Root {
   }
 
   pub async fn location_list() -> Result<Vec<Location>> {
-    let client = Root::client().await;
+    let client = Database::client().await;
     let rs = client
       .execute(Statement::from("select id, name, path from locations"))
       .await?;
@@ -230,7 +234,7 @@ impl Root {
     return Ok(list);
   }
 
-  pub async fn tags_list(client: &Client) -> Result<Vec<Tag>> {
+  pub async fn tags_list() -> Result<Vec<Tag>> {
     let rs = client
       .execute(Statement::from("select id, name from tags"))
       .await?;

@@ -9,7 +9,7 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_db::{Client, Root};
+use tokyo_db::{Client, Database};
 use tokyo_files::{IndexEntry, Library};
 use tokyo_proto::library::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
@@ -31,8 +31,8 @@ struct OkResponse {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-  let client = Root::client().await;
-  Root::init_db(&client).await;
+  let client = Database::client().await;
+  Database::init_db(&client).await;
 
   let router = Router::new().route(
     "/ws",
@@ -57,8 +57,8 @@ async fn metadata(client: &Client, file: &String) -> library::Message {
 }
 
 async fn get_location_list(client: &Client) -> library::LibraryListMessage {
-  let list = Root::location_list(client).await.unwrap();
-  let tags = Root::tags_list(client).await.unwrap();
+  let list = Database::location_list(client).await.unwrap();
+  let tags = Database::tags_list(client).await.unwrap();
 
   let mut list_msg = library::LibraryListMessage::new();
   list_msg.tags = tags
@@ -166,7 +166,7 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
   if ok_msg.has_postmeta() {
     let file = &ok_msg.postmeta().file;
     let rating = ok_msg.postmeta().rating.unwrap();
-    Root::set_rating(client, file, rating)
+    Database::set_rating(client, file, rating)
       .await
       .expect("Failed to set rating");
 
@@ -194,7 +194,7 @@ async fn handle_socket(mut socket: WebSocket) {
   let (sender, mut receiver) = socket.split();
 
   let arc_sender = Arc::new(Mutex::new(sender));
-  let arc_db_client = Arc::new(Mutex::new(Root::client().await));
+  let arc_db_client = Arc::new(Mutex::new(Database::client().await));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {

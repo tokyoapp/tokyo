@@ -2,7 +2,7 @@ use serde::de::DeserializeOwned;
 use std::{path::Path, sync::Arc};
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 use tokio::sync::Mutex;
-use tokyo_db::{Client, Root};
+use tokyo_db::{Client, Database};
 use tokyo_shadow::MyImage;
 
 use crate::LibraryExt;
@@ -11,9 +11,9 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
-  let db = Root::client().await;
+  let db = Database::client().await;
   tokio::spawn(async move {
-    Root::init_db(&db).await.expect("Error at init db");
+    Database::init_db(&db).await.expect("Error at init db");
   });
 
   let lib = Library::new(app.clone()).await;
@@ -39,11 +39,11 @@ impl<R: Runtime> Library<R> {
   }
 
   pub async fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
-    return Ok(Root::location_list().await.unwrap());
+    return Ok(Database::location_list().await.unwrap());
   }
 
   pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
-    Root::insert_location(&name.as_str(), &path.as_str())
+    Database::insert_location(&name.as_str(), &path.as_str())
       .await
       .expect("Error while inserting location");
     Ok(())

@@ -5,7 +5,7 @@ mod images;
 
 use anyhow::Result;
 use tokyo_db::Client;
-use tokyo_db::Root;
+use tokyo_db::Database;
 
 use std::path::Path;
 
@@ -91,11 +91,11 @@ impl Library {
   }
 
   pub async fn list_tags() -> Vec<tokyo_db::Tag> {
-    Root::tags_list(client).await.unwrap()
+    Database::tags_list(client).await.unwrap()
   }
 
   pub async fn default_library(client: &Arc<Mutex<Client>>) -> Option<tokyo_db::Location> {
-    let locs = Root::location_list(client)
+    let locs = Database::location_list(client)
       .await
       .expect("Failed to list locations");
     let first = locs.first();
@@ -184,22 +184,22 @@ impl Library {
   }
 
   pub async fn add_file(client: &Client, hash: &str, rating: i32) {
-    let id = Root::insert_tag(client, "Test").await.unwrap();
+    let id = Database::insert_tag(client, "Test").await.unwrap();
 
-    let _ = Root::insert_file(client, hash, rating)
+    let _ = Database::insert_file(client, hash, rating)
       .await
       .expect("Failed to insert file");
 
-    let mut f = Root::get_file(client, hash).await.unwrap();
+    let mut f = Database::get_file(client, hash).await.unwrap();
     let tags = &mut f.first_mut().unwrap().tags;
 
     tags.push(id);
 
-    let _ = Root::set_tags(client, hash, tags.as_ref()).await;
+    let _ = Database::set_tags(client, hash, tags.as_ref()).await;
   }
 
   pub async fn get_file(client: &Client, hash: &str) -> Option<tokyo_db::File> {
-    return Root::get_file(client, hash)
+    return Database::get_file(client, hash)
       .await
       .expect("Failed to get file")
       .first()
@@ -207,7 +207,7 @@ impl Library {
   }
 
   pub async fn find_library(client: &Client, id: &str) -> Result<tokyo_db::Location> {
-    let locs = Root::location_list(client).await?;
+    let locs = Database::location_list(client).await?;
     let loc = locs
       .iter()
       .find(|lib| lib.id == id)
@@ -217,7 +217,7 @@ impl Library {
   }
 
   pub async fn create_library(client: &Client, name: &str, path: &str) -> Result<()> {
-    Root::insert_location(client, name, path).await?;
+    Database::insert_location(client, name, path).await?;
     Ok(())
   }
 

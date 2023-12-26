@@ -2,7 +2,7 @@ use tauri::{
   plugin::{Builder, TauriPlugin},
   Manager, Runtime,
 };
-use tokyo_db::{Client, Root};
+use tokyo_db::{Client, Database};
 
 use std::{collections::HashMap, future::Future};
 use tokio::sync::Mutex;
