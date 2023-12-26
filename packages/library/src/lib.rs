@@ -1,11 +1,12 @@
+pub mod db;
 pub mod image;
 
 mod edit;
 mod images;
 
 use anyhow::Result;
-use tokyo_db::Client;
-use tokyo_db::Database;
+use db::Client;
+use db::Database;
 
 use std::path::Path;
 
@@ -90,11 +91,11 @@ impl Library {
     return images::list(dir);
   }
 
-  pub async fn list_tags() -> Vec<tokyo_db::Tag> {
+  pub async fn list_tags() -> Vec<db::Tag> {
     Database::tags_list(client).await.unwrap()
   }
 
-  pub async fn default_library(client: &Arc<Mutex<Client>>) -> Option<tokyo_db::Location> {
+  pub async fn default_library(client: &Arc<Mutex<Client>>) -> Option<db::Location> {
     let locs = Database::location_list(client)
       .await
       .expect("Failed to list locations");
@@ -198,7 +199,7 @@ impl Library {
     let _ = Database::set_tags(client, hash, tags.as_ref()).await;
   }
 
-  pub async fn get_file(client: &Client, hash: &str) -> Option<tokyo_db::File> {
+  pub async fn get_file(client: &Client, hash: &str) -> Option<db::File> {
     return Database::get_file(client, hash)
       .await
       .expect("Failed to get file")
@@ -206,7 +207,7 @@ impl Library {
       .and_then(|f| Some(f.clone()));
   }
 
-  pub async fn find_library(client: &Client, id: &str) -> Result<tokyo_db::Location> {
+  pub async fn find_library(client: &Client, id: &str) -> Result<db::Location> {
     let locs = Database::location_list(client).await?;
     let loc = locs
       .iter()

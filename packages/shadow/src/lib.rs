@@ -99,13 +99,13 @@ pub fn get_image(path: &Path) -> Option<DynamicImage> {
   if let Ok(mut params) = rawimage.develop_params() {
     // params.gamma = 1.8;
 
-    let buf = match &rawimage.data {
-      RawImageData::Integer(buf) => buf,
-      RawImageData::Float(_) => todo!(),
-    };
+    // let buf = match &rawimage.data {
+    //   RawImageData::Integer(buf) => buf,
+    //   RawImageData::Float(_) => todo!(),
+    // };
 
     println!("Develop image");
-    let (srgbf, dim) = raw::develop_raw_srgb(buf, &params).unwrap();
+    let (srgbf, dim) = raw::develop_raw_srgb(&rawimage.data, &params).unwrap();
 
     let mut img = DynamicImage::ImageRgb32F(
       ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).expect("Invalid ImageBuffer size"),

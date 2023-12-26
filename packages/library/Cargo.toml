@@ -1,11 +1,10 @@
 [package]
-name = "tokyo-files"
+name = "tokyo-library"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 tokyo-shadow = { path = "../shadow" }
-tokyo-db = { path = "../db" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.105"
 sha256 = "1.4.0"

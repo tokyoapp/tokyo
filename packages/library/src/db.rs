@@ -3,9 +3,7 @@ use libsql_client::client;
 pub use libsql_client::{Client, Config, Statement};
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::sync::Arc;
 use std::{fs, path::Path};
-use tokio::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Tag {
@@ -63,7 +61,7 @@ impl Database {
     }
   }
 
-  pub async fn init_db() -> Result<()> {
+  pub async fn init_db(&self) -> Result<()> {
     let client = Database::client().await;
 
     if !Path::exists(&Path::new("./data/")) {
@@ -103,7 +101,7 @@ impl Database {
     return Ok(());
   }
 
-  pub async fn insert_tag(client: &Client, name: &str) -> Result<String> {
+  pub async fn insert_tag(&self, name: &str) -> Result<String> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     client
@@ -116,7 +114,7 @@ impl Database {
     Ok(uid)
   }
 
-  pub async fn insert_edit(client: &Client, hash: &str, edits: &str) -> Result<()> {
+  pub async fn insert_edit(&self, hash: &str, edits: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
     client
@@ -129,7 +127,7 @@ impl Database {
     Ok(())
   }
 
-  pub async fn insert_file(client: &Client, hash: &str, rating: i32) -> Result<()> {
+  pub async fn insert_file(&self, hash: &str, rating: i32) -> Result<()> {
     client
       .execute(Statement::with_args(
         "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
@@ -140,7 +138,7 @@ impl Database {
     Ok(())
   }
 
-  pub async fn get_edits(client: &Client, hash: &str) -> Result<Vec<Edit>> {
+  pub async fn get_edits(&self, hash: &str) -> Result<Vec<Edit>> {
     let rs = client
       .execute(Statement::with_args(
         "select id, edits, file from edits where file = ?",
@@ -158,7 +156,7 @@ impl Database {
     return Ok(list);
   }
 
-  pub async fn get_file(client: &Client, hash: &str) -> Result<Vec<File>> {
+  pub async fn get_file(&self, hash: &str) -> Result<Vec<File>> {
     let rs = client
       .execute(Statement::with_args(
         "select hash, tags, rating from files where hash = ?",
@@ -180,8 +178,9 @@ impl Database {
     return Ok(list);
   }
 
-  pub async fn set_rating(client: &Client, hash: &str, rating: i32) -> Result<()> {
-    client
+  pub async fn set_rating(&self, hash: &str, rating: i32) -> Result<()> {
+    self
+      .client
       .execute(Statement::with_args(
         "update files SET rating = ?1 where hash = ?2",
         &[rating.to_string(), hash.to_string()],
@@ -191,7 +190,7 @@ impl Database {
     Ok(())
   }
 
-  pub async fn set_tags(client: &Client, hash: &str, tags: &Vec<String>) -> Result<()> {
+  pub async fn set_tags(&self, hash: &str, tags: &Vec<String>) -> Result<()> {
     let ts = tags.join(",");
 
     client
@@ -204,7 +203,7 @@ impl Database {
     Ok(())
   }
 
-  pub async fn insert_location(name: &str, path: &str) -> Result<()> {
+  pub async fn insert_location(&self, name: &str, path: &str) -> Result<()> {
     let client = Database::client().await;
     let uid = uuid::Uuid::new_v4().to_string();
 
@@ -218,7 +217,7 @@ impl Database {
     Ok(())
   }
 
-  pub async fn location_list() -> Result<Vec<Location>> {
+  pub async fn location_list(&self) -> Result<Vec<Location>> {
     let client = Database::client().await;
     let rs = client
       .execute(Statement::from("select id, name, path from locations"))
@@ -234,7 +233,7 @@ impl Database {
     return Ok(list);
   }
 
-  pub async fn tags_list() -> Result<Vec<Tag>> {
+  pub async fn tags_list(&self) -> Result<Vec<Tag>> {
     let rs = client
       .execute(Statement::from("select id, name from tags"))
       .await?;

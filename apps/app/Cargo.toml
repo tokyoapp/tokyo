@@ -24,8 +24,7 @@ tauri-plugin-tokyo = { path = "../../packages/tauri-plugin-tokyo" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokyo-proto = { path = "../../packages/proto", features = ["protoc"] }
-tokyo-files = { path = "../../packages/files" }
-tokyo-db = { path = "../../packages/db" }
+tokyo-library = { path = "../../packages/library" }
 window-vibrancy = "0.4.2"
 
 [features]

@@ -16,9 +16,8 @@ serde = "1.0"
 serde_json = "1.0.105"
 thiserror = "1.0"
 tokyo-proto = { path = "../proto", features = ["protoc"] }
-tokyo-files = { path = "../files" }
+tokyo-library = { path = "../library" }
 tokyo-shadow = { path = "../shadow" }
-tokyo-db = { path = "../db" }
 anyhow = "1.0.75"
 tokio = { version = "1.35.0", features = ["rt", "rt-multi-thread", "macros"] }
 

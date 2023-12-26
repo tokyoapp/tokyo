@@ -1,12 +1,12 @@
 use crate::{LibraryExt, Result};
 use tauri::{command, AppHandle, Runtime};
-use tokyo_files::Image;
+use tokyo_library::Image;
 
 // get local library list
 #[command]
 pub(crate) async fn get_locations<R: Runtime>(
   app: AppHandle<R>,
-) -> Result<Vec<tokyo_db::Location>> {
+) -> Result<Vec<tokyo_library::db::Location>> {
   let r = app.library().get_locations().await;
   return Ok(r.unwrap());
 }
@@ -30,13 +30,13 @@ pub(crate) async fn get_thumbnail<R: Runtime>(app: AppHandle<R>, id: String) -> 
 pub async fn get_index<R: Runtime>(
   app: AppHandle<R>,
   name: String,
-) -> Result<Vec<tokyo_files::IndexEntry>> {
+) -> Result<Vec<tokyo_library::IndexEntry>> {
   let r = app.library().get_index(name).await;
   return Ok(r.unwrap());
 }
 
 #[command]
-pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<tokyo_files::SystemInfo> {
+pub async fn get_system<R: Runtime>(app: AppHandle<R>) -> Result<tokyo_library::SystemInfo> {
   return Ok(app.library().get_system().await.unwrap());
 }
 
@@ -47,7 +47,7 @@ pub async fn create_library() {}
 pub async fn get_metadata<R: Runtime>(
   app: AppHandle<R>,
   file: String,
-) -> Result<tokyo_files::MetadataEntry> {
+) -> Result<tokyo_library::MetadataEntry> {
   let r = app.library().get_metadata(file).await;
   return Ok(r.unwrap());
 }
@@ -57,6 +57,6 @@ pub async fn post_metadata() {}
 
 #[command]
 pub async fn get_image(path: String, exposure: f32) -> Image {
-  let img = tokyo_files::Library::render_image(path, exposure);
+  let img = tokyo_library::Library::render_image(path, exposure);
   img
 }

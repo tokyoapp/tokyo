@@ -44,9 +44,9 @@ task dev
 - `apps/app` - The desktop and mobile app
 - `apps/library` - A headless server
 - `apps/website` - The landing page
+
 - `packages/api` - Typescript API client
-- `packages/db` - Persistent structured data storage
-- `packages/files` - File handling
+- `packages/library` - Persistent structured data storage and file handling
 - `packages/proto` - Protobuf definitions
 - `packages/shadow` - Image manipulation library
 - `packages/ui` - User Interface components

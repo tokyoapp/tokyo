@@ -7,7 +7,7 @@ pub use gen::library;
 pub use protobuf::Message;
 
 #[cfg(feature = "protoc")]
-impl Into<library::SystemInfo> for tokyo_files::SystemInfo {
+impl Into<library::SystemInfo> for tokyo_library::SystemInfo {
   fn into(self) -> library::SystemInfo {
     let mut _msg = library::SystemInfo::new();
     _msg.disk_name = self.disk_name;
@@ -18,7 +18,7 @@ impl Into<library::SystemInfo> for tokyo_files::SystemInfo {
 }
 
 #[cfg(feature = "protoc")]
-impl Into<library::IndexEntryMessage> for tokyo_files::IndexEntry {
+impl Into<library::IndexEntryMessage> for tokyo_library::IndexEntry {
   fn into(self) -> library::IndexEntryMessage {
     let mut _msg = library::IndexEntryMessage::new();
     _msg.hash = self.hash;
@@ -33,7 +33,7 @@ impl Into<library::IndexEntryMessage> for tokyo_files::IndexEntry {
 }
 
 #[cfg(feature = "protoc")]
-impl Into<library::MetadataMessage> for tokyo_files::MetadataEntry {
+impl Into<library::MetadataMessage> for tokyo_library::MetadataEntry {
   fn into(self) -> library::MetadataMessage {
     let mut _msg = library::MetadataMessage::new();
     _msg.hash = self.hash;
