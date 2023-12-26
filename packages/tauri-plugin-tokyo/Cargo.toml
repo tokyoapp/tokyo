@@ -1,0 +1,26 @@
+[package]
+name = "tauri-plugin-tokyo"
+version = "0.0.0"
+authors = ["You"]
+description = ""
+edition = "2021"
+rust-version = "1.65"
+exclude = ["/examples", "/webview-dist", "/webview-src", "/node_modules"]
+links = "tauri-plugin-tokyo"
+
+[target]
+
+[dependencies]
+tauri = { version = "2.0.0-alpha.14" }
+serde = "1.0"
+serde_json = "1.0.105"
+thiserror = "1.0"
+tokyo-proto = { path = "../proto", features = ["protoc"] }
+tokyo-files = { path = "../files" }
+tokyo-shadow = { path = "../shadow" }
+tokyo-db = { path = "../db" }
+anyhow = "1.0.75"
+tokio = { version = "1.35.0", features = ["rt", "rt-multi-thread", "macros"] }
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-alpha.8" }

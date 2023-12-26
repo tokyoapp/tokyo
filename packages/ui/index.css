@@ -71,3 +71,36 @@ hr {
 .thumbnail-image:nth-child(2) canvas {
   box-shadow: 4px 3px 15px rgba(0, 0, 0, 0.33);
 }
+
+/* tooltips */
+.tooltip[aria-label] {
+  position: relative;
+}
+
+.tooltip[aria-label]:hover::after {
+  opacity: 0.9;
+  transform: translate(0px, -50%);
+}
+
+.tooltip[aria-label]::after {
+  content: attr(aria-label);
+  z-index: 10000;
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(-10px, -50%);
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #333;
+  color: #eee;
+  white-space: nowrap;
+  font-family: sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  transition: opacity .1s .1s ease,
+              transform .1s .1s ease;
+}

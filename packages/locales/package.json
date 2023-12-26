@@ -1,0 +1,9 @@
+{
+  "name": "tokyo-locales",
+  "description": "Locales",
+  "main": "src/lib.ts",
+  "type": "module",
+  "dependencies": {
+    "solid-js": "^1.7.8"
+  }
+}

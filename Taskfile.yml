@@ -48,14 +48,20 @@ tasks:
       - Cargo.toml
       - Cargo.lock
       - "**/package.json"
+      - .env
+      - .env.example
+    generates:
+      - node_modules/**
+      - target/**
     cmds:
-      - rtx install
+      - cp -n .env.example .env 2> /dev/null || true
+      - rtx install 2> /dev/null || true
       - task: codegen
-      - cargo check
       - bun install
       - cargo install cargo-watch
       - cargo install wasm-pack
       - cargo install tauri-cli --version "^2.0.0-alpha"
+      - cargo check
 
   codegen:
     dir: "./packages/proto"
@@ -70,36 +76,28 @@ tasks:
 
   dev:
     desc: Run desktop app with library
-    vars:
-      deps:
-        sh: task setup
-    cmd: task --parallel app:dev
+    deps: [setup]
+    cmds:
+      - task: app:dev
 
   dev:server:
     desc: Run desktop app with library
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:dev app:dev
 
   dev:ios:
     desc: Run ios app in simulator
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:dev app:dev:ios
 
   build:
     desc: Build app
-    vars:
-      deps:
-        sh: task setup
+    deps: [setup]
     cmd: task --parallel library:build app:build
 
   build:docker:
     desc: Build docker image for library server
-    cmds:
-      - docker buildx build --platform linux/amd64 . --tag tokyo/library:latest
+    cmd: docker buildx build --platform linux/amd64 -f apps/library/Dockerfile --tag luckydye/tokyo:latest .
 
   check:
     desc: Check files

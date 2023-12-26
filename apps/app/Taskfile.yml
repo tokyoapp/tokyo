@@ -34,13 +34,13 @@ tasks:
     desc: Dev ios
     prefix: ios
     dir: "./"
-    deps: [ui:dev, tauri:dev:ios]
+    cmd: task --parallel ui:dev tauri:dev:ios
 
   dev:
     desc: Dev
     prefix: "desktop"
     dir: ./
-    deps: [ui:dev, tauri:dev]
+    cmd: task --parallel ui:dev tauri:dev
 
   build:
     desc: Build app

@@ -64,8 +64,8 @@ export default function Icon(props: Props) {
       riveInstance?.cleanup();
     });
 
-    return <div class={`inline-block mb-[-0.175em] align-baseline ${className}`}>{canvas}</div>;
+    return <div class={`inline-block align-baseline ${className}`}>{canvas}</div>;
   }
 
-  return <div class={`inline-block mb-[-0.175em] align-baseline ${className}`} innerHTML={src} />;
+  return <div class={`inline-block align-baseline ${className}`} innerHTML={src} />;
 }

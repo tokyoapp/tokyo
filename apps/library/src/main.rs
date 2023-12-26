@@ -6,13 +6,13 @@ use axum::{
 };
 use futures::sink::SinkExt;
 use futures::StreamExt;
-use phl_library::db::Root;
-use phl_library::{db, IndexEntry, Library};
-use phl_proto::library::{self, IndexEntryMessage, LibraryIndexMessage};
-use phl_proto::Message;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokyo_db::{Client, Root};
+use tokyo_files::{IndexEntry, Library};
+use tokyo_proto::library::{self, ClientMessage, IndexEntryMessage};
+use tokyo_proto::Message;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -31,8 +31,8 @@ struct OkResponse {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-  let root = db::Root::new();
-  let _ = root.init_db();
+  let client = Root::client().await;
+  Root::init_db(&client).await;
 
   let router = Router::new().route(
     "/ws",
@@ -47,9 +47,8 @@ async fn main() {
     .unwrap();
 }
 
-async fn metadata(file: &String) -> library::Message {
-  let root = db::Root::new();
-  let meta = phl_library::Library::metadata(&root, &file).await;
+async fn metadata(client: &Client, file: &String) -> library::Message {
+  let meta = tokyo_files::Library::metadata(client, &file).await;
   let mut msg = library::Message::new();
   if let Some(metadata) = meta {
     msg.set_metadata(metadata.into());
@@ -57,10 +56,9 @@ async fn metadata(file: &String) -> library::Message {
   return msg;
 }
 
-fn get_location_list() -> library::LibraryListMessage {
-  let root = db::Root::new();
-  let list = root.location_list().unwrap();
-  let tags = root.tags_list().unwrap();
+async fn get_location_list(client: &Client) -> library::LibraryListMessage {
+  let list = Root::location_list(client).await.unwrap();
+  let tags = Root::tags_list(client).await.unwrap();
 
   let mut list_msg = library::LibraryListMessage::new();
   list_msg.tags = tags
@@ -87,16 +85,14 @@ fn get_location_list() -> library::LibraryListMessage {
   list_msg
 }
 
-async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
-  let root = db::Root::new();
-
+async fn get_index_msg(client: &Client, ids: Vec<String>) -> library::LibraryIndexMessage {
   let mut _index: Vec<IndexEntry> = Vec::new();
 
   // TODO: this should be streamed
   for id in ids {
     println!("{}", id);
-    let dir = Library::find_library(&root, &id).unwrap().path;
-    let mut index = Library::get_index(&root, dir).await;
+    let dir = Library::find_library(client, &id).await.unwrap().path;
+    let mut index = Library::get_index(client, dir).await;
     _index.append(&mut index);
   }
 
@@ -112,12 +108,85 @@ async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
   return index_msg;
 }
 
+async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option<ws::Message> {
+  if ok_msg.has_locations() {
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_list(get_location_list(client).await);
+    let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
+    return Some(packet);
+  }
+
+  if ok_msg.has_index() {
+    let index = ok_msg.index();
+    println!("Requested Index {:?}", index);
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_index(get_index_msg(client, index.ids.clone()).await);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
+
+  if ok_msg.has_create() {
+    let create = ok_msg.create();
+    let _cr = Library::create_library(client, create.name.as_str(), create.path.as_str()).await;
+
+    if _cr.is_ok() {
+      let mut msg = library::Message::new();
+      msg.set_list(get_location_list(client).await);
+      let bytes = msg.write_to_bytes().unwrap();
+      let packet = ws::Message::Binary(bytes);
+      return Some(packet);
+    }
+  }
+
+  if ok_msg.has_meta() {
+    let file = &ok_msg.meta().file;
+    let mut msg = metadata(client, file).await;
+    msg.id = ok_msg.id;
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
+
+  if ok_msg.has_image() {
+    let file = &ok_msg.image().file; // should be the hash,
+    let image = tokyo_files::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
+    let mut img_msg = library::ImageMessage::new();
+    img_msg.image = image;
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_image(img_msg);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
+
+  if ok_msg.has_postmeta() {
+    let file = &ok_msg.postmeta().file;
+    let rating = ok_msg.postmeta().rating.unwrap();
+    Root::set_rating(client, file, rating)
+      .await
+      .expect("Failed to set rating");
+
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_index(get_index_msg(client, ["default".to_string()].to_vec()).await);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
+
+  None
+}
+
 async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
 
   // send system info
   let mut sys_msg = library::Message::new();
-  sys_msg.set_system(phl_library::Library::sysinfo().into());
+  sys_msg.set_system(tokyo_files::Library::sysinfo().into());
   let _ = socket
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
@@ -125,6 +194,7 @@ async fn handle_socket(mut socket: WebSocket) {
   let (sender, mut receiver) = socket.split();
 
   let arc_sender = Arc::new(Mutex::new(sender));
+  let arc_db_client = Arc::new(Mutex::new(Root::client().await));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {
@@ -140,75 +210,12 @@ async fn handle_socket(mut socket: WebSocket) {
 
     if let Ok(ok_msg) = msg {
       let ws = arc_sender.clone();
-
+      let db = arc_db_client.clone();
       tokio::spawn(async move {
-        if ok_msg.has_locations() {
-          let mut msg = library::Message::new();
-          msg.id = ok_msg.id;
-          msg.set_list(get_location_list());
-          let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
-          ws.lock().await.send(packet).await;
-        }
-
-        if ok_msg.has_index() {
-          let index = ok_msg.index();
-          println!("Requested Index {:?}", index);
-          let mut msg = library::Message::new();
-          msg.id = ok_msg.id;
-          msg.set_index(get_index_msg(index.ids.clone()).await);
-          let bytes = msg.write_to_bytes().unwrap();
-          let packet = ws::Message::Binary(bytes);
-          ws.lock().await.send(packet).await;
-        }
-
-        if ok_msg.has_create() {
-          let root = Root::new();
-          let create = ok_msg.create();
-          let _cr = Library::create_library(&root, create.name.as_str(), create.path.as_str());
-
-          if _cr.is_ok() {
-            let mut msg = library::Message::new();
-            msg.set_list(get_location_list());
-            let bytes = msg.write_to_bytes().unwrap();
-            let packet = ws::Message::Binary(bytes);
-            ws.lock().await.send(packet).await;
-          }
-        }
-
-        if ok_msg.has_meta() {
-          let file = &ok_msg.meta().file;
-          let mut msg = metadata(file).await;
-          msg.id = ok_msg.id;
-          let bytes = msg.write_to_bytes().unwrap();
-          let packet = ws::Message::Binary(bytes);
-          ws.lock().await.send(packet).await;
-        }
-
-        if ok_msg.has_image() {
-          let file = &ok_msg.image().file; // should be the hash,
-          let image = phl_library::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
-          let mut img_msg = library::ImageMessage::new();
-          img_msg.image = image;
-          let mut msg = library::Message::new();
-          msg.id = ok_msg.id;
-          msg.set_image(img_msg);
-          let bytes = msg.write_to_bytes().unwrap();
-          let packet = ws::Message::Binary(bytes);
-          ws.lock().await.send(packet).await;
-        }
-
-        if ok_msg.has_postmeta() {
-          let file = &ok_msg.postmeta().file;
-          let rating = ok_msg.postmeta().rating.unwrap();
-          let root = Root::new();
-          root.set_rating(file, rating).expect("Failed to set rating");
-
-          let mut msg = library::Message::new();
-          msg.id = ok_msg.id;
-          msg.set_index(get_index_msg(["default".to_string()].to_vec()).await);
-          let bytes = msg.write_to_bytes().unwrap();
-          let packet = ws::Message::Binary(bytes);
-          ws.lock().await.send(packet).await;
+        let client = db.lock().await;
+        let packet = handle_socket_message(&client, ok_msg).await;
+        if let Some(message) = packet {
+          ws.lock().await.send(message).await;
         }
       });
     } else {

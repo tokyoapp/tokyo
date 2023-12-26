@@ -64,16 +64,16 @@ export enum PropertyTag {
 }
 
 export type PropertyType =
-  | ReturnType<typeof Property['Float']>
-  | ReturnType<typeof Property['DateRange']>
-  | ReturnType<typeof Property['Range']>
-  | ReturnType<typeof Property['Boolean']>
-  | ReturnType<typeof Property['Vector']>;
+  | ReturnType<(typeof Property)['Float']>
+  | ReturnType<(typeof Property)['DateRange']>
+  | ReturnType<(typeof Property)['Range']>
+  | ReturnType<(typeof Property)['Boolean']>
+  | ReturnType<(typeof Property)['Vector']>;
 
 export class Property<
   Value,
   Attributes extends PropertyAttributes<Value>,
-  Type extends PropertyTag
+  Type extends PropertyTag,
 > extends BaseProperty<Value> {
   constructor(public type: Type, public attr: Attributes & PropertyAttributes<Value>) {
     super(attr);

@@ -1,5 +1,5 @@
 import { sysinfo, index } from '../Library.ts';
-import { t } from '../locales/messages.ts';
+import { t } from 'tokyo-locales';
 
 export function SystemInfo() {
   return (

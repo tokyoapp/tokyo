@@ -19,3 +19,10 @@ dist
 !.rtx.toml
 
 tmp
+
+# env
+.env
+
+# vscode
+!.vscode/tokyo.code-workspace
+.vscode

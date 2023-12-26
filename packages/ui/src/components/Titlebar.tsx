@@ -1,13 +1,8 @@
-import { setSettingOpen, settingsOpen } from '../App.tsx';
-import Button from './Button.tsx';
 import Icon from './Icon.tsx';
-import Combobox from './Combobox.tsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { ParentProps, createSignal } from 'solid-js';
-import Jobs from '../actions/Action.ts';
-import { t } from '../locales/messages.ts';
-import { LibraryMessage } from 'proto';
+import { t } from 'tokyo-locales';
 
 const MacTitle = () => {
   const dot = 'p-0 w-[14px] h-[14px] border border-zinc-800 hover:border-zinc-800 cursor-default';
@@ -62,19 +57,6 @@ export default function Titlebar(props: { style: string } & ParentProps) {
         <div class="w-full h-11 py-2 px-2 pointer-events-none grid grid-cols-[350px_1fr_350px] items-center text-xs text-zinc-500">
           <div class="flex gap-4 items-center">
             {props.style === 'macos' ? <MacTitle /> : null}
-            <Button
-              onClick={() => {
-                setSettingOpen(!settingsOpen());
-              }}
-            >
-              <div
-                class={`flex items-center justify-center duration-100 transition-transform ${
-                  settingsOpen() ? 'rotate-90' : 'rotate-0'
-                }`}
-              >
-                <Icon name="chevron-right" />
-              </div>
-            </Button>
             <div />
             <div>
               {props.children}

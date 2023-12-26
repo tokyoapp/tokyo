@@ -12,12 +12,17 @@ const variants = {
 } as const;
 
 export default function (
-  props: ParentProps & { onClick?: () => void; variant?: keyof typeof variants }
+  props: ParentProps & { onClick?: () => void; variant?: keyof typeof variants; label: string }
 ) {
   const style = props.variant ? variants[props.variant] || variants.solid : variants.solid;
 
   return (
-    <button type="button" onClick={props.onClick} class={style}>
+    <button
+      type="button"
+      onClick={props.onClick}
+      aria-label={props.label}
+      class={`tooltip ${style}`}
+    >
       {props.children}
     </button>
   );
