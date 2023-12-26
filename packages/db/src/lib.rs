@@ -1,8 +1,11 @@
 use anyhow::Result;
+use libsql_client::client;
 pub use libsql_client::{Client, Config, Statement};
 use serde::{Deserialize, Serialize};
 use std::env;
+use std::sync::Arc;
 use std::{fs, path::Path};
+use tokio::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Tag {
@@ -56,7 +59,9 @@ impl Root {
     .expect("Failed to create db client")
   }
 
-  pub async fn init_db(client: &Client) -> Result<()> {
+  pub async fn init_db() -> Result<()> {
+    let client = Root::client().await;
+
     if !Path::exists(&Path::new("./data/")) {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
@@ -86,9 +91,9 @@ impl Root {
       ])
       .await?;
 
-    let list = Root::location_list(client).await?;
+    let list = Root::location_list().await?;
     if list.len() == 0 {
-      Root::insert_location(client, "default", "/Users/tihav/Pictures").await?;
+      Root::insert_location("default", "/Users/tihav/Pictures").await?;
     }
 
     return Ok(());
@@ -195,7 +200,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn insert_location(client: &Client, name: &str, path: &str) -> Result<()> {
+  pub async fn insert_location(name: &str, path: &str) -> Result<()> {
+    let client = Root::client().await;
     let uid = uuid::Uuid::new_v4().to_string();
 
     client
@@ -208,7 +214,8 @@ impl Root {
     Ok(())
   }
 
-  pub async fn location_list(client: &Client) -> Result<Vec<Location>> {
+  pub async fn location_list() -> Result<Vec<Location>> {
+    let client = Root::client().await;
     let rs = client
       .execute(Statement::from("select id, name, path from locations"))
       .await?;

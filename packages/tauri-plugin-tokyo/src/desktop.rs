@@ -1,21 +1,19 @@
-use std::{
-  path::Path,
-  sync::{Arc, Mutex},
-};
-
 use serde::de::DeserializeOwned;
+use std::{path::Path, sync::Arc};
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
+use tokio::sync::Mutex;
 use tokyo_db::{Client, Root};
 use tokyo_shadow::MyImage;
+
+use crate::LibraryExt;
 
 pub async fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
+  let db = Root::client().await;
   tokio::spawn(async move {
-    Root::init_db(&Root::client().await)
-      .await
-      .expect("Error at init db");
+    Root::init_db(&db).await.expect("Error at init db");
   });
 
   let lib = Library::new(app.clone()).await;
@@ -25,15 +23,11 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
 /// Access to the library APIs.
 pub struct Library<R: Runtime> {
   app: AppHandle<R>,
-  db: Arc<Mutex<Client>>,
 }
 
 impl<R: Runtime> Library<R> {
   pub async fn new(handle: AppHandle<R>) -> Library<R> {
-    Library {
-      app: handle,
-      db: Arc::new(Mutex::new(Root::client().await)),
-    }
+    Library { app: handle }
   }
 
   pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
@@ -45,30 +39,27 @@ impl<R: Runtime> Library<R> {
   }
 
   pub async fn get_locations(&self) -> crate::Result<Vec<tokyo_db::Location>> {
-    return Ok(Root::location_list(&self.db.lock().unwrap()).await.unwrap());
+    return Ok(Root::location_list().await.unwrap());
   }
 
   pub async fn post_location(&self, name: String, path: String) -> crate::Result<()> {
-    let client = &self.db.lock().unwrap();
-    Root::insert_location(client, &name.as_str(), &path.as_str())
+    Root::insert_location(&name.as_str(), &path.as_str())
       .await
       .expect("Error while inserting location");
     Ok(())
   }
 
   pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_files::IndexEntry>> {
-    let client = &self.db.lock().unwrap();
-    let dir = tokyo_files::Library::find_library(client, name.as_str())
+    let dir = tokyo_files::Library::find_library(&self.db, name.as_str())
       .await
       .unwrap()
       .path;
-    let index = tokyo_files::Library::get_index(client, dir).await;
+    let index = tokyo_files::Library::get_index(&self.db, dir).await;
     return Ok(index);
   }
 
   pub async fn get_metadata(&self, file_path: String) -> crate::Result<tokyo_files::MetadataEntry> {
-    let client = self.db.lock().unwrap();
-    let meta = tokyo_files::Library::metadata(&client, &file_path).await;
+    let meta = tokyo_files::Library::metadata(&self.db, &file_path).await;
     if let Some(metadata) = meta {
       return Ok(metadata);
     }

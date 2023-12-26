@@ -78,6 +78,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-app",
  "tauri-plugin-os",
+ "tauri-plugin-tokyo",
  "tauri-plugin-window",
  "tokyo-db",
  "tokyo-files",

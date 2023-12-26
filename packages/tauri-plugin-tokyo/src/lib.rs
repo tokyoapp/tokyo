@@ -4,7 +4,8 @@ use tauri::{
 };
 use tokyo_db::{Client, Root};
 
-use std::{collections::HashMap, future::Future, sync::Mutex};
+use std::{collections::HashMap, future::Future};
+use tokio::sync::Mutex;
 
 #[cfg(desktop)]
 mod desktop;

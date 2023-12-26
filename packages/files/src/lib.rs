@@ -9,7 +9,8 @@ use tokyo_db::Root;
 
 use std::path::Path;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use ::image::imageops::FilterType;
 use sysinfo::DiskExt;
@@ -89,11 +90,11 @@ impl Library {
     return images::list(dir);
   }
 
-  pub async fn list_tags(client: &Client) -> Vec<tokyo_db::Tag> {
+  pub async fn list_tags() -> Vec<tokyo_db::Tag> {
     Root::tags_list(client).await.unwrap()
   }
 
-  pub async fn default_library(client: &Client) -> Option<tokyo_db::Location> {
+  pub async fn default_library(client: &Arc<Mutex<Client>>) -> Option<tokyo_db::Location> {
     let locs = Root::location_list(client)
       .await
       .expect("Failed to list locations");
@@ -109,8 +110,7 @@ impl Library {
     let meta = image::metadat(&p.to_string());
 
     if let Some(metadata) = meta {
-      let client = client.lock().unwrap();
-      let file = Library::get_file(&client, &metadata.hash).await;
+      let file = Library::get_file(client, &metadata.hash).await;
 
       let mut tags: Vec<String> = Vec::new();
 
@@ -123,7 +123,7 @@ impl Library {
       if let Some(f) = file {
         tags.append(&mut f.tags.clone());
       } else {
-        Library::add_file(&client, &metadata.hash, metadata.rating as i32).await;
+        Library::add_file(client, &metadata.hash, metadata.rating as i32).await;
       }
 
       let meta_data = MetadataEntry {
@@ -146,7 +146,7 @@ impl Library {
     None
   }
 
-  pub async fn get_index(client: &Client, dir: String) -> Vec<IndexEntry> {
+  pub async fn get_index(client: &Arc<Mutex<Client>>, dir: String) -> Vec<IndexEntry> {
     let list = Library::list(dir);
     let mut index: Vec<image::Metadata> = Vec::new();
 
