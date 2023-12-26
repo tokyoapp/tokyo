@@ -6,6 +6,6 @@
   "main": "./src/index.ts",
   "devDependencies": {},
   "dependencies": {
-    "@tauri-apps/api": "2.0.0-alpha.8"
+    "@tauri-apps/api": "2.0.0-alpha.13"
   }
 }
