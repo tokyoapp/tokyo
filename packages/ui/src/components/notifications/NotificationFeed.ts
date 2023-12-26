@@ -2,14 +2,6 @@ import { html, css, LitElement } from 'lit';
 
 let instance: NotificationFeed | null = null;
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'notification-feed': NotificationFeed;
-    }
-  }
-}
-
 export default class NotificationFeed extends LitElement {
   static get styles() {
     return css`

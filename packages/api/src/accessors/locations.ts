@@ -2,17 +2,10 @@ import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
 import { LocalLibrary } from '../api/LocalLibrary.js';
 
-export function createLocationsAccessor(hosts: string[]) {
-  // TODO: for hosts, create api instance(s)
-
-  const api = new LocalLibrary();
-
-  return new Accessor(api, {
+export function createLocationsAccessor() {
+  return new Accessor([new LocalLibrary()], {
     createRequest(params: {
-      query: {
-        path: string;
-        name: string;
-      };
+      query: unknown;
     }) {
       return {
         _type: MessageType.Locations,

@@ -5,14 +5,6 @@ interface NotificationOptions {
   time?: number;
 }
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'ui-notification': Notification;
-    }
-  }
-}
-
 export default class Notification extends LitElement {
   static get styles() {
     return css`

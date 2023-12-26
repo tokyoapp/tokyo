@@ -9,9 +9,7 @@ import LocationSettings from './components/LocationSettings.tsx';
 import { Tabs } from './components/Tabs.tsx';
 import Titlebar from './components/Titlebar.tsx';
 import Preview from './components/Viewer';
-import './components/notifications/index.ts';
-import { ErrorNotification, Notifications } from './components/notifications/index.ts';
-import Button from './components/Button.tsx';
+import { Notifications } from './components/notifications/Notifications.ts';
 import { ActivityBar } from './components/Activitybar.tsx';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
@@ -33,12 +31,7 @@ window.addEventListener('keyup', (e) => {
 
 function App() {
   window.addEventListener('error', (e) => {
-    Notifications.push(
-      new ErrorNotification({
-        message: `Error: ${e.message}`,
-        time: 3000,
-      })
-    );
+    Notifications.error(e.message);
   });
 
   const [os, setOS] = createSignal('macos');
@@ -61,7 +54,9 @@ function App() {
         return (
           <>
             <Titlebar style={os()} />
+
             <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
+
             <div
               class={`p-10 relative w-full h-full grid ${
                 file() ? 'grid-cols-[250px_1.25fr_300px]' : 'grid-cols-1'
@@ -79,7 +74,7 @@ function App() {
     >
       <Titlebar style={os()} />
 
-      <notification-feed class="fixed z-10 left-1/2 top-20 -translate-x-1/2 w-80" />
+      <notification-feed class="fixed z-50 left-1/2 top-20 -translate-x-1/2 w-80" />
 
       <div class="grid grid-cols-[auto_1fr]">
         <ActivityBar />

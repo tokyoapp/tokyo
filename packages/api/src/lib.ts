@@ -18,7 +18,7 @@ export type RequestMessage =
   | {
       _type: MessageType.Index;
       _nonce?: number | string;
-      ids: string[];
+      locations: string[];
     };
 
 export type PickMessage<T> = Extract<RequestMessage, { _type: T }>;
@@ -40,4 +40,9 @@ export interface LibraryInterface {
   stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
 }
 
-export { Channel } from './Channel.ts';
+export { Accessor } from './Accessor.ts';
+
+export { createIndexAccessor } from '../src/accessors/index.ts';
+export { createLocationsAccessor } from '../src/accessors/locations.ts';
+export { createMetadataAccessor } from '../src/accessors/metadata.ts';
+export { createThumbnailAccessor } from '../src/accessors/thumbnails.ts';

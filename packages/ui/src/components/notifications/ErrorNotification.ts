@@ -1,14 +1,6 @@
 import { html, css } from 'lit';
 import Notification from './Notification';
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'ui-error-notification': ErrorNotification;
-    }
-  }
-}
-
 export default class ErrorNotification extends Notification {
   static get styles() {
     return css`

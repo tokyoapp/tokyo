@@ -3,10 +3,6 @@ import { Accessor } from '../Accessor.js';
 import { LocalLibrary } from '../api/LocalLibrary.js';
 
 export function createThumbnailAccessor(hosts: string[]) {
-  // TODO: for hosts, create api instance(s)
-
-  const api = new LocalLibrary();
-
   const makeThumbnail = (blob?: Blob) => {
     const dynimg = new DynamicImage();
     const canvas = dynimg.canvas();
@@ -26,7 +22,7 @@ export function createThumbnailAccessor(hosts: string[]) {
     return canvas;
   };
 
-  return new Accessor(api, {
+  return new Accessor([new LocalLibrary()], {
     createRequest(params: {
       query: {
         ids: string[];

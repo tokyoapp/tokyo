@@ -1,6 +1,6 @@
 import '@atrium-ui/mono/expandable';
 import { createSignal } from 'solid-js';
-import { metadataAccessor } from '../accessors/metadata.ts';
+import { createMetadataAccessor } from 'tokyo-api';
 import { t } from 'tokyo-locales';
 import Icon from './Icon.tsx';
 

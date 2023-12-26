@@ -1,10 +1,10 @@
-import { index, locations, thumbnail, system, metadata, createLocation } from "tauri-plugin-tokyo";
-import { LibraryInterface } from "../lib";
+import { index, locations, thumbnail, system, metadata, createLocation } from 'tauri-plugin-tokyo';
+import { LibraryInterface } from '../lib';
 
 export class LocalLibrary implements LibraryInterface {
   public async fetchLocations() {
     return {
-      type: "locations" as const,
+      type: 'locations' as const,
       data: await locations(),
     };
   }
@@ -12,7 +12,7 @@ export class LocalLibrary implements LibraryInterface {
   public async fetchIndex(locations: string[]) {
     if (locations.length > 0) {
       const res = {
-        type: "index" as const,
+        type: 'index' as const,
         data: await index(locations[0]),
       };
       return res;
@@ -22,7 +22,7 @@ export class LocalLibrary implements LibraryInterface {
   public async fetchThumbmails(ids: string[]) {
     if (ids.length > 0) {
       const res = {
-        type: "thumbnails" as const,
+        type: 'thumbnails' as const,
         data: await Promise.all(
           ids.map(async (id) => {
             return { thumbnail: await thumbnail(id), id };
@@ -36,7 +36,7 @@ export class LocalLibrary implements LibraryInterface {
   public async fetchMetadata(ids: string[]) {
     if (ids.length > 0) {
       const res = {
-        type: "metadata" as const,
+        type: 'metadata' as const,
         data: await Promise.all(
           ids.map(async (id) => {
             return { metadata: await metadata(id), id };
@@ -71,7 +71,7 @@ export class LocalLibrary implements LibraryInterface {
 
   async postLocation(name: string, path: string) {
     return await createLocation(name, path).catch((err) => {
-      console.error("error", err);
+      console.error('error', err);
     });
   }
 
@@ -81,7 +81,7 @@ export class LocalLibrary implements LibraryInterface {
         return info;
       })
       .catch((err) => {
-        console.error("error", err);
+        console.error('error', err);
       });
   }
 
@@ -89,15 +89,15 @@ export class LocalLibrary implements LibraryInterface {
     return index(name)
       .then((index) => {
         const loc = {
-          host: "files",
+          host: 'files',
           name: name,
-          path: "/",
+          path: '/',
           index: index,
         };
         return loc;
       })
       .catch((err) => {
-        console.error("error", err);
+        console.error('error', err);
       });
   }
 
@@ -114,35 +114,35 @@ export class LocalLibrary implements LibraryInterface {
 
     const write = new WritableStream({
       write(chunk) {
-        switch (chunk.type) {
-          case "locations.mutate":
+        switch (chunk._type) {
+          case 'locations.mutate':
             self.postLocation(chunk.name, chunk.path);
             break;
-          case "locations":
+          case 'locations':
             self.fetchLocations().then((msg) => {
               controller.enqueue(msg);
             });
             break;
-          case "index":
+          case 'index':
             self.fetchIndex(chunk.locations).then((msg) => {
               if (msg) controller.enqueue(msg);
             });
             break;
-          case "thumbnails":
+          case 'thumbnails':
             self.fetchThumbmails(chunk.ids).then((msg) => {
               if (msg) controller.enqueue(msg);
             });
             break;
-          case "metadata":
+          case 'metadata':
             self.fetchMetadata(chunk.ids).then((msg) => {
               if (msg) controller.enqueue(msg);
             });
             break;
-          case "metadata.mutate":
-            console.warn("not implemented");
+          case 'metadata.mutate':
+            console.warn('not implemented');
             break;
           default:
-            console.error("chunk.type", chunk.type, "no handled.");
+            console.error('chunk._type', chunk._type, 'no handled.');
         }
       },
     });

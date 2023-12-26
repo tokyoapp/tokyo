@@ -1,213 +1,86 @@
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 import { IndexEntryMessage } from 'tokyo-proto';
-import { For, createEffect, createSignal, on, onMount } from 'solid-js';
+import { For, createEffect, createSignal, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { indexAccessor } from '../accessors/index.ts';
-import { metadataAccessor } from '../accessors/metadata.ts';
+import { createLocationsAccessor, createMetadataAccessor, createIndexAccessor } from 'tokyo-api';
 import Jobs from '../actions/Action.ts';
 import { t } from 'tokyo-locales';
 import Combobox from './Combobox.tsx';
 import Icon from './Icon.tsx';
 import Rating from './Rating.tsx';
 import { Stars } from './Stars.tsx';
-import { locationsAccessor } from '../accessors/locations.ts';
-
-class ExplorerModel {
-  filterSettings = createStore({
-    rating: 0,
-  });
-
-  // private sortStore;
-  // get sort() {
-  //   return this.sortStore[0];
-  // }
-
-  sortSettings = createStore({
-    rating: false,
-    created: true,
-  });
-
-  selection = createStore<IndexEntryMessage[]>([]);
-
-  index = createStore<IndexEntryMessage[]>([]);
-  // TODO: this should be a "View" into index.
-  stacks = createStore<IndexEntryMessage[][]>([]);
-
-  indexAccessor = indexAccessor();
-
-  metadataAccessor = metadataAccessor({
-    ids: createSignal<string[]>([]),
-  });
-
-  constructor() {
-    createEffect(() => {
-      const stacks = this.stack(
-        this.indexAccessor.store.filter(this.filterItems).sort(this.sortItems)
-      );
-      this.stacks[1](stacks);
-    });
-  }
-
-  setIndex(index: IndexEntryMessage[]) {
-    this.index[1](index);
-    const stacks = this.stack(index.filter(this.filterItems).sort(this.sortItems));
-    this.stacks[1](stacks);
-  }
-
-  setFilter(options: {
-    rating: number;
-  }) {
-    if (options.rating != null) {
-      this.filterSettings[1]({
-        rating: options.rating,
-      });
-    }
-  }
-
-  setSorting(options: {
-    rating: boolean;
-    created: boolean;
-  }) {
-    if (options.rating != null) {
-      this.sortSettings[1]({
-        rating: options.rating,
-      });
-    }
-    if (options.created != null) {
-      this.sortSettings[1]({
-        created: options.created,
-      });
-    }
-  }
-
-  setSelection(entires: IndexEntryMessage[]) {
-    this.selection[1](entires);
-    if (entires[0]) this.openFile(entires[0]);
-  }
-
-  sort = {
-    rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-      return +b.rating - +a.rating;
-    },
-    created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-      const dateASlice = a.create_date.split(' ');
-      dateASlice[0] = dateASlice[0].replaceAll(':', '-');
-      const dateA = new Date(dateASlice.join(' '));
-
-      const dateBSlice = b.create_date.split(' ');
-      dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
-      const dateB = new Date(dateBSlice.join(' '));
-
-      return Math.sign(dateA.valueOf() - dateB.valueOf());
-    },
-  };
-
-  private stack(items: IndexEntryMessage[]) {
-    const stacked = [];
-
-    _stack: for (const item of items) {
-      for (const stacked_item of stacked) {
-        const _item = stacked_item[0];
-        if (_item.hash === item.hash) {
-          stacked_item.push(_item);
-          continue _stack;
-        }
-      }
-      stacked.push([item]);
-    }
-
-    return stacked;
-  }
-
-  private sortItems = (itemA: IndexEntryMessage, itemB: IndexEntryMessage) => {
-    let score = 0;
-    if (itemA && itemB) {
-      score =
-        (this.sortSettings[0].created ? this.sort.created(itemA, itemB) : 0) +
-        (this.sortSettings[0].rating ? this.sort.rating(itemA, itemB) : 0);
-    }
-    return score;
-  };
-
-  private filterItems = (item: IndexEntryMessage) => {
-    if (this.filterSettings[0].rating && item.rating < this.filterSettings[0].rating) {
-      return false;
-    }
-    return true;
-  };
-
-  async openFile(entry: IndexEntryMessage) {
-    Jobs.run('open', [entry]);
-  }
-
-  tags(entry: IndexEntryMessage) {
-    const arr = entry.tags.filter(Boolean).map((tag) => {
-      return [].find((t) => t.id === tag)?.name || tag;
-    });
-    return arr || [];
-  }
-}
+import { useAccessor } from '../utils/useAccessor.ts';
 
 export default function ExplorerView(props: {
   small: boolean;
 }) {
-  const explorer = new ExplorerModel();
+  // const metadataAccessor = useAccessor(createMetadataAccessor);
+  const locationsAccessor = useAccessor(createLocationsAccessor);
 
-  const locations = locationsAccessor();
+  locationsAccessor.params({
+    query: {},
+  });
+
   const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {
-    const locs = selectedLocations();
-    explorer.indexAccessor.locations = locs;
-
+    // explorer.indexAccessor.params({
+    //   query: {
+    //     locations: selectedLocations(),
+    //   },
+    // });
     // const locs = locations.store;
     // console.log(locs);
-
     // if (selectedLocations().length === 0) {
     //   setSelectedLocations([locs[0].id]);
     // }
   });
 
-  createEffect(
-    on(
-      () => [...locations.store],
-      () => {
-        if (selectedLocations().length === 0) {
-          const locs = locations.store;
-          if (locs[0]) setSelectedLocations([locs[0].id]);
-        }
-      }
-    )
-  );
-
-  const rows = (width = 4) => {
-    const rs = [];
-    let currRow: any[] = [];
-    const items = explorer.stacks[0];
-    for (const entry of items) {
-      if (currRow.length < width) {
-        currRow.push(entry);
-      } else {
-        rs.push(currRow);
-        currRow = [];
-        currRow.push(entry);
-      }
-    }
-    rs.push(currRow);
-
-    return rs;
-  };
-
   createEffect(() => {
-    if (props.small) {
-      setTimeout(() => {
-        const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
-        if (ele) {
-          ele.scrollIntoView({ inline: 'center', block: 'center' });
-        }
-      }, 100);
-    }
+    const d = locationsAccessor.data();
+    console.log(d);
   });
+
+  // createEffect(
+  //   on(
+  //     () => [...explorer.locationsAccessor.data()],
+  //     () => {
+  //       if (selectedLocations().length === 0) {
+  //         const locs = explorer.locationsAccessor.data();
+  //         if (locs[0]) setSelectedLocations([locs[0].id]);
+  //       }
+  //     }
+  //   )
+  // );
+
+  // const rows = (width = 4) => {
+  //   const rs = [];
+  //   let currRow: any[] = [];
+  //   const items = explorer.stacks[0];
+  //   for (const entry of items) {
+  //     if (currRow.length < width) {
+  //       currRow.push(entry);
+  //     } else {
+  //       rs.push(currRow);
+  //       currRow = [];
+  //       currRow.push(entry);
+  //     }
+  //   }
+  //   rs.push(currRow);
+
+  //   return rs;
+  // };
+
+  // createEffect(() => {
+  //   if (props.small) {
+  //     setTimeout(() => {
+  //       const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
+  //       if (ele) {
+  //         ele.scrollIntoView({ inline: 'center', block: 'center' });
+  //       }
+  //     }, 100);
+  //   }
+  // });
 
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
@@ -215,31 +88,31 @@ export default function ExplorerView(props: {
     showTags: false,
   });
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    const parent = (e.target as HTMLElement).parentNode;
-    const children = [...(parent?.children || [])];
+  // const onKeyDown = (e: KeyboardEvent) => {
+  //   const parent = (e.target as HTMLElement).parentNode;
+  //   const children = [...(parent?.children || [])];
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        const prevChild = children[children.indexOf(e.target) - 1];
-        prevChild.focus();
-        prevChild.click();
-        break;
-      case 'ArrowRight':
-        const nextChild = children[children.indexOf(e.target) + 1];
-        nextChild.focus();
-        nextChild.click();
-        break;
-    }
-  };
+  //   switch (e.key) {
+  //     case 'ArrowLeft':
+  //       const prevChild = children[children.indexOf(e.target) - 1];
+  //       prevChild.focus();
+  //       prevChild.click();
+  //       break;
+  //     case 'ArrowRight':
+  //       const nextChild = children[children.indexOf(e.target) + 1];
+  //       nextChild.focus();
+  //       nextChild.click();
+  //       break;
+  //   }
+  // };
 
   let scrollTargetElement!: HTMLDivElement;
 
-  console.log(explorer.metadataAccessor.store);
+  // const image = (id: string) => {
+  //   return explorer.metadataAccessor.data().find((item) => item.id === id)?.thumbnail;
+  // };
 
-  const image = (id: string) => {
-    return explorer.metadataAccessor.store.find((item) => item.id === id)?.thumbnail;
-  };
+  return <div></div>;
 
   return (
     <div
@@ -252,7 +125,7 @@ export default function ExplorerView(props: {
             <Combobox
               multiple
               class="px-1 pointer-events-auto hidden @5xl:block"
-              items={locations.store.map((lib) => {
+              items={explorer.locationsAccessor.data.map((lib) => {
                 return {
                   id: lib.id,
                   value: `${lib.name}`,
@@ -274,7 +147,7 @@ export default function ExplorerView(props: {
                       e.stopImmediatePropagation();
                       e.stopPropagation();
                       e.preventDefault();
-                      Jobs.run('create', [locations]);
+                      Jobs.run('create', [explorer.locationsAccessor.data]);
                     }}
                     class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
                   >
@@ -285,7 +158,9 @@ export default function ExplorerView(props: {
               }
             >
               {selectedLocations().map((loc) => {
-                return <span>{locations.store.find((l) => l.id === loc)?.name}, </span>;
+                return (
+                  <span>{explorer.locationsAccessor.data.find((l) => l.id === loc)?.name}, </span>
+                );
               })}
               <Icon class="pl-2" name="expand-down" />
             </Combobox>

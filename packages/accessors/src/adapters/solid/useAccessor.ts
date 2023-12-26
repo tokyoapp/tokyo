@@ -28,8 +28,6 @@ export function useAccessor<T extends Accessor<any, any, any, any>>(accessorFn: 
     data,
     error,
     pending,
-    params(p: (typeof accessor)['params']) {
-      setParams(p);
-    },
+    params: setParams,
   };
 }

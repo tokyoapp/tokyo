@@ -1,0 +1,8 @@
+{
+  "name": "tokyo-accessors",
+  "main": "./src/lib.ts",
+  "type": "module",
+  "dependencies": {
+    "comlink": "^4.4.1"
+  }
+}

@@ -37,9 +37,11 @@ export default function () {
         >
           Language: {language()}
         </Select>
-        <button type="button" onClick={() => storage.reset()}>
-          Reset Cache
-        </button>
+
+        <br />
+        <br />
+
+        <Button onClick={() => storage.reset()}>Reset Cache</Button>
       </div>
     </div>
   );

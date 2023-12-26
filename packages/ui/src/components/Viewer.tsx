@@ -1,16 +1,14 @@
 import { ParentProps, createEffect, createSignal, on, onMount } from 'solid-js';
 import { DynamicImage } from '../image/DynamicImage.ts';
 // import storage from '../services/ClientStorage.worker';
+// import * as viewport from 'tokyo-viewport';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import { Stars } from './Stars.tsx';
 import { Notifications } from './notifications/Notifications.ts';
-import { ErrorNotification } from './notifications/index.ts';
 import { settings } from './Edit.tsx';
-import { IndexEntryMessage } from 'tokyo-proto';
-// import * as viewport from 'tokyo-viewport';
 import { t } from 'tokyo-locales';
-import { metadataAccessor } from '../accessors/metadata.ts';
+import { createMetadataAccessor } from 'tokyo-api';
 import { getImage } from 'tauri-plugin-tokyo';
 
 const [app, setApp] = createSignal({
@@ -38,13 +36,8 @@ viewportCanvas.style.width = '100%';
 viewportCanvas.style.position = 'absolute';
 
 export default function Preview(props: { file: any; onClose?: () => void }) {
-  const [item, setItem] = createSignal<{
-    item: IndexEntryMessage;
-    url: string;
-  }>();
   const [loading, setLoading] = createSignal(true);
 
-  let controller: AbortController;
   let timeout: number;
 
   const resize = () => {
@@ -55,18 +48,18 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
 
   let vp: viewport.WebHandle;
 
-  const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
+  const metadata = createMetadataAccessor();
 
   createEffect(async () => {
     const _item = props.file;
 
     clearTimeout(timeout);
 
-    if (controller) controller.abort();
-
-    controller = new AbortController();
-
-    metadata.params.ids[1]([_item.path]);
+    metadata.setParams({
+      query: {
+        ids: [_item.path],
+      },
+    });
 
     createEffect(() => {
       const edit = settings();
@@ -131,12 +124,7 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
       })
       .catch((err) => {
         console.error('Viewport Error: ', err);
-        Notifications.push(
-          new ErrorNotification({
-            message: `Error: ${err.message}`,
-            time: 3000,
-          })
-        );
+        Notifications.error(err.message);
       });
   });
 
