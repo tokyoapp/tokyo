@@ -9,7 +9,6 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_library::db::{Client, Database};
 use tokyo_library::{IndexEntry, Library};
 use tokyo_proto::library::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
@@ -30,9 +29,8 @@ struct OkResponse {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() {
-  let db = Database::new().await;
-  db.init_db().await;
+pub async fn init() {
+  tokyo_library::Library::init();
 
   let router = Router::new().route(
     "/ws",
@@ -47,8 +45,8 @@ async fn main() {
     .unwrap();
 }
 
-async fn metadata(client: &Client, file: &String) -> library::Message {
-  let meta = tokyo_library::Library::metadata(client, &file).await;
+async fn metadata(file: &String) -> library::Message {
+  let meta = tokyo_library::Library::metadata(file.clone()).await;
   let mut msg = library::Message::new();
   if let Some(metadata) = meta {
     msg.set_metadata(metadata.into());
@@ -56,9 +54,9 @@ async fn metadata(client: &Client, file: &String) -> library::Message {
   return msg;
 }
 
-async fn get_location_list(client: &Client) -> library::LibraryListMessage {
-  let list = Database::location_list(client).await.unwrap();
-  let tags = Database::tags_list(client).await.unwrap();
+async fn get_location_list() -> library::LibraryListMessage {
+  let list = Library::list_locations().await.unwrap();
+  let tags = Library::list_tags().await;
 
   let mut list_msg = library::LibraryListMessage::new();
   list_msg.tags = tags
@@ -85,14 +83,14 @@ async fn get_location_list(client: &Client) -> library::LibraryListMessage {
   list_msg
 }
 
-async fn get_index_msg(client: &Client, ids: Vec<String>) -> library::LibraryIndexMessage {
+async fn get_index_msg(ids: Vec<String>) -> library::LibraryIndexMessage {
   let mut _index: Vec<IndexEntry> = Vec::new();
 
   // TODO: this should be streamed
   for id in ids {
     println!("{}", id);
-    let dir = Library::find_library(client, &id).await.unwrap().path;
-    let mut index = Library::get_index(client, dir).await;
+    let dir = Library::find_library(id).await.unwrap().path;
+    let mut index = Library::get_index(dir).await;
     _index.append(&mut index);
   }
 
@@ -108,11 +106,11 @@ async fn get_index_msg(client: &Client, ids: Vec<String>) -> library::LibraryInd
   return index_msg;
 }
 
-async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option<ws::Message> {
+async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
   if ok_msg.has_locations() {
     let mut msg = library::Message::new();
     msg.id = ok_msg.id;
-    msg.set_list(get_location_list(client).await);
+    msg.set_list(get_location_list().await);
     let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
     return Some(packet);
   }
@@ -122,7 +120,7 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
     println!("Requested Index {:?}", index);
     let mut msg = library::Message::new();
     msg.id = ok_msg.id;
-    msg.set_index(get_index_msg(client, index.ids.clone()).await);
+    msg.set_index(get_index_msg(index.ids.clone()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
     return Some(packet);
@@ -130,11 +128,11 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
 
   if ok_msg.has_create() {
     let create = ok_msg.create();
-    let _cr = Library::create_library(client, create.name.as_str(), create.path.as_str()).await;
+    let _cr = Library::create_library(create.name.to_string(), create.path.to_string()).await;
 
     if _cr.is_ok() {
       let mut msg = library::Message::new();
-      msg.set_list(get_location_list(client).await);
+      msg.set_list(get_location_list().await);
       let bytes = msg.write_to_bytes().unwrap();
       let packet = ws::Message::Binary(bytes);
       return Some(packet);
@@ -143,7 +141,7 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
 
   if ok_msg.has_meta() {
     let file = &ok_msg.meta().file;
-    let mut msg = metadata(client, file).await;
+    let mut msg = metadata(file).await;
     msg.id = ok_msg.id;
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
@@ -166,13 +164,11 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
   if ok_msg.has_postmeta() {
     let file = &ok_msg.postmeta().file;
     let rating = ok_msg.postmeta().rating.unwrap();
-    Database::set_rating(client, file, rating)
-      .await
-      .expect("Failed to set rating");
+    Library::set_rating(file.clone(), rating).await;
 
     let mut msg = library::Message::new();
     msg.id = ok_msg.id;
-    msg.set_index(get_index_msg(client, ["default".to_string()].to_vec()).await);
+    msg.set_index(get_index_msg(["default".to_string()].to_vec()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
     return Some(packet);
@@ -194,7 +190,7 @@ async fn handle_socket(mut socket: WebSocket) {
   let (sender, mut receiver) = socket.split();
 
   let arc_sender = Arc::new(Mutex::new(sender));
-  let arc_db_client = Arc::new(Mutex::new(Database::client().await));
+  // let arc_db_client = Arc::new(Mutex::new(Database::client().await));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {
@@ -210,10 +206,10 @@ async fn handle_socket(mut socket: WebSocket) {
 
     if let Ok(ok_msg) = msg {
       let ws = arc_sender.clone();
-      let db = arc_db_client.clone();
+      // let db = arc_db_client.clone();
       tokio::spawn(async move {
-        let client = db.lock().await;
-        let packet = handle_socket_message(&client, ok_msg).await;
+        // let client = db.lock().await;
+        let packet = handle_socket_message(ok_msg).await;
         if let Some(message) = packet {
           ws.lock().await.send(message).await;
         }

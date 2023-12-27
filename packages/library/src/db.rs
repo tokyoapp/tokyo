@@ -1,5 +1,4 @@
 use anyhow::Result;
-use libsql_client::client;
 pub use libsql_client::{Client, Config, Statement};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -50,7 +49,7 @@ pub struct Database {
 }
 
 impl Database {
-  pub async fn new(&self) -> Database {
+  pub async fn new() -> Database {
     Database {
       client: Client::from_config(Config {
         url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
@@ -62,13 +61,12 @@ impl Database {
   }
 
   pub async fn init_db(&self) -> Result<()> {
-    let client = Database::client().await;
-
     if !Path::exists(&Path::new("./data/")) {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 
-    client
+    self
+      .client
       .batch([
         // table: locations
         Statement::from(
@@ -93,9 +91,11 @@ impl Database {
       ])
       .await?;
 
-    let list = Database::location_list().await?;
+    let list = self.location_list().await?;
     if list.len() == 0 {
-      Database::insert_location("default", "/Users/tihav/Pictures").await?;
+      self
+        .insert_location("default", "/Users/tihav/Pictures")
+        .await?;
     }
 
     return Ok(());
@@ -104,7 +104,8 @@ impl Database {
   pub async fn insert_tag(&self, name: &str) -> Result<String> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    client
+    self
+      .client
       .execute(Statement::with_args(
         "insert into tags (id, name) values (?, ?)",
         &[&uid, &name.to_string()],
@@ -117,7 +118,8 @@ impl Database {
   pub async fn insert_edit(&self, hash: &str, edits: &str) -> Result<()> {
     let uid = uuid::Uuid::new_v4().to_string();
 
-    client
+    self
+      .client
       .execute(Statement::with_args(
         "insert into edits (id, edits, file) values (?, ?, ?)",
         &[&uid, &edits.to_string(), &hash.to_string()],
@@ -128,7 +130,8 @@ impl Database {
   }
 
   pub async fn insert_file(&self, hash: &str, rating: i32) -> Result<()> {
-    client
+    self
+      .client
       .execute(Statement::with_args(
         "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
         &[&hash.to_string(), &rating.to_string(), &"".to_string()],
@@ -139,7 +142,8 @@ impl Database {
   }
 
   pub async fn get_edits(&self, hash: &str) -> Result<Vec<Edit>> {
-    let rs = client
+    let rs = self
+      .client
       .execute(Statement::with_args(
         "select id, edits, file from edits where file = ?",
         &[&hash.to_string()],
@@ -157,7 +161,8 @@ impl Database {
   }
 
   pub async fn get_file(&self, hash: &str) -> Result<Vec<File>> {
-    let rs = client
+    let rs = self
+      .client
       .execute(Statement::with_args(
         "select hash, tags, rating from files where hash = ?",
         &[&hash.to_string()],
@@ -193,7 +198,8 @@ impl Database {
   pub async fn set_tags(&self, hash: &str, tags: &Vec<String>) -> Result<()> {
     let ts = tags.join(",");
 
-    client
+    self
+      .client
       .execute(Statement::with_args(
         "update files SET tags = ?1 where hash = ?2",
         &[ts, hash.to_string()],
@@ -204,10 +210,10 @@ impl Database {
   }
 
   pub async fn insert_location(&self, name: &str, path: &str) -> Result<()> {
-    let client = Database::client().await;
     let uid = uuid::Uuid::new_v4().to_string();
 
-    client
+    self
+      .client
       .execute(Statement::with_args(
         "insert into locations (id, name, path) values (?1, ?2, ?3)",
         &[&uid, &name.to_string(), &path.to_string()],
@@ -218,8 +224,8 @@ impl Database {
   }
 
   pub async fn location_list(&self) -> Result<Vec<Location>> {
-    let client = Database::client().await;
-    let rs = client
+    let rs = self
+      .client
       .execute(Statement::from("select id, name, path from locations"))
       .await?;
 
@@ -234,7 +240,8 @@ impl Database {
   }
 
   pub async fn tags_list(&self) -> Result<Vec<Tag>> {
-    let rs = client
+    let rs = self
+      .client
       .execute(Statement::from("select id, name from tags"))
       .await?;
 

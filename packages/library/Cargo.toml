@@ -17,6 +17,8 @@ tokio = "1.32.0"
 anyhow = "1.0.75"
 sysinfo = { version = "0.29.10", features = ["serde"] }
 futures = "0.3.29"
+libsql-client = "0.33.2"
+url = "2.5.0"
 
 [dependencies.uuid]
 version = "1.4.1"

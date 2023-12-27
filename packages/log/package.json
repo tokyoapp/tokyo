@@ -1,6 +1,0 @@
-{
-  "name": "tokyo-log",
-  "description": "Just a pretty log function.",
-  "main": "src/lib.ts",
-  "type": "module"
-}
