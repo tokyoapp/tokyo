@@ -15,20 +15,13 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
   //   db.init_db().await.expect("Error at init db");
   // });
 
-  let lib = Library::new(app.clone()).await;
-  Ok(lib)
+  Ok(Library(app.clone()))
 }
 
 /// Access to the library APIs.
-pub struct Library<R: Runtime> {
-  app: AppHandle<R>,
-}
+pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
-  pub async fn new(handle: AppHandle<R>) -> Library<R> {
-    Library { app: handle }
-  }
-
   // pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
   //   let meta = tokyo_library::Library::metadata(&self.db, &id).await;
   //   if let Some(metadata) = meta {

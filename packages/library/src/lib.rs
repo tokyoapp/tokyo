@@ -1,21 +1,19 @@
-mod image;
-
 mod db;
 mod edit;
+mod image;
 mod images;
 
+use ::image::imageops::FilterType;
 use anyhow::Result;
 use db::Database;
-
+use futures::future::join_all;
+use serde::{Deserialize, Serialize};
+use std::borrow::Borrow;
 use std::path::Path;
-
-use ::image::imageops::FilterType;
+use std::sync::Arc;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
-
-use futures::future::join_all;
-
-use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SystemInfo {
@@ -62,9 +60,17 @@ pub struct Edits {
   pub exposure: u32,
 }
 
-pub struct Library {}
+pub struct Library {
+  db: Database,
+}
 
 impl Library {
+  pub async fn new() -> Library {
+    Library {
+      db: Database::new().await,
+    }
+  }
+
   pub fn render_image(path: String, exposure: f32) -> Image {
     let mut img = edit::EditedImage::new(
       &Path::new(&path),
@@ -83,20 +89,19 @@ impl Library {
     }
   }
 
-  pub async fn init() {
-    let db = Database::new().await;
-    db.init_db().await.unwrap();
+  pub async fn init(self) {
+    self.db.init_db().await.unwrap();
   }
 
   pub fn list(dir: String) -> Vec<String> {
     return images::list(dir);
   }
 
-  pub async fn metadata(p: String) -> Option<MetadataEntry> {
+  pub async fn metadata(self, p: String) -> Option<MetadataEntry> {
     let meta = image::metadat(&p.to_string());
 
     if let Some(metadata) = meta {
-      let file = Library::get_file(metadata.hash.clone()).await;
+      let file = self.get_file(metadata.hash.clone()).await;
 
       let mut tags: Vec<String> = Vec::new();
 
@@ -109,7 +114,9 @@ impl Library {
       if let Some(f) = file {
         tags.append(&mut f.tags.clone());
       } else {
-        Library::add_file(metadata.hash.clone(), metadata.rating as i32).await;
+        self
+          .add_file(metadata.hash.clone(), metadata.rating as i32)
+          .await;
       }
 
       let meta_data = MetadataEntry {
@@ -132,7 +139,7 @@ impl Library {
     None
   }
 
-  pub async fn get_index(dir: String) -> Vec<IndexEntry> {
+  pub async fn get_index(self, dir: String) -> Vec<IndexEntry> {
     let list = Library::list(dir);
     let mut index: Vec<image::Metadata> = Vec::new();
 
@@ -144,8 +151,12 @@ impl Library {
       });
     }
 
+    let lib = Arc::new(Mutex::new(self));
+
     let idx = index.iter().map(|meta| async {
-      let file = Library::get_file(meta.hash.clone()).await;
+      let lib2 = lib.clone();
+
+      let file = lib2.lock().await.borrow().get_file(meta.hash.clone()).await;
       let rating = file
         .clone()
         .and_then(|f| Some(f.rating))
@@ -169,26 +180,26 @@ impl Library {
     join_all(idx).await
   }
 
-  pub async fn add_file(hash: String, rating: i32) {
-    let db = Database::new().await;
-    let id = db.insert_tag("Test").await.unwrap();
+  pub async fn add_file(self, hash: String, rating: i32) {
+    let id = self.db.insert_tag("Test").await.unwrap();
 
-    let _ = db
+    let _ = self
+      .db
       .insert_file(&hash, rating)
       .await
       .expect("Failed to insert file");
 
-    let mut f = db.get_file(&hash).await.unwrap();
+    let mut f = self.db.get_file(&hash).await.unwrap();
     let tags = &mut f.first_mut().unwrap().tags;
 
     tags.push(id);
 
-    let _ = db.set_tags(&hash, tags.as_ref()).await;
+    let _ = self.db.set_tags(&hash, tags.as_ref()).await;
   }
 
-  pub async fn get_file(hash: String) -> Option<db::File> {
-    let db = Database::new().await;
-    return db
+  pub async fn get_file(&self, hash: String) -> Option<db::File> {
+    return self
+      .db
       .get_file(&hash)
       .await
       .expect("Failed to get file")
@@ -196,25 +207,21 @@ impl Library {
       .and_then(|f| Some(f.clone()));
   }
 
-  pub async fn list_tags() -> Vec<db::Tag> {
-    let db = Database::new().await;
-    db.tags_list().await.unwrap()
+  pub async fn list_tags(self) -> Vec<db::Tag> {
+    self.db.tags_list().await.unwrap()
   }
 
-  pub async fn list_locations() -> Result<Vec<db::Location>> {
-    let db = Database::new().await;
-    Ok(db.location_list().await?)
+  pub async fn list_locations(self) -> Result<Vec<db::Location>> {
+    Ok(self.db.location_list().await?)
   }
 
-  pub async fn set_rating(file: String, rating: i32) -> Result<()> {
-    let db = Database::new().await;
-    db.set_rating(&file, rating).await?;
+  pub async fn set_rating(self, file: String, rating: i32) -> Result<()> {
+    self.db.set_rating(&file, rating).await?;
     Ok(())
   }
 
-  pub async fn find_library(id: String) -> Result<db::Location> {
-    let db = Database::new().await;
-    let locs = db.location_list().await?;
+  pub async fn find_library(self, id: String) -> Result<db::Location> {
+    let locs = self.db.location_list().await?;
     let loc = locs
       .iter()
       .find(|lib| lib.id == id.clone())
@@ -223,9 +230,8 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub async fn create_library(name: String, path: String) -> Result<()> {
-    let db = Database::new().await;
-    db.insert_location(&name, &path).await?;
+  pub async fn create_library(self, name: String, path: String) -> Result<()> {
+    self.db.insert_location(&name, &path).await?;
     Ok(())
   }
 

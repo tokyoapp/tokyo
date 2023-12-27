@@ -9,7 +9,6 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_library::db::{Client, Database};
 use tokyo_library::{IndexEntry, Library};
 use tokyo_proto::library::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;

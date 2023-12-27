@@ -2,7 +2,6 @@ use tauri::{
   plugin::{Builder, TauriPlugin},
   Manager, Runtime,
 };
-use tokyo_library::db::{Client, Database};
 
 use std::{collections::HashMap, future::Future};
 use tokio::sync::Mutex;
@@ -50,14 +49,14 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
       // commands::post_location,
       // commands::post_metadata,
     ])
-    .setup(|app, api| {
-      #[cfg(mobile)]
-      let library = mobile::init(app, api);
-      #[cfg(desktop)]
-      let library = desktop::init(app, api);
-      app.manage(library);
-      // app.manage(MyState::default());
-      Ok(())
-    })
+    // .setup(|app, api| {
+    //   #[cfg(mobile)]
+    //   let library = mobile::init(app, api);
+    //   #[cfg(desktop)]
+    //   let library = desktop::init(app, api);
+    //   app.manage(library);
+    //   // app.manage(MyState::default());
+    //   Ok(())
+    // })
     .build()
 }

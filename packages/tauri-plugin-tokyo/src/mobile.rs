@@ -28,15 +28,15 @@ pub struct Library<R: Runtime>(PluginHandle<R>);
 impl<R: Runtime> Library<R> {
   // TODO: implement mobile methods
 
-  pub fn get_locations(&self) -> crate::Result<Vec<tokyo_library::db::Location>> {
-    let x = self
-      .0
-      .run_mobile_plugin("get_locations")
-      .map_err(Into::into);
+  // pub fn get_locations(&self) -> crate::Result<Vec<tokyo_library::db::Location>> {
+  //   let x = self
+  //     .0
+  //     .run_mobile_plugin("get_locations")
+  //     .map_err(Into::into);
 
-    let root = db::Root::new().await;
-    return Ok(root.location_list().await.unwrap());
-  }
+  //   let root = db::Root::new().await;
+  //   return Ok(root.location_list().await.unwrap());
+  // }
 
   // pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_library::IndexEntry>> {
   //   let root = db::Root::new().await;

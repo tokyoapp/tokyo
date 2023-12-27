@@ -2442,6 +2442,7 @@ dependencies = [
  "base64 0.21.5",
  "fallible-iterator",
  "futures",
+ "futures-util",
  "hrana-client",
  "hrana-client-proto",
  "libsql",
