@@ -1,4 +1,4 @@
-pub mod image;
+mod image;
 
 mod db;
 mod edit;
@@ -239,4 +239,8 @@ impl Library {
       disk_available: (disk.available_space() / 1000 / 1000) as i32,
     }
   }
+}
+
+pub async fn cached_thumb(file: &String) -> Vec<u8> {
+  image::cached_thumb(file).await
 }

@@ -152,7 +152,7 @@ async fn handle_socket_message(client: &Client, ok_msg: ClientMessage) -> Option
 
   if ok_msg.has_image() {
     let file = &ok_msg.image().file; // should be the hash,
-    let image = tokyo_library::image::cached_thumb(file).await; // then this doesnt need to look for the hash itself
+    let image = tokyo_library::cached_thumb(file).await; // then this doesnt need to look for the hash itself
     let mut img_msg = library::ImageMessage::new();
     img_msg.image = image;
     let mut msg = library::Message::new();
