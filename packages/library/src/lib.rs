@@ -60,6 +60,11 @@ pub struct Image {
   pub data: Vec<u8>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Edits {
+  pub exposure: u32,
+}
+
 impl Into<schema::SystemInfo> for SystemInfo {
   fn into(self) -> schema::SystemInfo {
     let mut _msg = schema::SystemInfo::new();
@@ -100,11 +105,6 @@ impl Into<schema::MetadataMessage> for MetadataEntry {
     _msg.tags = self.tags;
     _msg
   }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Edits {
-  pub exposure: u32,
 }
 
 pub struct Library {
