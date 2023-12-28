@@ -79,6 +79,13 @@ tasks:
     cmds:
       - task --parallel server:dev app:dev
 
+  dev:shadow:
+    desc: Run shadow pacakge test
+    dir: "packages/shadow"
+    deps: [setup]
+    cmds:
+      - cargo watch -x run
+
   dev:ios:
     desc: Run ios app in simulator
     deps: [setup]
