@@ -9,8 +9,8 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_library::Library;
-use tokyo_proto::library::{self, ClientMessage};
+use tokyo_library::{IndexEntry, Library};
+use tokyo_proto::library::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
 
 #[derive(Deserialize, Serialize)]
@@ -45,146 +45,138 @@ pub async fn init() {
     .unwrap();
 }
 
-// async fn metadata(lib: Arc<Mutex<Library>>, file: &String) -> library::Message {
-//   let meta = lib.lock().await.metadata(file.clone()).await;
-//   let mut msg = library::Message::new();
-//   if let Some(metadata) = meta {
-//     msg.set_metadata(metadata.into());
-//   }
-//   return msg;
-// }
+async fn metadata(lib: &Library, file: &String) -> library::Message {
+  let meta = lib.metadata(file.clone()).await;
+  let mut msg = library::Message::new();
+  if let Some(metadata) = meta {
+    msg.set_metadata(metadata.into());
+  }
+  return msg;
+}
 
-// async fn get_location_list(lib: Arc<Mutex<Library>>) -> library::LibraryListMessage {
-//   let list = lib.lock().await.list_locations().await.unwrap();
-//   let tags = lib.lock().await.list_tags().await;
+async fn get_location_list(lib: &Library) -> library::LibraryListMessage {
+  let list = lib.list_locations().await.unwrap();
+  let tags = lib.list_tags().await;
 
-//   let mut list_msg = library::LibraryListMessage::new();
-//   list_msg.tags = tags
-//     .iter()
-//     .map(|t| {
-//       let mut m = library::TagMessage::new();
-//       m.id = t.id.clone();
-//       m.name = t.name.clone();
-//       return m;
-//     })
-//     .collect();
-//   list_msg.libraries = list
-//     .into_iter()
-//     .map(|loc| {
-//       let mut m = library::LibraryMessage::new();
-//       m.id = loc.id;
-//       m.name = loc.name;
-//       m.path = loc.path;
-//       m.library = "".to_string();
-//       m
-//     })
-//     .collect();
+  let mut list_msg = library::LibraryListMessage::new();
+  list_msg.tags = tags
+    .iter()
+    .map(|t| {
+      let mut m = library::TagMessage::new();
+      m.id = t.id.clone();
+      m.name = t.name.clone();
+      return m;
+    })
+    .collect();
+  list_msg.libraries = list
+    .into_iter()
+    .map(|loc| {
+      let mut m = library::LibraryMessage::new();
+      m.id = loc.id;
+      m.name = loc.name;
+      m.path = loc.path;
+      m.library = "".to_string();
+      m
+    })
+    .collect();
 
-//   list_msg
-// }
+  list_msg
+}
 
-// async fn get_index_msg(lib: Arc<Mutex<Library>>, ids: Vec<String>) -> library::LibraryIndexMessage {
-//   let lib = lib.lock().await;
+async fn get_index_msg(lib: &Library, ids: Vec<String>) -> library::LibraryIndexMessage {
+  let mut _index: Vec<IndexEntry> = Vec::new();
 
-//   let mut _index: Vec<IndexEntry> = Vec::new();
+  // TODO: this should be streamed
+  for id in ids {
+    println!("{}", id);
+    let dir = lib.find_library(id).await.unwrap().path;
+    let mut index = lib.get_index(dir).await;
+    _index.append(&mut index);
+  }
 
-//   // TODO: this should be streamed
-//   for id in ids {
-//     println!("{}", id);
-//     let dir = lib.find_library(id).await.unwrap().path;
-//     let mut index = lib.get_index(dir).await;
-//     _index.append(&mut index);
-//   }
+  let mut index_msg = library::LibraryIndexMessage::new();
+  index_msg.index = _index
+    .into_iter()
+    .map(|entry| {
+      let msg: IndexEntryMessage = entry.into();
+      msg
+    })
+    .collect();
 
-//   let mut index_msg = library::LibraryIndexMessage::new();
-//   index_msg.index = _index
-//     .into_iter()
-//     .map(|entry| {
-//       let msg: IndexEntryMessage = entry.into();
-//       msg
-//     })
-//     .collect();
+  return index_msg;
+}
 
-//   return index_msg;
-// }
+async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
+  let lib = &Library::new().await;
 
-async fn handle_socket_message(
-  ok_msg: ClientMessage,
-  lib: Arc<Mutex<Library>>,
-) -> Option<ws::Message> {
-  lib.lock().await.metadata("/as".to_string()).await;
-  // lib.init().await;
+  if ok_msg.has_locations() {
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_list(get_location_list(lib).await);
+    let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
+    return Some(packet);
+  }
 
-  // if ok_msg.has_locations() {
-  //   let mut msg = library::Message::new();
-  //   msg.id = ok_msg.id;
-  //   msg.set_list(get_location_list(lib).await);
-  //   let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
-  //   return Some(packet);
-  // }
+  if ok_msg.has_index() {
+    let index = ok_msg.index();
+    println!("Requested Index {:?}", index);
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_index(get_index_msg(lib, index.ids.clone()).await);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
 
-  // if ok_msg.has_index() {
-  //   let index = ok_msg.index();
-  //   println!("Requested Index {:?}", index);
-  //   let mut msg = library::Message::new();
-  //   msg.id = ok_msg.id;
-  //   msg.set_index(get_index_msg(lib, index.ids.clone()).await);
-  //   let bytes = msg.write_to_bytes().unwrap();
-  //   let packet = ws::Message::Binary(bytes);
-  //   return Some(packet);
-  // }
+  if ok_msg.has_create() {
+    let create = ok_msg.create();
+    let _cr = lib
+      .create_library(create.name.to_string(), create.path.to_string())
+      .await;
 
-  // if ok_msg.has_create() {
-  //   let create = ok_msg.create();
-  //   let _cr = lib
-  //     .lock()
-  //     .await
-  //     .create_library(create.name.to_string(), create.path.to_string())
-  //     .await;
+    if _cr.is_ok() {
+      let mut msg = library::Message::new();
+      msg.set_list(get_location_list(lib).await);
+      let bytes = msg.write_to_bytes().unwrap();
+      let packet = ws::Message::Binary(bytes);
+      return Some(packet);
+    }
+  }
 
-  //   if _cr.is_ok() {
-  //     let mut msg = library::Message::new();
-  //     msg.set_list(get_location_list(lib).await);
-  //     let bytes = msg.write_to_bytes().unwrap();
-  //     let packet = ws::Message::Binary(bytes);
-  //     return Some(packet);
-  //   }
-  // }
+  if ok_msg.has_meta() {
+    let file = &ok_msg.meta().file;
+    let mut msg = metadata(lib, file).await;
+    msg.id = ok_msg.id;
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
 
-  // if ok_msg.has_meta() {
-  //   let file = &ok_msg.meta().file;
-  //   let mut msg = metadata(lib, file).await;
-  //   msg.id = ok_msg.id;
-  //   let bytes = msg.write_to_bytes().unwrap();
-  //   let packet = ws::Message::Binary(bytes);
-  //   return Some(packet);
-  // }
+  if ok_msg.has_image() {
+    let file = &ok_msg.image().file; // should be the hash,
+    let image = tokyo_library::cached_thumb(file).await; // then this doesnt need to look for the hash itself
+    let mut img_msg = library::ImageMessage::new();
+    img_msg.image = image;
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_image(img_msg);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
 
-  // if ok_msg.has_image() {
-  //   let file = &ok_msg.image().file; // should be the hash,
-  //   let image = tokyo_library::cached_thumb(file).await; // then this doesnt need to look for the hash itself
-  //   let mut img_msg = library::ImageMessage::new();
-  //   img_msg.image = image;
-  //   let mut msg = library::Message::new();
-  //   msg.id = ok_msg.id;
-  //   msg.set_image(img_msg);
-  //   let bytes = msg.write_to_bytes().unwrap();
-  //   let packet = ws::Message::Binary(bytes);
-  //   return Some(packet);
-  // }
+  if ok_msg.has_postmeta() {
+    let file = &ok_msg.postmeta().file;
+    let rating = ok_msg.postmeta().rating.unwrap();
+    lib.set_rating(file.clone(), rating).await;
 
-  // if ok_msg.has_postmeta() {
-  //   let file = &ok_msg.postmeta().file;
-  //   let rating = ok_msg.postmeta().rating.unwrap();
-  //   lib.lock().await.set_rating(file.clone(), rating).await;
-
-  //   let mut msg = library::Message::new();
-  //   msg.id = ok_msg.id;
-  //   msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
-  //   let bytes = msg.write_to_bytes().unwrap();
-  //   let packet = ws::Message::Binary(bytes);
-  //   return Some(packet);
-  // }
+    let mut msg = library::Message::new();
+    msg.id = ok_msg.id;
+    msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
+    let bytes = msg.write_to_bytes().unwrap();
+    let packet = ws::Message::Binary(bytes);
+    return Some(packet);
+  }
 
   None
 }
@@ -218,13 +210,13 @@ async fn handle_socket(mut socket: WebSocket) {
 
     if let Ok(ok_msg) = msg {
       let ws = sender.clone();
-
       let db = db.clone();
 
       tokio::spawn(async move {
-        let message = handle_socket_message(ok_msg, db)
+        let message = handle_socket_message(ok_msg)
           .await
           .expect("Error handling message");
+
         ws.lock()
           .await
           .send(message)

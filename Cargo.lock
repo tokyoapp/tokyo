@@ -5033,6 +5033,7 @@ dependencies = [
  "futures",
  "image",
  "libsql-client",
+ "libsql-sys",
  "rawler",
  "rawloader",
  "roxmltree",

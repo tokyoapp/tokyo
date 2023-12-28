@@ -64,6 +64,9 @@ pub struct Library {
   db: Database,
 }
 
+unsafe impl Sync for Database {}
+unsafe impl Send for Database {}
+
 impl Library {
   pub async fn new() -> Library {
     Library {
@@ -89,7 +92,7 @@ impl Library {
     }
   }
 
-  pub async fn init(self) {
+  pub async fn init(&self) {
     self.db.init_db().await.unwrap();
   }
 
@@ -97,7 +100,7 @@ impl Library {
     return images::list(dir);
   }
 
-  pub async fn metadata(self, p: String) -> Option<MetadataEntry> {
+  pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
     let meta = image::metadat(&p.to_string());
 
     if let Some(metadata) = meta {
@@ -139,7 +142,7 @@ impl Library {
     None
   }
 
-  pub async fn get_index(self, dir: String) -> Vec<IndexEntry> {
+  pub async fn get_index(&self, dir: String) -> Vec<IndexEntry> {
     let list = Library::list(dir);
     let mut index: Vec<image::Metadata> = Vec::new();
 
@@ -180,7 +183,7 @@ impl Library {
     join_all(idx).await
   }
 
-  pub async fn add_file(self, hash: String, rating: i32) {
+  pub async fn add_file(&self, hash: String, rating: i32) {
     let id = self.db.insert_tag("Test").await.unwrap();
 
     let _ = self
@@ -207,20 +210,20 @@ impl Library {
       .and_then(|f| Some(f.clone()));
   }
 
-  pub async fn list_tags(self) -> Vec<db::Tag> {
+  pub async fn list_tags(&self) -> Vec<db::Tag> {
     self.db.tags_list().await.unwrap()
   }
 
-  pub async fn list_locations(self) -> Result<Vec<db::Location>> {
+  pub async fn list_locations(&self) -> Result<Vec<db::Location>> {
     Ok(self.db.location_list().await?)
   }
 
-  pub async fn set_rating(self, file: String, rating: i32) -> Result<()> {
+  pub async fn set_rating(&self, file: String, rating: i32) -> Result<()> {
     self.db.set_rating(&file, rating).await?;
     Ok(())
   }
 
-  pub async fn find_library(self, id: String) -> Result<db::Location> {
+  pub async fn find_library(&self, id: String) -> Result<db::Location> {
     let locs = self.db.location_list().await?;
     let loc = locs
       .iter()
@@ -230,7 +233,7 @@ impl Library {
     return Ok(loc.clone());
   }
 
-  pub async fn create_library(self, name: String, path: String) -> Result<()> {
+  pub async fn create_library(&self, name: String, path: String) -> Result<()> {
     self.db.insert_location(&name, &path).await?;
     Ok(())
   }
