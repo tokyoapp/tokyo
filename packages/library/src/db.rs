@@ -1,5 +1,5 @@
 use anyhow::Result;
-pub use libsql_client::{Client, Config, Statement};
+use libsql::{params, Connection, Database, Statement};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::{fs, path::Path};
@@ -44,19 +44,19 @@ pub struct File {
   pub tags: Vec<String>,
 }
 
-pub struct Database {
-  client: Client,
+pub struct LibraryDatabase {
+  connection: Connection,
 }
 
-impl Database {
-  pub async fn new() -> Database {
-    Database {
-      client: Client::from_config(Config {
-        url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
-        auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
-      })
-      .await
-      .expect("Failed to create db client"),
+impl LibraryDatabase {
+  pub async fn new() -> LibraryDatabase {
+    let db = Database::open(
+      url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
+    )
+    .unwrap();
+
+    LibraryDatabase {
+      connection: db.connect().expect("Failed to connecto to db"),
     }
   }
 
@@ -65,30 +65,58 @@ impl Database {
       fs::create_dir("./data/").expect("Unable to create dir './data/'");
     }
 
+    // table: locations
     self
-      .client
-      .batch([
-        // table: locations
-        Statement::from(
-          "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
-        ),
-        // table: files
-        Statement::from(
-          "create table if not exists files (hash TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
-        ),
-        // table: presets
-        Statement::from("create table if not exists presets (id TEXT PRIMARY KEY, edits INTEGER);"),
-        // table: edits
-        Statement::from(
-          "create table if not exists edits (id TEXT PRIMARY KEY, edits TEXT, file TEXT);",
-        ),
-        // table: set
-        Statement::from(
-          "create table if not exists sets (id TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
-        ),
-        // table: tags
-        Statement::from("create table if not exists tags (id TEXT PRIMARY KEY, name TEXT);"),
-      ])
+      .connection
+      .execute(
+        "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
+        params![],
+      )
+      .await?;
+
+    // table: files
+    self
+      .connection
+      .execute(
+        "create table if not exists files (hash TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
+        params![],
+      )
+      .await?;
+
+    // table: presets
+    self
+      .connection
+      .execute(
+        "create table if not exists presets (id TEXT PRIMARY KEY, edits INTEGER);",
+        params![],
+      )
+      .await?;
+
+    // table: edits
+    self
+      .connection
+      .execute(
+        "create table if not exists edits (id TEXT PRIMARY KEY, edits TEXT, file TEXT);",
+        params![],
+      )
+      .await?;
+
+    // table: set
+    self
+      .connection
+      .execute(
+        "create table if not exists sets (id TEXT PRIMARY KEY, tags TEXT, rating INTEGER);",
+        params![],
+      )
+      .await?;
+
+    // table: tags
+    self
+      .connection
+      .execute(
+        "create table if not exists tags (id TEXT PRIMARY KEY, name TEXT);",
+        params![],
+      )
       .await?;
 
     let list = self.location_list().await?;
@@ -105,11 +133,11 @@ impl Database {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "insert into tags (id, name) values (?, ?)",
-        &[&uid, &name.to_string()],
-      ))
+        params![uid.clone(), name.to_string().clone()],
+      )
       .await?;
 
     Ok(uid)
@@ -119,11 +147,15 @@ impl Database {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "insert into edits (id, edits, file) values (?, ?, ?)",
-        &[&uid, &edits.to_string(), &hash.to_string()],
-      ))
+        params![
+          uid.clone(),
+          edits.to_string().clone(),
+          hash.to_string().clone()
+        ],
+      )
       .await?;
 
     Ok(())
@@ -131,65 +163,86 @@ impl Database {
 
   pub async fn insert_file(&self, hash: &str, rating: i32) -> Result<()> {
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
-        &[&hash.to_string(), &rating.to_string(), &"".to_string()],
-      ))
+        params![
+          hash.to_string().clone(),
+          rating.to_string().clone(),
+          "".to_string()
+        ],
+      )
+      .await?;
+
+    self
+      .connection
+      .execute(
+        "insert into files (hash, rating, tags) values (?1, ?2, ?3)",
+        params![],
+      )
       .await?;
 
     Ok(())
   }
 
   pub async fn get_edits(&self, hash: &str) -> Result<Vec<Edit>> {
-    let rs = self
-      .client
-      .execute(Statement::with_args(
+    let mut rs = self
+      .connection
+      .query(
         "select id, edits, file from edits where file = ?",
-        &[&hash.to_string()],
-      ))
+        params![hash.to_string().clone()],
+      )
       .await?;
 
-    let rows = rs.rows.iter().map(|row| Edit {
-      id: row.values.get(0).unwrap().to_string(),
-      edits: row.values.get(1).unwrap().to_string(),
-      file: row.values.get(2).unwrap().to_string(),
-    });
+    let mut list: Vec<Edit> = Vec::new();
 
-    let list: Vec<Edit> = rows.collect();
+    while let Ok(Some(row)) = rs.next() {
+      list.push(Edit {
+        id: row.get_str(0)?.to_string(),
+        edits: row.get_str(1)?.to_string(),
+        file: row.get_str(2)?.to_string(),
+      })
+    }
+
     return Ok(list);
   }
 
   pub async fn get_file(&self, hash: &str) -> Result<Vec<File>> {
-    let rs = self
-      .client
-      .execute(Statement::with_args(
+    let mut rs = self
+      .connection
+      .query(
         "select hash, tags, rating from files where hash = ?",
-        &[&hash.to_string()],
-      ))
+        params![hash.to_string().clone()],
+      )
       .await?;
 
-    let rows = rs.rows.iter().map(|row| {
-      let tags: String = row.values.get(1).unwrap().to_string();
+    let mut list: Vec<File> = Vec::new();
 
-      File {
-        hash: row.values.get(0).unwrap().to_string(),
+    while let Ok(Some(row)) = rs.next() {
+      let tags: String = row.get_str(1).unwrap().to_string();
+
+      list.push(File {
+        hash: row.get_str(0).unwrap().to_string(),
         tags: tags.split(",").map(|str| String::from(str)).collect(),
-        rating: row.values.get(2).unwrap().try_into().unwrap(),
-      }
-    });
+        rating: row
+          .get_value(2)?
+          .as_integer()
+          .unwrap()
+          .to_owned()
+          .try_into()?,
+      })
+    }
 
-    let list: Vec<File> = rows.collect();
     return Ok(list);
   }
 
   pub async fn set_rating(&self, hash: &str, rating: i32) -> Result<()> {
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "update files SET rating = ?1 where hash = ?2",
-        &[rating.to_string(), hash.to_string()],
-      ))
+        params![rating.to_string(), hash.to_string()],
+      )
       .await?;
 
     Ok(())
@@ -199,11 +252,11 @@ impl Database {
     let ts = tags.join(",");
 
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "update files SET tags = ?1 where hash = ?2",
-        &[ts, hash.to_string()],
-      ))
+        params![ts, hash.to_string()],
+      )
       .await?;
 
     Ok(())
@@ -213,44 +266,50 @@ impl Database {
     let uid = uuid::Uuid::new_v4().to_string();
 
     self
-      .client
-      .execute(Statement::with_args(
+      .connection
+      .execute(
         "insert into locations (id, name, path) values (?1, ?2, ?3)",
-        &[&uid, &name.to_string(), &path.to_string()],
-      ))
+        params![uid, name.to_string().clone(), path.to_string().clone()],
+      )
       .await?;
 
     Ok(())
   }
 
   pub async fn location_list(&self) -> Result<Vec<Location>> {
-    let rs = self
-      .client
-      .execute(Statement::from("select id, name, path from locations"))
+    let mut rs = self
+      .connection
+      .query("select id, name, path from locations", params![])
       .await?;
 
-    let rows = rs.rows.iter().map(|row| Location {
-      id: row.values.get(0).unwrap().to_string(),
-      name: row.values.get(1).unwrap().to_string(),
-      path: row.values.get(2).unwrap().to_string(),
-    });
+    let mut list: Vec<Location> = Vec::new();
 
-    let list: Vec<Location> = rows.collect();
+    while let Ok(Some(row)) = rs.next() {
+      list.push(Location {
+        id: row.get_str(0)?.to_string(),
+        name: row.get_str(1)?.to_string(),
+        path: row.get_str(2)?.to_string(),
+      })
+    }
+
     return Ok(list);
   }
 
   pub async fn tags_list(&self) -> Result<Vec<Tag>> {
-    let rs = self
-      .client
-      .execute(Statement::from("select id, name from tags"))
+    let mut rs = self
+      .connection
+      .query("select id, name from tags", params![])
       .await?;
 
-    let rows = rs.rows.iter().map(|row| Tag {
-      id: row.values.get(0).unwrap().to_string(),
-      name: row.values.get(1).unwrap().to_string(),
-    });
+    let mut list: Vec<Tag> = Vec::new();
 
-    let list: Vec<Tag> = rows.collect();
+    while let Ok(Some(row)) = rs.next() {
+      list.push(Tag {
+        id: row.get_str(0)?.to_string(),
+        name: row.get_str(1)?.to_string(),
+      })
+    }
+
     return Ok(list);
   }
 }

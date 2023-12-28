@@ -193,20 +193,20 @@ pub async fn handle_socket(mut socket: WebSocket) {
       let ws = sender.clone();
       let db = db.clone();
 
-      // tokio::spawn(async move {
-      // let lib = &Library::new().await;
-      // lib.init().await;
+      tokio::spawn(async move {
+        let lib = &Library::new().await;
+        lib.init().await;
 
-      // let message = handle_socket_message(ok_msg)
-      //   .await
-      //   .expect("Error handling message");
+        let message = handle_socket_message(ok_msg)
+          .await
+          .expect("Error handling message");
 
-      // ws.lock()
-      //   .await
-      //   .send(message)
-      //   .await
-      //   .expect("Error sending message")
-      // });
+        ws.lock()
+          .await
+          .send(message)
+          .await
+          .expect("Error sending message")
+      });
     } else {
       let mut error_message = schema::Message::new();
       error_message.error = Some(true);

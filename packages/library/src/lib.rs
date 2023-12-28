@@ -9,7 +9,7 @@ use anyhow::Result;
 use axum::extract::WebSocketUpgrade;
 use axum::routing::get;
 use axum::Router;
-use db::Database;
+use db::LibraryDatabase;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
@@ -108,16 +108,16 @@ pub struct Edits {
 }
 
 pub struct Library {
-  db: Database,
+  db: LibraryDatabase,
 }
 
-unsafe impl Sync for Database {}
-unsafe impl Send for Database {}
+unsafe impl Sync for LibraryDatabase {}
+unsafe impl Send for LibraryDatabase {}
 
 impl Library {
   pub async fn new() -> Library {
     Library {
-      db: Database::new().await,
+      db: LibraryDatabase::new().await,
     }
   }
 
