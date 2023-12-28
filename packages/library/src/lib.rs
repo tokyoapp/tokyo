@@ -14,6 +14,7 @@ use std::sync::Arc;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;
 use tokio::sync::Mutex;
+use tokyo_proto::schema;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SystemInfo {
@@ -55,6 +56,48 @@ pub struct Image {
   pub data: Vec<u8>,
 }
 
+impl Into<schema::SystemInfo> for SystemInfo {
+  fn into(self) -> schema::SystemInfo {
+    let mut _msg = schema::SystemInfo::new();
+    _msg.disk_name = self.disk_name;
+    _msg.disk_size = self.disk_size;
+    _msg.disk_available = self.disk_available;
+    _msg
+  }
+}
+
+impl Into<schema::IndexEntryMessage> for IndexEntry {
+  fn into(self) -> schema::IndexEntryMessage {
+    let mut _msg = schema::IndexEntryMessage::new();
+    _msg.hash = self.hash;
+    _msg.name = self.name;
+    _msg.path = self.path;
+    _msg.create_date = self.create_date;
+    _msg.rating = self.rating;
+    _msg.orientation = self.orientation;
+    _msg.tags = self.tags;
+    _msg
+  }
+}
+
+impl Into<schema::MetadataMessage> for MetadataEntry {
+  fn into(self) -> schema::MetadataMessage {
+    let mut _msg = schema::MetadataMessage::new();
+    _msg.hash = self.hash;
+    _msg.name = self.name;
+    _msg.create_date = self.create_date;
+    _msg.rating = self.rating;
+    _msg.width = self.width;
+    _msg.height = self.height;
+    _msg.make = self.make;
+    _msg.exif = self.exif;
+    _msg.orientation = self.orientation;
+    _msg.thumbnail = self.thumbnail;
+    _msg.tags = self.tags;
+    _msg
+  }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Edits {
   pub exposure: u32,
@@ -93,7 +136,8 @@ impl Library {
   }
 
   pub async fn init(&self) {
-    self.db.init_db().await.unwrap();
+    self.db.borrow().init_db().await;
+    // self.db.init_db().await.unwrap();
   }
 
   pub fn list(dir: String) -> Vec<String> {

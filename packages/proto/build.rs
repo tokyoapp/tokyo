@@ -4,7 +4,7 @@ use std::process::Command;
 
 fn main() -> std::io::Result<()> {
   let include = PathBuf::from("src/protos");
-  let input = PathBuf::from("src/protos/library.proto");
+  let input = PathBuf::from("src/protos/schema.proto");
   let dist = PathBuf::from("src/gen");
 
   println!("Generating code from {:?} tp {:?}", input, dist.display());

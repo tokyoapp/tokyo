@@ -42,7 +42,7 @@ task dev
 ### Packages
 
 - `apps/app` - The desktop and mobile app
-- `apps/library` - A headless server
+- `apps/server` - A headless server
 - `apps/website` - The landing page
 
 - `packages/api` - Typescript API client

@@ -5,10 +5,9 @@ version: "3"
 dotenv: [".env"]
 
 includes:
-  library:
-    aliases: [lib]
-    dir: apps/library
-    taskfile: apps/library/Taskfile.yml
+  server:
+    dir: apps/server
+    taskfile: apps/server/Taskfile.yml
 
   app:
     aliases: [app]
@@ -75,29 +74,29 @@ tasks:
     cmd: git clean -xdf .
 
   dev:
-    desc: Run desktop app with library
+    desc: Run desktop app with server
     deps: [setup]
     cmds:
       - task: app:dev
 
   dev:server:
-    desc: Run desktop app with library
+    desc: Run desktop app with server
     deps: [setup]
-    cmd: task --parallel library:dev app:dev
+    cmd: task --parallel server:dev app:dev
 
   dev:ios:
     desc: Run ios app in simulator
     deps: [setup]
-    cmd: task --parallel library:dev app:dev:ios
+    cmd: task --parallel server:dev app:dev:ios
 
   build:
     desc: Build app
     deps: [setup]
-    cmd: task --parallel library:build app:build
+    cmd: task --parallel server:build app:build
 
   build:docker:
     desc: Build docker image for library server
-    cmd: docker buildx build --platform linux/amd64 -f apps/library/Dockerfile --tag luckydye/tokyo:latest .
+    cmd: docker buildx build --platform linux/amd64 -f apps/server/Dockerfile --tag luckydye/tokyo:latest .
 
   check:
     desc: Check files
