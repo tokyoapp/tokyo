@@ -60,6 +60,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "allocator-api2"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0942ffc6dcaadf03badf6e6a2d0228460359d5e34b57ccdc720b7382dfbd5ec5"
+
+[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1265,6 +1271,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
 
 [[package]]
+name = "fallible-iterator"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649"
+
+[[package]]
+name = "fallible-streaming-iterator"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
+
+[[package]]
 name = "fastrand"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1861,6 +1879,19 @@ name = "hashbrown"
 version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
+dependencies = [
+ "ahash",
+ "allocator-api2",
+]
+
+[[package]]
+name = "hashlink"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8094feaf31ff591f651a2664fb9cfd92bba7a60ce3197265e9482ebe753c8f7"
+dependencies = [
+ "hashbrown 0.14.3",
+]
 
 [[package]]
 name = "heck"
@@ -2413,7 +2444,7 @@ dependencies = [
  "hrana-client-proto",
  "hyper",
  "hyper-rustls",
- "libsql-sys",
+ "libsql-sys 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "libsql_replication",
  "parking_lot",
  "serde",
@@ -2425,6 +2456,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "libsql"
+version = "0.2.0-alpha.1"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "anyhow",
+ "async-stream",
+ "async-trait",
+ "base64 0.21.5",
+ "bincode",
+ "bitflags 2.4.1",
+ "bytes",
+ "fallible-iterator 0.3.0",
+ "futures",
+ "http",
+ "hyper",
+ "hyper-rustls",
+ "libsql-replication",
+ "libsql-sys 0.2.14 (git+https://github.com/tursodatabase/libsql)",
+ "parking_lot",
+ "serde",
+ "serde_json",
+ "sqlite3-parser 0.11.0",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tonic-web",
+ "tower",
+ "tower-http",
+ "tracing",
+ "uuid",
+ "zerocopy",
+]
+
+[[package]]
 name = "libsql-client"
 version = "0.33.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2432,19 +2498,51 @@ checksum = "89f737bc1458d02d6c91d413187dc6ff506102bb3c72b2523c78af39ad24c575"
 dependencies = [
  "anyhow",
  "base64 0.21.5",
- "fallible-iterator",
+ "fallible-iterator 0.2.0",
  "futures",
  "futures-util",
  "hrana-client",
  "hrana-client-proto",
- "libsql",
+ "libsql 0.1.8",
  "num-traits",
  "reqwest",
  "serde",
  "serde_json",
- "sqlite3-parser",
+ "sqlite3-parser 0.8.0",
  "tracing",
  "url",
+]
+
+[[package]]
+name = "libsql-ffi"
+version = "0.1.0"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "bindgen",
+ "cc",
+]
+
+[[package]]
+name = "libsql-replication"
+version = "0.1.0"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "async-stream",
+ "async-trait",
+ "bytes",
+ "libsql-sys 0.2.14 (git+https://github.com/tursodatabase/libsql)",
+ "parking_lot",
+ "prost",
+ "rusqlite",
+ "serde",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+ "tonic",
+ "tracing",
+ "uuid",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2461,6 +2559,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "libsql-sys"
+version = "0.2.14"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "libsql-ffi",
+ "once_cell",
+ "rusqlite",
+ "tracing",
+ "zerocopy",
+]
+
+[[package]]
 name = "libsql_replication"
 version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2474,7 +2584,7 @@ dependencies = [
  "http",
  "hyper",
  "hyper-rustls",
- "libsql-sys",
+ "libsql-sys 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "memmap",
  "nix",
  "once_cell",
@@ -3804,6 +3914,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusqlite"
+version = "0.29.0"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "bitflags 2.4.1",
+ "fallible-iterator 0.2.0",
+ "fallible-streaming-iterator",
+ "hashlink",
+ "libsql-ffi",
+ "smallvec",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4314,8 +4437,26 @@ checksum = "c3995a6daa13c113217b6ad22154865fb06f9cb939bef398fd04f4a7aaaf5bd7"
 dependencies = [
  "bitflags 2.4.1",
  "cc",
- "fallible-iterator",
+ "fallible-iterator 0.2.0",
  "indexmap 1.9.3",
+ "log",
+ "memchr",
+ "phf 0.11.2",
+ "phf_codegen 0.11.2",
+ "phf_shared 0.11.2",
+ "smallvec",
+ "uncased",
+]
+
+[[package]]
+name = "sqlite3-parser"
+version = "0.11.0"
+source = "git+https://github.com/tursodatabase/libsql#7cbf480d04380d9ac38add7cb46b33266e06c5c2"
+dependencies = [
+ "bitflags 2.4.1",
+ "cc",
+ "fallible-iterator 0.3.0",
+ "indexmap 2.1.0",
  "log",
  "memchr",
  "phf 0.11.2",
@@ -5025,8 +5166,8 @@ dependencies = [
  "axum",
  "futures",
  "image",
+ "libsql 0.2.0-alpha.1",
  "libsql-client",
- "libsql-sys",
  "rawler",
  "rawloader",
  "roxmltree",
@@ -6274,6 +6415,7 @@ version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
 dependencies = [
+ "byteorder",
  "zerocopy-derive",
 ]
 

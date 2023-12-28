@@ -1,39 +1,11 @@
-use anyhow::Result;
 use axum::Router;
 use axum::{
   extract::ws::{WebSocket, WebSocketUpgrade},
   routing::get,
 };
-pub use libsql_client::{Client, Config, Statement};
+use libsql::{params, Database, Statement};
 use std::env;
-
-pub struct Database {
-  client: Client,
-}
-
-impl Database {
-  pub async fn new() -> Database {
-    Database {
-      client: Client::from_config(Config {
-        url: url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
-        auth_token: env::var("TURSO_AUTH_TOKEN").ok(),
-      })
-      .await
-      .expect("Failed to create db client"),
-    }
-  }
-
-  pub async fn init_db(&self) -> Result<()> {
-    self
-      .client
-      .batch([Statement::from(
-        "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
-      )])
-      .await?;
-
-    return Ok(());
-  }
-}
+use std::sync::{Arc, Mutex};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
@@ -51,22 +23,22 @@ async fn main() {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-  println!("Socket connected");
-
   // Process incoming messages
   while let Some(msg) = socket.recv().await {
-    let msg = if let Ok(msg) = msg {
-      msg
-    } else {
-      // client disconnected
-      return;
-    };
+    tokio::spawn(async {
+      let db = Database::open(
+        url::Url::parse(env::var("DATABASE").expect("No Database set").as_str()).unwrap(),
+      )
+      .unwrap();
+      let con = db.connect().unwrap();
 
-    let data = msg.into_data();
-
-    tokio::spawn(async move {
-      let db = Database::new().await;
-      db.init_db().await;
+      con
+        .execute(
+          "create table if not exists locations (id TEXT PRIMARY KEY, name TEXT, path TEXT);",
+          params![],
+        )
+        .await
+        .unwrap();
     });
   }
 }
