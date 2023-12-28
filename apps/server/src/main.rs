@@ -1,4 +1,4 @@
-use library::start_websocket_server;
+use tokyo_library::start_websocket_server;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {

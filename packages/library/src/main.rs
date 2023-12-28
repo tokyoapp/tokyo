@@ -6,7 +6,6 @@ use axum::{
 };
 pub use libsql_client::{Client, Config, Statement};
 use std::env;
-use std::{fs, path::Path};
 
 pub struct Database {
   client: Client,
@@ -25,10 +24,6 @@ impl Database {
   }
 
   pub async fn init_db(&self) -> Result<()> {
-    if !Path::exists(&Path::new("./data/")) {
-      fs::create_dir("./data/").expect("Unable to create dir './data/'");
-    }
-
     self
       .client
       .batch([Statement::from(
@@ -58,10 +53,8 @@ async fn main() {
 async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
 
-  let (sender, mut receiver) = socket.split();
-
   // Process incoming messages
-  while let Some(msg) = receiver.next().await {
+  while let Some(msg) = socket.recv().await {
     let msg = if let Ok(msg) = msg {
       msg
     } else {

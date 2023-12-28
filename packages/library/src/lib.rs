@@ -2,9 +2,13 @@ mod db;
 mod edit;
 mod image;
 mod images;
+mod ws;
 
 use ::image::imageops::FilterType;
 use anyhow::Result;
+use axum::extract::WebSocketUpgrade;
+use axum::routing::get;
+use axum::Router;
 use db::Database;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
@@ -136,8 +140,7 @@ impl Library {
   }
 
   pub async fn init(&self) {
-    self.db.borrow().init_db().await;
-    // self.db.init_db().await.unwrap();
+    self.db.borrow().init_db().await.unwrap();
   }
 
   pub fn list(dir: String) -> Vec<String> {
@@ -296,4 +299,20 @@ impl Library {
 
 pub async fn cached_thumb(file: &String) -> Vec<u8> {
   image::cached_thumb(file).await
+}
+
+pub async fn start_websocket_server() {
+  Library::new().await.init().await;
+
+  let router = Router::new().route(
+    "/ws",
+    get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| ws::handle_socket(socket)) }),
+  );
+
+  println!("Running app on http://0.0.0.0:8000");
+
+  axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
+    .serve(router.into_make_service())
+    .await
+    .unwrap();
 }

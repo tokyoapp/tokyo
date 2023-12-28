@@ -1,15 +1,13 @@
+use crate::cached_thumb;
+use crate::IndexEntry;
+use crate::Library;
 use axum::extract::ws;
-use axum::Router;
-use axum::{
-  extract::ws::{WebSocket, WebSocketUpgrade},
-  routing::get,
-};
+use axum::extract::ws::WebSocket;
 use futures::sink::SinkExt;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_library::{IndexEntry, Library};
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
 
@@ -26,23 +24,6 @@ struct LibraryInfo {
 #[derive(Deserialize, Serialize)]
 struct OkResponse {
   ok: bool,
-}
-
-#[tokio::main(flavor = "current_thread")]
-pub async fn start_websocket_server() {
-  Library::new().await.init().await;
-
-  let router = Router::new().route(
-    "/ws",
-    get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| handle_socket(socket)) }),
-  );
-
-  println!("Running app on http://0.0.0.0:8000");
-
-  axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
-    .serve(router.into_make_service())
-    .await
-    .unwrap();
 }
 
 async fn metadata(lib: &Library, file: &String) -> schema::Message {
@@ -154,7 +135,7 @@ async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
 
   if ok_msg.has_image() {
     let file = &ok_msg.image().file; // should be the hash,
-    let image = tokyo_library::cached_thumb(file).await; // then this doesnt need to look for the hash itself
+    let image = cached_thumb(file).await; // then this doesnt need to look for the hash itself
     let mut img_msg = schema::ImageMessage::new();
     img_msg.image = image;
     let mut msg = schema::Message::new();
@@ -181,12 +162,12 @@ async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
   None
 }
 
-async fn handle_socket(mut socket: WebSocket) {
+pub async fn handle_socket(mut socket: WebSocket) {
   println!("Socket connected");
 
   // send system info
   let mut sys_msg = schema::Message::new();
-  sys_msg.set_system(tokyo_library::Library::sysinfo().into());
+  sys_msg.set_system(Library::sysinfo().into());
   let _ = socket
     .send(ws::Message::Binary(sys_msg.write_to_bytes().unwrap()))
     .await;
