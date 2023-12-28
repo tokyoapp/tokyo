@@ -80,7 +80,7 @@ export class RemoteLibrary {
       case message.index: {
         if (message.index) {
           return {
-            type: 'index',
+            _type: 'index',
             data: message.index,
           };
         }
@@ -89,7 +89,7 @@ export class RemoteLibrary {
       case message.list: {
         if (message.list) {
           return {
-            type: 'locations',
+            _type: 'locations',
             data: message.list.libraries,
           };
         }
@@ -105,7 +105,7 @@ export class RemoteLibrary {
         //
         if (message.metadata) {
           return {
-            type: 'metadata',
+            _type: 'metadata',
             data: message.metadata,
           };
         }
@@ -113,13 +113,13 @@ export class RemoteLibrary {
       }
       case message.image: {
         return {
-          type: 'image',
+          _type: 'image',
           data: message.image,
         };
       }
       case message.system: {
         return {
-          type: 'system',
+          _type: 'system',
           data: message.system,
         };
       }

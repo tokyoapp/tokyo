@@ -21,11 +21,11 @@ export default {
       start(ctlr) {
         controller = ctlr;
 
-        wrappedWorker.onMessage((msg) => {
-          console.log(msg);
-
-          controller.enqueue(msg);
-        });
+        wrappedWorker.onMessage(
+          Comlink.proxy((msg) => {
+            controller.enqueue(msg);
+          })
+        );
       },
     });
 

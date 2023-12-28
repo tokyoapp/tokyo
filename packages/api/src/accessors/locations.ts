@@ -21,6 +21,8 @@ export function createLocationsAccessor() {
       if (msg._type === MessageType.Locations) return msg;
     },
 
-    filter: ([data]) => data,
+    filter: ([data]) => {
+      return data.data;
+    },
   });
 }

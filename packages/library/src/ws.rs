@@ -208,8 +208,6 @@ pub async fn handle_socket(mut socket: WebSocket) {
           .send(message.clone())
           .await
           .expect("Error sending message");
-
-        println!("sent this msg {:?}", message);
       });
     } else {
       let mut error_message = schema::Message::new();
