@@ -6,7 +6,6 @@ import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import { Stars } from './Stars.tsx';
 import { Notifications } from './notifications/Notifications.ts';
-import { settings } from './Edit.tsx';
 import { t } from 'tokyo-locales';
 import { createMetadataAccessor } from 'tokyo-api';
 import { getImage } from 'tauri-plugin-tokyo';

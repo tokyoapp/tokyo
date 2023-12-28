@@ -42,7 +42,7 @@ export class Model {
   static properties<
     T extends {
       [key: string]: BaseProperty<any> | string | string[] | undefined;
-    }
+    },
   >(model: T) {
     const props = Object.entries(model).filter(([_, value]) => value instanceof BaseProperty);
     return props as [keyof T, T[keyof T]][];
@@ -77,18 +77,25 @@ export class Model {
   }
 
   /**
-   * Create stream from model where every property is mapped to its value.
+   * TODO: Create stream from model where every property is mapped to its value.
    */
   static stream<T extends PropertyModel>(model: T) {
     type Chunk = Record<keyof T, string>;
 
     let controller: ReadableStreamDefaultController<Chunk>;
 
+    let lastValue = null;
+
     const unsubscribe = Model.subscribe(model, () => {
       if (controller) {
         const properties = Model.properties(model);
         const map = Object.fromEntries(properties);
-        controller.enqueue(map);
+
+        lastValue = map;
+
+        if (controller.desiredSize && controller.desiredSize > 0) {
+          controller.enqueue(map);
+        }
       }
     });
 
@@ -96,9 +103,24 @@ export class Model {
       start(ctrler) {
         controller = ctrler;
       },
+      pull(ctrler) {
+        if (lastValue) ctrler.enqueue(lastValue);
+        lastValue = null;
+      },
       cancel() {
         unsubscribe();
       },
     });
+  }
+
+  /**
+   * Print current values to an key value map.
+   */
+  static serialize<T extends PropertyModel>(model: T) {
+    const res: Record<string, string | number | string[] | number[]> = {};
+    for (const [key, prop] of Model.properties(model)) {
+      res[key as string] = prop.serialize();
+    }
+    return res;
   }
 }

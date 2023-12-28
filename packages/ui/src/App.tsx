@@ -2,7 +2,6 @@ import { platform } from '@tauri-apps/plugin-os';
 import { IndexEntryMessage } from 'tokyo-proto';
 import { ErrorBoundary, createSignal } from 'solid-js';
 import Jobs from './actions/Action.ts';
-import Edit from './components/Edit';
 import Explorer from './components/Explorer';
 import Info from './components/Info';
 import LocationSettings from './components/LocationSettings.tsx';
@@ -11,12 +10,19 @@ import Titlebar from './components/Titlebar.tsx';
 import Preview from './components/Viewer';
 import { Notifications } from './components/notifications/Notifications.ts';
 import { ActivityBar } from './components/Activitybar.tsx';
+import { Panel } from './components/Panel.tsx';
+import { Basic } from './properties/Basic.ts';
+import { Model } from 'tokyo-properties';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
 // selected locations
 
-export const [file, setFile] = createSignal<IndexEntryMessage>();
+export const [file, setFile] = createSignal<IndexEntryMessage>({});
+
+const models = {
+  basic: new Basic(),
+};
 
 const shortcuts: Record<string, () => void> = {
   r: Jobs.map('reload'),
@@ -33,6 +39,23 @@ function App() {
   window.addEventListener('error', (e) => {
     Notifications.error(e.message);
   });
+
+  //
+  // Model.stream(models.basic).pipeTo(
+  //   new WritableStream({
+  //     async write(c) {
+  //       for (const key in c) {
+  //         console.log(key, c[key].value);
+  //       }
+
+  //       return new Promise((res) => {
+  //         setTimeout(() => {
+  //           res();
+  //         }, 1000);
+  //       });
+  //     },
+  //   })
+  // );
 
   const [os, setOS] = createSignal('macos');
 
@@ -108,14 +131,15 @@ function App() {
                     <Tabs.Tab title="Info" icon="ph-info" open>
                       <Info file={file()} />
                     </Tabs.Tab>
+
                     <Tabs.Tab title="Exposure" icon="ph-pencil" open>
-                      <Edit file={file()} />
+                      <Panel model={models.basic} />
                     </Tabs.Tab>
                     <Tabs.Tab title="Color" icon="ph-pencil">
-                      <Edit file={file()} />
+                      <Panel model={models.basic} />
                     </Tabs.Tab>
                     <Tabs.Tab title="Effects" icon="ph-pencil">
-                      <Edit file={file()} />
+                      <Panel model={models.basic} />
                     </Tabs.Tab>
                   </Tabs>
                 </div>

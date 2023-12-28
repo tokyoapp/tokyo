@@ -32,10 +32,11 @@ export function createMetadataAccessor() {
         ids: string[];
       };
     }) {
-      return {
-        _type: MessageType.Thumbnails,
-        ids: params.query.ids.filter((id) => !cache.find((entry) => entry.id === id)),
-      };
+      if (params.query)
+        return {
+          _type: MessageType.Thumbnails,
+          ids: params.query.ids?.filter((id) => !cache.find((entry) => entry.id === id)),
+        };
     },
 
     async handleMessage(msg) {

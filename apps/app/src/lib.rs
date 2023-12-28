@@ -55,6 +55,6 @@ impl AppBuilder {
       .run(tauri::generate_context!())
       .expect("error while running tauri application");
 
-    library::init();
+    // library::init();
   }
 }

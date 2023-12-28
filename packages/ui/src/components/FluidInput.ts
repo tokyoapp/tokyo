@@ -4,8 +4,6 @@ function map(value: number, inMin: number, inMax: number, outMin: number, outMax
   return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
-interface FluidInputProps {}
-
 export default class FluidInput extends LitElement {
   internalValue = 400;
 
@@ -456,14 +454,6 @@ export default class FluidInput extends LitElement {
           </span>
       </div>
     `;
-  }
-}
-
-declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      'fluid-input': HTMLAttributes<HTMLDivElement> & FluidInputProps & IntrinsicAttributes;
-    }
   }
 }
 

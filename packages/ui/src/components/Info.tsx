@@ -1,8 +1,8 @@
 import '@atrium-ui/mono/expandable';
-import { createSignal } from 'solid-js';
 import { createMetadataAccessor } from 'tokyo-api';
 import { t } from 'tokyo-locales';
 import Icon from './Icon.tsx';
+import { useAccessor } from '../utils/useAccessor.ts';
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -53,8 +53,15 @@ function typeFromFilename(name: string) {
 export default function Info(props: {
   file?: any;
 }) {
-  const metadata = metadataAccessor({ ids: createSignal<string[]>([]) });
-  if (props.file) metadata.params.ids[1]([props.file.path]);
+  const metadata = useAccessor(createMetadataAccessor);
+
+  if (props.file)
+    metadata.params({
+      query: {
+        ids: [],
+        // ids: [props.file.path],
+      },
+    });
 
   const file_tags = () => {
     // const arr = meta()?.tags.map((tag) => {
@@ -65,11 +72,11 @@ export default function Info(props: {
   };
 
   const meta = () => {
-    return metadata.store[0];
+    return metadata.data[0];
   };
 
   const exif = () => {
-    const meta = metadata.store[0];
+    const meta = metadata.data[0];
     return JSON.parse(meta?.exif);
   };
 
@@ -83,10 +90,10 @@ export default function Info(props: {
           <Property title={t('info_hash')} value={props.file.hash} />
           <Property title={t('info_path')} value={props.file.path} />
           <Property title={t('info_date_created')} value={props.file.create_date} />
-          <Property
+          {/* <Property
             title={t('info_tags')}
             value={[typeFromFilename(props.file.name), ...file_tags()]}
-          />
+          /> */}
 
           <Seperator />
 
