@@ -31,7 +31,10 @@ export default {
 
     const write = new WritableStream({
       write(chunk) {
-        wrappedWorker.send(chunk);
+        switch (chunk._type) {
+          case 'locations':
+            wrappedWorker.fetchLocations();
+        }
       },
     });
 

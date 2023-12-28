@@ -31,7 +31,6 @@ export class RemoteLibrary {
       id: ++msg_count,
       locations: library.RequestLocations.create({}),
     });
-    const data = library.ClientMessage.encode(msg).finish();
 
     const res = new Promise<ClientAPIMessage>(async (resolve) => {
       const unsub = await this.onMessage(async (msg) => {
@@ -40,7 +39,7 @@ export class RemoteLibrary {
       }, msg.id);
     });
 
-    this.ws.send(data);
+    this.send(msg);
 
     return res;
   }
@@ -52,7 +51,6 @@ export class RemoteLibrary {
         ids: locations,
       }),
     });
-    const data = library.ClientMessage.encode(msg).finish();
 
     const res = new Promise<ClientAPIMessage>(async (resolve) => {
       const unsub = await this.onMessage(async (msg) => {
@@ -61,7 +59,7 @@ export class RemoteLibrary {
       }, msg.id);
     });
 
-    this.ws.send(data);
+    this.send(msg);
 
     return res;
   }
@@ -130,8 +128,15 @@ export class RemoteLibrary {
     return undefined;
   }
 
+  backlog = [];
+
   send(msg: library.ClientMessage) {
-    this.ws.send(library.ClientMessage.encode(msg).finish());
+    if (this.ws.readyState !== this.ws.OPEN) {
+      this.backlog.push(msg);
+    } else {
+      const req = library.ClientMessage.encode(msg).finish();
+      this.ws.send(req);
+    }
   }
 
   postLocation() {
@@ -153,6 +158,12 @@ export class RemoteLibrary {
 
     ws.onopen = () => {
       console.log('[WS] Connected');
+
+      for (const req of this.backlog) {
+        this.send(req);
+      }
+
+      this.backlog = [];
     };
     ws.onerror = (err) => {
       console.error('[WS] Error: ', err);
@@ -160,8 +171,7 @@ export class RemoteLibrary {
 
     const rx = new ReadableStream<Blob | DataView>({
       start(controller) {
-        ws.onmessage = async (msg) => {
-          console.log('[WS]', msg);
+        ws.onmessage = (msg) => {
           controller.enqueue(msg.data);
         };
       },

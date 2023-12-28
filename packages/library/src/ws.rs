@@ -1,6 +1,8 @@
 use crate::cached_thumb;
 use crate::IndexEntry;
 use crate::Library;
+use anyhow::anyhow;
+use anyhow::Result;
 use axum::extract::ws;
 use axum::extract::ws::WebSocket;
 use futures::sink::SinkExt;
@@ -87,30 +89,30 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   return index_msg;
 }
 
-async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
+async fn handle_socket_message(msg: ClientMessage) -> Result<ws::Message> {
   let lib = &Library::new().await;
 
-  if ok_msg.has_locations() {
+  if msg.has_locations() {
     let mut msg = schema::Message::new();
-    msg.id = ok_msg.id;
+    msg.id = msg.id;
     msg.set_list(get_location_list(lib).await);
     let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
-    return Some(packet);
+    return Ok(packet);
   }
 
-  if ok_msg.has_index() {
-    let index = ok_msg.index();
+  if msg.has_index() {
+    let index = msg.index();
     println!("Requested Index {:?}", index);
     let mut msg = schema::Message::new();
-    msg.id = ok_msg.id;
+    msg.id = msg.id;
     msg.set_index(get_index_msg(lib, index.ids.clone()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
-    return Some(packet);
+    return Ok(packet);
   }
 
-  if ok_msg.has_create() {
-    let create = ok_msg.create();
+  if msg.has_create() {
+    let create = msg.create();
     let _cr = lib
       .create_library(create.name.to_string(), create.path.to_string())
       .await;
@@ -120,46 +122,46 @@ async fn handle_socket_message(ok_msg: ClientMessage) -> Option<ws::Message> {
       msg.set_list(get_location_list(lib).await);
       let bytes = msg.write_to_bytes().unwrap();
       let packet = ws::Message::Binary(bytes);
-      return Some(packet);
+      return Ok(packet);
     }
   }
 
-  if ok_msg.has_meta() {
-    let file = &ok_msg.meta().file;
+  if msg.has_meta() {
+    let file = &msg.meta().file;
     let mut msg = metadata(lib, file).await;
-    msg.id = ok_msg.id;
+    msg.id = msg.id;
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
-    return Some(packet);
+    return Ok(packet);
   }
 
-  if ok_msg.has_image() {
-    let file = &ok_msg.image().file; // should be the hash,
+  if msg.has_image() {
+    let file = &msg.image().file; // should be the hash,
     let image = cached_thumb(file).await; // then this doesnt need to look for the hash itself
     let mut img_msg = schema::ImageMessage::new();
     img_msg.image = image;
     let mut msg = schema::Message::new();
-    msg.id = ok_msg.id;
+    msg.id = msg.id;
     msg.set_image(img_msg);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
-    return Some(packet);
+    return Ok(packet);
   }
 
-  if ok_msg.has_postmeta() {
-    let file = &ok_msg.postmeta().file;
-    let rating = ok_msg.postmeta().rating.unwrap();
+  if msg.has_postmeta() {
+    let file = &msg.postmeta().file;
+    let rating = msg.postmeta().rating.unwrap();
     lib.set_rating(file.clone(), rating).await;
 
     let mut msg = schema::Message::new();
-    msg.id = ok_msg.id;
+    msg.id = msg.id;
     msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
-    return Some(packet);
+    return Ok(packet);
   }
 
-  None
+  Err(anyhow!("Message was empty"))
 }
 
 pub async fn handle_socket(mut socket: WebSocket) {
@@ -175,7 +177,7 @@ pub async fn handle_socket(mut socket: WebSocket) {
   let (sender, mut receiver) = socket.split();
 
   let sender = Arc::new(Mutex::new(sender));
-  let db = Arc::new(Mutex::new(Library::new().await));
+  // let db = Arc::new(Mutex::new(Library::new().await));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {
@@ -189,23 +191,25 @@ pub async fn handle_socket(mut socket: WebSocket) {
     let data = msg.into_data();
     let msg = schema::ClientMessage::parse_from_bytes(&data);
 
-    if let Ok(ok_msg) = msg {
+    if let Ok(msg) = msg {
       let ws = sender.clone();
-      let db = db.clone();
+      // let db = db.clone();
 
       tokio::spawn(async move {
         let lib = &Library::new().await;
         lib.init().await;
 
-        let message = handle_socket_message(ok_msg)
+        let message = handle_socket_message(msg)
           .await
           .expect("Error handling message");
 
         ws.lock()
           .await
-          .send(message)
+          .send(message.clone())
           .await
-          .expect("Error sending message")
+          .expect("Error sending message");
+
+        println!("sent this msg {:?}", message);
       });
     } else {
       let mut error_message = schema::Message::new();
