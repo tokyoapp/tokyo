@@ -1,6 +1,6 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
-import { LocalLibrary } from '../api/LocalLibrary.js';
+import Worker from '../Worker.js';
 
 export function createMetadataAccessor() {
   const loadImage = (src: string): Promise<Image> => {
@@ -26,7 +26,7 @@ export function createMetadataAccessor() {
     return canvas;
   };
 
-  return new Accessor([new LocalLibrary()], {
+  return new Accessor([Worker], {
     createRequest(params: {
       query: {
         ids: string[];

@@ -2,11 +2,11 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'tokyo-proto';
-import { ClientAPIMessage, LibraryInterface, RequestMessage } from '../lib';
+import { ClientAPIMessage, RequestMessage } from '../lib';
 
 let msg_count = 1;
 
-export class RemoteLibrary implements LibraryInterface {
+export class RemoteLibrary {
   ws!: WebSocket;
 
   messageListeners = new Set<(arg: library.Message) => void>();
@@ -144,59 +144,54 @@ export class RemoteLibrary implements LibraryInterface {
     this.send(msg);
   }
 
-  connect(host: string): Promise<void> {
+  connect(host: string) {
     console.log('worker connecting to', host);
 
-    const trx = new TransformStream({
-      start(controller) {
-        this.ws = new WebSocket(`ws://${host}/ws`);
-        this.ws.onmessage = async (msg) => {
-          controller.enqueue(msg);
-        };
-      },
-      transform(req_msg) {
-        this.ws.send(req_msg);
-      }
-    })
+    const self = this;
 
-    return new Promise((resolve) => {
-      this.ws = new WebSocket(`ws://${host}/ws`);
+    const ws = new WebSocket(`ws://${host}`);
 
-      this.ws.onopen = () => {
-        console.log('[WS] Connected');
-        resolve();
-      };
-      this.ws.onerror = (err) => {
-        console.error('[WS] Error: ', err);
-      };
-      this.ws.onmessage = async (msg) => {
-        let buf;
-        if (msg.data instanceof Blob) {
-          buf = await (msg.data as Blob).arrayBuffer();
-        } else {
-          buf = msg.data.buffer;
-        }
-
-        const message = library.Message.decode(new Uint8Array(buf));
-        this.messageListeners.forEach((cb) => cb(message));
-      };
-    });
-  }
-
-  stream() {
-    const worker = new Worker(new URL('./api/RemoteLibrary.ts', import.meta.url), {
-      type: 'module',
-    });
-    const wrappedWorker = Comlink.wrap<RemoteLibrary>(worker);
-
-    worker.onerror = (err) => {
-      throw new Error(err.message);
+    ws.onopen = () => {
+      console.log('[WS] Connected');
+    };
+    ws.onerror = (err) => {
+      console.error('[WS] Error: ', err);
     };
 
-    wrappedWorker.connect(url);
+    const rx = new ReadableStream<Blob | DataView>({
+      start(controller) {
+        ws.onmessage = async (msg) => {
+          console.log('[WS]', msg);
+          controller.enqueue(msg.data);
+        };
+      },
+    });
 
-    // TODO: actually send request to worker.
-    return wrappedWorker;
+    this.ws = ws;
+
+    rx.pipeThrough(
+      new TransformStream<Blob | DataView, library.Message>({
+        async transform(msg, controller) {
+          let buf;
+          if (msg instanceof Blob) {
+            buf = await (msg as Blob).arrayBuffer();
+          } else {
+            buf = msg.buffer;
+          }
+
+          const message = library.Message.decode(new Uint8Array(buf));
+          controller.enqueue(message);
+        },
+      })
+    ).pipeTo(
+      new WritableStream({
+        write(message) {
+          for (const listener of self.messageListeners) {
+            listener(message);
+          }
+        },
+      })
+    );
   }
 }
 

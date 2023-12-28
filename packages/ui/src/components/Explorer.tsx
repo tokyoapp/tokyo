@@ -17,6 +17,8 @@ export default function ExplorerView(props: {
   // const metadataAccessor = useAccessor(createMetadataAccessor);
   const locationsAccessor = useAccessor(createLocationsAccessor);
 
+  console.log('test');
+
   locationsAccessor.params({
     query: {},
   });
@@ -38,7 +40,7 @@ export default function ExplorerView(props: {
 
   createEffect(() => {
     const d = locationsAccessor.data();
-    console.log(d);
+    console.log('locations', d);
   });
 
   // createEffect(

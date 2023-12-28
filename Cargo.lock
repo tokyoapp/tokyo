@@ -98,8 +98,8 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-tokyo",
  "tauri-plugin-window",
+ "tokio",
  "tokyo-library",
- "tokyo-proto",
  "window-vibrancy",
 ]
 

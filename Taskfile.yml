@@ -77,12 +77,7 @@ tasks:
     desc: Run desktop app with server
     deps: [setup]
     cmds:
-      - task: app:dev
-
-  dev:server:
-    desc: Run desktop app with server
-    deps: [setup]
-    cmd: task --parallel server:dev app:dev
+      - task --parallel server:dev app:dev
 
   dev:ios:
     desc: Run ios app in simulator

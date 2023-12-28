@@ -1,9 +1,9 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
-import { LocalLibrary } from '../api/LocalLibrary.js';
+import Worker from '../Worker.js';
 
 export function createIndexAccessor() {
-  return new Accessor([new LocalLibrary()], {
+  return new Accessor([Worker], {
     createRequest(params: {
       query: {
         locations: string[];

@@ -1,6 +1,6 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
-import { LocalLibrary } from '../api/LocalLibrary.js';
+import Worker from '../Worker.js';
 
 export function createThumbnailAccessor(hosts: string[]) {
   const makeThumbnail = (blob?: Blob) => {
@@ -22,7 +22,7 @@ export function createThumbnailAccessor(hosts: string[]) {
     return canvas;
   };
 
-  return new Accessor([new LocalLibrary()], {
+  return new Accessor([Worker], {
     createRequest(params: {
       query: {
         ids: string[];

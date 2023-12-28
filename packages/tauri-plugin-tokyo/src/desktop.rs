@@ -13,7 +13,8 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
   // tokio::spawn(async move {
   //   let db = Database::new().await;
   //   db.init_db().await.expect("Error at init db");
-  // });
+  // })
+  // .await;
 
   Ok(Library(app.clone()))
 }
@@ -22,14 +23,6 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
-  // pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
-  //   let meta = tokyo_library::Library::metadata(&self.db, &id).await;
-  //   if let Some(metadata) = meta {
-  //     return Ok(metadata.thumbnail);
-  //   }
-  //   Err(crate::Error::Unknown("thumbnail".to_string()))
-  // }
-
   // pub async fn get_locations(&self) -> crate::Result<Vec<tokyo_library::db::Location>> {
   //   let db = Database::new().await;
   //   let d = db.location_list().await.unwrap();
@@ -41,6 +34,14 @@ impl<R: Runtime> Library<R> {
   //     .await
   //     .expect("Error while inserting location");
   //   Ok(())
+  // }
+
+  // pub async fn get_thumbnail(&self, id: String) -> crate::Result<Vec<u8>> {
+  //   let meta = tokyo_library::Library::metadata(&self.db, &id).await;
+  //   if let Some(metadata) = meta {
+  //     return Ok(metadata.thumbnail);
+  //   }
+  //   Err(crate::Error::Unknown("thumbnail".to_string()))
   // }
 
   // pub async fn get_index(&self, name: String) -> crate::Result<Vec<tokyo_library::IndexEntry>> {
