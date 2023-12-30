@@ -2,7 +2,6 @@ use serde::de::DeserializeOwned;
 use std::{path::Path, sync::Arc};
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 use tokio::sync::Mutex;
-use tokyo_shadow::MyImage;
 
 use crate::LibraryExt;
 

@@ -7,8 +7,7 @@ edition = "2021"
 serde = { version = "1.0", features = ["derive"] }
 rawler = { git = "https://github.com/luckydye/dnglab" }
 tokio = "1.32.0"
-pix = "0.13.3"                                          # Pixel / raster image library
-# xmp_toolkit = "*"                                       # Rust-language bindings for Adobe's XMP Toolkit
-# colorspace = "*"
 image = "0.24.7"
-imagepipe = "*"
+anyhow = "1.0.75"
+srgb = "0.3.2"
+kolor = "0.1.9"

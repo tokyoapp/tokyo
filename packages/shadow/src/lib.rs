@@ -1,123 +1,190 @@
-use core::panic;
-pub use image::{DynamicImage, ImageBuffer};
-use imagepipe::{ImageSource, Pipeline};
+use anyhow::anyhow;
+use image::{DynamicImage, ImageBuffer};
+use image::{Pixel, Rgb};
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
   get_decoder,
   imgop::raw,
-  RawFile, RawImageData,
+  RawFile,
 };
+use serde::{Deserialize, Serialize};
 use std::{fs::File, io::BufReader, path::Path};
-// use xmp_toolkit;
 
-// pub fn get_xmp_data(path: &Path) {
-//   let filename = path.file_stem().unwrap().to_str().unwrap();
-//   let xmp_file_path =
-//     PathBuf::from(path.parent().unwrap().to_str().unwrap().to_owned() + "/" + filename + ".xmp");
+pub fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
+  let file = File::open(&path).unwrap();
+  let mut rawfile = RawFile::new(path, BufReader::new(file));
 
-//   let xmp = xmp_toolkit::XmpMeta::from_str(xmp_file_path).unwrap();
-//   xmp.property("http://ns.adobe.com/xap/1.0/", "Rating");
-// }
-//
+  let params = RawDecodeParams { image_index: 0 };
 
-pub struct MyImage {
-  pub image: DynamicImage,
-  pub edits: Edits,
+  let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
+    Ok(decoder) => Some(decoder.raw_metadata(&mut rawfile, params.clone()).unwrap()),
+    Err(error) => {
+      println!("Error reading metadata {}", error.to_string());
+      None
+    }
+  };
+
+  let decoder = get_decoder(&mut rawfile).unwrap();
+
+  let rawimage = decoder.raw_image(&mut rawfile, params, false)?;
+
+  if let Ok(params) = rawimage.develop_params() {
+    let (srgbf, dim) = raw::develop_raw_srgb(&rawimage.data, &params).unwrap();
+    // spits out a srg gamma 2.4 image
+
+    let mut img =
+      DynamicImage::ImageRgb32F(ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).unwrap());
+
+    img = match metadata.unwrap().exif.orientation.unwrap() {
+      5 | 6 => img.rotate90(),
+      7 | 8 => img.rotate270(),
+      _ => img,
+    };
+
+    return Ok(img);
+  }
+
+  Err(anyhow!("Invalid image"))
 }
 
-impl MyImage {
-  pub fn new(path: &Path) -> MyImage {
-    let image = get_image(path).unwrap();
+/**
+ * relative changes to image properties
+ */
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Edits {
+  pub exposure: f32,
+  pub contrast: f32,
+  pub temperature: f32,
+  pub tint: f32,
+  pub highlights: f32,
+  pub shadows: f32,
+  pub blacks: f32,
+  pub whites: f32,
+  pub texture: f32,
+  pub vibrancy: f32,
+  pub saturation: f32,
+  pub curve_tone: Vec<(f32, f32)>,
+  pub curve_red: Vec<(f32, f32)>,
+  pub curve_green: Vec<(f32, f32)>,
+  pub curve_blue: Vec<(f32, f32)>,
+}
 
-    MyImage {
-      image,
-      edits: Edits {
-        gamma: 2.2,
-        exposure: 0.0,
-        curve: vec![(0.00, 0.00), (1.0, 1.0)],
-      },
+impl Edits {
+  pub fn new() -> Edits {
+    Edits {
+      exposure: 0.4,
+      contrast: 0.03,
+      temperature: 0.15,
+      tint: -0.1,
+      highlights: -0.22,
+      shadows: 0.15,
+      blacks: 0.0,
+      whites: 0.0,
+      vibrancy: 0.4,
+      saturation: 0.0,
+      texture: 0.1,
+      curve_tone: vec![],
+      curve_red: vec![],
+      curve_green: vec![],
+      curve_blue: vec![],
     }
   }
+}
 
-  pub fn render(&mut self) -> DynamicImage {
-    println!("{:?}", self.edits.exposure);
-
-    let img = process(&self.image, &self.edits);
-
-    img
+fn mat_mul(matrix: &[[f32; 3]; 3], vector: &[f32; 3]) -> [f32; 3] {
+  let mut result = [0.0; 3];
+  for i in 0..3 {
+    for j in 0..3 {
+      result[i] += matrix[i][j] * vector[j];
+    }
   }
+  result
 }
 
-pub struct Edits {
-  pub gamma: f32,
-  pub exposure: f32,
-  pub curve: Vec<(f32, f32)>,
+fn exposure(rgb: [f32; 3], exposure: f32) -> [f32; 3] {
+  let mut color = rgb;
+  color[0] = color[0] * (1.0 + exposure);
+  color[1] = color[1] * (1.0 + exposure);
+  color[2] = color[2] * (1.0 + exposure);
+  color
 }
 
-pub fn process(img: &DynamicImage, edits: &Edits) -> DynamicImage {
-  println!("process image");
-  let source = ImageSource::Other(img.clone());
-  let mut pipeline = Pipeline::new_from_source(source).unwrap();
-
-  // pipeline.ops.gamma. = edits.gamma;
-  pipeline.ops.basecurve.exposure = edits.exposure;
-  pipeline.ops.basecurve.points = edits.curve.clone();
-
-  println!("generate ouput");
-
-  let out = pipeline.output_16bit(None).unwrap();
-
-  println!("convert ouput");
-
-  return DynamicImage::ImageRgb16(
-    ImageBuffer::from_raw(out.width as u32, out.height as u32, out.data).expect("F"),
-  );
+fn contrast(rgb: [f32; 3], contrast: f32) -> [f32; 3] {
+  let mut color = rgb;
+  color[0] = color[0] - 0.5 * (1.0 + contrast) + 0.5;
+  color[1] = color[1] - 0.5 * (1.0 + contrast) + 0.5;
+  color[2] = color[2] - 0.5 * (1.0 + contrast) + 0.5;
+  color
 }
 
-pub fn get_image(path: &Path) -> Option<DynamicImage> {
-  let raw_file = File::open(&path).unwrap();
-  let mut rawfile = RawFile::new(path, BufReader::new(raw_file));
+/**
+ * Color temperature acording to CIE 1960 color space
+ */
+fn temprature(color: [f32; 3], temp: f32, tint: f32) -> [f32; 3] {
+  let [x, y, z] = color;
 
-  // let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
-  //   Ok(decoder) => Some(
-  //     decoder
-  //       .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
-  //       .unwrap(),
-  //   ),
-  //   Err(error) => {
-  //     println!("Error reading metadata {}", error.to_string());
-  //     None
-  //   }
-  // };
+  let mut u = (2.0 / 3.0) * x;
+  let mut v = y;
+  let mut w = (1.0 / 2.0) * (-x + 3.0 * y + z);
 
-  let raw_params = RawDecodeParams { image_index: 0 };
-  let decoder = get_decoder(&mut rawfile).unwrap();
-  let rawimage = decoder
-    .raw_image(&mut rawfile, raw_params.clone(), false)
-    .unwrap();
+  u = u * (1.0 + tint);
+  w = w * (1.0 + temp);
 
-  if let Ok(mut params) = rawimage.develop_params() {
-    // params.gamma = 1.8;
+  let X = (3.0 / 2.0) * u;
+  let Y = v;
+  let Z = (3.0 / 2.0) * u - 3.0 * v + 2.0 * w;
 
-    // let buf = match &rawimage.data {
-    //   RawImageData::Integer(buf) => buf,
-    //   RawImageData::Float(_) => todo!(),
-    // };
+  [X, Y, Z]
+}
 
-    println!("Develop image");
-    let (srgbf, dim) = raw::develop_raw_srgb(&rawimage.data, &params).unwrap();
+pub fn process(
+  source: ImageBuffer<Rgb<f32>, Vec<f32>>,
+  paramters: &Edits,
+) -> ImageBuffer<Rgb<f32>, Vec<f32>> {
+  println!("process");
 
-    let mut img = DynamicImage::ImageRgb32F(
-      ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).expect("Invalid ImageBuffer size"),
-    );
+  let mut source = source;
 
-    // img = match metadata.unwrap().exif.orientation.unwrap() {
-    //   5 | 6 => img.rotate90(),
-    //   7 | 8 => img.rotate270(),
-    //   _ => img,
-    // };
+  for pixel in source.pixels_mut() {
+    let out = pixel.channels_mut();
+    let linear_srgb = srgb::gamma::linear_from_normalised([out[0], out[1], out[2]]);
 
-    return Some(img);
+    // in
+
+    let source_colorspace = kolor::spaces::LINEAR_SRGB;
+    let working_colorspace = kolor::spaces::ACES2065_1;
+    let target_colorspace = kolor::spaces::LINEAR_SRGB;
+
+    let conversion_source = kolor::ColorConversion::new(source_colorspace, kolor::spaces::CIE_XYZ);
+    let mut xyz = conversion_source.convert(linear_srgb.into());
+
+    xyz = temprature(xyz.clone().into(), paramters.temperature, paramters.tint).into();
+
+    let conversion_source = kolor::ColorConversion::new(kolor::spaces::CIE_XYZ, working_colorspace);
+    let mut aces = conversion_source.convert(xyz.into());
+
+    aces = exposure(aces.clone().into(), paramters.exposure).into();
+    aces = contrast(aces.clone().into(), paramters.contrast).into();
+
+    // highlights
+    // shadows
+    // blacks
+    // whites
+    // vibrancy
+    // saturation
+
+    let conversion_target = kolor::ColorConversion::new(working_colorspace, target_colorspace);
+    let linear_srgb = conversion_target.convert(aces);
+
+    // out
+
+    let srgb_out = srgb::gamma::normalised_from_linear(linear_srgb);
+    out[0] = srgb_out[0];
+    out[1] = srgb_out[1];
+    out[2] = srgb_out[2];
   }
-  return None;
+
+  println!("done");
+
+  return source;
 }

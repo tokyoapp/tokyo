@@ -121,23 +121,23 @@ impl Library {
     }
   }
 
-  pub fn render_image(path: String, exposure: f32) -> Image {
-    let mut img = edit::EditedImage::new(
-      &Path::new(&path),
-      tokyo_shadow::Edits {
-        gamma: 2.4,
-        exposure,
-        curve: vec![(0.00, 0.00), (1.0, 1.0)],
-      },
-    );
-    let resized = img.render().resize(1024, 1024, FilterType::Lanczos3);
+  // pub fn render_image(path: String, exposure: f32) -> Image {
+  //   let mut img = edit::EditedImage::new(
+  //     &Path::new(&path),
+  //     tokyo_shadow::Edits {
+  //       gamma: 2.4,
+  //       exposure,
+  //       curve: vec![(0.00, 0.00), (1.0, 1.0)],
+  //     },
+  //   );
+  //   let resized = img.render().resize(1024, 1024, FilterType::Lanczos3);
 
-    Image {
-      width: resized.width(),
-      height: resized.height(),
-      data: resized.to_rgb8().to_vec(),
-    }
-  }
+  //   Image {
+  //     width: resized.width(),
+  //     height: resized.height(),
+  //     data: resized.to_rgb8().to_vec(),
+  //   }
+  // }
 
   pub async fn init(&self) {
     self.db.borrow().init_db().await.unwrap();
