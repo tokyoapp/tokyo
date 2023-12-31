@@ -150,7 +150,7 @@ impl Library {
   pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
     let meta = image::metadat(&p.to_string());
 
-    if let Some(metadata) = meta {
+    if let Ok(metadata) = meta {
       let file = self.get_file(metadata.hash.clone()).await;
 
       let mut tags: Vec<String> = Vec::new();
@@ -195,7 +195,7 @@ impl Library {
 
     for path in list {
       let meta = image::metadat(&path);
-      let _ = meta.is_some_and(|v| {
+      let _ = meta.is_ok_and(|v| {
         index.push(v);
         true
       });
@@ -204,9 +204,9 @@ impl Library {
     let lib = Arc::new(Mutex::new(self));
 
     let idx = index.iter().map(|meta| async {
-      let lib2 = lib.clone();
+      let lib = lib.clone();
 
-      let file = lib2.lock().await.borrow().get_file(meta.hash.clone()).await;
+      let file = lib.lock().await.borrow().get_file(meta.hash.clone()).await;
       let rating = file
         .clone()
         .and_then(|f| Some(f.rating))
@@ -227,7 +227,8 @@ impl Library {
       }
     });
 
-    join_all(idx).await
+    let rs = join_all(idx).await;
+    rs
   }
 
   pub async fn add_file(&self, hash: String, rating: i32) {

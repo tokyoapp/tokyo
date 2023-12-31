@@ -36,11 +36,6 @@ export default function ExplorerView(props: {
     }
   });
 
-  createEffect(() => {
-    const locs = locationsAccessor.data() || [];
-    console.log('locations', locs);
-  });
-
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
 
   function tags(entry: IndexEntryMessage) {

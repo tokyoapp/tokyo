@@ -28,10 +28,11 @@ export function createThumbnailAccessor(hosts: string[]) {
         ids: string[];
       };
     }) {
-      return {
-        _type: MessageType.Thumbnails,
-        ids: params.query.ids,
-      };
+      if (params.query)
+        return {
+          _type: MessageType.Thumbnails,
+          ids: params.query.ids,
+        };
     },
 
     handleMessage(msg) {

@@ -18,7 +18,7 @@ export const [settingsOpen, setSettingOpen] = createSignal(false);
 
 // selected locations
 
-export const [file, setFile] = createSignal<IndexEntryMessage>({});
+export const [file, setFile] = createSignal<IndexEntryMessage>();
 
 const models = {
   basic: new Basic(),

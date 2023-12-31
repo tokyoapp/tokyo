@@ -27,15 +27,18 @@ export function createMetadataAccessor() {
   };
 
   return new Accessor([Worker], {
-    createRequest(params: {
-      query: {
-        ids: string[];
-      };
-    }) {
-      if (params.query)
+    createRequest(
+      params: {
+        query: {
+          ids: string[];
+        };
+      },
+      cache
+    ) {
+      if (params?.query)
         return {
           _type: MessageType.Thumbnails,
-          ids: params.query.ids?.filter((id) => !cache.find((entry) => entry.id === id)),
+          ids: params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id)),
         };
     },
 

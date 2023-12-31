@@ -31,7 +31,7 @@ export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage
    * Set the params for this accessor. This will trigger a new request to the API when needed.
    */
   public setParams(params: Params) {
-    const req = this._strategy.createRequest(params);
+    const req = this._strategy.createRequest(params, this._cache);
 
     if (Array.isArray(req)) {
       throw new Error('Multiple requests are not supported yet');
@@ -129,7 +129,10 @@ export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage
       /**
        * Create request message from params.
        */
-      createRequest(params: Params): RequestMessage | RequestMessage[] | undefined;
+      createRequest(
+        params: Params,
+        cache: (Cache | undefined)[]
+      ): RequestMessage | RequestMessage[] | undefined;
       /**
        * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
        */

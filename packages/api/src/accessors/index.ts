@@ -12,10 +12,12 @@ export function createIndexAccessor() {
       sortRating: boolean;
       sortCreated: boolean;
     }) {
-      return {
-        _type: MessageType.Index,
-        locations: params.query.locations,
-      };
+      if (params?.query) {
+        return {
+          _type: MessageType.Index,
+          locations: params.query.locations,
+        };
+      }
     },
 
     handleMessage(msg) {
@@ -23,7 +25,7 @@ export function createIndexAccessor() {
     },
 
     filter: ([data], params) => {
-      console.log(params);
+      console.log(params, data);
 
       function setIndex(index: IndexEntryMessage[]) {
         this.index[1](index);

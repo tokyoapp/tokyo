@@ -34,6 +34,12 @@ export default {
         switch (chunk._type) {
           case 'locations':
             wrappedWorker.fetchLocations();
+            break;
+          case 'index':
+            wrappedWorker.fetchIndex(chunk.locations);
+            break;
+          default:
+            throw new Error(`Request message "${chunk._type}" not handled.`);
         }
       },
     });

@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
 use rawler::{
@@ -60,48 +61,39 @@ pub fn get_rating(path: String) -> Option<u32> {
   return None;
 }
 
-pub fn metadat(path: &String) -> Option<Metadata> {
+pub fn metadat(path: &String) -> Result<Metadata> {
   let raw_file = File::open(&path);
 
   if raw_file.is_err() {
-    return None;
+    return Err(anyhow!("File is error"));
   }
 
   let p = PathBuf::from(path.clone());
   let reader = BufReader::new(raw_file.unwrap());
+
   let mut rawfile = RawFile::new(&p, reader);
 
-  let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
-    Ok(decoder) => Some(
-      decoder
-        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
-        .unwrap(),
-    ),
-    Err(error) => {
-      println!("Error reading metadata {}", error.to_string());
-      None
-    }
-  };
+  let decoder = get_decoder(&mut rawfile)?;
+  let metadata = decoder
+    .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+    .expect("Failed to get metadata");
 
-  match meta {
-    Some(metadata) => Some(Metadata {
-      hash: file_hash(path).unwrap(),
-      name: String::from(p.file_name().unwrap().to_str().unwrap()),
-      path: String::from(p.to_str().unwrap()),
-      width: 0,
-      height: 0,
-      exif: metadata.exif.clone(),
-      rating: metadata
-        .rating
-        .or(get_rating(path.to_string()))
-        .or(Some(0))
-        .unwrap(),
-      make: metadata.make,
-      create_date: metadata.exif.create_date.unwrap(),
-      orientation: metadata.exif.orientation.unwrap(),
-    }),
-    None => None,
-  }
+  Ok(Metadata {
+    hash: file_hash(path).unwrap(),
+    name: String::from(p.file_name().unwrap().to_str().unwrap()),
+    path: String::from(p.to_str().unwrap()),
+    width: 0,
+    height: 0,
+    exif: metadata.exif.clone(),
+    rating: metadata
+      .rating
+      .or(get_rating(path.to_string()))
+      .or(Some(0))
+      .unwrap(),
+    make: metadata.make,
+    create_date: metadata.exif.create_date.unwrap(),
+    orientation: metadata.exif.orientation.unwrap(),
+  })
 }
 
 pub fn file_hash(path: &String) -> Option<String> {

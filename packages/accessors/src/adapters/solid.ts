@@ -17,8 +17,6 @@ export function useAccessor<T extends Accessor<any, any, any, any, any>>(accesso
   const [params, setParams] = createSignal<Partial<(typeof accessor)['params']>>();
 
   accessor.on('data', (data) => {
-    console.log('set', data);
-
     setData(data);
   });
   accessor.on('error', (error) => setError(error));
@@ -26,12 +24,8 @@ export function useAccessor<T extends Accessor<any, any, any, any, any>>(accesso
 
   createEffect(() => {
     if (params) {
-      accessor.setParams(params);
+      accessor.setParams(params());
     }
-  });
-
-  createEffect(() => {
-    console.log('change', data());
   });
 
   return {
