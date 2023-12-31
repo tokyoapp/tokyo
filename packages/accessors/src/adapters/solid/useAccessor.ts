@@ -7,7 +7,7 @@ import { createEffect, createSignal } from 'solid-js';
  * @param params The params as a signal, that will be used to fetch and filter the data.
  */
 
-export function useAccessor<T extends Accessor<any, any, any, any>>(accessorFn: () => T) {
+export function useAccessor<T extends Accessor<any, any, any, any, any>>(accessorFn: () => T) {
   const accessor = accessorFn();
   const [data, setData] = createSignal<ReturnType<(typeof accessor)['processData']>>();
   const [error, setError] = createSignal<string>();

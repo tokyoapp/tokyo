@@ -1,6 +1,6 @@
 import { VirtualContainer } from '@minht11/solid-virtual-container';
 import { IndexEntryMessage } from 'tokyo-proto';
-import { For, createEffect, createSignal, onMount } from 'solid-js';
+import { For, createEffect, createSignal, on, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { createLocationsAccessor, createMetadataAccessor, createIndexAccessor } from 'tokyo-api';
 import Jobs from '../actions/Action.ts';
@@ -14,10 +14,9 @@ import { useAccessor } from '../utils/useAccessor.ts';
 export default function ExplorerView(props: {
   small: boolean;
 }) {
-  // const metadataAccessor = useAccessor(createMetadataAccessor);
+  const indexAccessor = useAccessor(createIndexAccessor);
+  const metadataAccessor = useAccessor(createMetadataAccessor);
   const locationsAccessor = useAccessor(createLocationsAccessor);
-
-  console.log('test');
 
   locationsAccessor.params({
     query: {},
@@ -26,16 +25,16 @@ export default function ExplorerView(props: {
   const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {
-    // explorer.indexAccessor.params({
-    //   query: {
-    //     locations: selectedLocations(),
-    //   },
-    // });
-    // const locs = locations.store;
-    // console.log(locs);
-    // if (selectedLocations().length === 0) {
-    //   setSelectedLocations([locs[0].id]);
-    // }
+    indexAccessor.params({
+      query: {
+        locations: selectedLocations(),
+      },
+    });
+    const locs = locations.store;
+    console.log(locs);
+    if (selectedLocations().length === 0) {
+      setSelectedLocations([locs[0].id]);
+    }
   });
 
   createEffect(() => {
@@ -43,46 +42,64 @@ export default function ExplorerView(props: {
     console.log('locations', d);
   });
 
-  // createEffect(
-  //   on(
-  //     () => [...explorer.locationsAccessor.data()],
-  //     () => {
-  //       if (selectedLocations().length === 0) {
-  //         const locs = explorer.locationsAccessor.data();
-  //         if (locs[0]) setSelectedLocations([locs[0].id]);
-  //       }
-  //     }
-  //   )
-  // );
+  const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
 
-  // const rows = (width = 4) => {
-  //   const rs = [];
-  //   let currRow: any[] = [];
-  //   const items = explorer.stacks[0];
-  //   for (const entry of items) {
-  //     if (currRow.length < width) {
-  //       currRow.push(entry);
-  //     } else {
-  //       rs.push(currRow);
-  //       currRow = [];
-  //       currRow.push(entry);
-  //     }
-  //   }
-  //   rs.push(currRow);
+  function tags(entry: IndexEntryMessage) {
+    const arr = entry.tags.filter(Boolean).map((tag) => {
+      return [].find((t) => t.id === tag)?.name || tag;
+    });
+    return arr || [];
+  }
 
-  //   return rs;
-  // };
+  createEffect(() => {
+    const entires = selection();
+    if (entires[0]) openFile(entires[0]);
+  });
 
-  // createEffect(() => {
-  //   if (props.small) {
-  //     setTimeout(() => {
-  //       const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
-  //       if (ele) {
-  //         ele.scrollIntoView({ inline: 'center', block: 'center' });
-  //       }
-  //     }, 100);
-  //   }
-  // });
+  async function openFile(entry: IndexEntryMessage) {
+    Jobs.run('open', [entry]);
+  }
+
+  createEffect(
+    on(
+      () => [...locationsAccessor.data()],
+      () => {
+        if (selectedLocations().length === 0) {
+          const locs = locationsAccessor.data();
+          if (locs[0]) setSelectedLocations([locs[0].id]);
+        }
+      }
+    )
+  );
+
+  const rows = (width = 4) => {
+    const rs = [];
+    let currRow: any[] = [];
+    const items = indexAccessor.data().stacks[0];
+    for (const entry of items) {
+      if (currRow.length < width) {
+        currRow.push(entry);
+      } else {
+        rs.push(currRow);
+        currRow = [];
+        currRow.push(entry);
+      }
+    }
+    rs.push(currRow);
+
+    return rs;
+  };
+
+  createEffect(() => {
+    if (props.small) {
+      setTimeout(() => {
+        const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
+        if (ele) {
+          ele.scrollIntoView({ inline: 'center', block: 'center' });
+        }
+      }, 100);
+    }
+  });
 
   const [viewSettings, setViewSettings] = createStore({
     showRating: true,
@@ -90,31 +107,29 @@ export default function ExplorerView(props: {
     showTags: false,
   });
 
-  // const onKeyDown = (e: KeyboardEvent) => {
-  //   const parent = (e.target as HTMLElement).parentNode;
-  //   const children = [...(parent?.children || [])];
+  const onKeyDown = (e: KeyboardEvent) => {
+    const parent = (e.target as HTMLElement).parentNode;
+    const children = [...(parent?.children || [])];
 
-  //   switch (e.key) {
-  //     case 'ArrowLeft':
-  //       const prevChild = children[children.indexOf(e.target) - 1];
-  //       prevChild.focus();
-  //       prevChild.click();
-  //       break;
-  //     case 'ArrowRight':
-  //       const nextChild = children[children.indexOf(e.target) + 1];
-  //       nextChild.focus();
-  //       nextChild.click();
-  //       break;
-  //   }
-  // };
+    switch (e.key) {
+      case 'ArrowLeft':
+        const prevChild = children[children.indexOf(e.target) - 1];
+        prevChild.focus();
+        prevChild.click();
+        break;
+      case 'ArrowRight':
+        const nextChild = children[children.indexOf(e.target) + 1];
+        nextChild.focus();
+        nextChild.click();
+        break;
+    }
+  };
 
   let scrollTargetElement!: HTMLDivElement;
 
-  // const image = (id: string) => {
-  //   return explorer.metadataAccessor.data().find((item) => item.id === id)?.thumbnail;
-  // };
-
-  return <div></div>;
+  const image = (id: string) => {
+    return metadataAccessor.data()?.find((item) => item.id === id)?.thumbnail;
+  };
 
   return (
     <div
@@ -127,7 +142,7 @@ export default function ExplorerView(props: {
             <Combobox
               multiple
               class="px-1 pointer-events-auto hidden @5xl:block"
-              items={explorer.locationsAccessor.data.map((lib) => {
+              items={locationsAccessor.data().map((lib) => {
                 return {
                   id: lib.id,
                   value: `${lib.name}`,
@@ -149,7 +164,7 @@ export default function ExplorerView(props: {
                       e.stopImmediatePropagation();
                       e.stopPropagation();
                       e.preventDefault();
-                      Jobs.run('create', [explorer.locationsAccessor.data]);
+                      Jobs.run('create', [locationsAccessor.data()]);
                     }}
                     class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
                   >
@@ -160,9 +175,7 @@ export default function ExplorerView(props: {
               }
             >
               {selectedLocations().map((loc) => {
-                return (
-                  <span>{explorer.locationsAccessor.data.find((l) => l.id === loc)?.name}, </span>
-                );
+                return <span>{locationsAccessor.data().find((l) => l.id === loc)?.name}, </span>;
               })}
               <Icon class="pl-2" name="expand-down" />
             </Combobox>
@@ -171,21 +184,21 @@ export default function ExplorerView(props: {
               title="Sort"
               multiple
               onInput={(values) => {
-                explorer.setSorting({
-                  created: values.includes('created'),
-                  rating: values.includes('rating'),
+                indexAccessor.params({
+                  sortCreated: values.includes('created'),
+                  sortRating: values.includes('rating'),
                 });
               }}
               items={[
                 {
                   id: 'created',
                   value: t('explorer_sort_created'),
-                  checked: explorer.sortSettings[0].created,
+                  checked: indexAccessor.params()?.sortCreated || false,
                 },
                 {
                   id: 'rating',
                   value: t('explorer_sort_rating'),
-                  checked: explorer.sortSettings[0].rating,
+                  checked: indexAccessor.params()?.sortRating || false,
                 },
               ]}
             >
@@ -202,9 +215,11 @@ export default function ExplorerView(props: {
             </FilterCombobox> */}
 
             <Stars
-              value={explorer.filterSettings[0].rating}
+              value={indexAccessor.params()?.filterRating || 0}
               onChange={(v) =>
-                explorer.setFilter({ rating: v === explorer.filterSettings[0].rating ? 0 : v })
+                indexAccessor.params({
+                  filterRating: v === indexAccessor.params()?.filterRating ? 0 : v,
+                })
               }
             />
 
@@ -256,20 +271,25 @@ export default function ExplorerView(props: {
                       return (
                         <Thumbnail
                           onMount={() => {
-                            const ids = explorer.metadataAccessor.params.ids[0]();
+                            const ids = metadataAccessor.params()?.query?.ids || [];
                             const id = items[0].path;
-                            if (!ids.includes(id))
-                              explorer.metadataAccessor.params.ids[1]([...ids, items[0].path]);
+                            if (!ids.includes(id)) {
+                              metadataAccessor.params({
+                                query: {
+                                  ids: [...ids, items[0].path],
+                                },
+                              });
+                            }
                           }}
                           class="flex-1 pb-1"
-                          selected={explorer.selection[0].includes(items[0])}
+                          selected={selection().includes(items[0])}
                           number={(props.index * 4 + i() + 1).toString()}
                           name={viewSettings.showName}
-                          tags={viewSettings.showTags ? explorer.tags(items[0]) : []}
+                          tags={viewSettings.showTags ? tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
                           image={image(items[0].path)}
                           onClick={() => {
-                            explorer.setSelection(items);
+                            setSelection(items);
                           }}
                           items={items}
                         />
@@ -283,10 +303,10 @@ export default function ExplorerView(props: {
         </div>
       </div>
 
-      {explorer.selection[0].length > 0 ? (
+      {selection().length > 0 ? (
         <div class="z-40 absolute bottom-3 left-3 right-3 w-auto">
           <div class="bg-zinc-900 px-3 py-1 border-zinc-800 border rounded-md text-sm">
-            <span class="text-zinc-700">{explorer.selection[0][0].name}</span>
+            <span class="text-zinc-700">{selection()[0].name}</span>
             <span class="px-2" />
             <button type="button" class="p-1 px-2">
               <Icon name="close" />

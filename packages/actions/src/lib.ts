@@ -203,18 +203,3 @@ export class Actions {
 
 // window.addEventListener('keydown', (e) => Actions.handleKey(e, true));
 window.addEventListener('keyup', (e) => Actions.handleKey(e, false));
-
-//
-
-() => {
-  Actions.register('delete', {
-    title: 'Delete',
-    icon: 'bin',
-    description: 'Deletes current selection',
-    async run() {
-      console.log('value');
-    },
-  });
-
-  Actions.run('delete');
-};

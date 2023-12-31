@@ -8,6 +8,9 @@ export function createIndexAccessor() {
       query: {
         locations: string[];
       };
+      filterRating: number;
+      sortRating: boolean;
+      sortCreated: boolean;
     }) {
       return {
         _type: MessageType.Index,
@@ -19,15 +22,8 @@ export function createIndexAccessor() {
       if (msg._type === MessageType.Index) return msg;
     },
 
-    filter: ([data]) => {
-      const filterSettings = createStore({
-        rating: 0,
-      });
-
-      const sortSettings = createStore({
-        rating: false,
-        created: true,
-      });
+    filter: ([data], params) => {
+      console.log(params);
 
       function setIndex(index: IndexEntryMessage[]) {
         this.index[1](index);
@@ -59,11 +55,6 @@ export function createIndexAccessor() {
             created: options.created,
           });
         }
-      }
-
-      function setSelection(entires: IndexEntryMessage[]) {
-        this.selection[1](entires);
-        if (entires[0]) this.openFile(entires[0]);
       }
 
       const sort = {
@@ -116,17 +107,6 @@ export function createIndexAccessor() {
         }
         return true;
       };
-
-      async function openFile(entry: IndexEntryMessage) {
-        Jobs.run('open', [entry]);
-      }
-
-      function tags(entry: IndexEntryMessage) {
-        const arr = entry.tags.filter(Boolean).map((tag) => {
-          return [].find((t) => t.id === tag)?.name || tag;
-        });
-        return arr || [];
-      }
 
       return data;
     },
