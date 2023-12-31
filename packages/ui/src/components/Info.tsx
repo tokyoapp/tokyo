@@ -2,7 +2,7 @@ import '@atrium-ui/mono/expandable';
 import { createMetadataAccessor } from 'tokyo-api';
 import { t } from 'tokyo-locales';
 import Icon from './Icon.tsx';
-import { useAccessor } from '../utils/useAccessor.ts';
+import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -72,11 +72,11 @@ export default function Info(props: {
   };
 
   const meta = () => {
-    return metadata.data[0];
+    return metadata.data();
   };
 
   const exif = () => {
-    const meta = metadata.data[0];
+    const meta = metadata.data();
     return JSON.parse(meta?.exif);
   };
 

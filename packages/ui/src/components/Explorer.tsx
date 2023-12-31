@@ -9,7 +9,7 @@ import Combobox from './Combobox.tsx';
 import Icon from './Icon.tsx';
 import Rating from './Rating.tsx';
 import { Stars } from './Stars.tsx';
-import { useAccessor } from '../utils/useAccessor.ts';
+import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
 
 export default function ExplorerView(props: {
   small: boolean;
@@ -30,16 +30,15 @@ export default function ExplorerView(props: {
         locations: selectedLocations(),
       },
     });
-    const locs = locations.store;
-    console.log(locs);
-    if (selectedLocations().length === 0) {
+    const locs = locationsAccessor.data() || [];
+    if (selectedLocations().length === 0 && locs.length > 0) {
       setSelectedLocations([locs[0].id]);
     }
   });
 
   createEffect(() => {
-    const d = locationsAccessor.data();
-    console.log('locations', d);
+    const locs = locationsAccessor.data() || [];
+    console.log('locations', locs);
   });
 
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
@@ -62,10 +61,10 @@ export default function ExplorerView(props: {
 
   createEffect(
     on(
-      () => [...locationsAccessor.data()],
+      () => [...(locationsAccessor.data() || [])],
       () => {
-        if (selectedLocations().length === 0) {
-          const locs = locationsAccessor.data();
+        const locs = locationsAccessor.data() || [];
+        if (selectedLocations().length === 0 && locs.length > 0) {
           if (locs[0]) setSelectedLocations([locs[0].id]);
         }
       }
@@ -75,7 +74,8 @@ export default function ExplorerView(props: {
   const rows = (width = 4) => {
     const rs = [];
     let currRow: any[] = [];
-    const items = indexAccessor.data().stacks[0];
+    // const items = indexAccessor.data().stacks[0];
+    const items = [];
     for (const entry of items) {
       if (currRow.length < width) {
         currRow.push(entry);
@@ -142,15 +142,17 @@ export default function ExplorerView(props: {
             <Combobox
               multiple
               class="px-1 pointer-events-auto hidden @5xl:block"
-              items={locationsAccessor.data().map((lib) => {
-                return {
-                  id: lib.id,
-                  value: `${lib.name}`,
-                  get checked() {
-                    return selectedLocations().includes(lib.id);
-                  },
-                };
-              })}
+              items={
+                locationsAccessor.data()?.map((lib) => {
+                  return {
+                    id: lib.id,
+                    value: `${lib.name}`,
+                    get checked() {
+                      return selectedLocations().includes(lib.id);
+                    },
+                  };
+                }) || []
+              }
               title={'Library'}
               onInput={(values) => {
                 setSelectedLocations(values);
@@ -175,7 +177,7 @@ export default function ExplorerView(props: {
               }
             >
               {selectedLocations().map((loc) => {
-                return <span>{locationsAccessor.data().find((l) => l.id === loc)?.name}, </span>;
+                return <span>{locationsAccessor.data()?.find((l) => l.id === loc)?.name}, </span>;
               })}
               <Icon class="pl-2" name="expand-down" />
             </Combobox>

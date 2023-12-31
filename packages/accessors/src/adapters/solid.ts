@@ -9,12 +9,18 @@ import { createEffect, createSignal } from 'solid-js';
 
 export function useAccessor<T extends Accessor<any, any, any, any, any>>(accessorFn: () => T) {
   const accessor = accessorFn();
-  const [data, setData] = createSignal<ReturnType<(typeof accessor)['processData']>>();
+  const [data, setData] = createSignal<
+    Awaited<ReturnType<(typeof accessor)['processData']>> | undefined
+  >();
   const [error, setError] = createSignal<string>();
   const [pending, setPending] = createSignal<boolean>();
-  const [params, setParams] = createSignal<(typeof accessor)['params']>();
+  const [params, setParams] = createSignal<Partial<(typeof accessor)['params']>>();
 
-  accessor.on('data', (data) => setData(data));
+  accessor.on('data', (data) => {
+    console.log('set', data);
+
+    setData(data);
+  });
   accessor.on('error', (error) => setError(error));
   accessor.on('pending', (pending) => setPending(pending));
 
@@ -24,10 +30,17 @@ export function useAccessor<T extends Accessor<any, any, any, any, any>>(accesso
     }
   });
 
+  createEffect(() => {
+    console.log('change', data());
+  });
+
   return {
     data,
     error,
     pending,
-    params: setParams,
+    params(p?: ReturnType<typeof params>) {
+      if (p) setParams(p);
+      return params();
+    },
   };
 }
