@@ -8,6 +8,7 @@ use rawler::{
   RawFile,
 };
 use serde::{Deserialize, Serialize};
+use std::time::Instant;
 use std::{fs::File, io::BufReader, path::Path};
 
 pub fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
@@ -75,12 +76,12 @@ impl Edits {
       exposure: 0.4,
       contrast: 0.03,
       temperature: 0.15,
-      tint: -0.1,
+      tint: 0.0,
       highlights: -0.22,
       shadows: 0.15,
       blacks: 0.0,
       whites: 0.0,
-      vibrancy: 0.4,
+      vibrancy: 0.0,
       saturation: 0.0,
       texture: 0.1,
       curve_tone: vec![],
@@ -117,6 +118,30 @@ fn contrast(rgb: [f32; 3], contrast: f32) -> [f32; 3] {
   color
 }
 
+fn saturation(color: [f32; 3], saturation: f32) -> [f32; 3] {
+  let [r, g, b] = color;
+
+  let sat = 0.3 * r + 0.59 * g + 0.11 * b;
+
+  [
+    sat + (1.0 + saturation) * (r - sat),
+    sat + (1.0 + saturation) * (g - sat),
+    sat + (1.0 + saturation) * (b - sat),
+  ]
+}
+
+fn vibrancy(color: [f32; 3], vibrancy: f32) -> [f32; 3] {
+  let [r, g, b] = color;
+
+  let sat = 0.3 * r + 0.59 * g + 0.11 * b;
+
+  [
+    sat + (1.0 + vibrancy * sat) * (r - sat),
+    sat + (1.0 + vibrancy * sat) * (g - sat),
+    sat + (1.0 + vibrancy * sat) * (b - sat),
+  ]
+}
+
 /**
  * Color temperature acording to CIE 1960 color space
  */
@@ -141,6 +166,7 @@ pub fn process(
   source: ImageBuffer<Rgb<f32>, Vec<f32>>,
   paramters: &Edits,
 ) -> ImageBuffer<Rgb<f32>, Vec<f32>> {
+  let start = Instant::now();
   println!("process");
 
   let mut source = source;
@@ -165,13 +191,12 @@ pub fn process(
 
     aces = exposure(aces.clone().into(), paramters.exposure).into();
     aces = contrast(aces.clone().into(), paramters.contrast).into();
-
     // highlights
     // shadows
     // blacks
     // whites
-    // vibrancy
-    // saturation
+    aces = vibrancy(aces.clone().into(), paramters.vibrancy).into();
+    aces = saturation(aces.clone().into(), paramters.saturation).into();
 
     let conversion_target = kolor::ColorConversion::new(working_colorspace, target_colorspace);
     let linear_srgb = conversion_target.convert(aces);
@@ -184,7 +209,8 @@ pub fn process(
     out[2] = srgb_out[2];
   }
 
-  println!("done");
+  let duration = start.elapsed();
+  println!("done in {}ms", duration.as_millis());
 
   return source;
 }

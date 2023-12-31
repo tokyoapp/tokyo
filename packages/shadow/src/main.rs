@@ -9,7 +9,7 @@ pub fn main() {
 pub fn process_image(file: &str, output: &str) {
   let image = get_image(&Path::new(&file)).expect("Failed to get image");
 
-  let resized = image.resize(1024, 1024, FilterType::Lanczos3);
+  let resized = image.resize(2048, 2048, FilterType::Lanczos3);
   let img = process(resized.to_rgb32f(), &Edits::new());
 
   DynamicImage::ImageRgb16(DynamicImage::ImageRgb32F(img).to_rgb16())
