@@ -69,17 +69,19 @@ export default function ExplorerView(props: {
   const rows = (width = 4) => {
     const rs = [];
     let currRow: any[] = [];
-    // const items = indexAccessor.data().stacks[0];
-    const items = [];
-    for (const entry of items) {
-      if (currRow.length < width) {
-        currRow.push(entry);
-      } else {
-        rs.push(currRow);
-        currRow = [];
-        currRow.push(entry);
+    const items = indexAccessor.data();
+
+    if (items)
+      for (const entry of items) {
+        if (currRow.length < width) {
+          currRow.push(entry);
+        } else {
+          rs.push(currRow);
+          currRow = [];
+          currRow.push(entry);
+        }
       }
-    }
+
     rs.push(currRow);
 
     return rs;
@@ -356,18 +358,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {props.image
             ? props.items.slice(0, 3).map((item, i) => {
-                return (
-                  <div
-                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+              return (
+                <div
+                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                  >
-                    {props.image}
-                  </div>
-                );
-              })
+                >
+                  {props.image}
+                </div>
+              );
+            })
             : null}
           {!props.image ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>

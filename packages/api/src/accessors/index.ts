@@ -1,6 +1,7 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
 import Worker from '../Worker.js';
+import { IndexEntryMessage } from 'tokyo-proto';
 
 export function createIndexAccessor() {
   return new Accessor([Worker], {
@@ -25,39 +26,7 @@ export function createIndexAccessor() {
     },
 
     filter: ([data], params) => {
-      console.log(params, data);
-
-      function setIndex(index: IndexEntryMessage[]) {
-        this.index[1](index);
-        const stacks = this.stack(index.filter(this.filterItems).sort(this.sortItems));
-        this.stacks[1](stacks);
-      }
-
-      function setFilter(options: {
-        rating: number;
-      }) {
-        if (options.rating != null) {
-          this.filterSettings[1]({
-            rating: options.rating,
-          });
-        }
-      }
-
-      function setSorting(options: {
-        rating: boolean;
-        created: boolean;
-      }) {
-        if (options.rating != null) {
-          this.sortSettings[1]({
-            rating: options.rating,
-          });
-        }
-        if (options.created != null) {
-          this.sortSettings[1]({
-            created: options.created,
-          });
-        }
-      }
+      const items = data.data.index;
 
       const sort = {
         rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
@@ -97,20 +66,20 @@ export function createIndexAccessor() {
         let score = 0;
         if (itemA && itemB) {
           score =
-            (this.sortSettings[0].created ? this.sort.created(itemA, itemB) : 0) +
-            (this.sortSettings[0].rating ? this.sort.rating(itemA, itemB) : 0);
+            (params?.sortCreated ? sort.created(itemA, itemB) : 0) +
+            (params?.sortRating ? sort.rating(itemA, itemB) : 0);
         }
         return score;
       };
 
       const filterItems = (item: IndexEntryMessage) => {
-        if (this.filterSettings[0].rating && item.rating < this.filterSettings[0].rating) {
+        if (params?.filterRating && item.rating < params?.filterRating) {
           return false;
         }
         return true;
       };
 
-      return data;
+      return stack(items.filter(filterItems).sort(sortItems));
     },
   });
 }
