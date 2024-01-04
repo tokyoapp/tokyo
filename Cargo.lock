@@ -3497,7 +3497,7 @@ checksum = "f2ff9a1f06a88b01621b7ae906ef0211290d1c8a168a15542486a8f61c0833b9"
 [[package]]
 name = "rawler"
 version = "0.6.0"
-source = "git+https://github.com/luckydye/dnglab?rev=2f2520f#2f2520f36384c3ca60fb2d4069bd6189edd3d9f9"
+source = "git+https://github.com/luckydye/dnglab?rev=4aafb2e#4aafb2e3a4456200a9ecb08e84454a57b1bfe32d"
 dependencies = [
  "async-trait",
  "backtrace",

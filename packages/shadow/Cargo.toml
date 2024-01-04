@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-rawler = { git = "https://github.com/luckydye/dnglab", rev = "2f2520f" }
+rawler = { git = "https://github.com/luckydye/dnglab", rev = "4aafb2e" }
 tokio = "1.32.0"
 image = "0.24.7"
 anyhow = "1.0.75"
