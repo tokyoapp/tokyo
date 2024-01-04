@@ -18,20 +18,14 @@ The desktop and mobile app is built on Tauri, a lightweight Rust framework for b
 
 ## Development
 
-Used tools and versions are pinned in [.rtx.toml](./.rtx.toml).
+Used tools and versions are pinned in [.mise.toml](./.mise.toml). The will automatically be installed on setup if [mise](https://github.com/jdx/mise) is installed.
 
 Requirements:
 
+- [task](https://taskfile.dev/)
 - [bun](https://bun.sh/)
 - [rust](https://rustup.rs/)
-- [task](https://taskfile.dev/)
 - [protoc](https://grpc.io/docs/protoc-installation/)
-
-All can automatically be installed using [RTX](https://github.com/jdx/rtx) with:
-
-```sh
-rtx install
-```
 
 #### Running the desktop app:
 

@@ -41,7 +41,7 @@ tasks:
     desc: Install dependencies
     dir: "."
     sources:
-      - .rtx.toml
+      - .mise.toml
       - bun.lockb
       - package.json
       - Cargo.toml
@@ -54,7 +54,7 @@ tasks:
       - target/**
     cmds:
       - cp -n .env.example .env 2> /dev/null || true
-      - rtx install 2> /dev/null || true
+      - mise install 2> /dev/null || true
       - task: codegen
       - bun install
       - cargo install cargo-watch

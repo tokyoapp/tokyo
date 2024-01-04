@@ -15,7 +15,7 @@ jobs:
       - uses: arduino/setup-task@v1
         with:
           version: 3.30.1
-      - uses: jdx/rtx-action@v1
+      - uses: jdx/mise-action@v1
       # - name: Build the Docker image
       #   run: task build:docker
       # - name: Tag image

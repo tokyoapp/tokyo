@@ -14,14 +14,14 @@ RUN apt install -y libwebkit2gtk-4.1-dev \
     librsvg2-dev \
     unzip
 
-RUN rtx use rust@latest -y
+RUN mise use rust@latest -y
 
 WORKDIR /app
 
 COPY . .
 
-# RUN export PATH=~/.local/share/rtx/shims:$PATH
-RUN rtx install -y
+# RUN export PATH=~/.local/share/mise/shims:$PATH
+RUN mise install -y
 RUN task setup
 RUN task library:install
 
