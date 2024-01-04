@@ -73,7 +73,7 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   for id in ids {
     let dir = lib.find_library(id.clone()).await.unwrap().path;
     println!("[INDEX] {:?}, {:?}", dir, id);
-    let mut index = lib.get_index(dir).await;
+    let mut index = lib.get_index(dir).await.expect("Failed to get index");
     _index.append(&mut index);
   }
 

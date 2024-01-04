@@ -189,16 +189,13 @@ impl Library {
     None
   }
 
-  pub async fn get_index(&self, dir: String) -> Vec<IndexEntry> {
+  pub async fn get_index(&self, dir: String) -> Result<Vec<IndexEntry>> {
     let list = Library::list(dir);
     let mut index: Vec<image::Metadata> = Vec::new();
 
     for path in list {
-      let meta = image::metadat(&path);
-      let _ = meta.is_ok_and(|v| {
-        index.push(v);
-        true
-      });
+      let meta = image::metadat(&path)?;
+      index.push(meta);
     }
 
     let lib = Arc::new(Mutex::new(self));
@@ -227,8 +224,7 @@ impl Library {
       }
     });
 
-    let rs = join_all(idx).await;
-    rs
+    Ok(join_all(idx).await)
   }
 
   pub async fn add_file(&self, hash: String, rating: i32) {
