@@ -1,11 +1,8 @@
 use anyhow::{anyhow, Result};
 use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
-use rawler::{
-  analyze::extract_thumbnail_pixels,
-  decoders::{RawDecodeParams, RawMetadata},
-  get_decoder, RawFile,
-};
+use rawler::decoders::{RawDecodeParams, RawMetadata};
+use rawler::{analyze::extract_thumbnail_pixels, get_decoder, imgop::develop::RawDevelop, RawFile};
 use std::io::Cursor;
 use std::{
   fs::File,
@@ -72,8 +69,8 @@ pub fn metadat(path: &String) -> Result<Metadata> {
   let reader = BufReader::new(raw_file.unwrap());
 
   let mut rawfile = RawFile::new(&p, reader);
-
   let decoder = get_decoder(&mut rawfile)?;
+
   let metadata = decoder
     .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
     .expect("Failed to get metadata");

@@ -75,7 +75,8 @@ export class RemoteLibrary {
 
     switch (type) {
       case message.error: {
-        throw new Error('Error response, ' + JSON.stringify(message));
+        console.error(new Error(`Error response, ${JSON.stringify(message)}`));
+        break;
       }
       case message.index: {
         if (message.index) {
@@ -149,6 +150,22 @@ export class RemoteLibrary {
     this.send(msg);
   }
 
+  retryTimeoutDuration = 1000;
+  retryTimeout: number | undefined = undefined;
+
+  retry(host: string) {
+    console.log('[WS] Retrying in 1 second');
+
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+    }
+
+    this.retryTimeout = setTimeout(() => {
+      this.connect(host);
+      this.retryTimeout = undefined;
+    }, this.retryTimeoutDuration);
+  }
+
   connect(host: string) {
     console.log('worker connecting to', host);
 
@@ -164,44 +181,45 @@ export class RemoteLibrary {
       }
 
       this.backlog = [];
+
+      const rx = new ReadableStream<Blob | DataView>({
+        start(controller) {
+          ws.onmessage = (msg) => {
+            controller.enqueue(msg.data);
+          };
+        },
+      });
+
+      rx.pipeThrough(
+        new TransformStream<Blob | DataView, library.Message>({
+          async transform(msg, controller) {
+            let buf;
+            if (msg instanceof Blob) {
+              buf = await (msg as Blob).arrayBuffer();
+            } else {
+              buf = msg.buffer;
+            }
+
+            const message = library.Message.decode(new Uint8Array(buf));
+            controller.enqueue(message);
+          },
+        })
+      ).pipeTo(
+        new WritableStream({
+          write(message) {
+            for (const listener of self.messageListeners) {
+              listener(message);
+            }
+          },
+        })
+      );
     };
     ws.onerror = (err) => {
-      console.error('[WS] Error: ', err);
+      console.error('[WS] Connection error: ', err);
+      this.retry(host);
     };
 
-    const rx = new ReadableStream<Blob | DataView>({
-      start(controller) {
-        ws.onmessage = (msg) => {
-          controller.enqueue(msg.data);
-        };
-      },
-    });
-
     this.ws = ws;
-
-    rx.pipeThrough(
-      new TransformStream<Blob | DataView, library.Message>({
-        async transform(msg, controller) {
-          let buf;
-          if (msg instanceof Blob) {
-            buf = await (msg as Blob).arrayBuffer();
-          } else {
-            buf = msg.buffer;
-          }
-
-          const message = library.Message.decode(new Uint8Array(buf));
-          controller.enqueue(message);
-        },
-      })
-    ).pipeTo(
-      new WritableStream({
-        write(message) {
-          for (const listener of self.messageListeners) {
-            listener(message);
-          }
-        },
-      })
-    );
   }
 }
 

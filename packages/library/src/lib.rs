@@ -194,8 +194,12 @@ impl Library {
     let mut index: Vec<image::Metadata> = Vec::new();
 
     for path in list {
-      let meta = image::metadat(&path)?;
-      index.push(meta);
+      let meta = image::metadat(&path);
+      if let Ok(meta) = meta {
+        index.push(meta);
+      } else {
+        println!("Failed to get metadata for {}", path);
+      }
     }
 
     let lib = Arc::new(Mutex::new(self));

@@ -151,7 +151,7 @@ async fn handle_socket_message(msg: ClientMessage) -> Result<ws::Message> {
   if msg.has_postmeta() {
     let file = &msg.postmeta().file;
     let rating = msg.postmeta().rating.unwrap();
-    lib.set_rating(file.clone(), rating).await;
+    lib.set_rating(file.clone(), rating).await?;
 
     let mut msg = schema::Message::new();
     msg.id = msg.id;
@@ -192,22 +192,38 @@ pub async fn handle_socket(mut socket: WebSocket) {
     let msg = schema::ClientMessage::parse_from_bytes(&data);
 
     if let Ok(msg) = msg {
-      let ws = sender.clone();
+      let sender = sender.clone();
       // let db = db.clone();
 
       tokio::spawn(async move {
         let lib = &Library::new().await;
         lib.init().await;
 
-        let message = handle_socket_message(msg)
-          .await
-          .expect("Error handling message");
+        let message = handle_socket_message(msg).await;
 
-        ws.lock()
-          .await
-          .send(message.clone())
-          .await
-          .expect("Error sending message");
+        if message.is_err() {
+          let mut error_message = schema::Message::new();
+          error_message.error = Some(true);
+          error_message.message = Some("Something went wrong".to_string());
+
+          sender
+            .lock()
+            .await
+            .send(ws::Message::Binary(
+              error_message
+                .write_to_bytes()
+                .expect("Filed to write error message."),
+            ))
+            .await
+            .expect("Error sending message");
+        } else if let Ok(message) = message {
+          sender
+            .lock()
+            .await
+            .send(message.clone())
+            .await
+            .expect("Error sending message");
+        }
       });
     } else {
       let mut error_message = schema::Message::new();

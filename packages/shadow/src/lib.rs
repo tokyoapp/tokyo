@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use image::{DynamicImage, ImageBuffer};
 use image::{Pixel, Rgb};
+use rawler::imgop::develop::RawDevelop;
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
   get_decoder,
@@ -29,23 +30,21 @@ pub fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
 
   let rawimage = decoder.raw_image(&mut rawfile, params, false)?;
 
-  if let Ok(params) = rawimage.develop_params() {
-    let (srgbf, dim) = raw::develop_raw_srgb(&rawimage.data, &params).unwrap();
-    // spits out a srg gamma 2.4 image
+  let dev = RawDevelop::default();
+  let mut img = dev
+    .develop_intermediate(&rawimage)
+    .unwrap()
+    .to_dynamic_image()
+    .unwrap();
+  // spits out a srg gamma 2.4 image
 
-    let mut img =
-      DynamicImage::ImageRgb32F(ImageBuffer::from_raw(dim.w as u32, dim.h as u32, srgbf).unwrap());
+  img = match metadata.unwrap().exif.orientation.unwrap() {
+    5 | 6 => img.rotate90(),
+    7 | 8 => img.rotate270(),
+    _ => img,
+  };
 
-    img = match metadata.unwrap().exif.orientation.unwrap() {
-      5 | 6 => img.rotate90(),
-      7 | 8 => img.rotate270(),
-      _ => img,
-    };
-
-    return Ok(img);
-  }
-
-  Err(anyhow!("Invalid image"))
+  return Ok(img);
 }
 
 /**
