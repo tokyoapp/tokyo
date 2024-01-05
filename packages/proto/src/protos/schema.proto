@@ -19,7 +19,7 @@ message IndexEntryMessage {
   repeated string tags = 7;
 }
 
-message MetadataMessage {
+message MetadataEntryMessage {
   string hash = 1;
   string name = 2;
   string create_date = 3;
@@ -31,6 +31,10 @@ message MetadataMessage {
   int32 orientation = 9;
   bytes thumbnail = 10;
   repeated string tags = 11;
+}
+
+message MetadataMessage {
+  repeated MetadataEntryMessage entries = 1;
 }
 
 message ImageMessage {
@@ -82,7 +86,7 @@ message RequestLibraryIndex {
 message RequestLocations {}
 
 message RequestMetadata {
-  string file = 1;
+  repeated string file = 1;
 }
 
 message RequestImage {

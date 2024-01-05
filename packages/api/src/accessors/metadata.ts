@@ -43,7 +43,7 @@ export function createMetadataAccessor() {
 
         return proto.ClientMessage.create({
           meta: proto.RequestMetadata.create({
-            file: ids[0],
+            file: ids,
           }),
         });
       }
@@ -62,12 +62,8 @@ export function createMetadataAccessor() {
           };
         };
 
-        // const items = Promise.all(
-        //   msg.data.map(entry)
-        // );
-        // return items;
-
-        return [await entry(msg.data)];
+        const items = Promise.all(msg.data.entries.map(entry));
+        return items;
       }
     },
 

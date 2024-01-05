@@ -87,9 +87,9 @@ impl Into<schema::IndexEntryMessage> for IndexEntry {
   }
 }
 
-impl Into<schema::MetadataMessage> for MetadataEntry {
-  fn into(self) -> schema::MetadataMessage {
-    let mut _msg = schema::MetadataMessage::new();
+impl Into<schema::MetadataEntryMessage> for MetadataEntry {
+  fn into(self) -> schema::MetadataEntryMessage {
+    let mut _msg = schema::MetadataEntryMessage::new();
     _msg.hash = self.hash;
     _msg.name = self.name;
     _msg.create_date = self.create_date;

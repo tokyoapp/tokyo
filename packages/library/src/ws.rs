@@ -10,6 +10,7 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokyo_proto::schema::MetadataEntryMessage;
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
 
@@ -28,12 +29,19 @@ struct OkResponse {
   ok: bool,
 }
 
-async fn metadata(lib: &Library, file: &String) -> schema::Message {
-  let meta = lib.metadata(file.clone()).await;
+async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
   let mut msg = schema::Message::new();
-  if let Some(metadata) = meta {
-    msg.set_metadata(metadata.into());
+  let mut entires_msg = schema::MetadataMessage::new();
+
+  for f in file {
+    let meta = lib.metadata(f.clone()).await;
+    if let Some(metadata) = meta {
+      let entry: MetadataEntryMessage = metadata.into();
+      entires_msg.entries.push(entry);
+    }
   }
+
+  msg.set_metadata(entires_msg);
   return msg;
 }
 
@@ -199,6 +207,7 @@ pub async fn handle_socket(mut socket: WebSocket) {
         let lib = &Library::new().await;
         lib.init().await;
 
+        // TODO: streamed responses
         let message = handle_socket_message(msg).await;
 
         if message.is_err() {
