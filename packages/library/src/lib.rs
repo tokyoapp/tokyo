@@ -4,7 +4,6 @@ mod image;
 mod images;
 mod ws;
 
-use ::image::imageops::FilterType;
 use anyhow::Result;
 use axum::extract::WebSocketUpgrade;
 use axum::routing::get;
@@ -13,7 +12,6 @@ use db::LibraryDatabase;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
-use std::path::Path;
 use std::sync::Arc;
 use sysinfo::DiskExt;
 use sysinfo::SystemExt;

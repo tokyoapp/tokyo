@@ -157,7 +157,7 @@ export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage
            */
           transform: async (msg, controller) => {
             if (msg._type === 'error') {
-              console.error('ohno an error, this should be handled!', msg.error);
+              console.error('ohno an error, this should be handled!', msg);
 
               if (msg.error) {
                 this.onError(msg.error);

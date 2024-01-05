@@ -1,6 +1,7 @@
 import RemoteLibrary from './api/RemoteLibrary.ts?worker';
 
 import * as Comlink from 'comlink';
+import { MessageType } from './lib.ts';
 
 export default {
   stream() {
@@ -10,20 +11,18 @@ export default {
     const wrappedWorker = Comlink.wrap<typeof import('./api/RemoteLibrary.ts').default>(worker);
 
     worker.onerror = (err) => {
-      console.error('Error creating worker');
+      console.error('Error in worker:', err);
     };
 
     wrappedWorker.connect(url);
 
-    let controller: ReadableStreamDefaultController<any>;
-
-    const read = new ReadableStream({
+    const read = new ReadableStream<{ _type: MessageType }>({
       start(ctlr) {
-        controller = ctlr;
-
         wrappedWorker.onMessage(
           Comlink.proxy((msg) => {
-            controller.enqueue(msg);
+            console.log(msg);
+
+            ctlr.enqueue(msg);
           })
         );
       },
@@ -31,16 +30,7 @@ export default {
 
     const write = new WritableStream({
       write(chunk) {
-        switch (chunk._type) {
-          case 'locations':
-            wrappedWorker.fetchLocations();
-            break;
-          case 'index':
-            wrappedWorker.fetchIndex(chunk.locations);
-            break;
-          default:
-            throw new Error(`Request message "${chunk._type}" not handled.`);
-        }
+        wrappedWorker.send(chunk);
       },
     });
 

@@ -2,6 +2,7 @@ import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
 import Worker from '../Worker.js';
 import { IndexEntryMessage } from 'tokyo-proto';
+import * as proto from 'tokyo-proto';
 
 export function createIndexAccessor() {
   return new Accessor([Worker], {
@@ -14,10 +15,15 @@ export function createIndexAccessor() {
       sortCreated: boolean;
     }) {
       if (params?.query) {
-        return {
-          _type: MessageType.Index,
-          locations: params.query.locations,
-        };
+        return proto.ClientMessage.create({
+          index: proto.RequestLibraryIndex.create({
+            ids: params.query.locations,
+          }),
+        });
+        // return {
+        //   _type: MessageType.Index,
+        //   locations: params.query.locations,
+        // };
       }
     },
 

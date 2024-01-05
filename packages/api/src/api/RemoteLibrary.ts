@@ -2,152 +2,56 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'tokyo-proto';
-import { ClientAPIMessage, RequestMessage } from '../lib';
+import { MessageType } from '../lib.ts';
 
-let msg_count = 1;
+const messageKeyToType = {
+  error: MessageType.Error,
+  list: MessageType.Locations,
+  index: MessageType.Index,
+  metadata: MessageType.Metadata,
+};
 
 export class RemoteLibrary {
   ws!: WebSocket;
 
   messageListeners = new Set<(arg: library.Message) => void>();
 
-  public async onMessage(callback: (arg: ClientAPIMessage) => void, id?: number) {
+  public async onMessage(callback: (arg: any) => void, id?: number) {
     const listener = async (msg: library.Message) => {
       if (id !== undefined && id !== msg.id) {
         return;
       }
 
-      const handledMessage = await this.handleMessage(msg);
-      if (handledMessage) {
-        callback(handledMessage);
+      for (const key in msg) {
+        if (msg[key] !== undefined) {
+          callback({
+            _type: messageKeyToType[key] || key,
+            data: msg[key],
+          });
+          return;
+        }
       }
+
+      callback({
+        _type: MessageType.Error,
+        message: 'Message not handled',
+      });
     };
     this.messageListeners.add(listener);
     return () => this.messageListeners.delete(listener);
   }
 
-  public fetchLocations() {
-    const msg = library.ClientMessage.create({
-      id: ++msg_count,
-      locations: library.RequestLocations.create({}),
-    });
-
-    const res = new Promise<ClientAPIMessage>(async (resolve) => {
-      const unsub = await this.onMessage(async (msg) => {
-        unsub();
-        resolve(msg);
-      }, msg.id);
-    });
-
-    this.send(msg);
-
-    return res;
-  }
-
-  public fetchIndex(locations: string[]): Promise<ClientAPIMessage> {
-    const msg = library.ClientMessage.create({
-      id: ++msg_count,
-      index: library.RequestLibraryIndex.create({
-        ids: locations,
-      }),
-    });
-
-    const res = new Promise<ClientAPIMessage>(async (resolve) => {
-      const unsub = await this.onMessage(async (msg) => {
-        unsub();
-        resolve(msg);
-      }, msg.id);
-    });
-
-    this.send(msg);
-
-    return res;
-  }
-
-  private async handleMessage(message: library.Message): Promise<ClientAPIMessage | undefined> {
-    const type =
-      message.error ||
-      message.image ||
-      message.index ||
-      message.list ||
-      message.metadata ||
-      message.system;
-
-    switch (type) {
-      case message.error: {
-        console.error(new Error(`Error response, ${JSON.stringify(message)}`));
-        break;
-      }
-      case message.index: {
-        if (message.index) {
-          return {
-            _type: 'index',
-            data: message.index,
-          };
-        }
-        break;
-      }
-      case message.list: {
-        if (message.list) {
-          return {
-            _type: 'locations',
-            data: message.list.libraries,
-          };
-        }
-        break;
-      }
-      case message.metadata: {
-        // const file = message.metadata?.hash;
-        // const thumbnail = message.metadata?.thumbnail;
-        // if (file && thumbnail) {
-        //   const blob = new Blob([thumbnail]);
-        //   storage.writeTemp(file, await blob.arrayBuffer());
-        // }
-        //
-        if (message.metadata) {
-          return {
-            _type: 'metadata',
-            data: message.metadata,
-          };
-        }
-        break;
-      }
-      case message.image: {
-        return {
-          _type: 'image',
-          data: message.image,
-        };
-      }
-      case message.system: {
-        return {
-          _type: 'system',
-          data: message.system,
-        };
-      }
-    }
-
-    return undefined;
-  }
-
-  backlog = [];
+  backlog: library.ClientMessage[] = [];
 
   send(msg: library.ClientMessage) {
+    console.log('RemoteLibrary.send', msg);
+
     if (this.ws.readyState !== this.ws.OPEN) {
       this.backlog.push(msg);
     } else {
       const req = library.ClientMessage.encode(msg).finish();
       this.ws.send(req);
     }
-  }
-
-  postLocation() {
-    const msg = library.ClientMessage.create({
-      create: library.CreateLibraryMessage.create({
-        name: 'Desktop',
-        path: '/Users/tihav/Desktop',
-      }),
-    });
-    this.send(msg);
   }
 
   retryTimeoutDuration = 1000;

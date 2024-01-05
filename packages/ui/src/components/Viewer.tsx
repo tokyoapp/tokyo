@@ -1,5 +1,5 @@
 import { ParentProps, createEffect, createSignal, on, onMount } from 'solid-js';
-import { DynamicImage } from '../image/DynamicImage.ts';
+import { DynamicImage } from 'tokyo-api/src/DynamicImage.ts';
 // import storage from '../services/ClientStorage.worker';
 // import * as viewport from 'tokyo-viewport';
 import Button from './Button.tsx';

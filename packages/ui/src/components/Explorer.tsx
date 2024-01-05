@@ -56,9 +56,9 @@ export default function ExplorerView(props: {
 
   createEffect(
     on(
-      () => [...(locationsAccessor.data() || [])],
+      () => [...(locationsAccessor.data()?.libraries || [])],
       () => {
-        const locs = locationsAccessor.data() || [];
+        const locs = locationsAccessor.data()?.libraries || [];
         if (selectedLocations().length === 0 && locs.length > 0) {
           if (locs[0]) setSelectedLocations([locs[0].id]);
         }
@@ -124,10 +124,6 @@ export default function ExplorerView(props: {
 
   let scrollTargetElement!: HTMLDivElement;
 
-  const image = (id: string) => {
-    return metadataAccessor.data()?.find((item) => item.id === id)?.thumbnail;
-  };
-
   return (
     <div
       class="@container bg-[#111] relative grid grid-rows-[auto_1fr] overflow-auto h-full"
@@ -140,7 +136,7 @@ export default function ExplorerView(props: {
               multiple
               class="px-1 pointer-events-auto hidden @5xl:block"
               items={
-                locationsAccessor.data()?.map((lib) => {
+                locationsAccessor.data()?.libraries?.map((lib) => {
                   return {
                     id: lib.id,
                     value: `${lib.name}`,
@@ -163,7 +159,7 @@ export default function ExplorerView(props: {
                       e.stopImmediatePropagation();
                       e.stopPropagation();
                       e.preventDefault();
-                      Jobs.run('create', [locationsAccessor.data()]);
+                      Jobs.run('create', [locationsAccessor.data()?.libraries]);
                     }}
                     class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
                   >
@@ -174,7 +170,11 @@ export default function ExplorerView(props: {
               }
             >
               {selectedLocations().map((loc) => {
-                return <span>{locationsAccessor.data()?.find((l) => l.id === loc)?.name}, </span>;
+                return (
+                  <span>
+                    {locationsAccessor.data()?.libraries.find((l) => l.id === loc)?.name},{' '}
+                  </span>
+                );
               })}
               <Icon class="pl-2" name="expand-down" />
             </Combobox>
@@ -286,7 +286,10 @@ export default function ExplorerView(props: {
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? tags(items[0]) : []}
                           rating={viewSettings.showRating ? items[0].rating : undefined}
-                          image={image(items[0].path)}
+                          image={
+                            metadataAccessor.data()?.find((item) => item.hash === items[0].hash)
+                              ?.thumbnail
+                          }
                           onClick={() => {
                             setSelection(items);
                           }}
@@ -358,18 +361,18 @@ function Thumbnail(props: ThumbProps) {
         <div class="w-full h-full flex items-center justify-center">
           {props.image
             ? props.items.slice(0, 3).map((item, i) => {
-              return (
-                <div
-                  class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
+                return (
+                  <div
+                    class={`thumbnail-image absolute top-0 left-0 w-full h-full flex items-center justify-center
                   ${i === 0 ? 'z-30 shadow-md' : ''}
                   ${i === 1 ? 'z-20 ml-2 mt-2' : ''}
                   ${i === 2 ? 'z-10 ml-4 mt-4' : ''}
                 `}
-                >
-                  {props.image}
-                </div>
-              );
-            })
+                  >
+                    {props.image}
+                  </div>
+                );
+              })
             : null}
           {!props.image ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
         </div>

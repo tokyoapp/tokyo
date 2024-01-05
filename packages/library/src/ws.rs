@@ -204,7 +204,7 @@ pub async fn handle_socket(mut socket: WebSocket) {
         if message.is_err() {
           let mut error_message = schema::Message::new();
           error_message.error = Some(true);
-          error_message.message = Some("Something went wrong".to_string());
+          error_message.message = Some(message.err().unwrap().to_string());
 
           sender
             .lock()

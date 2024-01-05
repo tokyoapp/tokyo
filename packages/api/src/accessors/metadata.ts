@@ -1,6 +1,8 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
+import * as proto from 'tokyo-proto';
 import Worker from '../Worker.js';
+import { DynamicImage } from '../DynamicImage.js';
 
 export function createMetadataAccessor() {
   const loadImage = (src: string): Promise<Image> => {
@@ -35,29 +37,37 @@ export function createMetadataAccessor() {
       },
       cache
     ) {
-      if (params?.query)
-        return {
-          _type: MessageType.Thumbnails,
-          ids: params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id)),
-        };
+      if (params?.query) {
+        // const ids = params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id));
+        const ids = params.query.ids;
+
+        return proto.ClientMessage.create({
+          meta: proto.RequestMetadata.create({
+            file: ids[0],
+          }),
+        });
+      }
     },
 
     async handleMessage(msg) {
-      if (msg._type === MessageType.Locations) {
-        const items = Promise.all(
-          msg.data.map(async (entry) => {
-            const buff = new Uint8Array(entry.metadata.thumbnail);
-            const blob = new Blob([buff]);
-            return {
-              ...entry.metadata,
-              thumbnail: await makeThumbnail(blob, entry.metadata),
-              id: entry.id,
-              source_id: msg.source_id,
-            };
-          })
-        );
+      if (msg._type === MessageType.Metadata) {
+        const entry = async (entry) => {
+          const buff = new Uint8Array(entry.thumbnail);
+          const blob = new Blob([buff]);
+          return {
+            ...entry,
+            thumbnail: await makeThumbnail(blob, entry),
+            id: entry.id,
+            source_id: msg.source_id,
+          };
+        };
 
-        return items;
+        // const items = Promise.all(
+        //   msg.data.map(entry)
+        // );
+        // return items;
+
+        return [await entry(msg.data)];
       }
     },
 

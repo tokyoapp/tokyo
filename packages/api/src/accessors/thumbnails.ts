@@ -1,6 +1,7 @@
 import { MessageType } from '../lib.js';
 import { Accessor } from '../Accessor.js';
 import Worker from '../Worker.js';
+import { DynamicImage } from '../DynamicImage.js';
 
 export function createThumbnailAccessor(hosts: string[]) {
   const makeThumbnail = (blob?: Blob) => {
