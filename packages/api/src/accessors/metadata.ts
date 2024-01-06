@@ -29,28 +29,21 @@ export function createMetadataAccessor() {
   };
 
   return new Accessor([Worker], {
-    createRequest(
-      params: {
-        query: {
-          ids: string[];
-        };
-      },
-      cache
-    ) {
-      if (params?.query) {
-        // const ids = params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id));
-        const ids = params.query.ids;
-
-        return proto.ClientMessage.create({
+    createRequest(query: {
+      ids: string[];
+    }) {
+      // const ids = params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id));
+      return [
+        proto.ClientMessage.create({
           meta: proto.RequestMetadata.create({
-            file: ids,
+            file: query.ids,
           }),
-        });
-      }
+        }),
+      ];
     },
 
-    async handleMessage(msg) {
-      if (msg._type === MessageType.Metadata) {
+    async transform(msg) {
+      if (msg.type === MessageType.Metadata) {
         const entry = async (entry) => {
           const buff = new Uint8Array(entry.thumbnail);
           const blob = new Blob([buff]);
@@ -67,6 +60,6 @@ export function createMetadataAccessor() {
       }
     },
 
-    filter: ([data]) => data,
+    compute: ([data]) => data,
   });
 }

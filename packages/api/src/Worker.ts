@@ -1,14 +1,16 @@
+import * as Comlink from 'comlink';
+import * as library from 'tokyo-proto';
 import RemoteLibrary from './api/RemoteLibrary.ts?worker';
 
-import * as Comlink from 'comlink';
-import { MessageType } from './lib.ts';
+type Remote = typeof import('./api/RemoteLibrary.ts').default;
+type Message = ReturnType<Remote['parseMessage']>;
 
 export default {
   stream() {
     const url = '127.0.0.1:8000/ws';
 
     const worker = new RemoteLibrary();
-    const wrappedWorker = Comlink.wrap<typeof import('./api/RemoteLibrary.ts').default>(worker);
+    const wrappedWorker = Comlink.wrap<Remote>(worker);
 
     worker.onerror = (err) => {
       console.error('Error in worker:', err);
@@ -16,19 +18,17 @@ export default {
 
     wrappedWorker.connect(url);
 
-    const read = new ReadableStream<{ _type: MessageType }>({
+    const read = new ReadableStream<Message>({
       start(ctlr) {
         wrappedWorker.onMessage(
           Comlink.proxy((msg) => {
-            console.log(msg);
-
             ctlr.enqueue(msg);
           })
         );
       },
     });
 
-    const write = new WritableStream({
+    const write = new WritableStream<library.ClientMessage>({
       write(chunk) {
         wrappedWorker.send(chunk);
       },

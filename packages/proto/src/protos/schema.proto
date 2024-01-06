@@ -62,7 +62,7 @@ message SystemInfo {
 }
 
 message Message {
-  optional int32 id = 1;
+  optional string nonce = 1;
   optional string message = 2;
   optional bool error = 3;
   oneof msg {
@@ -100,7 +100,7 @@ message PostFileMetadata {
 }
 
 message ClientMessage {
-  optional int32 id = 1;
+  optional string nonce = 1;
   oneof msg {
     CreateLibraryMessage create = 5;
     RequestLibraryIndex index = 6;

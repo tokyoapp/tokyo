@@ -2,8 +2,6 @@
 
 version: "3"
 
-dotenv: [".env"]
-
 includes:
   server:
     dir: apps/server
@@ -75,6 +73,9 @@ tasks:
 
   dev:
     desc: Run desktop app with server
+    env:
+      DATABASE: "file:///tmp/tokyo.db"
+      TURSO_AUTH_TOKEN: ""
     deps: [setup]
     cmds:
       - task --parallel server:dev app:dev

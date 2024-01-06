@@ -97,30 +97,31 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   return index_msg;
 }
 
-async fn handle_socket_message(msg: ClientMessage) -> Result<ws::Message> {
+async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
   let lib = &Library::new().await;
 
-  if msg.has_locations() {
+  if req.has_locations() {
     let mut msg = schema::Message::new();
-    msg.id = msg.id;
+    msg.nonce = req.nonce;
     msg.set_list(get_location_list(lib).await);
     let packet = ws::Message::Binary(msg.write_to_bytes().unwrap());
     return Ok(packet);
   }
 
-  if msg.has_index() {
-    let index = msg.index();
-    println!("Requested Index {:?}", index);
+  if req.has_index() {
     let mut msg = schema::Message::new();
-    msg.id = msg.id;
+    msg.nonce = req.nonce.clone();
+
+    let index = req.index();
+    println!("Requested Index {:?}", index);
     msg.set_index(get_index_msg(lib, index.ids.clone()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
     return Ok(packet);
   }
 
-  if msg.has_create() {
-    let create = msg.create();
+  if req.has_create() {
+    let create = req.create();
     let _cr = lib
       .create_library(create.name.to_string(), create.path.to_string())
       .await;
@@ -134,35 +135,35 @@ async fn handle_socket_message(msg: ClientMessage) -> Result<ws::Message> {
     }
   }
 
-  if msg.has_meta() {
-    let file = &msg.meta().file;
+  if req.has_meta() {
+    let file = &req.meta().file;
     let mut msg = metadata(lib, file).await;
-    msg.id = msg.id;
+    msg.nonce = req.nonce;
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
     return Ok(packet);
   }
 
-  if msg.has_image() {
-    let file = &msg.image().file; // should be the hash,
+  if req.has_image() {
+    let file = &req.image().file; // should be the hash,
     let image = cached_thumb(file).await; // then this doesnt need to look for the hash itself
     let mut img_msg = schema::ImageMessage::new();
     img_msg.image = image;
     let mut msg = schema::Message::new();
-    msg.id = msg.id;
+    msg.nonce = req.nonce;
     msg.set_image(img_msg);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
     return Ok(packet);
   }
 
-  if msg.has_postmeta() {
-    let file = &msg.postmeta().file;
-    let rating = msg.postmeta().rating.unwrap();
+  if req.has_postmeta() {
+    let file = &req.postmeta().file;
+    let rating = req.postmeta().rating.unwrap();
     lib.set_rating(file.clone(), rating).await?;
 
     let mut msg = schema::Message::new();
-    msg.id = msg.id;
+    msg.nonce = req.nonce;
     msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);

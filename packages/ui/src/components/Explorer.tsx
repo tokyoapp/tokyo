@@ -18,18 +18,17 @@ export default function ExplorerView(props: {
   const metadataAccessor = useAccessor(createMetadataAccessor);
   const locationsAccessor = useAccessor(createLocationsAccessor);
 
-  locationsAccessor.params({
-    query: {},
-  });
+  locationsAccessor.query({});
 
   const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {
-    indexAccessor.params({
-      query: {
-        locations: selectedLocations(),
-      },
+    indexAccessor.query({
+      locations: selectedLocations(),
     });
+  });
+
+  createEffect(() => {
     const locs = locationsAccessor.data() || [];
     if (selectedLocations().length === 0 && locs.length > 0) {
       setSelectedLocations([locs[0].id]);
@@ -270,13 +269,11 @@ export default function ExplorerView(props: {
                       return (
                         <Thumbnail
                           onMount={() => {
-                            const ids = metadataAccessor.params()?.query?.ids || [];
+                            const ids = metadataAccessor.query()?.ids || [];
                             const id = items[0].path;
                             if (!ids.includes(id)) {
-                              metadataAccessor.params({
-                                query: {
-                                  ids: [...ids, items[0].path],
-                                },
+                              metadataAccessor.query({
+                                ids: [...ids, items[0].path],
                               });
                             }
                           }}
