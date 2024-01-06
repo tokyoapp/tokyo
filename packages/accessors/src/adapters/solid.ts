@@ -7,14 +7,12 @@ import { createEffect, createSignal } from 'solid-js';
  * @param params The params as a signal, that will be used to fetch and filter the data.
  */
 
-export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(accessorFn: () => T) {
+export function useAccessor<T extends Accessor>(accessorFn: () => T) {
   const accessor = accessorFn();
-  const [data, setData] = createSignal<
-    Awaited<ReturnType<(typeof accessor)['compute']>> | undefined
-  >();
+  const [data, setData] = createSignal<Awaited<ReturnType<T['compute']>> | undefined>();
 
-  type Query = Partial<(typeof accessor)['query']>;
-  type Params = Partial<(typeof accessor)['params']>;
+  type Query = Partial<T['query']>;
+  type Params = Partial<T['params']>;
 
   const [pending, setPending] = createSignal<boolean>();
   const [params, setParams] = createSignal<Query>();

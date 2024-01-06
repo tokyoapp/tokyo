@@ -41,12 +41,12 @@ type AccessorState = {
  * Responsible for handling the communication with the API, caching that data and keeping the data up to date with the given parameters.
  */
 export class Accessor<
-  Query,
-  Params,
-  HandledMessage,
-  Data,
-  RequestMessage extends { nonce?: string },
-  ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState },
+  Query = any,
+  Params = any,
+  HandledMessage = any,
+  Data = any,
+  RequestMessage extends { nonce?: string } = any,
+  ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState } = any,
 > {
   private _query?: Query;
   private _params?: Params;
