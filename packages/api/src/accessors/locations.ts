@@ -1,5 +1,5 @@
 import { MessageType } from '../lib.js';
-import { Accessor } from '../Accessor.js';
+import { Accessor } from 'tokyo-accessors';
 import Worker from '../Worker.js';
 import * as proto from 'tokyo-proto';
 
@@ -11,12 +11,6 @@ export function createLocationsAccessor() {
       return proto.ClientMessage.create({
         locations: proto.RequestLocations.create({}),
       });
-      // return {
-      //   _type: MessageType.MutateLocations,
-      //   path: params.path,
-      //   name: params.name,
-      // };
-
       // Create a library
       // library.ClientMessage.create({
       //   create: library.CreateLibraryMessage.create({

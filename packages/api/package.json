@@ -5,6 +5,7 @@
   "dependencies": {
     "comlink": "^4.4.1",
     "tokyo-proto": "workspace:",
+    "tokyo-accessors": "workspace:",
     "tauri-plugin-tokyo": "workspace:"
   }
 }

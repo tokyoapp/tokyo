@@ -6,23 +6,16 @@ export type AccessorParams = {
    */
   query: Record<string, number | string | undefined | string[] | number[] | Date>;
 
-  params: {
-    [key: string]: any;
-  };
+  mutation?: Record<string, number | string | undefined | string[] | number[] | Date>;
+
+  [key: string]: any;
 };
 
 /**
  * This class is responsible for handling the communication with the API, caching that data and keeping the data up to date with the given parameters.
  */
-export class Accessor<
-  Params extends AccessorParams,
-  Cache,
-  Data,
-  RequestMessage extends { _nonce: number | string; _type: number | string },
-  ResponseMessage,
-> {
-  public query?: Params['query'];
-  public params?: Params['params'];
+export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage, ResponseMessage> {
+  public params?: Params;
 
   public error?: Error;
 
@@ -35,50 +28,10 @@ export class Accessor<
   private _cache: (Cache | undefined)[] = [];
 
   /**
-   * Set the query for this accessor. This will trigger a new request to the API when needed.
+   * Set the params for this accessor. This will trigger a new request to the API when needed.
    */
-  public setQuery(query: Params['query']) {
-    const req = this._strategy.createRequest(query, this.params);
-
-    if (Array.isArray(req)) {
-      throw new Error('Multiple requests are not supported yet');
-    }
-
-    const messageId = 0;
-    if (req) {
-      const cacheKey = JSON.stringify(req);
-
-      if (cacheKey !== this._cacheKey[messageId]) {
-        this.params = query;
-        this._cacheKey[messageId] = cacheKey;
-        this._cache[messageId] = undefined;
-
-        this.setPending(true);
-
-        req._nonce = messageId;
-
-        const writer = this.tx.getWriter();
-        writer.write(req);
-        writer.releaseLock();
-
-        this.dispatch('request', query);
-      } else if (this._cache[messageId] && query !== this.params) {
-        this.params = query;
-
-        this.dispatch('data', this.processData());
-        this.setPending(false);
-      }
-    }
-    this.params = query;
-
-    this.clearError();
-  }
-
-  /**
-   * Set the params for this accessor. This won't trigger requests.
-   */
-  public setParams(params: Params['params']) {
-    const req = this._strategy.createRequest(params);
+  public setParams(params: Params) {
+    const req = this._strategy.createRequest(params, this._cache);
 
     if (Array.isArray(req)) {
       throw new Error('Multiple requests are not supported yet');
@@ -158,7 +111,7 @@ export class Accessor<
   }
 
   private dispatch(event: 'data', payload?: Data): void;
-  private dispatch(event: 'request', payload?: Params['query']): void;
+  private dispatch(event: 'request', payload?: Params): void;
   private dispatch(event: 'pending', payload?: undefined): void;
   private dispatch(event: 'error', payload?: undefined): void;
   private dispatch(event: string, payload?: undefined) {
@@ -177,18 +130,17 @@ export class Accessor<
        * Create request message from params.
        */
       createRequest(
-        query?: Params['query'],
-        params?: Params['params']
+        params: Params,
+        cache: (Cache | undefined)[]
       ): RequestMessage | RequestMessage[] | undefined;
       /**
        * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
        */
-      handleMessage(msg: ResponseMessage, params: Params['params']): Cache | undefined;
-      // TODO: handle message and filter functions should be replaced be cache layers. A dynamic pipeline of data processing, where each layer can be cached.
+      handleMessage(msg: ResponseMessage, params?: Params): Cache | undefined;
       /**
        * Filtered cached data before returning it to the user.
        */
-      filter: (cache: (Cache | undefined)[], params: Params['params']) => Data;
+      filter: (cache: (Cache | undefined)[], params?: Params) => Data;
     }
   ) {
     // If a client connects after a request has been made, the request will run into the void.
@@ -205,7 +157,7 @@ export class Accessor<
            */
           transform: async (msg, controller) => {
             if (msg._type === 'error') {
-              console.error('ohno an error, this should be handled!', msg.error);
+              console.error('ohno an error, this should be handled!', msg);
 
               if (msg.error) {
                 this.onError(msg.error);

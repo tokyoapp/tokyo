@@ -40,7 +40,7 @@ export interface LibraryInterface {
   stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
 }
 
-export { Accessor } from './Accessor.ts';
+export { Accessor } from 'tokyo-accessors';
 
 export { createIndexAccessor } from '../src/accessors/index.ts';
 export { createLocationsAccessor } from '../src/accessors/locations.ts';

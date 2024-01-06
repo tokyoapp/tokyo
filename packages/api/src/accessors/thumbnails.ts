@@ -1,5 +1,5 @@
 import { MessageType } from '../lib.js';
-import { Accessor } from '../Accessor.js';
+import { Accessor } from 'tokyo-accessors';
 import Worker from '../Worker.js';
 import { DynamicImage } from '../DynamicImage.js';
 
