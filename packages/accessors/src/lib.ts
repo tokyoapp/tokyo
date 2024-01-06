@@ -1,101 +1,223 @@
 import * as Comlink from 'comlink';
 
-export type AccessorParams = {
-  /**
-   * The query parameters that will be used to fetch the data.
-   */
-  query: Record<string, number | string | undefined | string[] | number[] | Date>;
+/**
+ * [x] Create request message(s) from params.
+ * [x] Handle responses and associate them to the correct request.
+ * [x] Cache data by specific request params for multiple requests.
+ * [x] Request creation can check the cached params for overlap and exclude already cached data from the request. (outside)
+ * [x] Filter or transform cached data before returning it to the user.
+ * [x] Invalidate cache on mutation (and when outdated (~1h old) -- not implemented)
+ * [x] Abort signaling (ignore responses from aborted requests)
+ * [x] Internal message types, fetch states, progress
+ * [x] Accessors can be chained for a layered caching approach -- if the query changes before the request is finished, abort (ignore incoming response) the request and start a new one; only handle responses the have a nonce included in cacheKeys
+ * [ ] TODO: Handle compute errors
+ * [ ] TODO: Clear cache entries that were not accessed for a while to save memory
+ * [ ] TODO: Stream params to the accessor
+ */
 
-  mutation?: Record<string, number | string | undefined | string[] | number[] | Date>;
+const CACHE_MAX_AGE = 1000 * 60 * 60; // 1h
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+const CACHE = new Map<string, any>();
+const CACHE_TIMESTAMPS = new Map<string, number>();
 
-  [key: string]: any;
+class MultiplexStream<T> extends WritableStream<T> {
+  constructor(write: WritableStream) {
+    super({
+      write: async (msg) => {
+        const writer = write.getWriter();
+        writer.write(msg);
+        writer.releaseLock();
+      },
+    });
+  }
+}
+
+type AccessorState = {
+  progress?: number;
+  message?: string;
 };
 
 /**
- * This class is responsible for handling the communication with the API, caching that data and keeping the data up to date with the given parameters.
+ * Responsible for handling the communication with the API, caching that data and keeping the data up to date with the given parameters.
  */
-export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage, ResponseMessage> {
-  public params?: Params;
+export class Accessor<
+  Query,
+  Params,
+  HandledMessage,
+  Data,
+  RequestMessage extends { nonce?: string },
+  ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState },
+> {
+  private _query?: Query;
+  private _params?: Params;
 
-  public error?: Error;
+  public state: AccessorState = {};
+
+  public get query() {
+    return this._query;
+  }
+
+  public get params() {
+    return this._params;
+  }
+
+  private cacheKeys: string[] = [];
 
   /**
-   * Indicates if the accessor is currently fetching or filtering data.
+   * Set the query for this accessor. This will trigger a new request to the API for an invalid cache.
    */
-  public pending = false;
+  public set query(query: Query | undefined) {
+    // shallow check, skip if queries are the same
+    if (!query || query === this._query) return;
 
-  private _cacheKey: string[] = [];
-  private _cache: (Cache | undefined)[] = [];
+    const requests = this._strategy.createRequest(query);
+    if (requests === undefined) return;
 
-  /**
-   * Set the params for this accessor. This will trigger a new request to the API when needed.
-   */
-  public setParams(params: Params) {
-    const req = this._strategy.createRequest(params, this._cache);
+    this._query = query;
 
-    if (Array.isArray(req)) {
-      throw new Error('Multiple requests are not supported yet');
-    }
+    const now = Date.now();
 
-    const messageId = 0;
-    if (req) {
-      const cacheKey = JSON.stringify(req);
+    let cached = true;
 
-      if (cacheKey !== this._cacheKey[messageId]) {
-        this.params = params;
-        this._cacheKey[messageId] = cacheKey;
-        this._cache[messageId] = undefined;
+    for (const req of requests) {
+      const id = requests.indexOf(req);
 
-        this.setPending(true);
+      const cacheKey = `${id}.${JSON.stringify(requests)}`;
+      this.cacheKeys[id] = cacheKey;
 
-        req._nonce = messageId;
+      const timestamp = CACHE_TIMESTAMPS.get(cacheKey);
+      const age = timestamp ? now - timestamp : now;
 
-        const writer = this.tx.getWriter();
-        writer.write(req);
-        writer.releaseLock();
-
-        this.dispatch('request', params);
-      } else if (this._cache[messageId] && params !== this.params) {
-        this.params = params;
-
-        this.dispatch('data', this.processData());
-        this.setPending(false);
+      if (CACHE.has(cacheKey) && age <= CACHE_MAX_AGE) {
+        // skip request if cache is valid
+        continue;
       }
+
+      cached = false;
+
+      CACHE.delete(cacheKey);
+      CACHE_TIMESTAMPS.delete(cacheKey);
+
+      req.nonce = cacheKey;
+      this.request(req);
     }
-    this.params = params;
 
-    this.clearError();
+    if (cached) {
+      this.compute();
+    }
   }
 
-  public mutate(mutation: any) {
-    const writer = this.tx.getWriter();
-    writer.write(mutation);
-    writer.releaseLock();
+  /**
+   * Set the params for this accessor. This will only trigger a recompute, never a new request.
+   */
+  public set params(params: Params | undefined) {
+    // shallow check, skip if params are the same
+    if (!params || params === this._params) return;
+    this._params = params;
+
+    this.compute();
   }
 
-  public write = new WritableStream<Params>({
-    write: (msg) => {
-      console.log(msg);
+  private _pending = false;
 
-      // this.setParams(msg);
-    },
-  });
+  private set pending(pending: boolean) {
+    this._pending = pending;
+    this.emit('pending');
+  }
+
+  public get pending() {
+    return this._pending;
+  }
+
+  constructor(
+    clients: {
+      stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
+    }[],
+    private _strategy: {
+      /**
+       * Create request message from params.
+       */
+      createRequest(query: Query): RequestMessage[] | undefined;
+      /**
+       * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
+       */
+      transform(msg: ResponseMessage): HandledMessage | undefined;
+      /**
+       * Filter / Transform / Aggregate cached data.
+       */
+      compute: (data: (HandledMessage | undefined)[], params: Params | undefined) => Data;
+    }
+  ) {
+    // If a client connects after a request has been made, the request will run into the void.
+    //  Not a concern here, since we connect in the constructor.
+    for (const client of clients) {
+      this.stream(client);
+    }
+  }
 
   /**
    * Returns the filtered data if available.
    */
-  public processData() {
-    if (this._strategy.filter) {
-      return this._strategy.filter(this._cache, this.params);
+  public compute() {
+    const data: (HandledMessage | undefined)[] = [];
+
+    for (const key of this.cacheKeys) {
+      data.push(CACHE.get(key));
+    }
+
+    this.emit('data', this._strategy.compute(data, this.params));
+    this.pending = false;
+  }
+
+  private receive = new WritableStream<ResponseMessage>({
+    write: async (msg) => {
+      if (msg.type === 'state') {
+        this.state = Object.assign(this.state, msg.state);
+        this.emit('state', this.state);
+        return;
+      }
+
+      const nonce = msg.nonce; // corresponds to the request message
+
+      if (nonce && this.cacheKeys.includes(nonce)) {
+        const data = await this._strategy.transform(msg);
+
+        CACHE.set(nonce, data);
+        CACHE_TIMESTAMPS.set(nonce, Date.now());
+
+        this.compute();
+      }
+    },
+  });
+
+  private streams: WritableStream<RequestMessage>[] = [];
+
+  private stream(client: {
+    stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
+  }) {
+    const [read, write] = client.stream();
+    this.streams.push(write);
+    read.pipeTo(new MultiplexStream(this.receive));
+  }
+
+  public request(mutation: any) {
+    this.pending = true;
+
+    // replicate the request to all peers
+    for (const stream of this.streams) {
+      const writer = stream.getWriter();
+      writer.write(mutation);
+      writer.releaseLock();
     }
   }
 
   private target = new EventTarget();
 
-  // public on(event: 'data', callback: (payload?: Data) => void): () => void;
-  // public on(event: 'pending', callback: (payload?: undefined) => void): () => void;
-  // public on(event: 'error', callback: (payload?: undefined) => void): () => void;
-  public on(event: 'data' | 'pending' | 'error' | 'request', callback: (payload?: any) => void) {
+  public on(event: 'data', callback: (payload?: Data) => void): () => void;
+  public on(event: 'pending', callback: (payload?: undefined) => void): () => void;
+  public on(event: 'error', callback: (payload?: undefined) => void): () => void;
+  public on(event: 'state', callback: (payload?: AccessorState) => void): () => void;
+  public on(event: string, callback: (payload?: undefined) => void) {
     const listener = ((ev: CustomEvent) => callback(ev.detail)) as EventListener;
 
     this.target.addEventListener(event, listener);
@@ -110,102 +232,10 @@ export class Accessor<Params extends AccessorParams, Cache, Data, RequestMessage
     };
   }
 
-  private dispatch(event: 'data', payload?: Data): void;
-  private dispatch(event: 'request', payload?: Params): void;
-  private dispatch(event: 'pending', payload?: undefined): void;
-  private dispatch(event: 'error', payload?: undefined): void;
-  private dispatch(event: string, payload?: undefined) {
+  private emit(event: 'state', payload?: AccessorState): void;
+  private emit(event: 'data', payload?: Data): void;
+  private emit(event: 'pending', payload?: undefined): void;
+  private emit(event: string, payload?: undefined) {
     this.target.dispatchEvent(new CustomEvent(event, { detail: payload }));
-  }
-
-  private rx: ReadableStream<ResponseMessage>;
-  private tx: WritableStream<RequestMessage>;
-
-  constructor(
-    clients: {
-      stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
-    }[],
-    private _strategy: {
-      /**
-       * Create request message from params.
-       */
-      createRequest(
-        params: Params,
-        cache: (Cache | undefined)[]
-      ): RequestMessage | RequestMessage[] | undefined;
-      /**
-       * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
-       */
-      handleMessage(msg: ResponseMessage, params?: Params): Cache | undefined;
-      /**
-       * Filtered cached data before returning it to the user.
-       */
-      filter: (cache: (Cache | undefined)[], params?: Params) => Data;
-    }
-  ) {
-    // If a client connects after a request has been made, the request will run into the void.
-    //  Not a concern here, since we connect in the constructor.
-    const [read, write] = clients[0].stream(); // TODO: use all clients in the array
-    this.rx = read;
-    this.tx = write;
-
-    this.rx
-      ?.pipeThrough(
-        new TransformStream<ResponseMessage, Cache>({
-          /**
-           * Handle response.
-           */
-          transform: async (msg, controller) => {
-            if (msg._type === 'error') {
-              console.error('ohno an error, this should be handled!', msg);
-
-              if (msg.error) {
-                this.onError(msg.error);
-              }
-            } else {
-              const res = await this._strategy.handleMessage(msg, this.params);
-              if (res) controller.enqueue(res);
-            }
-          },
-        })
-      )
-      ?.pipeThrough(
-        new TransformStream<Cache, Cache>({
-          /**
-           * Cache the prepared data from the api.
-           */
-          transform: async (msg, controller) => {
-            const messageId = msg._nonce ? msg._nonce : 0;
-            this._cache[messageId] = msg;
-            controller.enqueue(msg);
-          },
-        })
-      )
-      .pipeTo(
-        new WritableStream({
-          /**
-           * Handles responses from the api.
-           */
-          write: (msg) => {
-            this.dispatch('data', this.processData());
-            this.setPending(false);
-          },
-        })
-      );
-  }
-
-  private clearError() {
-    this.error = undefined;
-  }
-
-  private onError(err: Error) {
-    this.error = err;
-    this.dispatch('error');
-    this.setPending(false);
-  }
-
-  private setPending(pending: boolean) {
-    this.pending = pending;
-    this.dispatch('pending');
   }
 }

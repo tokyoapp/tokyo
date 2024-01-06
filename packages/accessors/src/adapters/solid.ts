@@ -7,33 +7,39 @@ import { createEffect, createSignal } from 'solid-js';
  * @param params The params as a signal, that will be used to fetch and filter the data.
  */
 
-export function useAccessor<T extends Accessor<any, any, any, any, any>>(accessorFn: () => T) {
+export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(accessorFn: () => T) {
   const accessor = accessorFn();
   const [data, setData] = createSignal<
-    Awaited<ReturnType<(typeof accessor)['processData']>> | undefined
+    Awaited<ReturnType<(typeof accessor)['compute']>> | undefined
   >();
-  const [error, setError] = createSignal<string>();
-  const [pending, setPending] = createSignal<boolean>();
-  const [params, setParams] = createSignal<Partial<(typeof accessor)['params']>>();
 
-  accessor.on('data', (data) => {
-    setData(data);
-  });
-  accessor.on('error', (error) => setError(error));
+  type Query = Partial<(typeof accessor)['query']>;
+  type Params = Partial<(typeof accessor)['params']>;
+
+  const [pending, setPending] = createSignal<boolean>();
+  const [params, setParams] = createSignal<Query>();
+  const [query, setQuery] = createSignal<Params>();
+
+  accessor.on('data', (data) => setData(data));
   accessor.on('pending', (pending) => setPending(pending));
 
   createEffect(() => {
-    if (params) {
-      accessor.setParams(params());
-    }
+    accessor.params = params();
+  });
+
+  createEffect(() => {
+    accessor.query = query();
   });
 
   return {
     data,
-    error,
     pending,
-    params(p?: ReturnType<typeof params>) {
-      if (p) setParams(p);
+    query(value?: Query) {
+      if (value) setQuery(value);
+      return query();
+    },
+    params(value?: Params) {
+      if (value) setParams(value);
       return params();
     },
   };

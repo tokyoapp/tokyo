@@ -24,20 +24,19 @@ export function createThumbnailAccessor(hosts: string[]) {
   };
 
   return new Accessor([Worker], {
-    createRequest(params: {
-      query: {
-        ids: string[];
-      };
+    createRequest(query: {
+      ids: string[];
     }) {
-      if (params.query)
-        return {
-          _type: MessageType.Thumbnails,
-          ids: params.query.ids,
-        };
+      return [
+        {
+          type: MessageType.Thumbnails,
+          ids: query.ids,
+        },
+      ];
     },
 
-    handleMessage(msg) {
-      if (msg._type === MessageType.Locations) {
+    transform(msg) {
+      if (msg.type === MessageType.Locations) {
         const thumbs = msg.data.map((d) => {
           const buff = new Uint8Array(d.data.thumbnail);
           const blob = new Blob([buff]);
@@ -47,6 +46,6 @@ export function createThumbnailAccessor(hosts: string[]) {
       }
     },
 
-    filter: ([data]) => data,
+    compute: ([data]) => data,
   });
 }

@@ -3,3 +3,6 @@ bun = "latest"
 task = "3.32"
 protoc = "21.12"
 rust = "latest"
+
+[env]
+RUST_BACKTRACE = "1"

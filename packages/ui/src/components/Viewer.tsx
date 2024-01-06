@@ -1,14 +1,12 @@
 import { ParentProps, createEffect, createSignal, on, onMount } from 'solid-js';
 import { DynamicImage } from 'tokyo-api/src/DynamicImage.ts';
-// import storage from '../services/ClientStorage.worker';
-// import * as viewport from 'tokyo-viewport';
 import Button from './Button.tsx';
 import Icon from './Icon.tsx';
 import { Stars } from './Stars.tsx';
-import { Notifications } from './notifications/Notifications.ts';
 import { t } from 'tokyo-locales';
-import { createMetadataAccessor } from 'tokyo-api';
+import { createImageAccessor, createMetadataAccessor } from 'tokyo-api';
 import { getImage } from 'tauri-plugin-tokyo';
+import { useAccessor } from 'tokyo-accessors/src/adapters/solid.ts';
 
 const [app, setApp] = createSignal({
   zoom: 1,
@@ -37,6 +35,8 @@ viewportCanvas.style.position = 'absolute';
 export default function Preview(props: { file: any; onClose?: () => void }) {
   const [loading, setLoading] = createSignal(true);
 
+  const [settings] = createSignal({});
+
   let timeout: number;
 
   const resize = () => {
@@ -45,33 +45,23 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
     viewportCanvas.height = parent?.clientHeight * 2;
   };
 
-  let vp: viewport.WebHandle;
-
-  const metadata = createMetadataAccessor();
+  const metadata = useAccessor(createMetadataAccessor);
+  const image = useAccessor(createImageAccessor);
 
   createEffect(async () => {
     const _item = props.file;
 
     clearTimeout(timeout);
 
-    metadata.setParams({
-      query: {
-        ids: [_item.path],
-      },
-    });
-
-    createEffect(() => {
-      const edit = settings();
-      if (vp) {
-        vp.apply_edit(edit);
-      }
+    metadata.query({
+      ids: [_item.path],
     });
 
     createEffect(
       on(
-        () => [...metadata.store, settings()],
+        () => [...(metadata.data() || []), settings()],
         () => {
-          const meta = metadata.store[0];
+          const meta = metadata.data()?.[0];
           if (meta) {
             console.log('Load', _item.path, settings());
 
@@ -113,18 +103,6 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
     );
 
     window.addEventListener('resize', resize);
-
-    viewport
-      .default()
-      .then(async () => {
-        const handle = await viewport.init();
-        vp = handle;
-        return handle;
-      })
-      .catch((err) => {
-        console.error('Viewport Error: ', err);
-        Notifications.error(err.message);
-      });
   });
 
   onMount(() => {

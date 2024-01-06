@@ -16,36 +16,40 @@ export class RemoteLibrary {
 
   messageListeners = new Set<(arg: library.Message) => void>();
 
-  public async onMessage(callback: (arg: any) => void, id?: number) {
+  public async onMessage(callback: (arg: any) => void) {
     const listener = async (msg: library.Message) => {
-      if (id !== undefined && id !== msg.id) {
-        return;
-      }
-
-      for (const key in msg) {
-        if (msg[key] !== undefined) {
-          callback({
-            _type: messageKeyToType[key] || key,
-            data: msg[key],
-          });
-          return;
-        }
-      }
-
-      callback({
-        _type: MessageType.Error,
-        message: 'Message not handled',
-      });
+      callback(this.parseMessage(msg));
     };
     this.messageListeners.add(listener);
     return () => this.messageListeners.delete(listener);
   }
 
+  private emit(message: any) {
+    for (const listener of this.messageListeners) {
+      listener(message);
+    }
+  }
+
+  parseMessage(msg: library.Message) {
+    for (const key in msg) {
+      if (key !== 'nonce' && msg[key] !== undefined) {
+        return {
+          type: messageKeyToType[key] || key,
+          nonce: msg.nonce,
+          data: msg[key],
+        };
+      }
+    }
+
+    return {
+      type: MessageType.Error,
+      message: 'Message not handled',
+    };
+  }
+
   backlog: library.ClientMessage[] = [];
 
   send(msg: library.ClientMessage) {
-    console.log('RemoteLibrary.send', msg);
-
     if (this.ws.readyState !== this.ws.OPEN) {
       this.backlog.push(msg);
     } else {
@@ -73,8 +77,6 @@ export class RemoteLibrary {
   connect(host: string) {
     console.log('worker connecting to', host);
 
-    const self = this;
-
     const ws = new WebSocket(`ws://${host}`);
 
     ws.onopen = () => {
@@ -94,6 +96,7 @@ export class RemoteLibrary {
         },
       });
 
+      // TODO: should transfer (Comlink.transfer) a stream instead of a event listener
       rx.pipeThrough(
         new TransformStream<Blob | DataView, library.Message>({
           async transform(msg, controller) {
@@ -110,10 +113,8 @@ export class RemoteLibrary {
         })
       ).pipeTo(
         new WritableStream({
-          write(message) {
-            for (const listener of self.messageListeners) {
-              listener(message);
-            }
+          write: (message) => {
+            this.emit(message);
           },
         })
       );

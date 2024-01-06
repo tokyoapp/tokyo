@@ -6,33 +6,35 @@ import * as proto from 'tokyo-proto';
 
 export function createIndexAccessor() {
   return new Accessor([Worker], {
-    createRequest(params: {
-      query: {
-        locations: string[];
-      };
-      filterRating: number;
-      sortRating: boolean;
-      sortCreated: boolean;
+    createRequest(query: {
+      locations: string[];
     }) {
-      if (params?.query) {
-        return proto.ClientMessage.create({
+      return [
+        proto.ClientMessage.create({
           index: proto.RequestLibraryIndex.create({
-            ids: params.query.locations,
+            ids: query.locations,
           }),
-        });
-        // return {
-        //   _type: MessageType.Index,
-        //   locations: params.query.locations,
-        // };
+        }),
+      ];
+      // return {
+      //   _type: MessageType.Index,
+      //   locations: params.query.locations,
+      // };
+    },
+
+    transform(msg) {
+      if (msg.type === MessageType.Index) return msg;
+    },
+
+    compute: (
+      [data],
+      params?: {
+        filterRating: number;
+        sortRating: boolean;
+        sortCreated: boolean;
       }
-    },
-
-    handleMessage(msg) {
-      if (msg._type === MessageType.Index) return msg;
-    },
-
-    filter: ([data], params) => {
-      const items = data.data.index;
+    ) => {
+      const items = data?.data.index || [];
 
       const sort = {
         rating: (a: IndexEntryMessage, b: IndexEntryMessage) => {
