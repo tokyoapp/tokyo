@@ -20,6 +20,11 @@ export default function ExplorerView(props: {
 
   locationsAccessor.query({});
 
+  indexAccessor.params({
+    sortCreated: true,
+    sortRating: false,
+  });
+
   const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {

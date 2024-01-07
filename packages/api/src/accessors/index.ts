@@ -41,11 +41,11 @@ export function createIndexAccessor() {
           return +b.rating - +a.rating;
         },
         created: (a: IndexEntryMessage, b: IndexEntryMessage) => {
-          const dateASlice = a.create_date.split(' ');
+          const dateASlice = a.createDate.split(' ');
           dateASlice[0] = dateASlice[0].replaceAll(':', '-');
           const dateA = new Date(dateASlice.join(' '));
 
-          const dateBSlice = b.create_date.split(' ');
+          const dateBSlice = b.createDate.split(' ');
           dateBSlice[0] = dateBSlice[0].replaceAll(':', '-');
           const dateB = new Date(dateBSlice.join(' '));
 
