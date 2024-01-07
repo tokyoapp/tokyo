@@ -7,12 +7,19 @@ use axum::extract::ws;
 use axum::extract::ws::WebSocket;
 use futures::sink::SinkExt;
 use futures::StreamExt;
+use image::imageops::FilterType;
+use image::DynamicImage;
+use image::EncodableLayout;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokyo_proto::schema::MetadataEntryMessage;
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
+use tokyo_shadow::get_image;
+use tokyo_shadow::process;
+use tokyo_shadow::Edits;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -97,6 +104,16 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   return index_msg;
 }
 
+pub async fn edited_image(path: &String) -> Result<DynamicImage> {
+  let image = get_image(&Path::new(path))?;
+
+  let resized = image.resize(2048, 2048, FilterType::Lanczos3);
+  let img = process(resized.to_rgb32f(), &Edits::new());
+  let image = DynamicImage::ImageRgb32F(img);
+
+  Ok(image)
+}
+
 async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
   let lib = &Library::new().await;
 
@@ -146,9 +163,12 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
 
   if req.has_image() {
     let file = &req.image().file; // should be the hash,
-    let image = cached_thumb(file).await; // then this doesnt need to look for the hash itself
     let mut img_msg = schema::ImageMessage::new();
-    img_msg.image = image;
+    let image = edited_image(file).await?;
+    let v = image.to_rgb8().as_bytes().to_vec();
+    img_msg.image = v;
+    img_msg.width = image.width() as i32;
+    img_msg.height = image.height() as i32;
     let mut msg = schema::Message::new();
     msg.nonce = req.nonce;
     msg.set_image(img_msg);

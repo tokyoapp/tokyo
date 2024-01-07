@@ -1,24 +1,33 @@
-import { MessageType } from '../lib.js';
 import { Accessor } from 'tokyo-accessors';
 import Worker from '../Worker.js';
 import * as proto from 'tokyo-proto';
 
 export function createImageAccessor() {
   return new Accessor([Worker], {
-    createRequest(query: unknown) {
+    createRequest(query: { file: string }) {
       return [
         proto.ClientMessage.create({
-          // locations: proto.RequestLocations.create({}),
+          image: proto.RequestImage.create({
+            file: query.file
+          })
         }),
       ];
     },
 
     transform(msg) {
-      if (msg.type === MessageType.Locations) return msg;
+      return msg;
     },
 
     compute([data]) {
-      return data?.data;
+      const img = data?.data;
+
+      if (!img) return;
+
+      return {
+        image: new Uint8Array(img.image?.buffer),
+        width: img?.width,
+        height: img?.height,
+      };
     },
   });
 }

@@ -38,4 +38,5 @@ interface HTMLElementTagNameMap {
   'a-dropdown': any;
   'a-option': any;
   'a-toggle': any;
+  'a-expandable': any;
 }

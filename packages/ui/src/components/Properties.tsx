@@ -28,7 +28,7 @@ function Panel(props: { model: PropertyModel }) {
   const properties = useProperties(props.model, () => Model.properties(props.model));
 
   return (
-    <div class="select-none">
+    <div class="select-none pb-2">
       {properties().map(([name, property], i) => {
         return <PanelProperty property={property} name={name.toString()} />;
       })}
@@ -40,7 +40,7 @@ function PanelProperty(props: { name: string; property: PropertyType }) {
   const { property, name } = props;
 
   return (
-    <div class="grid grid-cols-[1fr] px-2 py-1 text-sm">
+    <div class="grid grid-cols-[1fr] px-2 pt-1 text-sm">
       {property.type === PropertyTag.Float ? (
         <>
           <label class="mr-2 mb-1">
@@ -51,7 +51,7 @@ function PanelProperty(props: { name: string; property: PropertyType }) {
             min={property.attr.min}
             max={property.attr.max}
             value={property.value}
-            class="w-full h-7 text-xs"
+            class="w-full h-6 text-xs"
             onChange={(e) => {
               property.value = parseFloat(e.currentTarget.value);
             }}

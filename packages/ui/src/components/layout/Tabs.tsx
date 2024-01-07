@@ -1,5 +1,6 @@
 import { ParentProps, createSignal } from 'solid-js';
 import Icon from '../ui/Icon.jsx';
+import '@atrium-ui/mono/expandable';
 
 export function Tabs(props: ParentProps) {
   const children = props.children as Element[];
@@ -26,13 +27,15 @@ Tabs.Tab = (props: ParentProps & { title: string; icon: string; open?: boolean }
         <Icon name="chevron-right" class="mr-2" />
       </button>
 
-      <div
+      <a-expandable
+        style="--transition-speed: 0.2s; --animation-easing: cubic-bezier(.07,0,0,1.07);"
         data-tab={props.title}
         data-icon={props.icon}
-        class={`bg-zinc-800 w-full ${open() ? 'block' : 'hidden'}`}
+        class={`bg-zinc-800 w-full`}
+        opened={open() ? 'true' : undefined}
       >
         {props.children}
-      </div>
+      </a-expandable>
     </div>
   );
 };

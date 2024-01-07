@@ -5,7 +5,6 @@ import Icon from './ui/Icon.jsx';
 import { Stars } from './ui/Stars.jsx';
 import { t } from 'tokyo-locales';
 import { createImageAccessor, createMetadataAccessor } from 'tokyo-api';
-import { getImage } from 'tauri-plugin-tokyo';
 import { useAccessor } from 'tokyo-accessors/src/adapters/solid.ts';
 import { Model, PropertyModel } from 'tokyo-properties';
 
@@ -34,13 +33,11 @@ viewportCanvas.style.width = '100%';
 viewportCanvas.style.position = 'absolute';
 
 export default function Preview(props: {
-  models: Record<string, PropertyModel>;
   file: any;
+  models: Rlogrd<string, PropertyModel>;
   onClose?: () => void;
 }) {
   const [loading, setLoading] = createSignal(true);
-
-  const [settings] = createSignal({});
 
   let timeout: number;
 
@@ -72,6 +69,33 @@ export default function Preview(props: {
     })
   );
 
+  const renderImage = (image: { width: number; height: number; image: Uint8Array }) => {
+
+    if (!image) return;
+
+    const img = new DynamicImage();
+    console.log(image);
+    img.fromRaw(image.image, image.width, image.height);
+
+    // if (meta.orientation)
+    //   switch (meta.orientation) {
+    //     case 5:
+    //     case 6:
+    //       img.rotate90();
+    //       break;
+    //     case 7:
+    //     case 8:
+    //       img.rotate270();
+    //       break;
+    //   }
+
+    const v = document.querySelector('#viewport');
+    v?.childNodes.forEach((node) => node.remove());
+    v?.appendChild(img.canvas());
+
+    setLoading(false);
+  }
+
   createEffect(async () => {
     const _item = props.file;
 
@@ -80,53 +104,15 @@ export default function Preview(props: {
     metadata.query({
       ids: [_item.path],
     });
-
-    createEffect(
-      on(
-        () => [...(metadata.data() || []), settings()],
-        () => {
-          const meta = metadata.data()?.[0];
-          if (meta) {
-            console.log('Load', _item.path, settings());
-
-            getImage(_item.path, {
-              exposure: settings().exposure,
-            }).then((image) => {
-              const img = new DynamicImage();
-              console.log(image);
-              img.fromRaw(image.data, image.width, image.height);
-
-              if (meta.orientation)
-                switch (meta.orientation) {
-                  case 5:
-                  case 6:
-                    img.rotate90();
-                    break;
-                  case 7:
-                  case 8:
-                    img.rotate270();
-                    break;
-                }
-
-              const v = document.querySelector('#viewport');
-              v?.childNodes.forEach((node) => node.remove());
-              v?.appendChild(img.canvas());
-
-              // if (vp) {
-              //   vp.destroy();
-              //   vp.start(viewportCanvas.id, img.canvas().toDataURL(), {
-              //     orientation: _item.orientation,
-              //   });
-              // }
-
-              setLoading(false);
-            });
-          }
-        }
-      )
-    );
+    image.query({
+      file: _item.path,
+    });
 
     window.addEventListener('resize', resize);
+  });
+
+  createEffect(() => {
+    renderImage(image.data());
   });
 
   onMount(() => {

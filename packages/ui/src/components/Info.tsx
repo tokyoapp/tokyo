@@ -3,6 +3,7 @@ import { createMetadataAccessor } from 'tokyo-api';
 import { t } from 'tokyo-locales';
 import Icon from './ui/Icon.jsx';
 import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
+import { fileTypes } from '../utils/fileTypes.js';
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -30,25 +31,13 @@ function Property(props: { title: string; value: string | string[] }) {
   );
 }
 
-const fileTypeMap = new Map([
-  ['CR3', 'Canon Raw 3'],
-  ['CR2', 'Canon Raw 2'],
-  ['ARW', 'Sony Raw'],
-]);
-
 function typeFromFilename(name: string) {
   const ext = name.split('.').pop()?.toLocaleUpperCase();
-  if (ext && fileTypeMap.has(ext)) {
-    return `${fileTypeMap.get(ext)}`;
+  if (ext && fileTypes.has(ext)) {
+    return `${fileTypes.get(ext)}`;
   }
   return 'unknown';
 }
-
-// const [tagList, setTagList] = createSignal([]);
-
-// Library.tags().then((tags) => {
-//   setTagList(tags);
-// });
 
 export default function Info(props: {
   file?: any;
@@ -56,11 +45,8 @@ export default function Info(props: {
   const metadata = useAccessor(createMetadataAccessor);
 
   if (props.file)
-    metadata.params({
-      query: {
-        ids: [],
-        // ids: [props.file.path],
-      },
+    metadata.query({
+      ids: [props.file.path],
     });
 
   const file_tags = () => {
@@ -72,12 +58,12 @@ export default function Info(props: {
   };
 
   const meta = () => {
-    return metadata.data();
+    const data = metadata.data();
+    return data?.[0];
   };
 
   const exif = () => {
-    const meta = metadata.data();
-    return JSON.parse(meta?.exif);
+    return JSON.parse(meta()?.exif);
   };
 
   return (
