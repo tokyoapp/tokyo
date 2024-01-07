@@ -2,14 +2,16 @@ import { Model, PropertyTag, PropertyType, PropertyModel } from 'tokyo-propertie
 import { Tabs } from './layout/Tabs.tsx';
 import Info from './Info.tsx';
 import { useProperties } from '../utils/useProperties.ts';
-import './ui/FluidInput.ts';
+import { FluidInput } from './ui/FluidInput.ts';
+
+FluidInput;
 
 export function Properties(props: { file: any; models: Record<string, PropertyModel> }) {
   return (
     <div class="relative mt-2 mr-2 overflow-hidden">
       <div class="absolute top-0 bottom-0 right-0 h-auto overflow-auto">
         <Tabs>
-          <Tabs.Tab title="Info" icon="ph-info" open>
+          <Tabs.Tab title="Info" icon="ph-info">
             <Info file={props.file} />
           </Tabs.Tab>
 
@@ -45,14 +47,14 @@ function PanelProperty(props: { name: string; property: PropertyType }) {
             {property.attr.label?.replace('{#}', property.value.toString()) || name}
           </label>
           <fluid-input
-            onChange={(e) => {
-              property.value = parseFloat(e.currentTarget.value);
-            }}
-            steps="0.01"
+            steps={0.01}
             min={property.attr.min}
             max={property.attr.max}
             value={property.value}
-            class="w-full h-7"
+            class="w-full h-7 text-xs"
+            onChange={(e) => {
+              property.value = parseFloat(e.currentTarget.value);
+            }}
           />
         </>
       ) : null}

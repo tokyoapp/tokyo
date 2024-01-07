@@ -7,6 +7,7 @@ import { t } from 'tokyo-locales';
 import { createImageAccessor, createMetadataAccessor } from 'tokyo-api';
 import { getImage } from 'tauri-plugin-tokyo';
 import { useAccessor } from 'tokyo-accessors/src/adapters/solid.ts';
+import { Model, PropertyModel } from 'tokyo-properties';
 
 const [app, setApp] = createSignal({
   zoom: 1,
@@ -32,7 +33,11 @@ viewportCanvas.id = 'viewport_canvas';
 viewportCanvas.style.width = '100%';
 viewportCanvas.style.position = 'absolute';
 
-export default function Preview(props: { file: any; onClose?: () => void }) {
+export default function Preview(props: {
+  models: Record<string, PropertyModel>;
+  file: any;
+  onClose?: () => void;
+}) {
   const [loading, setLoading] = createSignal(true);
 
   const [settings] = createSignal({});
@@ -47,6 +52,25 @@ export default function Preview(props: { file: any; onClose?: () => void }) {
 
   const metadata = useAccessor(createMetadataAccessor);
   const image = useAccessor(createImageAccessor);
+
+  Model.stream(props.models.basic).pipeTo(
+    new WritableStream({
+      async write(c) {
+        const values = Model.serialize(c);
+        console.log(values);
+        image.query(values);
+
+        return new Promise((res) => {
+          const int = setInterval(() => {
+            if (!image.pending()) {
+              clearInterval(int);
+              res();
+            }
+          }, 250);
+        });
+      },
+    })
+  );
 
   createEffect(async () => {
     const _item = props.file;

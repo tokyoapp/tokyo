@@ -4,23 +4,16 @@ function map(value: number, inMin: number, inMax: number, outMin: number, outMax
   return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
-export default class FluidInput extends LitElement {
-  internalValue = 400;
-
-  internalMin = 100;
-
-  internalMax = 600;
-
-  internalSteps = 10;
+export class FluidInput extends LitElement {
+  _value = 400;
+  _min = 100;
+  _max = 600;
+  _steps = 10;
 
   input: HTMLInputElement | undefined | null;
-
   inputValue: HTMLInputElement | undefined | null;
-
   valueContainer: HTMLInputElement | undefined | null;
-
   leftArrow: Element | undefined | null;
-
   rightArrow: Element | undefined | null;
 
   static get properties() {
@@ -41,38 +34,38 @@ export default class FluidInput extends LitElement {
   }
 
   get value() {
-    return this.internalValue;
+    return this._value;
   }
 
   set value(val) {
-    this.internalValue = +val;
+    this._value = +val;
     this.updateValue();
   }
 
   get min() {
-    return this.internalMin;
+    return this._min;
   }
 
   set min(val) {
-    this.internalMin = +val;
+    this._min = +val;
     this.updateValue();
   }
 
   get max() {
-    return this.internalMax;
+    return this._max;
   }
 
   set max(val) {
-    this.internalMax = +val;
+    this._max = +val;
     this.updateValue();
   }
 
   get steps() {
-    return this.internalSteps;
+    return this._steps;
   }
 
   set steps(val) {
-    this.internalSteps = +val;
+    this._steps = +val;
     this.updateValue();
   }
 
@@ -205,7 +198,7 @@ export default class FluidInput extends LitElement {
       }
 
       if (startPos) {
-        if (Math.abs(x - startPos[0]) > 10) {
+        if (Math.abs(x - startPos[0]) > 1) {
           startMovePos = [x, y];
         }
       }
@@ -316,11 +309,11 @@ export default class FluidInput extends LitElement {
         display: inline-block;
         height: 28px;
 
-        --color-input-background: #111;
+        --color-input-background: #1c1c1c;
         --color-input-hover-background: #121212;
         --color-input-active-background: #121212;
-        --value-background-color: #27272A;
-        --color-input-focus-color: #222;
+        --value-background-color: #373739;
+        --color-input-focus-color: #333;
       }
 
       .input-container {
@@ -332,7 +325,6 @@ export default class FluidInput extends LitElement {
         align-items: center;
         background: var(--color-input-background);
         border-radius: 4px;
-        cursor: ew-resize;
         position: relative;
         overflow: hidden;
         border: 1px solid transparent;
@@ -365,7 +357,7 @@ export default class FluidInput extends LitElement {
       }
 
       .input-value {
-        cursor: ew-resize;
+        cursor: default;
         height: 100%;
         display: inline-flex;
         align-items: center;
@@ -383,10 +375,6 @@ export default class FluidInput extends LitElement {
         z-index: 1000;
       }
 
-      .input-value:focus {
-        cursor: text;
-      }
-
       .value-suffix {
         opacity: 0.5;
         pointer-events: none;
@@ -398,7 +386,6 @@ export default class FluidInput extends LitElement {
 
       .input-value:focus {
         outline: none;
-        cursor: text;
       }
 
       .arrow {
@@ -406,7 +393,6 @@ export default class FluidInput extends LitElement {
         height: 100%;
         display: flex;
         align-items: center;
-        cursor: pointer;
         opacity: 0.75;
         position: absolute;
       }
@@ -458,3 +444,9 @@ export default class FluidInput extends LitElement {
 }
 
 customElements.define('fluid-input', FluidInput);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'fluid-input': FluidInput;
+  }
+}

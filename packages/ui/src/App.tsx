@@ -13,8 +13,6 @@ import { Properties } from './components/Properties.tsx';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
-// selected locations
-
 export const [file, setFile] = createSignal<IndexEntryMessage>();
 
 const models = {
@@ -36,23 +34,6 @@ function App() {
   window.addEventListener('error', (e) => {
     Notifications.error(e.message);
   });
-
-  //
-  // Model.stream(models.basic).pipeTo(
-  //   new WritableStream({
-  //     async write(c) {
-  //       for (const key in c) {
-  //         console.log(key, c[key].value);
-  //       }
-
-  //       return new Promise((res) => {
-  //         setTimeout(() => {
-  //           res();
-  //         }, 1000);
-  //       });
-  //     },
-  //   })
-  // );
 
   const [os, setOS] = createSignal('macos');
 
@@ -119,7 +100,7 @@ function App() {
           {file() ? (
             <>
               <div class="relative flex flex-col justify-center items-center">
-                <Preview file={file()} onClose={() => setFile(undefined)} />
+                <Preview models={models} file={file()} onClose={() => setFile(undefined)} />
               </div>
 
               <Properties models={models} file={file()} />

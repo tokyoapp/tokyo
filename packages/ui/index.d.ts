@@ -6,7 +6,12 @@ type CustomElementChildren = Element | Element[] | JSX.Element | JSX.Element[];
 
 type CustomElementProps<T> = {
   [K in keyof Omit<T, 'children'> as string & K]?: T[K];
-} & { children?: CustomElementChildren; class?: string };
+} & {
+  children?: CustomElementChildren;
+  class?: string;
+  onChange?: (e: Event) => void;
+  // TODO: merge with default react props
+};
 
 // global
 type CustomElements = ElementProps<HTMLElementTagNameMap>;
@@ -33,5 +38,4 @@ interface HTMLElementTagNameMap {
   'a-dropdown': any;
   'a-option': any;
   'a-toggle': any;
-  'fluid-input': any;
 }

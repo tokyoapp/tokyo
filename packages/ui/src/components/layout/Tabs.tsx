@@ -7,7 +7,7 @@ export function Tabs(props: ParentProps) {
   return <div>{children}</div>;
 }
 
-Tabs.Tab = function (props: ParentProps & { title: string; icon: string; open?: boolean }) {
+Tabs.Tab = (props: ParentProps & { title: string; icon: string; open?: boolean }) => {
   const [open, setOpen] = createSignal(props.open || false);
 
   return (
@@ -29,7 +29,7 @@ Tabs.Tab = function (props: ParentProps & { title: string; icon: string; open?: 
       <div
         data-tab={props.title}
         data-icon={props.icon}
-        class={`bg-zinc-900 w-full ${open() ? 'block' : 'hidden'}`}
+        class={`bg-zinc-800 w-full ${open() ? 'block' : 'hidden'}`}
       >
         {props.children}
       </div>
