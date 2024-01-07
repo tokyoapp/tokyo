@@ -1,15 +1,6 @@
 import * as Comlink from 'comlink';
 
 /**
- * [x] Create request message(s) from params.
- * [x] Handle responses and associate them to the correct request.
- * [x] Cache data by specific request params for multiple requests.
- * [x] Request creation can check the cached params for overlap and exclude already cached data from the request. (outside)
- * [x] Filter or transform cached data before returning it to the user.
- * [x] Invalidate cache on mutation (and when outdated (~1h old) -- not implemented)
- * [x] Abort signaling (ignore responses from aborted requests)
- * [x] Internal message types, fetch states, progress
- * [x] Accessors can be chained for a layered caching approach -- if the query changes before the request is finished, abort (ignore incoming response) the request and start a new one; only handle responses the have a nonce included in cacheKeys
  * [ ] TODO: Handle compute errors
  * [ ] TODO: Clear cache entries that were not accessed for a while to save memory
  * [ ] TODO: Stream params to the accessor

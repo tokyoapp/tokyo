@@ -37,7 +37,7 @@ export class BaseProperty<T> {
   }
 
   serialize() {
-    return JSON.stringify(this.value);
+    return this.value;
   }
 
   deserialize(value: string) {

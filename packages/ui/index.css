@@ -104,3 +104,10 @@ hr {
   transition: opacity .1s .1s ease,
               transform .1s .1s ease;
 }
+
+#viewport canvas {
+  width: 100%;
+  height: auto;
+  max-height: 100vh;
+  object-fit: contain;
+}
