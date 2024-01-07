@@ -3,16 +3,13 @@ import { IndexEntryMessage } from 'tokyo-proto';
 import { ErrorBoundary, createSignal } from 'solid-js';
 import Jobs from './actions/Action.ts';
 import Explorer from './components/Explorer';
-import Info from './components/Info';
-import LocationSettings from './components/LocationSettings.tsx';
-import { Tabs } from './components/Tabs.tsx';
-import Titlebar from './components/Titlebar.tsx';
+import LocationSettings from './components/LocationSettings.jsx';
+import Titlebar from './components/Titlebar.jsx';
 import Preview from './components/Viewer';
 import { Notifications } from './components/notifications/Notifications.ts';
-import { ActivityBar } from './components/Activitybar.tsx';
-import { Panel } from './components/Panel.tsx';
+import { ActivityBar } from './components/Activitybar.jsx';
 import { Basic } from './properties/Basic.ts';
-import { Model } from 'tokyo-properties';
+import { Properties } from './components/Properties.tsx';
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
@@ -125,25 +122,7 @@ function App() {
                 <Preview file={file()} onClose={() => setFile(undefined)} />
               </div>
 
-              <div class="relative mt-2 mr-2 overflow-hidden">
-                <div class="absolute top-0 bottom-0 right-0 h-auto overflow-auto">
-                  <Tabs>
-                    <Tabs.Tab title="Info" icon="ph-info" open>
-                      <Info file={file()} />
-                    </Tabs.Tab>
-
-                    <Tabs.Tab title="Exposure" icon="ph-pencil" open>
-                      <Panel model={models.basic} />
-                    </Tabs.Tab>
-                    <Tabs.Tab title="Color" icon="ph-pencil">
-                      <Panel model={models.basic} />
-                    </Tabs.Tab>
-                    <Tabs.Tab title="Effects" icon="ph-pencil">
-                      <Panel model={models.basic} />
-                    </Tabs.Tab>
-                  </Tabs>
-                </div>
-              </div>
+              <Properties models={models} file={file()} />
             </>
           ) : null}
         </div>

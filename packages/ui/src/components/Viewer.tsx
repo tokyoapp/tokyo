@@ -1,8 +1,8 @@
 import { ParentProps, createEffect, createSignal, on, onMount } from 'solid-js';
 import { DynamicImage } from 'tokyo-api/src/DynamicImage.ts';
-import Button from './Button.tsx';
-import Icon from './Icon.tsx';
-import { Stars } from './Stars.tsx';
+import Button from './ui/Button.jsx';
+import Icon from './ui/Icon.jsx';
+import { Stars } from './ui/Stars.jsx';
 import { t } from 'tokyo-locales';
 import { createImageAccessor, createMetadataAccessor } from 'tokyo-api';
 import { getImage } from 'tauri-plugin-tokyo';

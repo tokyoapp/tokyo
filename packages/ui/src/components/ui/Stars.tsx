@@ -1,4 +1,4 @@
-import Icon from './Icon.tsx';
+import Icon from './Icon.jsx';
 
 export function Stars(props: { value: number; onChange?: (value: number) => void }) {
   return (
@@ -18,6 +18,30 @@ export function Stars(props: { value: number; onChange?: (value: number) => void
             <Icon name="star" />
           </div>
         );
+      })}
+    </div>
+  );
+}
+
+export function Rating(props: { rating: number; empty: boolean }) {
+  if (props.empty) {
+    return (
+      <div class="flex gap-1 text-xs">
+        {new Array(5).fill(1).map((i) => {
+          if (i > props.rating) {
+            return <Icon class="opacity-20" name="star" />;
+          } else {
+            return <Icon name="star" />;
+          }
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div class="flex gap-1 text-xs">
+      {new Array(props.rating).fill(1).map(() => {
+        return <Icon name="star" />;
       })}
     </div>
   );

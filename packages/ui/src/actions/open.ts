@@ -1,5 +1,5 @@
 import { IndexEntryMessage } from 'tokyo-proto';
-import { setFile } from '../App.tsx';
+import { setFile } from '../App.jsx';
 
 export default async function open(item: IndexEntryMessage) {
   setFile(item);

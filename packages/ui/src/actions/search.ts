@@ -1,4 +1,4 @@
-import { setCmdOpen } from '../components/Titlebar.tsx';
+import { setCmdOpen } from '../components/Titlebar.jsx';
 
 export default async function () {
   setCmdOpen(true);

@@ -3,18 +3,18 @@ import { onCleanup } from 'solid-js';
 import '@phosphor-icons/web/light';
 
 const icons = {
-  unknown: await import('../../assets/icons/unknown.svg?raw'),
-  star: await import('../../assets/icons/star.svg?raw'),
-  check: await import('../../assets/icons/check.svg?raw'),
-  'chevron-right': await import('../../assets/icons/chevron-right.svg?raw'),
-  close: await import('../../assets/icons/close.svg?raw'),
-  cogwheel: await import('../../assets/icons/cogwheel.svg?raw'),
-  'expand-down': await import('../../assets/icons/expand-down.svg?raw'),
-  more: await import('../../assets/icons/more.svg?raw'),
-  'smaller-equals': await import('../../assets/icons/smaller-equals.svg?raw'),
-  text: await import('../../assets/icons/text.svg?raw'),
-  plus: await import('../../assets/icons/plus.svg?raw'),
-  loader: await import('../../assets/icons/loader.riv?url'),
+  unknown: await import('../../../assets/icons/unknown.svg?raw'),
+  star: await import('../../../assets/icons/star.svg?raw'),
+  check: await import('../../../assets/icons/check.svg?raw'),
+  'chevron-right': await import('../../../assets/icons/chevron-right.svg?raw'),
+  close: await import('../../../assets/icons/close.svg?raw'),
+  cogwheel: await import('../../../assets/icons/cogwheel.svg?raw'),
+  'expand-down': await import('../../../assets/icons/expand-down.svg?raw'),
+  more: await import('../../../assets/icons/more.svg?raw'),
+  'smaller-equals': await import('../../../assets/icons/smaller-equals.svg?raw'),
+  text: await import('../../../assets/icons/text.svg?raw'),
+  plus: await import('../../../assets/icons/plus.svg?raw'),
+  loader: await import('../../../assets/icons/loader.riv?url'),
 } as const;
 
 type Props = {

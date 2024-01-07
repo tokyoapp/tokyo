@@ -1,8 +1,28 @@
-import { Model, PropertyModel, PropertyTag, PropertyType } from 'tokyo-properties';
+import { Model, PropertyTag, PropertyType, PropertyModel } from 'tokyo-properties';
+import { Tabs } from './layout/Tabs.tsx';
+import Info from './Info.tsx';
 import { useProperties } from '../utils/useProperties.ts';
-import './FluidInput.ts';
+import './ui/FluidInput.ts';
 
-export function Panel(props: { model: PropertyModel }) {
+export function Properties(props: { file: any; models: Record<string, PropertyModel> }) {
+  return (
+    <div class="relative mt-2 mr-2 overflow-hidden">
+      <div class="absolute top-0 bottom-0 right-0 h-auto overflow-auto">
+        <Tabs>
+          <Tabs.Tab title="Info" icon="ph-info" open>
+            <Info file={props.file} />
+          </Tabs.Tab>
+
+          <Tabs.Tab title="Exposure" icon="ph-pencil" open>
+            <Panel model={props.models.basic} />
+          </Tabs.Tab>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function Panel(props: { model: PropertyModel }) {
   const properties = useProperties(props.model, () => Model.properties(props.model));
 
   return (
@@ -14,7 +34,7 @@ export function Panel(props: { model: PropertyModel }) {
   );
 }
 
-export function PanelProperty(props: { name: string; property: PropertyType }) {
+function PanelProperty(props: { name: string; property: PropertyType }) {
   const { property, name } = props;
 
   return (

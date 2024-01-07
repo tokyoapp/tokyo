@@ -1,4 +1,4 @@
-import Icon from './Icon.tsx';
+import Icon from './ui/Icon.jsx';
 import '@atrium-ui/mono/command';
 import '@atrium-ui/mono/blur';
 import { ParentProps, createSignal } from 'solid-js';

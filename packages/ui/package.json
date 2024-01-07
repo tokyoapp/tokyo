@@ -1,6 +1,6 @@
 {
   "name": "tokyo-ui",
-  "main": "./index.tsx",
+  "main": "./index.jsx",
   "type": "module",
   "bin": {
     "tokyo-ui": "./cli/main.ts"

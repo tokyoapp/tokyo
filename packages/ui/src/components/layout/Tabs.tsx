@@ -1,5 +1,5 @@
 import { ParentProps, createSignal } from 'solid-js';
-import Icon from './Icon.tsx';
+import Icon from '../ui/Icon.jsx';
 
 export function Tabs(props: ParentProps) {
   const children = props.children as Element[];

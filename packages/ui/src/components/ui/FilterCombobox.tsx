@@ -1,39 +1,35 @@
 import '@atrium-ui/mono/dropdown';
 import '@atrium-ui/mono/toggle';
-import Icon from './Icon.tsx';
+import Icon from './Icon.jsx';
 import { ParentProps } from 'solid-js';
 
-export default function Combobox(
+export default function FilterCombobox(
   props: {
     title: string;
     value: string;
-    class: string;
     multiple: boolean;
     onInput: (value: string[]) => void;
     items: { id: string; value: string; checked: boolean }[];
-    content?: Element;
   } & ParentProps
 ) {
   return (
     <a-dropdown
-      class={`relative inline-block ${props.class}`}
+      class="relative inline-block z-50"
       style="--dropdown-speed: 0s"
-      onInput={(e) => {
-        if (e.target.value[0] !== 'none') {
-          props.onInput(e.target.value);
-        }
-      }}
+      onInput={(e) => props.onInput(e.target.value)}
     >
       <button
         title={props.title}
         type="button"
         slot="input"
-        class=" bg-zinc-800 rounded-md px-2 py-1 text-left shadow-none"
+        class=" rounded-lg px-2 py-1 text-left shadow-none"
       >
         {props.children}
       </button>
 
       <div class="rounded-md bg-zinc-800 border border-zinc-800 p-1 mt-1 min-w-[150px]">
+        <input type="text" />
+
         <a-toggle
           multiple={props.multiple}
           value={props.items.map((item) => (item.checked ? item.id : false)).filter(Boolean)}
@@ -53,8 +49,6 @@ export default function Combobox(
               </button>
             );
           })}
-
-          <div value="none">{props.content || null}</div>
         </a-toggle>
       </div>
     </a-dropdown>

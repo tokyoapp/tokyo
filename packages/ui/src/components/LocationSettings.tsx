@@ -1,9 +1,9 @@
 import { langs, language, setLanguage } from 'tokyo-locales';
 // import storage from '../services/ClientStorage.worker.ts';
-import { setSettingOpen } from '../App.tsx';
-import Button from './Button.tsx';
-import Icon from './Icon.tsx';
-import Select from './Select.tsx';
+import { setSettingOpen } from '../App.jsx';
+import Button from './ui/Button.jsx';
+import Icon from './ui/Icon.jsx';
+import Select from './ui/Select.jsx';
 
 export default function () {
   return (

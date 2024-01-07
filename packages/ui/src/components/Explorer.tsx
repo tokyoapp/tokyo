@@ -5,10 +5,9 @@ import { createStore } from 'solid-js/store';
 import { createLocationsAccessor, createMetadataAccessor, createIndexAccessor } from 'tokyo-api';
 import Jobs from '../actions/Action.ts';
 import { t } from 'tokyo-locales';
-import Combobox from './Combobox.tsx';
-import Icon from './Icon.tsx';
-import Rating from './Rating.tsx';
-import { Stars } from './Stars.tsx';
+import Combobox from './ui/Combobox.jsx';
+import Icon from './ui/Icon.jsx';
+import { Stars, Rating } from './ui/Stars.jsx';
 import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
 
 export default function ExplorerView(props: {

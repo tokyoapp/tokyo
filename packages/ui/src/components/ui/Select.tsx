@@ -1,6 +1,6 @@
 import '@atrium-ui/mono/dropdown';
 import '@atrium-ui/mono/toggle';
-import Icon from './Icon.tsx';
+import Icon from '../ui/Icon.jsx';
 import { ParentProps } from 'solid-js';
 
 export default function Select(

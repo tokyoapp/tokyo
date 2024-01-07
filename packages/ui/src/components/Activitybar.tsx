@@ -1,6 +1,6 @@
-import Button from './Button';
-import Icon from './Icon.tsx';
-import { setSettingOpen, settingsOpen } from '../App.tsx';
+import Button from './ui/Button.jsx';
+import Icon from './ui/Icon.jsx';
+import { setSettingOpen, settingsOpen } from '../App.jsx';
 
 export function ActivityBar() {
   return (
