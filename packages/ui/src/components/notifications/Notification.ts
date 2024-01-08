@@ -1,13 +1,13 @@
-import { html, css, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 
 interface NotificationOptions {
-  message?: string;
-  time?: number;
+	message?: string;
+	time?: number;
 }
 
 export default class Notification extends LitElement {
-  static get styles() {
-    return css`
+	static get styles() {
+		return css`
       :host {
         display: block;
         position: relative;
@@ -49,55 +49,55 @@ export default class Notification extends LitElement {
         }
       }
     `;
-  }
+	}
 
-  message?: string;
-  time?: number;
+	message?: string;
+	time?: number;
 
-  constructor(options: NotificationOptions) {
-    super();
+	constructor(options: NotificationOptions) {
+		super();
 
-    this.message = options.message;
-    this.time = options.time;
+		this.message = options.message;
+		this.time = options.time;
 
-    this.addEventListener('click', () => {
-      setTimeout(() => {
-        this.kill();
-      }, 100);
-    });
-  }
+		this.addEventListener('click', () => {
+			setTimeout(() => {
+				this.kill();
+			}, 100);
+		});
+	}
 
-  connectedCallback(): void {
-    super.connectedCallback();
+	connectedCallback(): void {
+		super.connectedCallback();
 
-    if (this.time) {
-      setTimeout(() => {
-        this.kill();
-      }, this.time);
-    }
-  }
+		if (this.time) {
+			setTimeout(() => {
+				this.kill();
+			}, this.time);
+		}
+	}
 
-  kill() {
-    this.style.height = `${this.offsetHeight + 5}px`;
+	kill() {
+		this.style.height = `${this.offsetHeight + 5}px`;
 
-    this.offsetHeight;
+		this.offsetHeight;
 
-    this.style.opacity = '0';
-    this.style.height = '0px';
+		this.style.opacity = '0';
+		this.style.height = '0px';
 
-    setTimeout(() => {
-      this.remove();
-    }, 1000);
-  }
+		setTimeout(() => {
+			this.remove();
+		}, 1000);
+	}
 
-  protected render() {
-    return html`
+	protected render() {
+		return html`
       <div class="wrapper">
         <span>${this.message}</span>
         <slot></slot>
       </div>
     `;
-  }
+	}
 }
 
 customElements.define('ui-notification', Notification);

@@ -1,13 +1,8 @@
 {
-  "name": "tokyo-app",
-  "version": "0.0.0",
-  "description": "",
-  "dependencies": {
-    "@tauri-apps/api": "2.0.0-alpha.8",
-    "tokyo-ui": "workspace:"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "2.0.0-alpha.14",
-    "typescript": "^5.0.2"
-  }
+	"name": "tokyo-app",
+	"version": "0.0.0",
+	"description": "",
+	"dependencies": {
+		"tokyo-ui": "workspace:"
+	}
 }

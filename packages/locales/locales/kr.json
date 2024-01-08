@@ -1,21 +1,21 @@
 {
-  "copyright": "(c) Tim Havlicek",
+	"copyright": "(c) Tim Havlicek",
 
-  "search": "서치",
+	"search": "서치",
 
-  "notification_loaded": "라이브러리 '{}' 로드 중",
+	"notification_loaded": "라이브러리 '{}' 로드 중",
 
-  "explorer_sort_created": "창조했어",
-  "explorer_sort_rating": "순위",
-  "explorer_view_rating": "순위",
-  "explorer_view_tags": "태그",
-  "explorer_view_filename": "파일명",
+	"explorer_sort_created": "창조했어",
+	"explorer_sort_rating": "순위",
+	"explorer_view_rating": "순위",
+	"explorer_view_tags": "태그",
+	"explorer_view_filename": "파일명",
 
-  "system_disk_total": "총 {} GB",
-  "system_disk_available": "{} GB 사용 가능",
-  "system_photo_count": "사진 {}장",
+	"system_disk_total": "총 {} GB",
+	"system_disk_available": "{} GB 사용 가능",
+	"system_photo_count": "사진 {}장",
 
-  "viewer_back": "뒤로",
+	"viewer_back": "뒤로",
 
-  "create_library_headline": "라이브러리를 만듭니다"
+	"create_library_headline": "라이브러리를 만듭니다"
 }
