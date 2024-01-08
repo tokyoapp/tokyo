@@ -2,7 +2,7 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'tokyo-proto';
-import { MessageType } from '../lib.ts';
+import { MessageType } from '../MessageTypes.ts';
 
 const messageKeyToType = {
   error: MessageType.Error,

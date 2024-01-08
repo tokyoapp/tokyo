@@ -6,6 +6,8 @@ async function main(args) {
       return await import('./build.js');
     case 'dev':
       return await import('./dev.js');
+    case 'inspect':
+      return await import('./inspect.js');
   }
 }
 

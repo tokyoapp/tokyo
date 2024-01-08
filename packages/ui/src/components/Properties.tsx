@@ -2,9 +2,7 @@ import { Model, PropertyTag, PropertyType, PropertyModel } from 'tokyo-propertie
 import { Tabs } from './layout/Tabs.tsx';
 import Info from './Info.tsx';
 import { useProperties } from '../utils/useProperties.ts';
-import { FluidInput } from './ui/FluidInput.ts';
-
-FluidInput;
+import './ui/FluidInput.ts';
 
 export function Properties(props: { file: any; models: Record<string, PropertyModel> }) {
   return (

@@ -1,14 +1,7 @@
 import * as library from 'tokyo-proto';
+import { MessageType } from './MessageTypes.ts';
 
-export enum MessageType {
-  Error = 'error',
-  Locations = 'locations',
-  MutateLocations = 'locations.mutate',
-  Index = 'index',
-  Metadata = 'metadata',
-  MutateMetadata = 'metadata.mutate',
-  Thumbnails = 'thumbnails',
-}
+export { MessageType } from './MessageTypes.ts';
 
 export type RequestMessage =
   | {

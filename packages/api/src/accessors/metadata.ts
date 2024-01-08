@@ -1,8 +1,8 @@
-import { MessageType } from '../lib.js';
 import { Accessor } from 'tokyo-accessors';
 import * as proto from 'tokyo-proto';
 import Worker from '../Worker.js';
 import { DynamicImage } from '../DynamicImage.js';
+import { MessageType } from '../MessageTypes.js';
 
 export function createMetadataAccessor() {
   const loadImage = (src: string): Promise<Image> => {
@@ -19,7 +19,7 @@ export function createMetadataAccessor() {
     });
   };
 
-  const makeThumbnail = async (blob: Blob, meta: MetadataMessage) => {
+  const makeThumbnail = async (blob: Blob, meta: any) => {
     const dynimg = new DynamicImage();
     const url = URL.createObjectURL(blob);
     const image = await loadImage(url);
