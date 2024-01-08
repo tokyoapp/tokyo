@@ -15,31 +15,20 @@ tasks:
     cmds:
       - cargo tauri ios dev
 
-  ui:dev:
-    dir: ./
-    cmds:
-      - bun x tokyo-ui dev
-
   tauri:build:
     dir: ./
     cmds:
       - cargo tauri build
 
+  ui:dev:
+    dir: ./
+    cmds:
+      - bun x tokyo-ui dev
+
   ui:build:
     dir: ./
     cmds:
       - bun x tokyo-ui build
-
-  ui:inspect:
-    dir: ./
-    cmds:
-      - bun x tokyo-ui inspect
-
-  dev:ios:
-    desc: Dev ios
-    prefix: ios
-    dir: "./"
-    cmd: task --parallel ui:dev tauri:dev:ios
 
   dev:
     desc: Dev
@@ -47,9 +36,21 @@ tasks:
     dir: ./
     cmd: task --parallel ui:dev tauri:dev
 
+  dev:ios:
+    desc: Dev ios
+    prefix: ios
+    dir: "./"
+    cmd: task --parallel ui:dev tauri:dev:ios
+
   build:
     desc: Build app
     dir: ./
     cmds:
       - task: ui:build
       - task: tauri:build
+
+  start:
+    desc: Start app in production
+    dir: ../../target/release
+    cmds:
+      - ./app

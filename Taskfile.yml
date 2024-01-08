@@ -2,6 +2,9 @@
 
 version: "3"
 
+env:
+  DATABASE: "file:///tmp/tokyo.db"
+
 includes:
   server:
     dir: apps/server
@@ -73,9 +76,6 @@ tasks:
 
   dev:
     desc: Run desktop app with server
-    env:
-      DATABASE: "file:///tmp/tokyo.db"
-      TURSO_AUTH_TOKEN: ""
     deps: [setup]
     cmds:
       - task --parallel server:dev app:dev
@@ -107,3 +107,9 @@ tasks:
     cmds:
       - cargo check
       - bun x biome check ./ {{.CLI_ARGS}}
+
+  start:
+    desc: Run desktop app with server as production build
+    deps: [build]
+    cmds:
+      - task --parallel server:start app:start
