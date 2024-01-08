@@ -4,12 +4,13 @@ import * as proto from 'tokyo-proto';
 
 export function createImageAccessor() {
   return new Accessor([Worker], {
-    createRequest(query: { file: string }) {
+    createRequest(query: { file: string; edits: string }) {
       return [
         proto.ClientMessage.create({
           image: proto.RequestImage.create({
-            file: query.file
-          })
+            file: query.file,
+            edits: query.edits,
+          }),
         }),
       ];
     },

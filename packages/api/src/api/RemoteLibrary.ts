@@ -70,7 +70,6 @@ export class RemoteLibrary {
 
     this.retryTimeout = setTimeout(() => {
       this.connect(host);
-      this.retryTimeout = undefined;
     }, this.retryTimeoutDuration);
   }
 

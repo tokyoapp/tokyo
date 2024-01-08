@@ -93,6 +93,7 @@ message RequestMetadata {
 
 message RequestImage {
   string file = 1;
+  optional string edits = 2;
 }
 
 message PostFileMetadata {

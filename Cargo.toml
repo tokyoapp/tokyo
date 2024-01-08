@@ -3,7 +3,7 @@ resolver = "2"
 members = ["packages/*", "apps/*"]
 
 [profile.release]
-opt-level = 2 # fast and small wasm
+opt-level = 2
 
 # Optimize all dependencies even in debug builds:
 [profile.dev.package."*"]
