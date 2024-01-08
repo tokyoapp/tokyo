@@ -8,7 +8,7 @@ export const config = defineConfig({
   root: path.resolve('src'),
   build: {
     target: 'esnext',
-    outDir: '../dist',
+    outDir: path.resolve('dist'),
   },
   envPrefix: ['VITE_', 'TAURI_'],
   plugins: [require('vite-plugin-wasm').default(), solidPlugin()],

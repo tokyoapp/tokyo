@@ -30,7 +30,7 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-function App() {
+export default function App() {
   window.addEventListener('error', (e) => {
     Notifications.error(e.message);
   });
@@ -111,5 +111,3 @@ function App() {
     </ErrorBoundary>
   );
 }
-
-export default App;

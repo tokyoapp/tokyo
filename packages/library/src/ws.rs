@@ -104,11 +104,17 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   return index_msg;
 }
 
-pub async fn edited_image(path: &String) -> Result<DynamicImage> {
+pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<DynamicImage> {
   let image = get_image(&Path::new(path))?;
 
   let resized = image.resize(2048, 2048, FilterType::Lanczos3);
-  let img = process(resized.to_rgb32f(), &Edits::new());
+
+  let edits: Edits = match edits_json {
+    Some(json) => Edits::from_json(json),
+    _ => Edits::new(),
+  };
+
+  let img = process(resized.to_rgb32f(), &edits);
   let image = DynamicImage::ImageRgb32F(img);
 
   Ok(image)
@@ -164,7 +170,7 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
   if req.has_image() {
     let file = &req.image().file; // should be the hash,
     let mut img_msg = schema::ImageMessage::new();
-    let image = edited_image(file).await?;
+    let image = edited_image(file, req.image().edits.to_owned()).await?;
     let v = image.to_rgb8().as_bytes().to_vec();
     img_msg.image = v;
     img_msg.width = image.width() as i32;

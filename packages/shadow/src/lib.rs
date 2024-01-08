@@ -89,6 +89,11 @@ impl Edits {
       curve_blue: vec![],
     }
   }
+
+  pub fn from_json(str: String) -> Edits {
+    let edits: Edits = serde_json::from_str(&str).expect("Failed to parse edits");
+    edits
+  }
 }
 
 fn mat_mul(matrix: &[[f32; 3]; 3], vector: &[f32; 3]) -> [f32; 3] {

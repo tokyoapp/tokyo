@@ -34,7 +34,7 @@ viewportCanvas.style.position = 'absolute';
 
 export default function Preview(props: {
   file: any;
-  models: Rlogrd<string, PropertyModel>;
+  models: Record<string, PropertyModel>;
   onClose?: () => void;
 }) {
   const [loading, setLoading] = createSignal(true);
@@ -50,51 +50,22 @@ export default function Preview(props: {
   const metadata = useAccessor(createMetadataAccessor);
   const image = useAccessor(createImageAccessor);
 
-  Model.stream(props.models.basic).pipeTo(
-    new WritableStream({
-      async write(c) {
-        const values = Model.serialize(c);
-        console.log(values);
-        image.query(values);
-
-        return new Promise((res) => {
-          const int = setInterval(() => {
-            if (!image.pending()) {
-              clearInterval(int);
-              res();
-            }
-          }, 250);
-        });
-      },
-    })
-  );
+  const [edits, setEdits] = createSignal();
 
   const renderImage = (image: { width: number; height: number; image: Uint8Array }) => {
-
     if (!image) return;
 
     const img = new DynamicImage();
     console.log(image);
     img.fromRaw(image.image, image.width, image.height);
 
-    // if (meta.orientation)
-    //   switch (meta.orientation) {
-    //     case 5:
-    //     case 6:
-    //       img.rotate90();
-    //       break;
-    //     case 7:
-    //     case 8:
-    //       img.rotate270();
-    //       break;
-    //   }
-
     const v = document.querySelector('#viewport');
+    // biome-ignore lint/complexity/noForEach: <explanation>
     v?.childNodes.forEach((node) => node.remove());
     v?.appendChild(img.canvas());
 
     setLoading(false);
-  }
+  };
 
   createEffect(async () => {
     const _item = props.file;
@@ -106,10 +77,48 @@ export default function Preview(props: {
     });
     image.query({
       file: _item.path,
+      edits: JSON.stringify(edits()),
     });
 
     window.addEventListener('resize', resize);
   });
+
+  Model.stream(props.models.basic).pipeTo(
+    new WritableStream({
+      async write(c) {
+        const values = Model.serialize(c);
+
+        setEdits({
+          exposure: 0.0,
+          contrast: 0.0,
+          temperature: 0.0,
+          tint: 0.0,
+          highlights: 0.0,
+          shadows: 0.0,
+          blacks: 0.0,
+          whites: 0.0,
+          vibrancy: 0.0,
+          saturation: 0.0,
+          texture: 0.0,
+          curve_tone: [],
+          curve_red: [],
+          curve_green: [],
+          curve_blue: [],
+
+          ...values,
+        });
+
+        return new Promise((res) => {
+          const int = setInterval(() => {
+            if (!image.pending()) {
+              clearInterval(int);
+              res();
+            }
+          }, 100);
+        });
+      },
+    })
+  );
 
   createEffect(() => {
     renderImage(image.data());

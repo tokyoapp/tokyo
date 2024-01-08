@@ -15,8 +15,8 @@ export function useAccessor<T extends Accessor>(accessorFn: () => T) {
   type Params = Partial<T['params']>;
 
   const [pending, setPending] = createSignal<boolean>();
-  const [params, setParams] = createSignal<Query>();
-  const [query, setQuery] = createSignal<Params>();
+  const [params, setParams] = createSignal<Params>();
+  const [query, setQuery] = createSignal<Query>();
 
   accessor.on('data', (data) => setData(data));
   accessor.on('pending', (pending) => setPending(pending));
@@ -33,11 +33,15 @@ export function useAccessor<T extends Accessor>(accessorFn: () => T) {
     data,
     pending,
     query(value?: Query) {
-      if (value) setQuery(value);
+      if (value) {
+        setQuery(value);
+      }
       return query();
     },
     params(value?: Params) {
-      if (value) setParams(value);
+      if (value) {
+        setParams(value);
+      }
       return params();
     },
   };
