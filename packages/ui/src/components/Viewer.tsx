@@ -5,7 +5,7 @@ import Icon from './ui/Icon.jsx';
 import { Stars } from './ui/Stars.jsx';
 import { t } from 'tokyo-locales';
 import { createImageAccessor, createMetadataAccessor } from 'tokyo-api';
-import { useAccessor } from 'tokyo-accessors/src/adapters/solid.ts';
+import { useAccessor } from 'tokyo-accessors/solid';
 import { Model, PropertyModel } from 'tokyo-properties';
 
 const [app, setApp] = createSignal({

@@ -1,4 +1,4 @@
-import { Accessor } from 'tokyo-api';
+import { type Accessor } from './lib.ts';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 /**

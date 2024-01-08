@@ -2,7 +2,7 @@ import '@atrium-ui/mono/expandable';
 import { createMetadataAccessor } from 'tokyo-api';
 import { t } from 'tokyo-locales';
 import Icon from './ui/Icon.jsx';
-import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
+import { useAccessor } from 'tokyo-accessors/solid';
 import { fileTypes } from '../utils/fileTypes.js';
 
 function Seperator() {

@@ -1,4 +1,4 @@
-import { Accessor } from 'tokyo-api';
+import { type Accessor } from './lib.ts';
 import { createEffect, createSignal } from 'solid-js';
 
 /**

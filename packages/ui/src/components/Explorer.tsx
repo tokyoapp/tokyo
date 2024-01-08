@@ -8,7 +8,7 @@ import { t } from 'tokyo-locales';
 import Combobox from './ui/Combobox.jsx';
 import Icon from './ui/Icon.jsx';
 import { Stars, Rating } from './ui/Stars.jsx';
-import { useAccessor } from 'tokyo-accessors/src/adapters/solid.js';
+import { useAccessor } from 'tokyo-accessors/solid';
 
 export default function ExplorerView(props: {
   small: boolean;
@@ -95,7 +95,7 @@ export default function ExplorerView(props: {
       setTimeout(() => {
         const ele = document.querySelector('[data-selected]') as HTMLElement | undefined;
         if (ele) {
-          ele.scrollIntoView({ inline: 'center', block: 'center' });
+          ele.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }, 100);
     }

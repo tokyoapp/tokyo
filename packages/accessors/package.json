@@ -2,6 +2,17 @@
   "name": "tokyo-accessors",
   "main": "./src/lib.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/lib.ts"
+    },
+    "./react": {
+      "import": "./src/react.ts"
+    },
+    "./solid": {
+      "import": "./src/solid.ts"
+    }
+  },
   "dependencies": {
     "comlink": "^4.4.1"
   },
