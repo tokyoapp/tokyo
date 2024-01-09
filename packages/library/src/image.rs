@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use image::imageops::FilterType;
 pub use image::{DynamicImage, ImageBuffer};
+use log::{error, info};
 use rawler::decoders::{RawDecodeParams, RawMetadata};
 use rawler::{analyze::extract_thumbnail_pixels, get_decoder, imgop::develop::RawDevelop, RawFile};
 use std::io::Cursor;
@@ -111,7 +112,7 @@ pub fn file_hash(path: &String) -> Option<String> {
         .unwrap(),
     ),
     Err(error) => {
-      println!("Error reading metadata {}", error.to_string());
+      error!("Error reading metadata {}", error.to_string());
       None
     }
   };
@@ -154,7 +155,7 @@ pub async fn cached_thumb(p: &String) -> Vec<u8> {
 
   let hash = file_hash(p).unwrap();
 
-  println!("hash of {}: {}", p, hash);
+  info!("hash of {}: {}", p, hash);
 
   let cache_dir = "./data/tmp";
 

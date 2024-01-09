@@ -32,7 +32,7 @@ window.addEventListener('keyup', (e) => {
 
 export default function App() {
 	window.addEventListener('error', (e) => {
-		Notifications.error(e.message);
+		Notifications.error(e.message || e.detail);
 	});
 
 	const [os, setOS] = createSignal('macos');

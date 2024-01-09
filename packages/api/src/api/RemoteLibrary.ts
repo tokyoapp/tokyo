@@ -31,6 +31,14 @@ export class RemoteLibrary {
 	}
 
 	parseMessage(msg: library.Message) {
+		if (msg.error) {
+			return {
+				type: 'error',
+				nonce: msg.nonce,
+				message: msg.message,
+			};
+		}
+
 		for (const key in msg) {
 			if (key !== 'nonce' && msg[key] !== undefined) {
 				return {

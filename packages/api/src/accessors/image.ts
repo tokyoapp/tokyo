@@ -1,6 +1,7 @@
 import { Accessor } from 'tokyo-accessors';
 import * as proto from 'tokyo-proto';
 import Worker from '../Worker.js';
+import { MessageType } from '../MessageTypes.js';
 
 export function createImageAccessor() {
 	return new Accessor([Worker], {
@@ -16,7 +17,9 @@ export function createImageAccessor() {
 		},
 
 		transform(msg) {
-			return msg;
+			if (msg.type === MessageType.Image) return msg;
+			console.error(msg);
+			window.dispatchEvent(new CustomEvent('error', { detail: msg.message }));
 		},
 
 		compute([data]) {

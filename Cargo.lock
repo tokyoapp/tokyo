@@ -4971,8 +4971,10 @@ name = "tokyo-shadow"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "env_logger",
  "image",
  "kolor",
+ "log",
  "rawler",
  "serde",
  "serde_json",
