@@ -1,4 +1,3 @@
-use crate::cached_thumb;
 use crate::IndexEntry;
 use crate::Library;
 use anyhow::anyhow;
@@ -10,6 +9,7 @@ use futures::StreamExt;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use image::EncodableLayout;
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::sync::Arc;
@@ -87,7 +87,7 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   // TODO: this should be streamed
   for id in ids {
     let dir = lib.find_library(id.clone()).await.unwrap().path;
-    println!("[INDEX] {:?}, {:?}", dir, id);
+    info!("[INDEX] {:?}, {:?}", dir, id);
     let mut index = lib.get_index(dir).await.expect("Failed to get index");
     _index.append(&mut index);
   }
@@ -136,7 +136,7 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
     msg.nonce = req.nonce.clone();
 
     let index = req.index();
-    println!("Requested Index {:?}", index);
+    info!("Requested Index {:?}", index);
     msg.set_index(get_index_msg(lib, index.ids.clone()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
@@ -200,7 +200,7 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
 }
 
 pub async fn handle_socket(mut socket: WebSocket) {
-  println!("Socket connected");
+  info!("Socket connected");
 
   // send system info
   let mut sys_msg = schema::Message::new();

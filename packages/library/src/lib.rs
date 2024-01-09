@@ -301,6 +301,8 @@ pub async fn cached_thumb(file: &String) -> Vec<u8> {
 }
 
 pub async fn start_websocket_server() {
+  env_logger::init();
+
   Library::new().await.init().await;
 
   let router = Router::new().route(
