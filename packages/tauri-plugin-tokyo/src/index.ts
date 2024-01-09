@@ -1,85 +1,92 @@
 import { invoke } from '@tauri-apps/api/core';
+import { ClientMessage, Message } from 'tokyo-proto';
 
-export async function thumbnail(id: string): Promise<Uint8Array> {
-	return await invoke('plugin:library|get_thumbnail', { id });
+export async function request(clientMessage: ClientMessage) {
+	const message = ClientMessage.encode(clientMessage).finish();
+	const res = (await invoke('plugin:library|request', { message: [...message] })) as number[];
+	return Message.decode(new Uint8Array(res));
 }
 
-export async function locations(): Promise<
-	{
-		id: string;
-		name: string;
-		path: string;
-		library: string;
-	}[]
-> {
-	return await invoke('plugin:library|get_locations');
-}
+// export async function thumbnail(id: string): Promise<Uint8Array> {
+// 	return await invoke('plugin:library|get_thumbnail', { id });
+// }
 
-export async function createLocation(
-	name: string,
-	path: string
-): Promise<{
-	id: string;
-	name: string;
-	path: string;
-	library: string;
-}> {
-	return await invoke('plugin:library|post_location', {
-		name,
-		path,
-	});
-}
+// export async function locations(): Promise<
+// 	{
+// 		id: string;
+// 		name: string;
+// 		path: string;
+// 		library: string;
+// 	}[]
+// > {
+// 	return await invoke('plugin:library|get_locations');
+// }
 
-export async function index(name: string): Promise<
-	{
-		hash: string;
-		name: string;
-		path: string;
-		create_date: string;
-		rating: number;
-		orientation: number;
-		tags: Array<string>;
-	}[]
-> {
-	return await invoke('plugin:library|get_index', {
-		name,
-	});
-}
+// export async function createLocation(
+// 	name: string,
+// 	path: string
+// ): Promise<{
+// 	id: string;
+// 	name: string;
+// 	path: string;
+// 	library: string;
+// }> {
+// 	return await invoke('plugin:library|post_location', {
+// 		name,
+// 		path,
+// 	});
+// }
 
-export async function system(): Promise<{
-	disk_name: string;
-	disk_size: number;
-	disk_available: number;
-}> {
-	return await invoke('plugin:library|get_system', {});
-}
+// export async function index(name: string): Promise<
+// 	{
+// 		hash: string;
+// 		name: string;
+// 		path: string;
+// 		create_date: string;
+// 		rating: number;
+// 		orientation: number;
+// 		tags: Array<string>;
+// 	}[]
+// > {
+// 	return await invoke('plugin:library|get_index', {
+// 		name,
+// 	});
+// }
 
-export async function metadata(file: string): Promise<{
-	hash: string;
-	name: string;
-	path: string;
-	create_date: string;
-	rating: number;
-	orientation: number;
-	tags: string[];
-}> {
-	return await invoke('plugin:library|get_metadata', {
-		file,
-	});
-}
+// export async function system(): Promise<{
+// 	disk_name: string;
+// 	disk_size: number;
+// 	disk_available: number;
+// }> {
+// 	return await invoke('plugin:library|get_system', {});
+// }
 
-export async function getImage(
-	path: string,
-	params: {
-		exposure: number;
-	}
-): Promise<{
-	width: number;
-	height: number;
-	data: Uint8Array;
-}> {
-	return await invoke('plugin:library|get_image', {
-		path,
-		exposure: params.exposure,
-	});
-}
+// export async function metadata(file: string): Promise<{
+// 	hash: string;
+// 	name: string;
+// 	path: string;
+// 	create_date: string;
+// 	rating: number;
+// 	orientation: number;
+// 	tags: string[];
+// }> {
+// 	return await invoke('plugin:library|get_metadata', {
+// 		file,
+// 	});
+// }
+
+// export async function getImage(
+// 	path: string,
+// 	params: {
+// 		exposure: number;
+// 	}
+// ): Promise<{
+// 	width: number;
+// 	height: number;
+// 	data: Uint8Array;
+// }> {
+// 	return await invoke('plugin:library|get_image', {
+// 		path,
+// 		exposure: params.exposure,
+// 	});
+// }

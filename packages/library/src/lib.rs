@@ -2,7 +2,10 @@ mod db;
 mod edit;
 mod image;
 mod images;
+mod messages;
 mod ws;
+
+pub use messages::handle_client_request;
 
 use anyhow::Result;
 use axum::extract::WebSocketUpgrade;
@@ -302,7 +305,7 @@ pub async fn cached_thumb(file: &String) -> Vec<u8> {
   image::cached_thumb(file).await
 }
 
-pub async fn start_websocket_server() {
+pub async fn start_websocket_server() -> Result<()> {
   env_logger::init();
 
   Library::new().await.init().await;
@@ -316,6 +319,7 @@ pub async fn start_websocket_server() {
 
   axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
     .serve(router.into_make_service())
-    .await
-    .unwrap();
+    .await?;
+
+  Ok(())
 }

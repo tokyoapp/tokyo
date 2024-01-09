@@ -1,11 +1,8 @@
 use serde::de::DeserializeOwned;
-use std::{path::Path, sync::Arc};
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
-use tokio::sync::Mutex;
+use tokyo_proto::schema::{ClientMessage, Message};
 
-use crate::LibraryExt;
-
-pub async fn init<R: Runtime, C: DeserializeOwned>(
+pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
@@ -22,6 +19,14 @@ pub async fn init<R: Runtime, C: DeserializeOwned>(
 pub struct Library<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> Library<R> {
+  // pub async fn request(&self, req: ClientMessage) -> crate::Result<Message> {
+  //   println!("Request: {:?}", req);
+  //   let res = tokyo_library::handle_client_request(req)
+  //     .await
+  //     .expect("Could not handle");
+  //   Ok(res)
+  // }
+
   // pub async fn get_locations(&self) -> crate::Result<Vec<tokyo_library::db::Location>> {
   //   let db = Database::new().await;
   //   let d = db.location_list().await.unwrap();

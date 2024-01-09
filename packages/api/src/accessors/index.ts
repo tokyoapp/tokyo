@@ -3,9 +3,10 @@ import { IndexEntryMessage } from 'tokyo-proto';
 import * as proto from 'tokyo-proto';
 import Worker from '../Worker.js';
 import { MessageType } from '../lib.js';
+import { HostLibrary } from '../api/HostLibrary.js';
 
 export function createIndexAccessor() {
-	return new Accessor([Worker], {
+	return new Accessor([new HostLibrary()], {
 		createRequest(query: {
 			locations: string[];
 		}) {

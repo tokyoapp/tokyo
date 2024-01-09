@@ -2,6 +2,7 @@ import { Accessor } from 'tokyo-accessors';
 import { DynamicImage } from '../DynamicImage.js';
 import Worker from '../Worker.js';
 import { MessageType } from '../lib.js';
+import { HostLibrary } from '../api/HostLibrary.js';
 
 export function createThumbnailAccessor(hosts: string[]) {
 	const makeThumbnail = (blob?: Blob) => {
@@ -23,7 +24,7 @@ export function createThumbnailAccessor(hosts: string[]) {
 		return canvas;
 	};
 
-	return new Accessor([Worker], {
+	return new Accessor([new HostLibrary()], {
 		createRequest(query: {
 			ids: string[];
 		}) {

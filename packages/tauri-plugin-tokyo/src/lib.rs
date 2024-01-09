@@ -32,6 +32,7 @@ impl<R: Runtime, T: Manager<R>> crate::LibraryExt<R> for T {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("library")
     .invoke_handler(tauri::generate_handler![
+      commands::request,
       // commands::get_locations,
       // commands::get_thumbnail,
       // commands::get_index,
@@ -43,11 +44,11 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
       // commands::post_metadata,
     ])
     .setup(|app, api| {
-      // #[cfg(mobile)]
-      // let library = mobile::init(app, api);
-      // #[cfg(desktop)]
-      // let library = desktop::init(app, api);
-      // app.manage(library);
+      #[cfg(mobile)]
+      let library = mobile::init(app, api);
+      #[cfg(desktop)]
+      let library = desktop::init(app, api);
+      app.manage(library);
       Ok(())
     })
     .build()

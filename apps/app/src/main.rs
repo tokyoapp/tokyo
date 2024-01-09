@@ -3,7 +3,6 @@
   windows_subsystem = "windows"
 )]
 
-#[tokio::main]
-pub async fn main() {
+pub fn main() {
   app::AppBuilder::new().run()
 }

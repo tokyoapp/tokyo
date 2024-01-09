@@ -1,5 +1,5 @@
 use tauri::{App, Manager};
-use window_vibrancy::{apply_blur, apply_vibrancy, NSVisualEffectMaterial};
+use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
 #[cfg(mobile)]
 mod mobile;

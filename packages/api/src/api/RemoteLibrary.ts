@@ -2,14 +2,7 @@
 
 import * as Comlink from 'comlink';
 import * as library from 'tokyo-proto';
-import { MessageType } from '../MessageTypes.ts';
-
-const messageKeyToType = {
-	error: MessageType.Error,
-	list: MessageType.Locations,
-	index: MessageType.Index,
-	metadata: MessageType.Metadata,
-};
+import { parseMessage } from '../MessageTypes.ts';
 
 export class RemoteLibrary {
 	ws!: WebSocket;
@@ -18,7 +11,7 @@ export class RemoteLibrary {
 
 	public async onMessage(callback: (arg: any) => void) {
 		const listener = async (msg: library.Message) => {
-			callback(this.parseMessage(msg));
+			callback(parseMessage(msg));
 		};
 		this.messageListeners.add(listener);
 		return () => this.messageListeners.delete(listener);
@@ -28,31 +21,6 @@ export class RemoteLibrary {
 		for (const listener of this.messageListeners) {
 			listener(message);
 		}
-	}
-
-	parseMessage(msg: library.Message) {
-		if (msg.error) {
-			return {
-				type: 'error',
-				nonce: msg.nonce,
-				message: msg.message,
-			};
-		}
-
-		for (const key in msg) {
-			if (key !== 'nonce' && msg[key] !== undefined) {
-				return {
-					type: messageKeyToType[key] || key,
-					nonce: msg.nonce,
-					data: msg[key],
-				};
-			}
-		}
-
-		return {
-			type: MessageType.Error,
-			message: 'Message not handled',
-		};
 	}
 
 	backlog: library.ClientMessage[] = [];

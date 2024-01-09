@@ -2,9 +2,10 @@ import { Accessor } from 'tokyo-accessors';
 import * as proto from 'tokyo-proto';
 import Worker from '../Worker.js';
 import { MessageType } from '../MessageTypes.js';
+import { HostLibrary } from '../api/HostLibrary.js';
 
 export function createImageAccessor() {
-	return new Accessor([Worker], {
+	return new Accessor([new HostLibrary()], {
 		createRequest(query: { file: string; edits: string }) {
 			return [
 				proto.ClientMessage.create({

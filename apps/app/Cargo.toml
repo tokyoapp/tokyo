@@ -26,6 +26,7 @@ serde_json = "1.0"
 window-vibrancy = "0.4.2"
 tokyo-library = { path = "../../packages/library" }
 tokio = "1.32.0"
+futures = "0.3.30"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

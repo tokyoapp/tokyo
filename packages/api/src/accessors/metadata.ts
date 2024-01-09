@@ -3,6 +3,7 @@ import * as proto from 'tokyo-proto';
 import { DynamicImage } from '../DynamicImage.js';
 import { MessageType } from '../MessageTypes.js';
 import Worker from '../Worker.js';
+import { HostLibrary } from '../api/HostLibrary.js';
 
 export function createMetadataAccessor() {
 	const loadImage = (src: string): Promise<Image> => {
@@ -28,7 +29,7 @@ export function createMetadataAccessor() {
 		return canvas;
 	};
 
-	return new Accessor([Worker], {
+	return new Accessor([new HostLibrary()], {
 		createRequest(query: {
 			ids: string[];
 		}) {
