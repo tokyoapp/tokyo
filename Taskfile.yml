@@ -3,7 +3,7 @@
 version: "3"
 
 env:
-  RUST_LOG: info
+  RUST_LOG: info,rawler=error
   DATABASE: "file:///tmp/tokyo.db"
 
 includes:

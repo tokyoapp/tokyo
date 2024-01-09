@@ -2,24 +2,24 @@ use anyhow::anyhow;
 use image::{DynamicImage, ImageBuffer};
 use image::{Pixel, Rgb};
 use log::{error, info};
+use rawler::buffer::Buffer;
 use rawler::imgop::develop::RawDevelop;
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
   get_decoder, RawFile,
 };
 use serde::{Deserialize, Serialize};
-use std::io::Cursor;
 use std::path::Path;
-use std::time::Instant;
 use tokio::fs::File;
-use tokio::io::BufReader;
+use tokio::io::{self, AsyncReadExt};
 
 pub async fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
-  let file = File::open(&path).await.unwrap();
-  let buf: Vec<u8> = BufReader::new(file).buffer().to_vec();
-  info!("buf len {}", buf.len());
+  let mut file = File::open(&path).await.unwrap();
+  let mut buffer = Vec::new();
+  file.read_to_end(&mut buffer).await?;
 
-  let mut rawfile = RawFile::from(Cursor::new(buf));
+  let buf = Buffer::from(buffer);
+  let mut rawfile = RawFile::from(buf);
 
   let params = RawDecodeParams { image_index: 0 };
 
@@ -31,9 +31,7 @@ pub async fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
     }
   };
 
-  let decoder = get_decoder(&mut rawfile);
-
-  if let Ok(decoder) = decoder {
+  if let Ok(decoder) = get_decoder(&mut rawfile) {
     let rawimage = decoder.raw_image(&mut rawfile, params, false)?;
 
     let dev = RawDevelop::default();
@@ -179,9 +177,6 @@ pub fn process(
   source: ImageBuffer<Rgb<f32>, Vec<f32>>,
   paramters: &Edits,
 ) -> ImageBuffer<Rgb<f32>, Vec<f32>> {
-  let start = Instant::now();
-  info!("process");
-
   let mut source = source;
 
   for pixel in source.pixels_mut() {
@@ -221,9 +216,6 @@ pub fn process(
     out[1] = srgb_out[1];
     out[2] = srgb_out[2];
   }
-
-  let duration = start.elapsed();
-  info!("done in {}ms", duration.as_millis());
 
   return source;
 }

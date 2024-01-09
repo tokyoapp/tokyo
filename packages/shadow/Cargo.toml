@@ -14,3 +14,6 @@ srgb = "0.3.2"
 kolor = "0.1.9"
 env_logger = "0.10.1"
 log = "0.4.20"
+
+[profile.dev]
+opt-level = 3

@@ -4,7 +4,6 @@ use anyhow::anyhow;
 use anyhow::Result;
 use axum::extract::ws;
 use axum::extract::ws::WebSocket;
-use axum::http::request;
 use futures::sink::SinkExt;
 use futures::StreamExt;
 use image::imageops::FilterType;
@@ -12,10 +11,10 @@ use image::DynamicImage;
 use image::EncodableLayout;
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
-use std::borrow::BorrowMut;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokio::time::Instant;
 use tokyo_proto::schema::MetadataEntryMessage;
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
@@ -104,17 +103,24 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
 }
 
 pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<DynamicImage> {
+  let start = Instant::now();
+
+  info!("Load image");
   let image = tokyo_shadow::get_image(&Path::new(path)).await?;
 
-  let resized = image.resize(2048, 2048, FilterType::Lanczos3);
+  info!("Resize image");
+  let image = image.resize(2048, 2048, FilterType::Lanczos3);
 
   let edits: tokyo_shadow::Edits = match edits_json {
     Some(json) => tokyo_shadow::Edits::from_json(json),
     _ => tokyo_shadow::Edits::new(),
   };
 
-  let img = tokyo_shadow::process(resized.to_rgb32f(), &edits);
+  info!("Process image");
+  let img = tokyo_shadow::process(image.to_rgb32f(), &edits);
   let image = DynamicImage::ImageRgb32F(img);
+
+  info!("done in {}ms", start.elapsed().as_millis());
 
   Ok(image)
 }
@@ -211,7 +217,6 @@ pub async fn handle_socket(mut socket: WebSocket) {
   let (sender, mut receiver) = socket.split();
 
   let sender = Arc::new(Mutex::new(sender));
-  // let db = Arc::new(Mutex::new(Library::new().await));
 
   // Process incoming messages
   while let Some(msg) = receiver.next().await {
@@ -223,17 +228,14 @@ pub async fn handle_socket(mut socket: WebSocket) {
     };
 
     let data = msg.into_data();
-    let msg = schema::ClientMessage::parse_from_bytes(&data);
 
-    if let Ok(msg) = msg {
+    if let Ok(msg) = schema::ClientMessage::parse_from_bytes(&data) {
       let sender = sender.clone();
-      // let db = db.clone();
+
+      info!("Message: {:?}", msg);
 
       tokio::spawn(async move {
         let nonce = msg.nonce.clone();
-
-        let lib = &Library::new().await;
-        lib.init().await;
 
         // TODO: streamed responses
         let message = handle_socket_message(msg).await;

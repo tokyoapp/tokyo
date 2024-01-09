@@ -37,8 +37,6 @@ export default function Preview(props: {
 	models: Record<string, PropertyModel>;
 	onClose?: () => void;
 }) {
-	const [loading, setLoading] = createSignal(true);
-
 	let timeout: number;
 
 	const resize = () => {
@@ -56,7 +54,6 @@ export default function Preview(props: {
 		if (!image) return;
 
 		const img = new DynamicImage();
-		console.log(image);
 		img.fromRaw(image.image, image.width, image.height);
 
 		const v = document.querySelector('#viewport');
@@ -64,7 +61,7 @@ export default function Preview(props: {
 		v?.childNodes.forEach((node) => node.remove());
 		v?.appendChild(img.canvas());
 
-		setLoading(false);
+		console.timeEnd('render');
 	};
 
 	createEffect(async () => {
@@ -79,6 +76,7 @@ export default function Preview(props: {
 			file: _item.path,
 			edits: JSON.stringify(edits()),
 		});
+		console.time('render');
 
 		window.addEventListener('resize', resize);
 	});
@@ -121,6 +119,16 @@ export default function Preview(props: {
 	);
 
 	createEffect(() => {
+		const meta = metadata.data() as any;
+		const thumb = meta?.[0]?.thumbnail;
+		if (thumb) {
+			const v = document.querySelector('#viewport');
+			v?.childNodes.forEach((node) => node.remove());
+			v?.appendChild(thumb);
+		}
+	});
+
+	createEffect(() => {
 		renderImage(image.data());
 	});
 
@@ -131,7 +139,7 @@ export default function Preview(props: {
 	return (
 		<div class="relative z-0 grid grid-rows-[1fr] w-full h-full items-center">
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">
-				{loading() ? <Icon name="loader" /> : null}
+				{image.pending() ? <Icon name="loader" /> : null}
 			</div>
 
 			<div class="z-20 absolute top-2 left-3 w-auto right-3 flex gap-3 text-xs">
