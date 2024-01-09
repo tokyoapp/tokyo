@@ -54,7 +54,14 @@
 <body>
   <main></main>
 
-  <script type="module" src="./index.ts"></script>
+  <script type="module">
+    import { render } from 'solid-js/web';
+    import { App } from 'tokyo-ui';
+    import 'tokyo-ui/index.css';
+
+    const app = document.querySelector('main');
+    if (app) render(App, app);
+  </script>
 </body>
 
 </html>

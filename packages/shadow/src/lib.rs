@@ -1,50 +1,59 @@
 use anyhow::anyhow;
 use image::{DynamicImage, ImageBuffer};
 use image::{Pixel, Rgb};
+use log::{error, info};
 use rawler::imgop::develop::RawDevelop;
 use rawler::{
   decoders::{RawDecodeParams, RawMetadata},
-  get_decoder,
-  imgop::raw,
-  RawFile,
+  get_decoder, RawFile,
 };
 use serde::{Deserialize, Serialize};
+use std::io::Cursor;
+use std::path::Path;
 use std::time::Instant;
-use std::{fs::File, io::BufReader, path::Path};
+use tokio::fs::File;
+use tokio::io::BufReader;
 
-pub fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
-  let file = File::open(&path).unwrap();
-  let mut rawfile = RawFile::new(path, BufReader::new(file));
+pub async fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
+  let file = File::open(&path).await.unwrap();
+  let buf: Vec<u8> = BufReader::new(file).buffer().to_vec();
+  info!("buf len {}", buf.len());
+
+  let mut rawfile = RawFile::from(Cursor::new(buf));
 
   let params = RawDecodeParams { image_index: 0 };
 
   let metadata: Option<RawMetadata> = match get_decoder(&mut rawfile) {
     Ok(decoder) => Some(decoder.raw_metadata(&mut rawfile, params.clone()).unwrap()),
     Err(error) => {
-      println!("Error reading metadata {}", error.to_string());
+      error!("Error reading metadata {}", error.to_string());
       None
     }
   };
 
-  let decoder = get_decoder(&mut rawfile).unwrap();
+  let decoder = get_decoder(&mut rawfile);
 
-  let rawimage = decoder.raw_image(&mut rawfile, params, false)?;
+  if let Ok(decoder) = decoder {
+    let rawimage = decoder.raw_image(&mut rawfile, params, false)?;
 
-  let dev = RawDevelop::default();
-  let mut img = dev
-    .develop_intermediate(&rawimage)
-    .unwrap()
-    .to_dynamic_image()
-    .unwrap();
-  // spits out a srg gamma 2.4 image
+    let dev = RawDevelop::default();
+    let mut img = dev
+      .develop_intermediate(&rawimage)
+      .unwrap()
+      .to_dynamic_image()
+      .unwrap();
+    // spits out a srg gamma 2.4 image
 
-  img = match metadata.unwrap().exif.orientation.unwrap() {
-    5 | 6 => img.rotate90(),
-    7 | 8 => img.rotate270(),
-    _ => img,
-  };
+    img = match metadata.unwrap().exif.orientation.unwrap() {
+      5 | 6 => img.rotate90(),
+      7 | 8 => img.rotate270(),
+      _ => img,
+    };
 
-  return Ok(img);
+    return Ok(img);
+  }
+
+  Err(anyhow!("Failed to get image"))
 }
 
 /**
@@ -171,7 +180,7 @@ pub fn process(
   paramters: &Edits,
 ) -> ImageBuffer<Rgb<f32>, Vec<f32>> {
   let start = Instant::now();
-  println!("process");
+  info!("process");
 
   let mut source = source;
 
@@ -214,7 +223,7 @@ pub fn process(
   }
 
   let duration = start.elapsed();
-  println!("done in {}ms", duration.as_millis());
+  info!("done in {}ms", duration.as_millis());
 
   return source;
 }

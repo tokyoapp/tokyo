@@ -1,25 +1,24 @@
-use crate::cached_thumb;
 use crate::IndexEntry;
 use crate::Library;
 use anyhow::anyhow;
 use anyhow::Result;
 use axum::extract::ws;
 use axum::extract::ws::WebSocket;
+use axum::http::request;
 use futures::sink::SinkExt;
 use futures::StreamExt;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use image::EncodableLayout;
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
+use std::borrow::BorrowMut;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokyo_proto::schema::MetadataEntryMessage;
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 use tokyo_proto::Message;
-use tokyo_shadow::get_image;
-use tokyo_shadow::process;
-use tokyo_shadow::Edits;
 
 #[derive(Deserialize, Serialize)]
 struct FileInfo {
@@ -87,7 +86,7 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
   // TODO: this should be streamed
   for id in ids {
     let dir = lib.find_library(id.clone()).await.unwrap().path;
-    println!("[INDEX] {:?}, {:?}", dir, id);
+    info!("[INDEX] {:?}, {:?}", dir, id);
     let mut index = lib.get_index(dir).await.expect("Failed to get index");
     _index.append(&mut index);
   }
@@ -105,16 +104,16 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
 }
 
 pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<DynamicImage> {
-  let image = get_image(&Path::new(path))?;
+  let image = tokyo_shadow::get_image(&Path::new(path)).await?;
 
   let resized = image.resize(2048, 2048, FilterType::Lanczos3);
 
-  let edits: Edits = match edits_json {
-    Some(json) => Edits::from_json(json),
-    _ => Edits::new(),
+  let edits: tokyo_shadow::Edits = match edits_json {
+    Some(json) => tokyo_shadow::Edits::from_json(json),
+    _ => tokyo_shadow::Edits::new(),
   };
 
-  let img = process(resized.to_rgb32f(), &edits);
+  let img = tokyo_shadow::process(resized.to_rgb32f(), &edits);
   let image = DynamicImage::ImageRgb32F(img);
 
   Ok(image)
@@ -136,7 +135,7 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
     msg.nonce = req.nonce.clone();
 
     let index = req.index();
-    println!("Requested Index {:?}", index);
+    info!("Requested Index {:?}", index);
     msg.set_index(get_index_msg(lib, index.ids.clone()).await);
     let bytes = msg.write_to_bytes().unwrap();
     let packet = ws::Message::Binary(bytes);
@@ -200,7 +199,7 @@ async fn handle_socket_message(req: ClientMessage) -> Result<ws::Message> {
 }
 
 pub async fn handle_socket(mut socket: WebSocket) {
-  println!("Socket connected");
+  info!("Socket connected");
 
   // send system info
   let mut sys_msg = schema::Message::new();
@@ -231,6 +230,8 @@ pub async fn handle_socket(mut socket: WebSocket) {
       // let db = db.clone();
 
       tokio::spawn(async move {
+        let nonce = msg.nonce.clone();
+
         let lib = &Library::new().await;
         lib.init().await;
 
@@ -238,9 +239,12 @@ pub async fn handle_socket(mut socket: WebSocket) {
         let message = handle_socket_message(msg).await;
 
         if message.is_err() {
+          let error = message.err().unwrap().to_string();
+          error!("Error: {}", error);
           let mut error_message = schema::Message::new();
+          error_message.nonce = nonce;
           error_message.error = Some(true);
-          error_message.message = Some(message.err().unwrap().to_string());
+          error_message.message = Some(error);
 
           sender
             .lock()
@@ -253,6 +257,7 @@ pub async fn handle_socket(mut socket: WebSocket) {
             .await
             .expect("Error sending message");
         } else if let Ok(message) = message {
+          // TOOD: message should be a schema message, so I can give it the nonce here.
           sender
             .lock()
             .await

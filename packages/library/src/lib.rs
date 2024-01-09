@@ -10,6 +10,8 @@ use axum::routing::get;
 use axum::Router;
 use db::LibraryDatabase;
 use futures::future::join_all;
+use log::error;
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::sync::Arc;
@@ -196,7 +198,7 @@ impl Library {
       if let Ok(meta) = meta {
         index.push(meta);
       } else {
-        println!("Failed to get metadata for {}", path);
+        error!("Failed to get metadata for {}", path);
       }
     }
 
@@ -301,6 +303,8 @@ pub async fn cached_thumb(file: &String) -> Vec<u8> {
 }
 
 pub async fn start_websocket_server() {
+  env_logger::init();
+
   Library::new().await.init().await;
 
   let router = Router::new().route(
@@ -308,9 +312,9 @@ pub async fn start_websocket_server() {
     get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| ws::handle_socket(socket)) }),
   );
 
-  println!("Running app on http://0.0.0.0:8000");
+  info!("Running app on http://127.0.0.1:8000");
 
-  axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
+  axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
     .serve(router.into_make_service())
     .await
     .unwrap();

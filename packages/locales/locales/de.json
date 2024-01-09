@@ -1,33 +1,33 @@
 {
-  "copyright": "(c) Tim Havlicek",
+	"copyright": "(c) Tim Havlicek",
 
-  "search": "Suche",
+	"search": "Suche",
 
-  "notification_loaded": "Laedt library {}",
+	"notification_loaded": "Laedt library {}",
 
-  "explorer_sort_created": "Erstellt",
-  "explorer_sort_rating": "Bewertung",
-  "explorer_view_rating": "Bewertung",
-  "explorer_view_tags": "Tags",
-  "explorer_view_filename": "Dateiname",
+	"explorer_sort_created": "Erstellt",
+	"explorer_sort_rating": "Bewertung",
+	"explorer_view_rating": "Bewertung",
+	"explorer_view_tags": "Tags",
+	"explorer_view_filename": "Dateiname",
 
-  "system_disk_total": "{} GB",
-  "system_disk_available": "Verfuebar {} GB",
-  "system_photo_count": "{} Fotos",
+	"system_disk_total": "{} GB",
+	"system_disk_available": "Verfuebar {} GB",
+	"system_photo_count": "{} Fotos",
 
-  "viewer_back": "Zurueck",
+	"viewer_back": "Zurueck",
 
-  "info_name": "Name",
-  "info_hash": "Hash",
-  "info_path": "Pfad",
-  "info_date_created": "Datum erstellt",
-  "info_tags": "Tags",
-  "info_camera": "Kamera",
-  "info_lens": "Objektiv",
-  "info_aperture": "Blende",
-  "info_focal_length": "Brennweite",
-  "info_exposure_time": "Verschlusszeit",
-  "info_iso": "ISO",
+	"info_name": "Name",
+	"info_hash": "Hash",
+	"info_path": "Pfad",
+	"info_date_created": "Datum erstellt",
+	"info_tags": "Tags",
+	"info_camera": "Kamera",
+	"info_lens": "Objektiv",
+	"info_aperture": "Blende",
+	"info_focal_length": "Brennweite",
+	"info_exposure_time": "Verschlusszeit",
+	"info_iso": "ISO",
 
-  "create_library_headline": "Library erstellen"
+	"create_library_headline": "Library erstellen"
 }

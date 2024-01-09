@@ -3,6 +3,7 @@
 version: "3"
 
 env:
+  RUST_LOG: info
   DATABASE: "file:///tmp/tokyo.db"
 
 includes:
@@ -106,7 +107,13 @@ tasks:
     dir: ./
     cmds:
       - cargo check
-      - bun x biome check ./ {{.CLI_ARGS}}
+      - bun x biome check --diagnostic-level=error ./ {{.CLI_ARGS}}
+
+  fix:
+    desc: Fix files
+    dir: ./
+    cmds:
+      - bun x biome check --changed --diagnostic-level=error --apply-unsafe ./ {{.CLI_ARGS}}
 
   start:
     desc: Run desktop app with server as production build
