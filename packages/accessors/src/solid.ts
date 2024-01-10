@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 import { type Accessor } from './lib.js';
 
 /**
@@ -14,36 +14,32 @@ export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(ac
 
 	const [data, setData] = createSignal<Data>();
 	const [pending, setPending] = createSignal<boolean>();
-	const [params, setParams] = createSignal<Params>();
-	const [query, setQuery] = createSignal<Query>();
 
 	const accessor = accessorFn();
 
 	accessor.on('data', (data) => setData(data));
 	accessor.on('pending', (pending) => setPending(pending));
 
-	createEffect(() => {
-		accessor.params = params();
-	});
-
-	createEffect(() => {
-		accessor.query = query();
-	});
-
 	return {
 		data,
 		pending,
-		query(value?: Query) {
-			if (value) {
-				setQuery(value);
+		query(query?: Query) {
+			if (query) {
+				accessor.query = query;
 			}
-			return query();
+			return accessor.query;
 		},
-		params(value?: Params) {
-			if (value) {
-				setParams(value);
+		params(params?: Params) {
+			if (params) {
+				accessor.params = params;
 			}
-			return params();
+			return accessor.params;
+		},
+		mutate(value?: any) {
+			// if (value) {
+			// 	setParams(value);
+			// }
+			// return params();
 		},
 	};
 }

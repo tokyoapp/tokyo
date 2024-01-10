@@ -72,26 +72,39 @@ export class Accessor<
 		let cached = true;
 
 		for (const req of requests) {
-			const id = requests.indexOf(req);
+			this.pending = true;
 
-			const cacheKey = `${id}.${JSON.stringify(requests)}`;
-			this.cacheKeys[id] = cacheKey;
+			// TODO: Streaming
+			// - collect all responses for the same query
 
-			const timestamp = CACHE_TIMESTAMPS.get(cacheKey);
-			const age = timestamp ? now - timestamp : now;
+			// replicate the request to all peers
+			for (const stream of this.streams) {
+				const requestIndex = requests.indexOf(req);
+				const sourceIndex = this.streams.indexOf(stream);
 
-			if (CACHE.has(cacheKey) && age <= CACHE_MAX_AGE) {
-				// skip request if cache is valid
-				continue;
+				const cacheKey = `${sourceIndex}.${requestIndex}.${JSON.stringify(requests)}`;
+				// TODO: overwrites cache from other sources
+				this.cacheKeys[requestIndex] = cacheKey;
+
+				const timestamp = CACHE_TIMESTAMPS.get(cacheKey);
+				const age = timestamp ? now - timestamp : now;
+
+				if (CACHE.has(cacheKey) && age <= CACHE_MAX_AGE) {
+					// skip request if cache is valid
+					continue;
+				}
+
+				cached = false;
+
+				CACHE.delete(cacheKey);
+				CACHE_TIMESTAMPS.delete(cacheKey);
+
+				req.nonce = cacheKey;
+
+				const writer = stream.getWriter();
+				writer.write(req);
+				writer.releaseLock();
 			}
-
-			cached = false;
-
-			CACHE.delete(cacheKey);
-			CACHE_TIMESTAMPS.delete(cacheKey);
-
-			req.nonce = cacheKey;
-			this.request(req);
 		}
 
 		if (cached) {
@@ -172,6 +185,7 @@ export class Accessor<
 			if (nonce && this.cacheKeys.includes(nonce)) {
 				const data = await this._strategy.transform(msg);
 
+				// TODO: if the data is partial, eg streamed, the cache will just be overwritten
 				CACHE.set(nonce, data);
 				CACHE_TIMESTAMPS.set(nonce, Date.now());
 

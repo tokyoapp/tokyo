@@ -13,13 +13,13 @@ import { Rating, Stars } from './ui/Stars.jsx';
 export default function ExplorerView(props: {
 	small: boolean;
 }) {
-	const indexAccessor = useAccessor(createIndexAccessor);
-	const metadataAccessor = useAccessor(createMetadataAccessor);
-	const locationsAccessor = useAccessor(createLocationsAccessor);
+	const index = useAccessor(createIndexAccessor);
+	const metadata = useAccessor(createMetadataAccessor);
+	const locations = useAccessor(createLocationsAccessor);
 
-	locationsAccessor.query({});
+	locations.query({});
 
-	indexAccessor.params({
+	index.params({
 		sortCreated: true,
 		sortRating: false,
 	});
@@ -27,13 +27,13 @@ export default function ExplorerView(props: {
 	const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
 	createEffect(() => {
-		indexAccessor.query({
+		index.query({
 			locations: selectedLocations(),
 		});
 	});
 
 	createEffect(() => {
-		const locs = locationsAccessor.data() || [];
+		const locs = locations.data() || [];
 		if (selectedLocations().length === 0 && locs.length > 0) {
 			setSelectedLocations([locs[0].id]);
 		}
@@ -59,9 +59,9 @@ export default function ExplorerView(props: {
 
 	createEffect(
 		on(
-			() => [...(locationsAccessor.data()?.libraries || [])],
+			() => [...(locations.data()?.libraries || [])],
 			() => {
-				const locs = locationsAccessor.data()?.libraries || [];
+				const locs = locations.data()?.libraries || [];
 				if (selectedLocations().length === 0 && locs.length > 0) {
 					if (locs[0]) setSelectedLocations([locs[0].id]);
 				}
@@ -71,8 +71,8 @@ export default function ExplorerView(props: {
 
 	const rows = (width = 4) => {
 		const rs = [];
-		let currRow: any[] = [];
-		const items = indexAccessor.data();
+		let currRow: IndexEntryMessage[][] = [];
+		const items = index.data();
 
 		if (items)
 			for (const entry of items) {
@@ -141,7 +141,7 @@ export default function ExplorerView(props: {
 							multiple
 							class="px-1 pointer-events-auto hidden @5xl:block"
 							items={
-								locationsAccessor.data()?.libraries?.map((lib) => {
+								locations.data()?.libraries?.map((lib) => {
 									return {
 										id: lib.id,
 										value: `${lib.name}`,
@@ -164,7 +164,7 @@ export default function ExplorerView(props: {
 											e.stopImmediatePropagation();
 											e.stopPropagation();
 											e.preventDefault();
-											Jobs.run('create', [locationsAccessor.data()?.libraries]);
+											Jobs.run('create', [locations.data()?.libraries]);
 										}}
 										class="px-2 py-1 w-full text-left shadow-none opacity-50 hover:opacity-100"
 									>
@@ -175,11 +175,7 @@ export default function ExplorerView(props: {
 							}
 						>
 							{selectedLocations().map((loc) => {
-								return (
-									<span>
-										{locationsAccessor.data()?.libraries.find((l) => l.id === loc)?.name},{' '}
-									</span>
-								);
+								return <span>{locations.data()?.libraries.find((l) => l.id === loc)?.name}, </span>;
 							})}
 							<Icon class="pl-2" name="expand-down" />
 						</Combobox>
@@ -188,7 +184,7 @@ export default function ExplorerView(props: {
 							title="Sort"
 							multiple
 							onInput={(values) => {
-								indexAccessor.params({
+								index.params({
 									sortCreated: values.includes('created'),
 									sortRating: values.includes('rating'),
 								});
@@ -197,12 +193,12 @@ export default function ExplorerView(props: {
 								{
 									id: 'created',
 									value: t('explorer_sort_created'),
-									checked: indexAccessor.params()?.sortCreated || false,
+									checked: index.params()?.sortCreated || false,
 								},
 								{
 									id: 'rating',
 									value: t('explorer_sort_rating'),
-									checked: indexAccessor.params()?.sortRating || false,
+									checked: index.params()?.sortRating || false,
 								},
 							]}
 						>
@@ -219,10 +215,10 @@ export default function ExplorerView(props: {
             </FilterCombobox> */}
 
 						<Stars
-							value={indexAccessor.params()?.filterRating || 0}
+							value={index.params()?.filterRating || 0}
 							onChange={(v) =>
-								indexAccessor.params({
-									filterRating: v === indexAccessor.params()?.filterRating ? 0 : v,
+								index.params({
+									filterRating: v === index.params()?.filterRating ? 0 : v,
 								})
 							}
 						/>
@@ -275,10 +271,10 @@ export default function ExplorerView(props: {
 											return (
 												<Thumbnail
 													onMount={() => {
-														const ids = metadataAccessor.query()?.ids || [];
+														const ids = metadata.query()?.ids || [];
 														const id = items[0].path;
 														if (!ids.includes(id)) {
-															metadataAccessor.query({
+															metadata.query({
 																ids: [...ids, items[0].path],
 															});
 														}
@@ -290,8 +286,7 @@ export default function ExplorerView(props: {
 													tags={viewSettings.showTags ? tags(items[0]) : []}
 													rating={viewSettings.showRating ? items[0].rating : undefined}
 													image={
-														metadataAccessor.data()?.find((item) => item.hash === items[0].hash)
-															?.thumbnail
+														metadata.data()?.find((item) => item.hash === items[0].hash)?.thumbnail
 													}
 													onClick={() => {
 														setSelection(items);
