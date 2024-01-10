@@ -20,11 +20,9 @@ export function createLocationsAccessor() {
 			//   }),
 			// })
 		},
-
 		transform(msg) {
 			if (msg.type === MessageType.Locations) return msg;
 		},
-
 		compute([data]) {
 			return data?.data;
 		},

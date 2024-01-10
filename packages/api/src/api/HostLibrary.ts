@@ -6,13 +6,13 @@ export class HostLibrary {
 	stream() {
 		let controller: ReadableStreamDefaultController<any>;
 
-		const read = new ReadableStream({
+		const read = new ReadableStream<ReturnType<typeof parseMessage>>({
 			start(ctlr) {
 				controller = ctlr;
 			},
 		});
 
-		const write = new WritableStream({
+		const write = new WritableStream<library.ClientMessage>({
 			async write(chunk) {
 				const res = await request(library.ClientMessage.create(chunk));
 				const msg = parseMessage(res);

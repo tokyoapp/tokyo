@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { type Accessor } from './lib.ts';
+import { type Accessor } from './lib.js';
 
 /**
  * Accessor React hook that will return the data, error and pending state of the accessor.
  * @param accessorFn Function that builds the accessor instance.
- * @param params The params that will be used to fetch and filter the data.
+ * @param query
+ * @param params
  */
-export function useAccessor<T extends Accessor>(
+export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
 	accessorFn: () => T,
-	params: Partial<T['params']>,
-	query: Partial<T['query']>
+	query: Partial<T['query']>,
+	params?: Partial<T['params']>
 ) {
+	type Data = ReturnType<T['_strategy']['compute']>;
+
 	const accessor = useMemo(() => accessorFn(), [accessorFn]);
-	const [data, setData] = useState<Awaited<ReturnType<(typeof accessor)['compute']>> | undefined>();
+	const [data, setData] = useState<Data>();
 
 	const pending = useSyncExternalStore(
 		(callback) => accessor.on('pending', callback),

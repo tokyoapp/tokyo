@@ -3,6 +3,7 @@ import * as Comlink from 'comlink';
 /**
  * [ ] TODO: Handle compute errors
  * [ ] TODO: Clear cache entries that were not accessed for a while to save memory
+ * [ ] TODO: Streaming data from multiple sources
  * [ ] TODO: Stream params to the accessor
  */
 
@@ -32,12 +33,12 @@ type AccessorState = {
  * Responsible for handling the communication with the API, caching that data and keeping the data up to date with the given parameters.
  */
 export class Accessor<
-	Query = any,
-	Params = any,
-	HandledMessage = any,
-	Data = any,
-	RequestMessage extends { nonce?: string } = any,
-	ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState } = any,
+	Query,
+	Params,
+	HandledMessage,
+	Data,
+	RequestMessage extends { nonce?: string },
+	ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState },
 > {
 	private _query?: Query;
 	private _params?: Params;
@@ -124,7 +125,7 @@ export class Accessor<
 		clients: {
 			stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
 		}[],
-		private _strategy: {
+		public _strategy: {
 			/**
 			 * Create request message from params.
 			 */
@@ -139,8 +140,6 @@ export class Accessor<
 			compute: (data: (HandledMessage | undefined)[], params: Params | undefined) => Data;
 		}
 	) {
-		// If a client connects after a request has been made, the request will run into the void.
-		//  Not a concern here, since we connect in the constructor.
 		for (const client of clients) {
 			this.stream(client);
 		}
@@ -200,6 +199,9 @@ export class Accessor<
 			writer.write(mutation);
 			writer.releaseLock();
 		}
+
+		// If a client connects after a request has been made, the request will run into the void.
+		//  Not a concern here, since we connect in the constructor.
 	}
 
 	private target = new EventTarget();
