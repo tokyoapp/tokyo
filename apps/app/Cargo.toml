@@ -5,7 +5,8 @@ description = "A Tauri App"
 edition = "2021"
 
 [lib]
-crate-type = ["staticlib", "cdylib", "rlib"]
+name = "tauri_app_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -18,8 +19,6 @@ tauri = { version = "2.0.0-beta.12", features = [
     "devtools",
 ] }
 tauri-plugin-os = "2.0.0-beta.2"
-tauri-plugin-app = "2.0.0-alpha.2"
-tauri-plugin-window = "2.0.0-alpha.2"
 tauri-plugin-tokyo = { path = "../../packages/tauri-plugin-tokyo" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

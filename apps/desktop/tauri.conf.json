@@ -1,29 +1,13 @@
 {
+  "productName": "tokyo-desktop",
+  "version": "0.0.0",
+  "identifier": "com.tokyo.dev",
   "build": {
-    "devPath": "http://localhost:1420",
-    "distDir": "./dist",
-    "withGlobalTauri": true
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "./dist"
   },
-  "package": {
-    "productName": "app",
-    "version": "0.0.0"
-  },
-  "tauri": {
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.luckydye.dev",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "transparent": true,
@@ -38,6 +22,20 @@
         "height": 1200
       }
     ],
+    "security": {
+      "csp": null
+    },
     "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   }
 }

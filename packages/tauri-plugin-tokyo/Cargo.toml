@@ -5,7 +5,7 @@ authors = ["You"]
 description = ""
 edition = "2021"
 rust-version = "1.65"
-exclude = ["/examples", "/webview-dist", "/webview-src", "/node_modules"]
+exclude = ["/node_modules"]
 links = "tauri-plugin-tokyo"
 
 [target]
@@ -23,3 +23,4 @@ tokio = { version = "1.35.0", features = ["rt", "rt-multi-thread", "macros"] }
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-alpha.8" }
+tauri-plugin = { version = "2.0.0-beta.10", features = ["build"] }

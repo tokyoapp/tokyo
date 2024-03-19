@@ -1,8 +1,8 @@
 {
-	"name": "tokyo-app",
-	"version": "0.0.0",
-	"description": "",
-	"dependencies": {
-		"tokyo-ui": "workspace:"
-	}
+  "name": "tokyo-desktop",
+  "version": "0.0.0",
+  "description": "",
+  "dependencies": {
+    "tokyo-ui": "workspace:"
+  }
 }

@@ -1,46 +1,44 @@
 {
-	"build": {
-		"devPath": "http://localhost:1420",
-		"distDir": "./dist",
-		"withGlobalTauri": true
-	},
-	"package": {
-		"productName": "app",
-		"version": "0.0.0"
-	},
-	"tauri": {
-		"bundle": {
-			"iOS": {
-				"developmentTeam": "luckydye"
-			},
-			"active": true,
-			"targets": "all",
-			"identifier": "com.luckydye.dev",
-			"icon": [
-				"icons/32x32.png",
-				"icons/128x128.png",
-				"icons/128x128@2x.png",
-				"icons/icon.icns",
-				"icons/icon.ico"
-			]
-		},
-		"security": {
-			"csp": null
-		},
-		"windows": [
-			{
-				"transparent": true,
-				"fileDropEnabled": true,
-				"titleBarStyle": "Overlay",
-				"decorations": true,
-				"hiddenTitle": true,
-				"fullscreen": false,
-				"resizable": true,
-				"title": "TOKYO",
-				"width": 1400,
-				"height": 1200
-			}
-		],
-		"macOSPrivateApi": true
-	}
+  "productName": "tokyo-desktop",
+  "version": "0.0.0",
+  "identifier": "com.tokyo.dev",
+  "build": {
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "./dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "transparent": true,
+        "fileDropEnabled": true,
+        "titleBarStyle": "Overlay",
+        "decorations": true,
+        "hiddenTitle": true,
+        "fullscreen": false,
+        "resizable": true,
+        "title": "TOKYO",
+        "width": 1400,
+        "height": 1200
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "iOS": {
+      "developmentTeam": "luckydye"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
 }

@@ -4,6 +4,8 @@ version: "3"
 
 env:
   RUST_LOG: info,rawler=error
+  JS_LOG: info
+  RUST_BACKTRACE: 1
   DATABASE: "file:///tmp/tokyo.db"
 
 includes:
@@ -16,20 +18,28 @@ includes:
     dir: apps/app
     taskfile: apps/app/Taskfile.yml
 
+  desktop:
+    aliases: [d]
+    dir: apps/desktop
+    taskfile: apps/desktop/Taskfile.yml
+
   website:
     aliases: [web]
     dir: apps/website
     taskfile: apps/website/Taskfile.yml
 
 tasks:
+  default:
+    silent: true
+    cmd: task -l --sort default
+
   run:
     desc: Run a task recursivly in all included Taskfiles.
     vars:
       TASK: '{{.TASK | default "help"}}'
       TASKS:
         sh: echo $(task --list --json | jq -r '.tasks[] | select(.name | contains(":{{.TASK}}")).name')
-    cmds:
-      - task --parallel {{.TASKS}}
+    cmd: task --parallel {{.TASKS}}
 
   setup:ubuntu:
     desc: Install system dependencies
@@ -74,7 +84,7 @@ tasks:
     desc: Run desktop app with server
     deps: [setup]
     cmds:
-      - task --parallel server:dev app:dev
+      - task --parallel server:dev desktop:dev
 
   dev:shadow:
     desc: Run shadow pacakge test
@@ -105,11 +115,9 @@ tasks:
 
   fix:
     desc: Fix files
-    cmds:
-      - bun x biome check --changed --diagnostic-level=error --apply-unsafe ./ {{.CLI_ARGS}}
+    cmd: bun x biome check --changed --diagnostic-level=error --apply-unsafe ./ {{.CLI_ARGS}}
 
   start:
     desc: Run desktop app with server as production build
     deps: [build]
-    cmds:
-      - task --parallel server:start app:start
+    cmd: task --parallel server:start app:start
