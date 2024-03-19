@@ -1,45 +1,74 @@
 {
-	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"vcs": {
-		"clientKind": "git",
-		"enabled": true,
-		"defaultBranch": "main"
-	},
-	"organizeImports": {
-		"enabled": true
-	},
-	"formatter": {
-		"enabled": true,
-		"indentWidth": 2,
-		"lineWidth": 100,
-		"indentStyle": "tab",
-		"formatWithErrors": true
-	},
-	"linter": {
-		"rules": {
-			"complexity": {
-				"noBannedTypes": "off",
-				"noStaticOnlyClass": "off",
-				"noForEach": "off"
-			},
-			"a11y": {
-				"useKeyWithClickEvents": "off"
-			},
-			"suspicious": {
-				"noExplicitAny": "warn"
-			},
-			"style": {
-				"noNonNullAssertion": "off"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "single",
-			"semicolons": "always",
-			"trailingComma": "es5",
-			"quoteProperties": "asNeeded",
-			"jsxQuoteStyle": "double"
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "ignore": [
+      ".mise",
+      ".astro",
+      ".nuxt",
+      ".output",
+      "vendor",
+      "public",
+      "dist"
+    ]
+  },
+  "organizeImports": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+    "indentWidth": 2,
+    "lineWidth": 90,
+    "indentStyle": "space",
+    "formatWithErrors": true,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "noDefaultExport": "warn"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "warn",
+        "noForEach": "warn"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noExplicitAny": "warn",
+        "noConsoleLog": "warn"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["clsx", "cva", "twMerge", "tw"]
+          }
+        }
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingComma": "all",
+      "quoteProperties": "asNeeded",
+      "jsxQuoteStyle": "double"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none",
+      "lineWidth": 30
+    }
+  }
 }

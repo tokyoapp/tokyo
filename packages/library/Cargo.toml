@@ -12,7 +12,7 @@ sha256 = "1.4.0"
 walkdir = "2.3.3"
 image = "0.24.7"
 rawloader = "0.37.1"
-rawler = { git = "https://github.com/luckydye/dnglab", rev = "c088515" }
+rawler = { git = "https://github.com/tokyoapp/dnglab", rev = "11450c60e34e1deb7fa371e0a0a0b4e6e131c53b" }
 roxmltree = "0.18"
 tokio = "1.32.0"
 anyhow = "1.0.75"

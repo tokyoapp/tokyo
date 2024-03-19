@@ -1,12 +1,12 @@
 {
-	"name": "tauri-plugin-tokyo",
-	"version": "0.0.0",
-	"author": "Tim Havlicek",
-	"description": "",
-	"main": "./src/index.ts",
-	"devDependencies": {},
-	"dependencies": {
-		"tokyo-proto": "workspace:",
-		"@tauri-apps/api": "2.0.0-alpha.13"
-	}
+  "name": "tauri-plugin-tokyo",
+  "version": "0.0.0",
+  "author": "Tim Havlicek",
+  "description": "",
+  "main": "./src/index.ts",
+  "devDependencies": {},
+  "dependencies": {
+    "tokyo-proto": "workspace:",
+    "@tauri-apps/api": "2.0.0-beta.6"
+  }
 }

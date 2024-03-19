@@ -1,10 +1,12 @@
-import { invoke } from '@tauri-apps/api/core';
-import { ClientMessage, Message } from 'tokyo-proto';
+import { invoke } from "@tauri-apps/api/core";
+import { ClientMessage, Message } from "tokyo-proto";
 
 export async function request(clientMessage: ClientMessage) {
-	const message = ClientMessage.encode(clientMessage).finish();
-	const res = (await invoke('plugin:library|request', { message: [...message] })) as number[];
-	return Message.decode(new Uint8Array(res));
+  const message = ClientMessage.encode(clientMessage).finish();
+  const res = (await invoke("plugin:library|request", {
+    message: [...message],
+  })) as number[];
+  return Message.decode(new Uint8Array(res));
 }
 
 // export async function thumbnail(id: string): Promise<Uint8Array> {
