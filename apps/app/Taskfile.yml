@@ -15,6 +15,11 @@ tasks:
     cmds:
       - cargo tauri ios dev
 
+  tauri:build:ios:
+    dir: ./
+    cmds:
+      - cargo tauri ios build
+
   tauri:build:
     dir: ./
     cmds:
