@@ -6,39 +6,25 @@ silent: true
 
 tasks:
   tauri:dev:
-    dir: ./
     cmds:
       - cargo tauri dev
 
   tauri:dev:ios:
-    dir: ./
     cmds:
       - cargo tauri ios dev
 
-  tauri:build:ios:
-    dir: ./
-    cmds:
-      - cargo tauri ios build
-
-  tauri:build:
-    dir: ./
-    cmds:
-      - cargo tauri build
-
-  ui:dev:
-    dir: ./
-    cmds:
-      - bun x tokyo-ui dev
-
   ui:build:
-    dir: ./
     cmds:
       - bun x tokyo-ui build
+
+  tauri:build:ios:
+    deps: [ui:build]
+    cmds:
+      - cargo tauri ios build
 
   dev:
     desc: Dev
     prefix: "desktop"
-    dir: ./
     cmd: task --parallel ui:dev tauri:dev
 
   dev:ios:
@@ -47,15 +33,6 @@ tasks:
     dir: "./"
     cmd: task --parallel ui:dev tauri:dev:ios
 
-  build:
-    desc: Build app
-    dir: ./
+  ui:dev:
     cmds:
-      - task: ui:build
-      - task: tauri:build
-
-  start:
-    desc: Start app in production
-    dir: ../../target/release
-    cmds:
-      - ./app
+      - bun x tokyo-ui dev

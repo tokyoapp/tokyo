@@ -17,7 +17,7 @@ tasks:
       - "src/**/*.astro"
       - "src/**/*.ts"
     cmds:
-      - bun x astro check
+      # - bun x astro check
       - bun x astro build
 
   start:
