@@ -5,7 +5,7 @@ use tauri::{
 };
 
 #[cfg(target_os = "android")]
-const PLUGIN_IDENTIFIER: &str = "com.luckydye.plugin.library";
+const PLUGIN_IDENTIFIER: &str = "com.luckydye.plugin.tokyo";
 
 #[cfg(target_os = "ios")]
 tauri::ios_plugin_binding!(init_plugin_library);
@@ -16,7 +16,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   api: PluginApi<R, C>,
 ) -> crate::Result<Library<R>> {
   #[cfg(target_os = "android")]
-  let handle = api.register_android_plugin(PLUGIN_IDENTIFIER, "ExamplePlugin")?;
+  let handle = api.register_android_plugin(PLUGIN_IDENTIFIER, "tauri_plugin_tokyo")?;
   #[cfg(target_os = "ios")]
   let handle = api.register_ios_plugin(init_plugin_library)?;
   Ok(Library(handle))

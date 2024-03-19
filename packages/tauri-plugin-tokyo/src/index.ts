@@ -3,7 +3,7 @@ import { ClientMessage, Message } from "tokyo-proto";
 
 export async function request(clientMessage: ClientMessage) {
   const message = ClientMessage.encode(clientMessage).finish();
-  const res = (await invoke("plugin:library|request", {
+  const res = (await invoke("plugin:tokyo|request", {
     message: [...message],
   })) as number[];
   return Message.decode(new Uint8Array(res));

@@ -33,15 +33,3 @@ task setup
 ```sh
 task dev
 ```
-
-### Packages
-
-- `apps/app` - The desktop and mobile app
-- `apps/server` - A headless server
-- `apps/website` - The landing page
-
-- `packages/api` - Typescript API client
-- `packages/library` - Persistent structured data storage and file handling
-- `packages/proto` - Protobuf definitions
-- `packages/shadow` - Image manipulation library
-- `packages/ui` - User Interface components

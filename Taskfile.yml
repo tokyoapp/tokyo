@@ -33,21 +33,6 @@ tasks:
     silent: true
     cmd: task -l --sort default
 
-  run:
-    desc: Run a task recursivly in all included Taskfiles.
-    vars:
-      TASK: '{{.TASK | default "help"}}'
-      TASKS:
-        sh: echo $(task --list --json | jq -r '.tasks[] | select(.name | contains(":{{.TASK}}")).name')
-    cmd: task --parallel {{.TASKS}}
-
-  setup:ubuntu:
-    desc: Install system dependencies
-    cmds:
-      - sudo apt update
-      - sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsqlite3-dev
-      - task: setup
-
   setup:
     desc: Install dependencies
     sources:
@@ -66,19 +51,21 @@ tasks:
       - bun install
       - cargo install cargo-watch
       - cargo install wasm-pack
-      - cargo install tauri-cli --version "^2.0.0-alpha"
+      - cargo install tauri-cli
       - cargo check
+
+  setup:ubuntu:
+    desc: Install system dependencies
+    cmds:
+      - sudo apt update
+      - sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsqlite3-dev
+      - task: setup
 
   codegen:
     dir: "./packages/proto"
     cmds:
       - cargo install protobuf-codegen
       - bun x cargo run --bin force-build
-
-  reset:
-    desc: Reset repository files
-    prompt: Do you really want to reset the repository?
-    cmd: git clean -xdf .
 
   dev:
     desc: Run desktop app with server
@@ -90,8 +77,7 @@ tasks:
     desc: Run shadow pacakge test
     dir: "packages/shadow"
     deps: [setup]
-    cmds:
-      - RUST_BACKTRACE=1 cargo watch -x run
+    cmd: cargo watch -x run
 
   dev:ios:
     desc: Run ios app in simulator

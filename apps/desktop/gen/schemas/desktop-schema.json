@@ -967,31 +967,17 @@
           ]
         },
         {
-          "description": "tokyo:allow-execute -> Enables the execute command without any pre-configured scope.",
+          "description": "tokyo:allow-request -> Enables the request command without any pre-configured scope.",
           "type": "string",
           "enum": [
-            "tokyo:allow-execute"
+            "tokyo:allow-request"
           ]
         },
         {
-          "description": "tokyo:allow-ping -> Enables the ping command without any pre-configured scope.",
+          "description": "tokyo:deny-request -> Denies the request command without any pre-configured scope.",
           "type": "string",
           "enum": [
-            "tokyo:allow-ping"
-          ]
-        },
-        {
-          "description": "tokyo:deny-execute -> Denies the execute command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tokyo:deny-execute"
-          ]
-        },
-        {
-          "description": "tokyo:deny-ping -> Denies the ping command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tokyo:deny-ping"
+            "tokyo:deny-request"
           ]
         },
         {
