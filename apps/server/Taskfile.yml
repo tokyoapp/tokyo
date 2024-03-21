@@ -1,0 +1,29 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  dev:
+    desc: Run library in dev
+    prefix: "library"
+    cmds:
+      - cargo watch -x run
+
+  build:
+    desc: Build library
+    sources:
+      - "src/**/*.rs"
+    cmds:
+      - cargo build -Z unstable-options --out-dir dist
+      - chmod +x dist/library
+
+  install:
+    desc: Install Library
+    cmds:
+      - cargo install --path .
+
+  start:
+    desc: Start compiled library
+    deps: [build]
+    cmds:
+      - ./dist/library

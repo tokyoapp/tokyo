@@ -1,9 +1,0 @@
-[tasks."ui:dev"]
-run = ["bun x tokyo-ui dev"]
-
-[tasks."ui:build"]
-run = ["bun x tokyo-ui build"]
-
-[tasks.build]
-description = "Build app"
-run = ["mise run ui:build ::: tauri:build"]

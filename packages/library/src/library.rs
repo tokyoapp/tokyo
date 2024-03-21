@@ -4,10 +4,12 @@ use crate::image;
 use crate::IndexEntry;
 use crate::MetadataEntry;
 use crate::SystemInfo;
+use ccapi;
 
 use anyhow::Result;
 use futures::future::join_all;
 use log::error;
+use log::info;
 use std::borrow::Borrow;
 use std::sync::Arc;
 use sysinfo::DiskExt;
@@ -55,6 +57,31 @@ impl Library {
   }
 
   pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
+    info!("Getting file meta: {}", p);
+
+    // if p.contains("/ccapi") {
+    //   let camera = ccapi::CCAPI::new("127.0.0.1:3000");
+    //   let storage = camera.storage().await?;
+
+    //   let mut tags: Vec<String> = Vec::new();
+
+    //   let meta_data = MetadataEntry {
+    //     create_date: metadata.create_date,
+    //     exif: serde_json::to_string(&metadata.exif).unwrap(),
+    //     hash: metadata.hash,
+    //     height: metadata.height as i32,
+    //     width: metadata.width as i32,
+    //     make: metadata.make,
+    //     name: metadata.name,
+    //     orientation: metadata.orientation as i32,
+    //     rating,
+    //     tags,
+    //     thumbnail: image::cached_thumb(&p.to_string()).await,
+    //   };
+
+    //   return Some(meta_data);
+    // }
+
     let meta = image::metadat(&p.to_string());
 
     if let Ok(metadata) = meta {
@@ -139,7 +166,32 @@ impl Library {
   }
 
   pub async fn get_index_ccapi(&self, dir: String) -> Result<Vec<IndexEntry>> {
-    Err(anyhow::anyhow!("Not implemented"))
+    // "ccapi://127.0.0.1:3000"
+    let host = dir.split("://").nth(1).unwrap();
+    info!("Host: {}", host);
+
+    let camera = ccapi::CCAPI::new(host);
+
+    let storage = camera.storage().await?;
+    let files = camera.files(&storage.storagelist[0]).await?;
+
+    info!("Files: {:?}", files);
+
+    let index = files.iter().map(|file| {
+      let filename = file.split("/").last().unwrap();
+
+      IndexEntry {
+        name: filename.to_string(),
+        create_date: "".to_string(),
+        hash: file.to_string(),
+        orientation: 0,
+        path: file.to_string(),
+        rating: 0,
+        tags: Vec::new(),
+      }
+    });
+
+    Ok(index.collect())
   }
 
   pub async fn add_file(&self, hash: String, rating: i32) {

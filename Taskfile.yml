@@ -1,0 +1,109 @@
+# https://taskfile.dev
+
+version: "3"
+
+env:
+  RUST_LOG: info,rawler=error
+  JS_LOG: info
+  RUST_BACKTRACE: 1
+  DATABASE: "file:///tmp/tokyo.db"
+
+includes:
+  server:
+    dir: apps/server
+    taskfile: apps/server/Taskfile.yml
+
+  app:
+    aliases: [app]
+    dir: apps/app
+    taskfile: apps/app/Taskfile.yml
+
+  desktop:
+    aliases: [d]
+    dir: apps/desktop
+    taskfile: apps/desktop/Taskfile.yml
+
+  website:
+    aliases: [web]
+    dir: apps/website
+    taskfile: apps/website/Taskfile.yml
+
+tasks:
+  default:
+    silent: true
+    cmd: task -l --sort default
+
+  setup:
+    desc: Install dependencies
+    sources:
+      - .mise.toml
+      - bun.lockb
+      - package.json
+      - Cargo.toml
+      - Cargo.lock
+      - "**/package.json"
+      - .env
+      - .env.example
+    cmds:
+      - cp -n .env.example .env 2> /dev/null || true
+      - mise install 2> /dev/null || true
+      - task: codegen
+      - bun install
+      - cargo install cargo-watch
+      - cargo install wasm-pack
+      - cargo install tauri-cli
+      - cargo check
+
+  setup:ubuntu:
+    desc: Install system dependencies
+    cmds:
+      - sudo apt update
+      - sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsqlite3-dev
+      - task: setup
+
+  codegen:
+    dir: "./packages/proto"
+    cmds:
+      - cargo install protobuf-codegen
+      - bun x cargo run --bin force-build
+
+  dev:
+    desc: Run desktop app with server
+    deps: [setup]
+    cmds:
+      - task --parallel server:dev desktop:dev
+
+  dev:shadow:
+    desc: Run shadow pacakge test
+    dir: "packages/shadow"
+    deps: [setup]
+    cmd: cargo watch -x run
+
+  dev:ios:
+    desc: Run ios app in simulator
+    deps: [setup]
+    cmd: task --parallel server:dev app:dev:ios
+
+  build:
+    desc: Build app
+    deps: [setup]
+    cmd: task --parallel server:build app:build
+
+  build:docker:
+    desc: Build docker image for library server
+    cmd: docker buildx build --platform linux/amd64 -f apps/server/Dockerfile --tag luckydye/tokyo:latest .
+
+  check:
+    desc: Check files
+    cmds:
+      - cargo check
+      - bun x biome check --diagnostic-level=error ./ {{.CLI_ARGS}}
+
+  fix:
+    desc: Fix files
+    cmd: bun x biome check --changed --diagnostic-level=error --apply-unsafe ./ {{.CLI_ARGS}}
+
+  start:
+    desc: Run desktop app with server as production build
+    deps: [build]
+    cmd: task --parallel server:start app:start

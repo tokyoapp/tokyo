@@ -1,0 +1,43 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  tauri:dev:
+    dir: ./
+    cmds:
+      - cargo tauri dev
+
+  tauri:build:
+    dir: ./
+    cmds:
+      - cargo tauri build
+
+  ui:dev:
+    dir: ./
+    cmds:
+      - bun x tokyo-ui dev
+
+  ui:build:
+    dir: ./
+    cmds:
+      - bun x tokyo-ui build
+
+  dev:
+    desc: Dev
+    prefix: "desktop"
+    dir: ./
+    cmd: task --parallel ui:dev tauri:dev
+
+  build:
+    desc: Build app
+    dir: ./
+    cmds:
+      - task: ui:build
+      - task: tauri:build
+
+  start:
+    desc: Start app production build
+    dir: ../../target/release
+    cmds:
+      - ./app

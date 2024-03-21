@@ -5,6 +5,7 @@ use anyhow::Result;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use image::EncodableLayout;
+use log::error;
 use log::info;
 use std::path::Path;
 use tokio::time::Instant;
@@ -12,6 +13,8 @@ use tokyo_proto::schema::MetadataEntryMessage;
 use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
 
 async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
+  error!("Getting file meta: {:?}", file);
+
   let mut msg = schema::Message::new();
   let mut entires_msg = schema::MetadataMessage::new();
 
@@ -109,6 +112,8 @@ pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<D
 
 pub async fn handle_client_request(req: ClientMessage) -> Result<schema::Message> {
   let lib = &Library::new().await;
+
+  info!("Request: {:?}", req);
 
   if req.has_locations() {
     let mut msg = schema::Message::new();

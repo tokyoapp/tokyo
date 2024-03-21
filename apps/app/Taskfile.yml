@@ -1,0 +1,31 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  tauri:dev:
+    cmds:
+      - cargo tauri dev
+
+  tauri:dev:ios:
+    cmds:
+      - cargo tauri ios dev
+
+  ui:build:
+    cmds:
+      - bun x tokyo-ui build
+
+  tauri:build:ios:
+    deps: [ui:build]
+    cmds:
+      - cargo tauri ios build
+
+  dev:ios:
+    desc: Dev ios
+    prefix: ios
+    dir: "./"
+    cmd: task --parallel ui:dev tauri:dev:ios
+
+  ui:dev:
+    cmds:
+      - bun x tokyo-ui dev

@@ -4987,6 +4987,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
+ "ccapi",
  "env_logger",
  "futures",
  "hyper 1.2.0",
