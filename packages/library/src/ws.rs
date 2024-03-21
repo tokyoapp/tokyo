@@ -1,10 +1,14 @@
 use crate::messages::handle_client_request;
 use crate::Library;
+use anyhow::Result;
 use axum::extract::ws;
+use axum::extract::WebSocketUpgrade;
+use axum::routing::get;
+use axum::Router;
 use futures::sink::SinkExt;
 use futures::stream::SplitSink;
 use futures::StreamExt;
-use log::{debug, error, info, warn};
+use log::{error, info};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokyo_proto::schema;
@@ -102,4 +106,23 @@ pub async fn handle_socket(mut socket: ws::WebSocket) {
       }
     }
   }
+}
+
+pub async fn start_websocket_server() -> Result<()> {
+  env_logger::init();
+
+  Library::new().await.init().await;
+
+  let router = Router::new().route(
+    "/ws",
+    get(|ws: WebSocketUpgrade| async { ws.on_upgrade(move |socket| handle_socket(socket)) }),
+  );
+
+  info!("Running app on http://127.0.0.1:8000");
+
+  axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
+    .serve(router.into_make_service())
+    .await?;
+
+  Ok(())
 }

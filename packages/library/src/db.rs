@@ -1,48 +1,9 @@
+pub mod schema;
+
 use anyhow::Result;
-use libsql::{params, Connection, Database, Statement};
-use serde::{Deserialize, Serialize};
+use libsql::{params, Connection, Database};
 use std::env;
 use std::{fs, path::Path};
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Tag {
-  pub id: String,
-  pub name: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Set {
-  pub id: String,
-  pub tags: Vec<String>,
-  pub rating: i32,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Location {
-  pub id: String,
-  pub name: String,
-  pub path: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Edit {
-  pub id: String,
-  pub edits: String,
-  pub file: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Preset {
-  pub id: String,
-  pub edits: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct File {
-  pub hash: String,
-  pub rating: i32,
-  pub tags: Vec<String>,
-}
 
 pub struct LibraryDatabase {
   connection: Connection,
@@ -185,7 +146,7 @@ impl LibraryDatabase {
     Ok(())
   }
 
-  pub async fn get_edits(&self, hash: &str) -> Result<Vec<Edit>> {
+  pub async fn get_edits(&self, hash: &str) -> Result<Vec<schema::Edit>> {
     let mut rs = self
       .connection
       .query(
@@ -194,10 +155,10 @@ impl LibraryDatabase {
       )
       .await?;
 
-    let mut list: Vec<Edit> = Vec::new();
+    let mut list: Vec<schema::Edit> = Vec::new();
 
     while let Ok(Some(row)) = rs.next() {
-      list.push(Edit {
+      list.push(schema::Edit {
         id: row.get_str(0)?.to_string(),
         edits: row.get_str(1)?.to_string(),
         file: row.get_str(2)?.to_string(),
@@ -207,7 +168,7 @@ impl LibraryDatabase {
     return Ok(list);
   }
 
-  pub async fn get_file(&self, hash: &str) -> Result<Vec<File>> {
+  pub async fn get_file(&self, hash: &str) -> Result<Vec<schema::File>> {
     let mut rs = self
       .connection
       .query(
@@ -216,12 +177,12 @@ impl LibraryDatabase {
       )
       .await?;
 
-    let mut list: Vec<File> = Vec::new();
+    let mut list: Vec<schema::File> = Vec::new();
 
     while let Ok(Some(row)) = rs.next() {
       let tags: String = row.get_str(1).unwrap().to_string();
 
-      list.push(File {
+      list.push(schema::File {
         hash: row.get_str(0).unwrap().to_string(),
         tags: tags.split(",").map(|str| String::from(str)).collect(),
         rating: row
@@ -276,16 +237,16 @@ impl LibraryDatabase {
     Ok(())
   }
 
-  pub async fn location_list(&self) -> Result<Vec<Location>> {
+  pub async fn location_list(&self) -> Result<Vec<schema::Location>> {
     let mut rs = self
       .connection
       .query("select id, name, path from locations", params![])
       .await?;
 
-    let mut list: Vec<Location> = Vec::new();
+    let mut list: Vec<schema::Location> = Vec::new();
 
     while let Ok(Some(row)) = rs.next() {
-      list.push(Location {
+      list.push(schema::Location {
         id: row.get_str(0)?.to_string(),
         name: row.get_str(1)?.to_string(),
         path: row.get_str(2)?.to_string(),
@@ -295,16 +256,16 @@ impl LibraryDatabase {
     return Ok(list);
   }
 
-  pub async fn tags_list(&self) -> Result<Vec<Tag>> {
+  pub async fn tags_list(&self) -> Result<Vec<schema::Tag>> {
     let mut rs = self
       .connection
       .query("select id, name from tags", params![])
       .await?;
 
-    let mut list: Vec<Tag> = Vec::new();
+    let mut list: Vec<schema::Tag> = Vec::new();
 
     while let Ok(Some(row)) = rs.next() {
-      list.push(Tag {
+      list.push(schema::Tag {
         id: row.get_str(0)?.to_string(),
         name: row.get_str(1)?.to_string(),
       })

@@ -105,7 +105,9 @@
     "CapabilityRemote": {
       "description": "Configuration for remote URLs that are associated with the capability.",
       "type": "object",
-      "required": ["urls"],
+      "required": [
+        "urls"
+      ],
       "properties": {
         "urls": {
           "description": "Remote domains this capability refers to using the [URLPattern standard](https://urlpattern.spec.whatwg.org/).\n\n# Examples\n\n- \"https://*.mydomain.dev\": allows subdomains of mydomain.dev - \"https://mydomain.dev/api/*\": allows any subpath of mydomain.dev/api",
@@ -2209,27 +2211,37 @@
         {
           "description": "MacOS.",
           "type": "string",
-          "enum": ["macOS"]
+          "enum": [
+            "macOS"
+          ]
         },
         {
           "description": "Windows.",
           "type": "string",
-          "enum": ["windows"]
+          "enum": [
+            "windows"
+          ]
         },
         {
           "description": "Linux.",
           "type": "string",
-          "enum": ["linux"]
+          "enum": [
+            "linux"
+          ]
         },
         {
           "description": "Android.",
           "type": "string",
-          "enum": ["android"]
+          "enum": [
+            "android"
+          ]
         },
         {
           "description": "iOS.",
           "type": "string",
-          "enum": ["iOS"]
+          "enum": [
+            "iOS"
+          ]
         }
       ]
     }

@@ -5,7 +5,7 @@ use anyhow::Result;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use image::EncodableLayout;
-use log::{debug, error, info, warn};
+use log::info;
 use std::path::Path;
 use tokio::time::Instant;
 use tokyo_proto::schema::MetadataEntryMessage;

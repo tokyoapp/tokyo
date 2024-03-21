@@ -257,27 +257,37 @@
         {
           "description": "MacOS.",
           "type": "string",
-          "enum": ["macOS"]
+          "enum": [
+            "macOS"
+          ]
         },
         {
           "description": "Windows.",
           "type": "string",
-          "enum": ["windows"]
+          "enum": [
+            "windows"
+          ]
         },
         {
           "description": "Linux.",
           "type": "string",
-          "enum": ["linux"]
+          "enum": [
+            "linux"
+          ]
         },
         {
           "description": "Android.",
           "type": "string",
-          "enum": ["android"]
+          "enum": [
+            "android"
+          ]
         },
         {
           "description": "iOS.",
           "type": "string",
-          "enum": ["iOS"]
+          "enum": [
+            "iOS"
+          ]
         }
       ]
     },
