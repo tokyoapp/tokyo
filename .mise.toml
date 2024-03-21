@@ -56,7 +56,7 @@ run = ["mise run dev"]
 
 [tasks."dev:desktop"]
 description = "Run desktop app"
-dir = "apps/server"
+dir = "apps/desktop"
 run = ["mise run dev"]
 
 [tasks."dev:shadow"]

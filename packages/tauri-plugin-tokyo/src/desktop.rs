@@ -1,6 +1,5 @@
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
-use tokyo_proto::schema::{ClientMessage, Message};
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
