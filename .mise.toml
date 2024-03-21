@@ -4,6 +4,7 @@ node = "21"
 rust = "1.75.0"
 
 [env]
+_.path = ["./node_modules/.bin"]
 RUST_BACKTRACE = "1"
 RUST_LOG = "info,rawler=error"
 DATABASE = "file:///tmp/tokyo.db"
@@ -41,10 +42,7 @@ run = [
 
 [tasks.codegen]
 dir = "packages/proto"
-run = [
-    "cargo install protobuf-codegen",
-    "bun --bun x cargo run --bin force-build",
-]
+run = ["cargo install protobuf-codegen", "cargo run --bin force-build"]
 
 [tasks.dev]
 description = "Run desktop app with server"
@@ -76,13 +74,13 @@ run = [
 [tasks.check]
 description = "Check files"
 dir = "."
-run = ["cargo check", "bun x biome check --diagnostic-level=error ."]
+run = ["cargo check", "bun --bun x biome check --diagnostic-level=error ."]
 
 [tasks.fix]
 description = "Fix files"
-run = ["bun x biome check --diagnostic-level=error --apply-unsafe $root"]
+run = ["bun --bun x biome check --diagnostic-level=error --apply-unsafe $root"]
 
 [tasks.start]
 description = "Run desktop app with server as production build"
 depends = ["setup"]
-run = ["mise run server:start :: app:start"]
+run = ["mise run server:start ::: app:start"]
