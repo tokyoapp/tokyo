@@ -8,6 +8,7 @@
   "files": {
     "ignoreUnknown": true,
     "ignore": [
+      "gen",
       ".mise",
       ".astro",
       ".nuxt",
@@ -33,6 +34,9 @@
       "style": {
         "noDefaultExport": "warn"
       },
+      "security": {
+        "noGlobalEval": "off"
+      },
       "complexity": {
         "noStaticOnlyClass": "warn",
         "noForEach": "warn"
@@ -49,8 +53,15 @@
         "useSortedClasses": {
           "level": "warn",
           "options": {
-            "attributes": ["classList"],
-            "functions": ["clsx", "cva", "twMerge", "tw"]
+            "attributes": [
+              "classList"
+            ],
+            "functions": [
+              "clsx",
+              "cva",
+              "twMerge",
+              "tw"
+            ]
           }
         }
       }

@@ -18,18 +18,16 @@ The desktop and mobile app is built on Tauri, a lightweight Rust framework for b
 
 ## Development
 
-Used tools and versions are pinned in [.mise.toml](./.mise.toml). The tools will automatically be installed on setup if [mise](https://github.com/jdx/mise) is installed on the system.
-
-Only [task](https://taskfile.dev/) needs to be installed to run the setup.
+[mise](https://github.com/jdx/mise) is required to install required tools and run scripts for the project.
 
 #### Setup
 
 ```sh
-task setup
+mise run setup
 ```
 
 #### Running the desktop app:
 
 ```sh
-task dev
+mise run dev
 ```

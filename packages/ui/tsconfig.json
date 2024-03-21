@@ -3,7 +3,11 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "skipLibCheck": true,
 
     "experimentalDecorators": true,
@@ -23,7 +27,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["vite/client", "./index.d.ts"]
+    "types": [
+      "vite/client",
+      "./index.d.ts"
+    ]
   },
   "include": ["src"]
 }

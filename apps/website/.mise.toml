@@ -1,0 +1,13 @@
+[tasks.dev]
+description = "Run website dev server"
+run = ["bun x astro dev"]
+
+[tasks.build]
+description = "Build website"
+sources = ["src/**/*.astro", "src/**/*.ts"]
+run = ["bun x astro check", "bun x astro build"]
+
+[tasks.start]
+description = "Run website preview"
+depends = ["build"]
+run = ["bun x astro preview"]

@@ -1,310 +1,321 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html } from "lit";
 
-function map(value: number, inMin: number, inMax: number, outMin: number, outMax: number) {
-	return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+function map(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
+) {
+  return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
 export class FluidInput extends LitElement {
-	_value = 400;
-	_min = 100;
-	_max = 600;
-	_steps = 10;
+  _value = 400;
+  _min = 100;
+  _max = 600;
+  _steps = 10;
 
-	input: HTMLInputElement | undefined | null;
-	inputValue: HTMLInputElement | undefined | null;
-	valueContainer: HTMLInputElement | undefined | null;
-	leftArrow: Element | undefined | null;
-	rightArrow: Element | undefined | null;
+  input: HTMLInputElement | undefined | null;
+  inputValue: HTMLInputElement | undefined | null;
+  valueContainer: HTMLInputElement | undefined | null;
+  leftArrow: Element | undefined | null;
+  rightArrow: Element | undefined | null;
 
-	static get properties() {
-		return {
-			value: {
-				type: Number,
-			},
-			min: {
-				type: Number,
-			},
-			max: {
-				type: Number,
-			},
-			steps: {
-				type: Number,
-			},
-		};
-	}
+  static get properties() {
+    return {
+      value: {
+        type: Number,
+      },
+      min: {
+        type: Number,
+      },
+      max: {
+        type: Number,
+      },
+      steps: {
+        type: Number,
+      },
+    };
+  }
 
-	get value() {
-		return this._value;
-	}
+  get value() {
+    return this._value;
+  }
 
-	set value(val) {
-		this._value = +val;
-		this.updateValue();
-	}
+  set value(val) {
+    this._value = +val;
+    this.updateValue();
+  }
 
-	get min() {
-		return this._min;
-	}
+  get min() {
+    return this._min;
+  }
 
-	set min(val) {
-		this._min = +val;
-		this.updateValue();
-	}
+  set min(val) {
+    this._min = +val;
+    this.updateValue();
+  }
 
-	get max() {
-		return this._max;
-	}
+  get max() {
+    return this._max;
+  }
 
-	set max(val) {
-		this._max = +val;
-		this.updateValue();
-	}
+  set max(val) {
+    this._max = +val;
+    this.updateValue();
+  }
 
-	get steps() {
-		return this._steps;
-	}
+  get steps() {
+    return this._steps;
+  }
 
-	set steps(val) {
-		this._steps = +val;
-		this.updateValue();
-	}
+  set steps(val) {
+    this._steps = +val;
+    this.updateValue();
+  }
 
-	get suffix() {
-		return this.getAttribute('suffix');
-	}
+  get suffix() {
+    return this.getAttribute("suffix");
+  }
 
-	get isRange() {
-		return this.max || this.min;
-	}
+  get isRange() {
+    return this.max || this.min;
+  }
 
-	connectedCallback(): void {
-		super.connectedCallback();
+  connectedCallback(): void {
+    super.connectedCallback();
 
-		requestAnimationFrame(() => {
-			this.input = this.shadowRoot?.querySelector('.input-container') as HTMLInputElement;
-			this.inputValue = this.shadowRoot?.querySelector('.input-value') as HTMLInputElement;
+    requestAnimationFrame(() => {
+      this.input = this.shadowRoot?.querySelector(".input-container") as HTMLInputElement;
+      this.inputValue = this.shadowRoot?.querySelector(
+        ".input-value",
+      ) as HTMLInputElement;
 
-			this.valueContainer = this.shadowRoot?.querySelector('.value-container') as HTMLInputElement;
+      this.valueContainer = this.shadowRoot?.querySelector(
+        ".value-container",
+      ) as HTMLInputElement;
 
-			this.leftArrow = this.shadowRoot?.querySelector('.left-arrow');
-			this.rightArrow = this.shadowRoot?.querySelector('.right-arrow');
+      this.leftArrow = this.shadowRoot?.querySelector(".left-arrow");
+      this.rightArrow = this.shadowRoot?.querySelector(".right-arrow");
 
-			this.registerHandlers();
-			this.updateValue();
-		});
-	}
+      this.registerHandlers();
+      this.updateValue();
+    });
+  }
 
-	updateValue() {
-		if (this.isRange && this.input != null) {
-			this.input.style.setProperty('--value', map(this.value, this.min, this.max, 0, 1).toString());
-		}
+  updateValue() {
+    if (this.isRange && this.input != null) {
+      this.input.style.setProperty(
+        "--value",
+        map(this.value, this.min, this.max, 0, 1).toString(),
+      );
+    }
 
-		const getPrecision = (n: number) => {
-			const precParts = n.toString().split('.');
-			const size = precParts[1] ? precParts[1].length : 0;
+    const getPrecision = (n: number) => {
+      const precParts = n.toString().split(".");
+      const size = precParts[1] ? precParts[1].length : 0;
 
-			// return 0 if precision is smaller then .000
-			if (precParts[1] && precParts[1].substring(0, 3) === '000') {
-				return 0;
-			}
+      // return 0 if precision is smaller then .000
+      if (precParts[1] && precParts[1].substring(0, 3) === "000") {
+        return 0;
+      }
 
-			return size;
-		};
+      return size;
+    };
 
-		const valuePrecision = getPrecision(this.value);
-		const stepsPrecision = getPrecision(this.steps);
+    const valuePrecision = getPrecision(this.value);
+    const stepsPrecision = getPrecision(this.steps);
 
-		const precision = valuePrecision > stepsPrecision ? stepsPrecision : valuePrecision;
+    const precision = valuePrecision > stepsPrecision ? stepsPrecision : valuePrecision;
 
-		if (this.inputValue) {
-			this.inputValue.value = this.value.toFixed(precision);
-			this.inputValue.size = this.inputValue.value.length;
-		}
-	}
+    if (this.inputValue) {
+      this.inputValue.value = this.value.toFixed(precision);
+      this.inputValue.size = this.inputValue.value.length;
+    }
+  }
 
-	setValue(value: number) {
-		const latValue = this.value;
+  setValue(value: number) {
+    const latValue = this.value;
 
-		if (this.isRange) {
-			this.value = Math.min(Math.max(value, this.min), this.max);
-		} else {
-			this.value = value;
-		}
+    if (this.isRange) {
+      this.value = Math.min(Math.max(value, this.min), this.max);
+    } else {
+      this.value = value;
+    }
 
-		this.dispatchEvent(new CustomEvent('change', { detail: this.value - latValue }));
-	}
+    this.dispatchEvent(new CustomEvent("change", { detail: this.value - latValue }));
+  }
 
-	registerHandlers() {
-		let startPos: [number, number] | null = null;
-		let startMovePos: [number, number] | null = null;
-		let startValue = this.value;
-		let focused = false;
+  registerHandlers() {
+    let startPos: [number, number] | null = null;
+    let startMovePos: [number, number] | null = null;
+    let startValue = this.value;
+    let focused = false;
 
-		const cancel = () => {
-			startPos = null;
-			startMovePos = null;
-			if (this.input) {
-				this.input.removeAttribute('active');
-			}
-		};
+    const cancel = () => {
+      startPos = null;
+      startMovePos = null;
+      if (this.input) {
+        this.input.removeAttribute("active");
+      }
+    };
 
-		if (this.valueContainer) {
-			this.valueContainer.addEventListener('click', (e) => {
-				if (this.inputValue) {
-					this.inputValue.disabled = false;
-					focused = true;
+    if (this.valueContainer) {
+      this.valueContainer.addEventListener("click", (e) => {
+        if (this.inputValue) {
+          this.inputValue.disabled = false;
+          focused = true;
 
-					this.setAttribute('active', '');
+          this.setAttribute("active", "");
 
-					this.inputValue.focus();
-				}
-			});
-		}
+          this.inputValue.focus();
+        }
+      });
+    }
 
-		const up = () => {
-			cancel();
-		};
-		const start = (e: TouchEvent | MouseEvent) => {
-			let x = 0;
-			let y = 0;
+    const up = () => {
+      cancel();
+    };
+    const start = (e: TouchEvent | MouseEvent) => {
+      let x = 0;
+      let y = 0;
 
-			if (e instanceof MouseEvent) {
-				x = e.clientX;
-				y = e.clientY;
-			} else {
-				x = e.touches[0].clientX;
-				y = e.touches[0].clientY;
-			}
+      if (e instanceof MouseEvent) {
+        x = e.clientX;
+        y = e.clientY;
+      } else {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      }
 
-			if (!focused) {
-				startPos = [x, y];
-				startValue = this.value;
-				if (this.input) {
-					this.input.setAttribute('active', '');
-				}
-				e.preventDefault();
-			}
-		};
-		const move = (e: TouchEvent | MouseEvent) => {
-			let x = 0;
-			let y = 0;
+      if (!focused) {
+        startPos = [x, y];
+        startValue = this.value;
+        if (this.input) {
+          this.input.setAttribute("active", "");
+        }
+        e.preventDefault();
+      }
+    };
+    const move = (e: TouchEvent | MouseEvent) => {
+      let x = 0;
+      let y = 0;
 
-			if (e instanceof MouseEvent) {
-				x = e.clientX;
-				y = e.clientY;
-			} else {
-				x = e.touches[0].clientX;
-				y = e.touches[0].clientY;
-			}
+      if (e instanceof MouseEvent) {
+        x = e.clientX;
+        y = e.clientY;
+      } else {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      }
 
-			if (startPos) {
-				if (Math.abs(x - startPos[0]) > 1) {
-					startMovePos = [x, y];
-				}
-			}
-			if (startMovePos && startPos) {
-				// apply shift key scaler
-				let scale = e.shiftKey ? 0.0005 : 0.005;
-				// scale to min max range
-				if (this.max - this.min > 0) {
-					scale *= (this.max - this.min) / 1;
-				}
+      if (startPos) {
+        if (Math.abs(x - startPos[0]) > 1) {
+          startMovePos = [x, y];
+        }
+      }
+      if (startMovePos && startPos) {
+        // apply shift key scaler
+        let scale = e.shiftKey ? 0.0005 : 0.005;
+        // scale to min max range
+        if (this.max - this.min > 0) {
+          scale *= (this.max - this.min) / 1;
+        }
 
-				// set value by absolute delta movement * scale
-				let absolute = startValue + (x - startPos[0]) * scale;
-				// apply steps
-				absolute -= absolute % this.steps;
+        // set value by absolute delta movement * scale
+        let absolute = startValue + (x - startPos[0]) * scale;
+        // apply steps
+        absolute -= absolute % this.steps;
 
-				this.setValue(absolute);
-				e.preventDefault();
-			}
-		};
+        this.setValue(absolute);
+        e.preventDefault();
+      }
+    };
 
-		const cancelInput = () => {
-			this.setValue(this.value);
-			if (!this.inputValue) return;
-			this.inputValue.disabled = true;
-			focused = false;
-			this.removeAttribute('active');
-		};
+    const cancelInput = () => {
+      this.setValue(this.value);
+      if (!this.inputValue) return;
+      this.inputValue.disabled = true;
+      focused = false;
+      this.removeAttribute("active");
+    };
 
-		const submit = () => {
-			if (!this.inputValue) return;
+    const submit = () => {
+      if (!this.inputValue) return;
 
-			if (Number.isNaN(this.inputValue.value)) {
-				try {
-					const evalValue = +this.inputValue.value;
-					this.setValue(evalValue);
-				} catch (err) {
-					console.log(err);
-				}
+      if (Number.isNaN(this.inputValue.value)) {
+        try {
+          const evalValue = +this.inputValue.value;
+          this.setValue(evalValue);
+        } catch (err) {}
 
-				cancelInput();
-			} else {
-				const evalValue = eval(this.inputValue.value);
-				this.setValue(parseFloat(evalValue));
-				this.inputValue.disabled = true;
-				this.removeAttribute('active');
-				focused = false;
-			}
-		};
+        cancelInput();
+      } else {
+        const evalValue = eval(this.inputValue.value);
+        this.setValue(Number.parseFloat(evalValue));
+        this.inputValue.disabled = true;
+        this.removeAttribute("active");
+        focused = false;
+      }
+    };
 
-		const input = (e: KeyboardEvent) => {
-			if (e.key === 'Enter') {
-				submit();
-			} else if (e.key === 'Escape') {
-				cancelInput();
-			}
-		};
+    const input = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        submit();
+      } else if (e.key === "Escape") {
+        cancelInput();
+      }
+    };
 
-		if (this.inputValue && this.input && this.rightArrow && this.leftArrow) {
-			this.inputValue.addEventListener('blur', submit);
-			this.inputValue.addEventListener('keydown', input);
+    if (this.inputValue && this.input && this.rightArrow && this.leftArrow) {
+      this.inputValue.addEventListener("blur", submit);
+      this.inputValue.addEventListener("keydown", input);
 
-			// mouse
-			this.input.addEventListener('mousedown', start);
-			window.addEventListener('mousemove', move);
+      // mouse
+      this.input.addEventListener("mousedown", start);
+      window.addEventListener("mousemove", move);
 
-			// touch
-			this.input.addEventListener('touchstart', start);
-			window.addEventListener('touchmove', move);
+      // touch
+      this.input.addEventListener("touchstart", start);
+      window.addEventListener("touchmove", move);
 
-			// touch
-			window.addEventListener('touchend', up);
-			window.addEventListener('touchcancel', up);
+      // touch
+      window.addEventListener("touchend", up);
+      window.addEventListener("touchcancel", up);
 
-			// mouse
-			window.addEventListener('mouseup', up);
-			window.addEventListener('mousecancel', up);
-			window.addEventListener('mouseleave', up);
+      // mouse
+      window.addEventListener("mouseup", up);
+      window.addEventListener("mousecancel", up);
+      window.addEventListener("mouseleave", up);
 
-			this.leftArrow.addEventListener('click', (e) => {
-				this.setValue(this.value - this.steps);
-				e.preventDefault();
-			});
-			this.rightArrow.addEventListener('click', (e) => {
-				this.setValue(this.value + this.steps);
-				e.preventDefault();
-			});
-		}
+      this.leftArrow.addEventListener("click", (e) => {
+        this.setValue(this.value - this.steps);
+        e.preventDefault();
+      });
+      this.rightArrow.addEventListener("click", (e) => {
+        this.setValue(this.value + this.steps);
+        e.preventDefault();
+      });
+    }
 
-		// touch
-		this.addEventListener('touchstart', (e) => {
-			if (!startPos && !focused) {
-				e.preventDefault();
-			}
-		});
+    // touch
+    this.addEventListener("touchstart", (e) => {
+      if (!startPos && !focused) {
+        e.preventDefault();
+      }
+    });
 
-		// mouse
-		this.addEventListener('mousedown', (e) => {
-			if (!startPos && !focused) {
-				e.preventDefault();
-			}
-		});
-	}
+    // mouse
+    this.addEventListener("mousedown", (e) => {
+      if (!startPos && !focused) {
+        e.preventDefault();
+      }
+    });
+  }
 
-	static get styles() {
-		return css`
+  static get styles() {
+    return css`
       :host {
         display: inline-block;
         height: 28px;
@@ -419,10 +430,10 @@ export class FluidInput extends LitElement {
         stroke-linecap: round;
       }
     `;
-	}
+  }
 
-	render() {
-		return html`
+  render() {
+    return html`
       <div class="input-container">
           <span class="arrow left-arrow">
               <svg x="0px" y="0px" width="7.3px" height="11px" viewBox="0 0 7.3 12.5">
@@ -431,7 +442,11 @@ export class FluidInput extends LitElement {
           </span>
           <span class="value-container">
               <input class="input-value"></input>
-              ${this.suffix ? html` <span class="value-suffix">${this.suffix}</span> ` : ''}
+              ${
+                this.suffix
+                  ? html` <span class="value-suffix">${this.suffix}</span> `
+                  : ""
+              }
           </span>
           <span class="arrow right-arrow">
               <svg x="0px" y="0px" width="7.3px" height="11px" viewBox="0 0 7.3 12.5">
@@ -440,13 +455,13 @@ export class FluidInput extends LitElement {
           </span>
       </div>
     `;
-	}
+  }
 }
 
-customElements.define('fluid-input', FluidInput);
+customElements.define("fluid-input", FluidInput);
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'fluid-input': FluidInput;
-	}
+  interface HTMLElementTagNameMap {
+    "fluid-input": FluidInput;
+  }
 }

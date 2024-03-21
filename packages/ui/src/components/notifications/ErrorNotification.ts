@@ -1,9 +1,9 @@
-import { css, html } from 'lit';
-import Notification from './Notification';
+import { css, html } from "lit";
+import Notification from "./Notification";
 
 export default class ErrorNotification extends Notification {
-	static get styles() {
-		return css`
+  static get styles() {
+    return css`
       ${Notification.styles}
 
       span {
@@ -25,10 +25,10 @@ export default class ErrorNotification extends Notification {
         flex: none;
       }
     `;
-	}
+  }
 
-	protected render() {
-		return html`
+  protected render() {
+    return html`
       <div class="wrapper">
         <span>
           <svg class="icon" width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +40,7 @@ export default class ErrorNotification extends Notification {
         </span>
       </div>
     `;
-	}
+  }
 }
 
-customElements.define('ui-error-notification', ErrorNotification);
+customElements.define("ui-error-notification", ErrorNotification);

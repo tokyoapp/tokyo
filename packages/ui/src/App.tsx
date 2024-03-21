@@ -1,6 +1,6 @@
 import { platform } from "@tauri-apps/plugin-os";
 import { ErrorBoundary, createSignal } from "solid-js";
-import { IndexEntryMessage } from "tokyo-proto";
+import type { IndexEntryMessage } from "tokyo-proto";
 import Jobs from "./actions/Action.ts";
 import { ActivityBar } from "./components/Activitybar.jsx";
 import Explorer from "./components/Explorer";
@@ -56,10 +56,10 @@ export default function App() {
           <>
             <Titlebar style={os()} />
 
-            <notification-feed class="fixed left-1/2 top-20 z-10 w-80 -translate-x-1/2" />
+            <notification-feed class="-translate-x-1/2 fixed top-20 left-1/2 z-10 w-80" />
 
             <div
-              class={`relative grid h-full w-full p-10 ${
+              class={`relative grid h-full w-full p-10${
                 file() ? "grid-cols-[250px_1.25fr_300px]" : "grid-cols-1"
               }`}
             >
@@ -75,20 +75,20 @@ export default function App() {
     >
       <Titlebar style={os()} />
 
-      <notification-feed class="fixed left-1/2 top-20 z-50 w-80 -translate-x-1/2" />
+      <notification-feed class="-translate-x-1/2 fixed top-20 left-1/2 z-50 w-80" />
 
       <div class="grid grid-cols-[auto_1fr]">
         <ActivityBar />
 
         <div
-          class={`relative grid h-full w-full ${
+          class={`relative grid h-full w-full${
             file() ? "grid-cols-[250px_1.25fr_300px]" : "grid-cols-1"
           }`}
         >
           <div class="relative">
-            <div class="absolute left-0 top-0 h-full w-full">
+            <div class="absolute top-0 left-0 h-full w-full">
               {settingsOpen() ? (
-                <div class="absolute left-0 top-0 z-40 h-full w-full">
+                <div class="absolute top-0 left-0 z-40 h-full w-full">
                   <LocationSettings />
                 </div>
               ) : null}

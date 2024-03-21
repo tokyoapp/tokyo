@@ -1,0 +1,32 @@
+
+[tasks."tauri:dev"]
+run = ["cargo tauri dev"]
+
+[tasks."tauri:dev:ios"]
+run = ["cargo tauri ios dev"]
+
+[tasks."tauri:build"]
+run = ["cargo tauri build"]
+
+[tasks."ui:dev"]
+run = ["bun x tokyo-ui dev"]
+
+[tasks."ui:build"]
+run = ["bun x tokyo-ui build"]
+
+[tasks.dev]
+description = "Dev"
+run = ["mise run ui:dev ::: tauri:dev"]
+
+[tasks."dev:ios"]
+description = "Dev ios"
+run = ["mise run ui:dev ::: tauri:dev:ios"]
+
+[tasks.build]
+description = "Build app"
+run = ["mise run ui:build ::: tauri:build"]
+
+[tasks.start]
+description = "Start app in production"
+dir = "../../target/release"
+run = ["./app"]
