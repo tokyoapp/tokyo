@@ -19,6 +19,8 @@ tokyo-library = { path = "../library" }
 tokyo-shadow = { path = "../shadow" }
 anyhow = "1.0.75"
 tokio = { version = "1.35.0", features = ["rt", "rt-multi-thread", "macros"] }
+env_logger = "0.10.1"
+log = "0.4.20"
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-alpha.8" }

@@ -57,8 +57,6 @@ impl Library {
   }
 
   pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
-    info!("Getting file meta: {}", p);
-
     // if p.contains("/ccapi") {
     //   let camera = ccapi::CCAPI::new("127.0.0.1:3000");
     //   let storage = camera.storage().await?;
@@ -81,6 +79,8 @@ impl Library {
 
     //   return Some(meta_data);
     // }
+
+    info!("Getting metadata for {}", p);
 
     let meta = image::metadat(&p.to_string());
 
@@ -119,6 +119,8 @@ impl Library {
 
       return Some(meta_data);
     }
+
+    error!("Failed to get metadata for {}", p);
 
     None
   }

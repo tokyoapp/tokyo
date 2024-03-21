@@ -30,6 +30,8 @@ impl<R: Runtime, T: Manager<R>> crate::LibraryExt<R> for T {
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
+  env_logger::init();
+
   Builder::new("tokyo")
     .invoke_handler(tauri::generate_handler![
       commands::request,

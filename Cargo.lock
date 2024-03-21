@@ -4644,6 +4644,8 @@ name = "tauri-plugin-tokyo"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "env_logger",
+ "log",
  "serde",
  "serde_json",
  "tauri",
