@@ -5,6 +5,7 @@ use anyhow::Result;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use image::EncodableLayout;
+use log::error;
 use log::info;
 use std::path::Path;
 use tokio::time::Instant;
@@ -20,6 +21,8 @@ async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
     if let Some(metadata) = meta {
       let entry: MetadataEntryMessage = metadata.into();
       entires_msg.entries.push(entry);
+    } else {
+      error!("Failed to get lib metadata for {}", f);
     }
   }
 

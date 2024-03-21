@@ -57,30 +57,34 @@ impl Library {
   }
 
   pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
-    // if p.contains("/ccapi") {
-    //   let camera = ccapi::CCAPI::new("127.0.0.1:3000");
-    //   let storage = camera.storage().await?;
+    if p.contains("/ccapi") {
+      let camera = ccapi::CCAPI::new("127.0.0.1:3000");
+      let info = camera.info(p.as_str()).await.unwrap();
 
-    //   let mut tags: Vec<String> = Vec::new();
+      let tags: Vec<String> = Vec::new();
 
-    //   let meta_data = MetadataEntry {
-    //     create_date: metadata.create_date,
-    //     exif: serde_json::to_string(&metadata.exif).unwrap(),
-    //     hash: metadata.hash,
-    //     height: metadata.height as i32,
-    //     width: metadata.width as i32,
-    //     make: metadata.make,
-    //     name: metadata.name,
-    //     orientation: metadata.orientation as i32,
-    //     rating,
-    //     tags,
-    //     thumbnail: image::cached_thumb(&p.to_string()).await,
-    //   };
+      let filename = p.split("/").last().unwrap();
+      // let rating: i32 = info.rating.parse().unwrap();
+      let orientation: i32 = info.rotate.parse().unwrap();
 
-    //   return Some(meta_data);
-    // }
+      let thumb = camera.thumbnail(p.as_str()).await.unwrap();
 
-    info!("Getting metadata for {}", p);
+      let meta_data = MetadataEntry {
+        create_date: "".to_string(),
+        exif: "".to_string(),
+        hash: p.to_string(),
+        height: 0,
+        width: 0,
+        make: "".to_string(),
+        name: filename.to_string(),
+        orientation,
+        rating: 0,
+        tags,
+        thumbnail: thumb.into(),
+      };
+
+      return Some(meta_data);
+    }
 
     let meta = image::metadat(&p.to_string());
 
