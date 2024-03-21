@@ -36,6 +36,9 @@ export default function ExplorerView(props: { small: boolean }) {
 
   createEffect(() => {
     const locs = locations.data() || [];
+
+    console.log(locs);
+
     if (selectedLocations().length === 0 && locs.length > 0) {
       setSelectedLocations([locs[0].id]);
     }
@@ -143,7 +146,7 @@ export default function ExplorerView(props: { small: boolean }) {
           <div class="flex gap-2">
             <Combobox
               multiple
-              class="@5xl:block pointer-events-auto hidden px-1"
+              class="@5xl:block pointer-events-auto px-1"
               items={
                 locations.data()?.libraries?.map((lib) => {
                   return {

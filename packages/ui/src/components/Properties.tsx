@@ -9,10 +9,13 @@ import Info from "./Info.tsx";
 import { Tabs } from "./layout/Tabs.tsx";
 import "./ui/FluidInput.ts";
 
-export function Properties(props: { file: any; models: Record<string, PropertyModel> }) {
+export function Properties(props: {
+  file: any;
+  models: Record<string, PropertyModel>;
+}) {
   return (
-    <div class="relative mt-2 mr-2 overflow-hidden">
-      <div class="absolute top-0 right-0 bottom-0 h-auto overflow-auto">
+    <div class="relative mr-2 mt-2 overflow-hidden">
+      <div class="absolute bottom-0 right-0 top-0 h-auto overflow-auto">
         <Tabs>
           <Tabs.Tab title="Info" icon="ph-info">
             <Info file={props.file} />
@@ -28,7 +31,9 @@ export function Properties(props: { file: any; models: Record<string, PropertyMo
 }
 
 function Panel(props: { model: PropertyModel }) {
-  const properties = useProperties(props.model, () => Model.properties(props.model));
+  const properties = useProperties(props.model, () =>
+    Model.properties(props.model),
+  );
 
   return (
     <div class="select-none pb-2">
@@ -46,8 +51,9 @@ function PanelProperty(props: { name: string; property: PropertyType }) {
     <div class="grid grid-cols-[1fr] px-2 pt-1 text-sm">
       {property.type === PropertyTag.Float ? (
         <>
-          <label class="mr-2 mb-1">
-            {property.attr.label?.replace("{#}", property.value.toString()) || name}
+          <label class="mb-1 mr-2">
+            {property.attr.label?.replace("{#}", property.value.toString()) ||
+              name}
           </label>
           <fluid-input
             steps={0.01}
