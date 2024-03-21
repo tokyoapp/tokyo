@@ -14,16 +14,7 @@ export const config = defineConfig({
   plugins: [solidPlugin()],
   css: {
     postcss: {
-      plugins: [
-        autoprefixer(),
-        tailwind({
-          content: [path.resolve(__dirname, "../src/**/*.{js,ts,jsx,tsx}")],
-          theme: {
-            extend: {},
-          },
-          plugins: [require("@tailwindcss/container-queries")],
-        }),
-      ],
+      plugins: [autoprefixer(), tailwind()],
     },
     preprocessorOptions: {},
   },

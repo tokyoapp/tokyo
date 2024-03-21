@@ -11,7 +11,9 @@ const icons = {
   cogwheel: await import("../../../assets/icons/cogwheel.svg?raw"),
   "expand-down": await import("../../../assets/icons/expand-down.svg?raw"),
   more: await import("../../../assets/icons/more.svg?raw"),
-  "smaller-equals": await import("../../../assets/icons/smaller-equals.svg?raw"),
+  "smaller-equals": await import(
+    "../../../assets/icons/smaller-equals.svg?raw"
+  ),
   text: await import("../../../assets/icons/text.svg?raw"),
   plus: await import("../../../assets/icons/plus.svg?raw"),
   loader: await import("../../../assets/icons/loader.riv?url"),
@@ -42,7 +44,11 @@ export default function Icon(props: Props) {
   const className = `icon ${props.class}`;
 
   if (props.name?.startsWith("ph-")) {
-    return <i class={`ph-light inline-block align-baseline${props.name}${className}`} />;
+    return (
+      <i
+        class={`ph-light inline-block align-baseline ${props.name} ${className}`}
+      />
+    );
   }
 
   if (src.includes(".riv")) {
@@ -64,8 +70,12 @@ export default function Icon(props: Props) {
       riveInstance?.cleanup();
     });
 
-    return <div class={`inline-block align-baseline${className}`}>{canvas}</div>;
+    return (
+      <div class={`inline-block align-baseline ${className}`}>{canvas}</div>
+    );
   }
 
-  return <div class={`inline-block align-baseline${className}`} innerHTML={src} />;
+  return (
+    <div class={`inline-block align-baseline ${className}`} innerHTML={src} />
+  );
 }

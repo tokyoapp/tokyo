@@ -14,9 +14,7 @@ import Combobox from "./ui/Combobox.jsx";
 import Icon from "./ui/Icon.jsx";
 import { Rating, Stars } from "./ui/Stars.jsx";
 
-export default function ExplorerView(props: {
-  small: boolean;
-}) {
+export default function ExplorerView(props: { small: boolean }) {
   const index = useAccessor(createIndexAccessor);
   const metadata = useAccessor(createMetadataAccessor);
   const locations = useAccessor(createLocationsAccessor);
@@ -97,7 +95,9 @@ export default function ExplorerView(props: {
   createEffect(() => {
     if (props.small) {
       setTimeout(() => {
-        const ele = document.querySelector("[data-selected]") as HTMLElement | undefined;
+        const ele = document.querySelector("[data-selected]") as
+          | HTMLElement
+          | undefined;
         if (ele) {
           ele.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
@@ -143,7 +143,7 @@ export default function ExplorerView(props: {
           <div class="flex gap-2">
             <Combobox
               multiple
-              class="pointer-events-auto hidden px-1 @5xl:block"
+              class="@5xl:block pointer-events-auto hidden px-1"
               items={
                 locations.data()?.libraries?.map((lib) => {
                   return {
@@ -181,7 +181,11 @@ export default function ExplorerView(props: {
               {selectedLocations().map((loc) => {
                 return (
                   <span>
-                    {locations.data()?.libraries.find((l) => l.id === loc)?.name},{" "}
+                    {
+                      locations.data()?.libraries.find((l) => l.id === loc)
+                        ?.name
+                    }
+                    ,{" "}
                   </span>
                 );
               })}
@@ -265,8 +269,11 @@ export default function ExplorerView(props: {
         </div>
       </nav>
 
-      <div class="w-full overflow-auto overscroll-none p-1" ref={scrollTargetElement}>
-        <div class="hidden @5xl:block">{/* <SystemInfo /> */}</div>
+      <div
+        class="w-full overflow-auto overscroll-none p-1"
+        ref={scrollTargetElement}
+      >
+        <div class="@5xl:block hidden">{/* <SystemInfo /> */}</div>
 
         <div class="overscroll-none pb-24">
           <VirtualContainer
@@ -275,7 +282,11 @@ export default function ExplorerView(props: {
             overscan={2}
             items={rows(props.small ? 1 : 5)}
           >
-            {(props: { index: number; style: string; item: IndexEntryMessage[][] }) => {
+            {(props: {
+              index: number;
+              style: string;
+              item: IndexEntryMessage[][];
+            }) => {
               return (
                 <div style={props.style} class="flex w-full gap-1">
                   <For each={props.item}>
@@ -296,9 +307,15 @@ export default function ExplorerView(props: {
                           number={(props.index * 4 + i() + 1).toString()}
                           name={viewSettings.showName}
                           tags={viewSettings.showTags ? tags(items[0]) : []}
-                          rating={viewSettings.showRating ? items[0].rating : undefined}
+                          rating={
+                            viewSettings.showRating
+                              ? items[0].rating
+                              : undefined
+                          }
                           image={
-                            metadata.data()?.find((item) => item.hash === items[0].hash)
+                            metadata
+                              .data()
+                              ?.find((item) => item.hash === items[0].hash)
                               ?.thumbnail
                           }
                           onClick={() => {
@@ -317,7 +334,7 @@ export default function ExplorerView(props: {
       </div>
 
       {selection().length > 0 ? (
-        <div class="absolute right-3 bottom-3 left-3 z-40 w-auto">
+        <div class="absolute bottom-3 left-3 right-3 z-40 w-auto">
           <div class="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1 text-sm">
             <span class="text-zinc-700">{selection()[0].name}</span>
             <span class="px-2" />
@@ -358,13 +375,15 @@ function Thumbnail(props: ThumbProps) {
   });
 
   return (
-    <div class={`thumbnail relative z-0 h-52 overflow-hidden${props.class || ""}`}>
+    <div
+      class={`thumbnail relative z-0 h-52 overflow-hidden ${props.class || ""}`}
+    >
       <div
         data-selected={props.selected || undefined}
         class={[
           "h-full border bg-transparent shadow-none focus:border-gray-600 focus:bg-zinc-800",
           props.selected ? "border-gray-600" : "border-transparent",
-        ].join("")}
+        ].join(" ")}
         onClick={() => props.onClick()}
       >
         <div class="flex h-full w-full items-center justify-center">
@@ -372,10 +391,10 @@ function Thumbnail(props: ThumbProps) {
             ? props.items.slice(0, 3).map((item, i) => {
                 return (
                   <div
-                    class={`thumbnail-image absolute top-0 left-0 flex h-full w-full items-center justify-center${
+                    class={`thumbnail-image absolute left-0 top-0 flex h-full w-full items-center justify-center ${
                       i === 0 ? "z-30 shadow-md" : ""
-                    }${i === 1 ? "z-20 mt-2 ml-2" : ""}${
-                      i === 2 ? "z-10 mt-4 ml-4" : ""
+                    } ${i === 1 ? "z-20 ml-2 mt-2" : ""} ${
+                      i === 2 ? "z-10 ml-4 mt-4" : ""
                     }`}
                   >
                     {props.image}
@@ -383,12 +402,16 @@ function Thumbnail(props: ThumbProps) {
                 );
               })
             : null}
-          {!props.image ? <Icon name="loader" class="text-4xl opacity-50" /> : null}
+          {!props.image ? (
+            <Icon name="loader" class="text-4xl opacity-50" />
+          ) : null}
         </div>
       </div>
 
-      <div class="pointer-events-none absolute top-0 left-0 z-40 grid h-full w-full grid-rows-[1fr_auto_auto] gap-1 p-1 opacity-70">
-        <div class="absolute text-7xl leading-none opacity-5">{props.number}</div>
+      <div class="pointer-events-none absolute left-0 top-0 z-40 grid h-full w-full grid-rows-[1fr_auto_auto] gap-1 p-1 opacity-70">
+        <div class="absolute text-7xl leading-none opacity-5">
+          {props.number}
+        </div>
 
         <div class="text-xs">{props.name ? props.items[0].name : null}</div>
 

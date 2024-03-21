@@ -1,1 +1,7 @@
-// needs to exist for intelisens to work :/
+export default {
+  content: [path.resolve(__dirname, "../src/**/*.{js,ts,jsx,tsx}")],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("@tailwindcss/container-queries")],
+};

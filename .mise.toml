@@ -88,7 +88,7 @@ run = ["cargo check", "bun --bun x biome check --diagnostic-level=error ."]
 
 [tasks.fix]
 description = "Fix files"
-run = ["bun --bun x biome check --diagnostic-level=error --apply-unsafe $root"]
+run = ["bun --bun x biome check --diagnostic-level=error --apply $root"]
 
 [tasks.start]
 description = "Run desktop app with server as production build"
