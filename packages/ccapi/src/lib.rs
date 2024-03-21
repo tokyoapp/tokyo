@@ -128,8 +128,8 @@ impl CCAPI {
   }
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), anyhow::Error> {
+#[tokio::test]
+async fn my_test() -> Result<(), anyhow::Error> {
   let api = CCAPI::new("127.0.0.1:3000");
 
   let storage = api.storage().await?;
