@@ -1,7 +1,7 @@
 use log::error;
 use walkdir::WalkDir;
 
-fn walk(dir: String) -> Vec<String> {
+pub fn list(dir: String) -> Vec<String> {
   let mut entries: Vec<String> = Vec::new();
 
   for entry in WalkDir::new(dir).follow_links(true) {
@@ -34,8 +34,4 @@ fn process_entry(entry: walkdir::DirEntry) -> Option<String> {
     "png" => return Some(entry.path().to_str().unwrap().to_owned()),
     &_ => return None,
   }
-}
-
-pub fn list(dir: String) -> Vec<String> {
-  walk(dir)
 }

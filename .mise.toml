@@ -47,7 +47,17 @@ run = ["cargo install protobuf-codegen", "cargo run --bin force-build"]
 [tasks.dev]
 description = "Run desktop app with server"
 depends = ["setup"]
-run = ["mise run server:dev ::: app:dev"]
+run = ["mise run dev:server ::: dev:desktop"]
+
+[tasks."dev:server"]
+description = "Run server"
+dir = "apps/server"
+run = ["mise run dev"]
+
+[tasks."dev:desktop"]
+description = "Run desktop app"
+dir = "apps/server"
+run = ["mise run dev"]
 
 [tasks."dev:shadow"]
 description = "Run shadow pacakge test"

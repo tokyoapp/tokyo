@@ -1,6 +1,6 @@
 use crate::db;
+use crate::filesystem;
 use crate::image;
-use crate::images;
 use crate::IndexEntry;
 use crate::MetadataEntry;
 use crate::SystemInfo;
@@ -51,7 +51,7 @@ impl Library {
   }
 
   pub fn list(dir: String) -> Vec<String> {
-    return images::list(dir);
+    return filesystem::list(dir);
   }
 
   pub async fn metadata(&self, p: String) -> Option<MetadataEntry> {
@@ -136,6 +136,10 @@ impl Library {
     });
 
     Ok(join_all(idx).await)
+  }
+
+  pub async fn get_index_ccapi(&self, dir: String) -> Result<Vec<IndexEntry>> {
+    Err(anyhow::anyhow!("Not implemented"))
   }
 
   pub async fn add_file(&self, hash: String, rating: i32) {

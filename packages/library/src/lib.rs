@@ -1,7 +1,7 @@
 mod db;
 mod edit;
+mod filesystem;
 mod image;
-mod images;
 mod library;
 mod messages;
 mod ws;

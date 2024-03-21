@@ -59,12 +59,17 @@ async fn get_location_list(lib: &Library) -> schema::LibraryListMessage {
 async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexMessage {
   let mut _index: Vec<IndexEntry> = Vec::new();
 
-  // TODO: this should be streamed
   for id in ids {
     let dir = lib.find_library(id.clone()).await.unwrap().path;
-    info!("[INDEX] {:?}, {:?}", dir, id);
-    let mut index = lib.get_index(dir).await.expect("Failed to get index");
-    _index.append(&mut index);
+
+    // check if dir is a path or http address
+    if dir.starts_with("ccapi:") {
+      _index.append(&mut lib.get_index_ccapi(dir).await.expect("Failed to get index"));
+      continue;
+    } else {
+      info!("[INDEX] {:?}, {:?}", dir, id);
+      _index.append(&mut lib.get_index(dir).await.expect("Failed to get index"));
+    }
   }
 
   let mut index_msg = schema::LibraryIndexMessage::new();
