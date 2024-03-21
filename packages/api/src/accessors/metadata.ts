@@ -30,13 +30,14 @@ export function createMetadataAccessor() {
   };
 
   return new Accessor([new HostLibrary()], {
-    createRequest(query: {
-      ids: string[];
-    }) {
+    createRequest(query: { ids: string[] }) {
       // const ids = params.query.ids?.filter((id) => !cache[0]?.find((entry) => entry.id === id));
       return [
         proto.ClientMessage.create({
           meta: proto.RequestMetadata.create({
+            // TODO: each id should be its own request.
+            //   Later optimise to batch requests.
+            //   Tho this way, each request can be cached individually.
             file: query.ids,
           }),
         }),

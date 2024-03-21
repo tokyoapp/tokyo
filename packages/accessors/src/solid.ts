@@ -1,5 +1,8 @@
 import { createSignal } from "solid-js";
-import type { Accessor } from "./lib.js";
+import { type Accessor } from "./lib.js";
+import logger from "@luckydye/log";
+
+const log = logger().trace().prefix("accessors");
 
 /**
  * Accessor React hook that will return the data, error and pending state of the accessor.
@@ -10,38 +13,43 @@ import type { Accessor } from "./lib.js";
 export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
   accessorFn: () => T,
 ) {
-  type Query = Partial<T["query"]>;
-  type Params = Partial<T["params"]>;
-  type Data = ReturnType<T["_strategy"]["compute"]>;
-
-  const [data, setData] = createSignal<Data>();
-  const [pending, setPending] = createSignal<boolean>();
-
   const accessor = accessorFn();
 
+  const [data, setData] = createSignal<
+    Awaited<ReturnType<T["compute"]>> | undefined
+  >();
+  const [error, setError] = createSignal<Error | string>();
+  const [state, setState] = createSignal<T["state"]>();
+
+  type Query = Partial<T["query"]>;
+  type Params = Partial<T["params"]>;
+
+  const [pending, setPending] = createSignal<boolean>();
+
+  accessor.on("error", (error) => {
+    log.error("Error in accessor", "error", error);
+    setError(error);
+  });
+  accessor.on("state", (state) => setState(state));
   accessor.on("data", (data) => setData(data));
   accessor.on("pending", (pending) => setPending(pending));
 
   return {
+    error,
+    state,
     data,
     pending,
-    query(query?: Query) {
-      if (query) {
-        accessor.query = query;
+    query(value?: Query) {
+      if (value) {
+        accessor.query = value;
       }
       return accessor.query;
     },
-    params(params?: Params) {
-      if (params) {
-        accessor.params = params;
+    params(value?: Params) {
+      if (value) {
+        accessor.params = value;
       }
       return accessor.params;
-    },
-    mutate(value?: any) {
-      // if (value) {
-      // 	setParams(value);
-      // }
-      // return params();
     },
   };
 }

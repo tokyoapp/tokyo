@@ -8,7 +8,6 @@ import * as Comlink from "comlink";
  */
 
 const CACHE_MAX_AGE = 1000 * 60 * 60; // 1h
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const CACHE = new Map<string, any>();
 const CACHE_TIMESTAMPS = new Map<string, number>();
 
@@ -38,7 +37,12 @@ export class Accessor<
   HandledMessage,
   Data,
   RequestMessage extends { nonce?: string },
-  ResponseMessage extends { nonce?: string; type?: string; state?: AccessorState },
+  ResponseMessage extends {
+    nonce?: string;
+    type?: string;
+    error?: string | Error;
+    state?: AccessorState;
+  },
 > {
   private _query?: Query;
   private _params?: Params;
@@ -72,39 +76,26 @@ export class Accessor<
     let cached = true;
 
     for (const req of requests) {
-      this.pending = true;
+      const id = requests.indexOf(req);
 
-      // TODO: Streaming
-      // - collect all responses for the same query
+      const cacheKey = `${id}.${JSON.stringify(requests)}`;
+      this.cacheKeys[id] = cacheKey;
 
-      // replicate the request to all peers
-      for (const stream of this.streams) {
-        const requestIndex = requests.indexOf(req);
-        const sourceIndex = this.streams.indexOf(stream);
+      const timestamp = CACHE_TIMESTAMPS.get(cacheKey);
+      const age = timestamp ? now - timestamp : now;
 
-        const cacheKey = `${sourceIndex}.${requestIndex}.${JSON.stringify(requests)}`;
-        // TODO: overwrites cache from other sources
-        this.cacheKeys[requestIndex] = cacheKey;
-
-        const timestamp = CACHE_TIMESTAMPS.get(cacheKey);
-        const age = timestamp ? now - timestamp : now;
-
-        if (CACHE.has(cacheKey) && age <= CACHE_MAX_AGE) {
-          // skip request if cache is valid
-          continue;
-        }
-
-        cached = false;
-
-        CACHE.delete(cacheKey);
-        CACHE_TIMESTAMPS.delete(cacheKey);
-
-        req.nonce = cacheKey;
-
-        const writer = stream.getWriter();
-        writer.write(req);
-        writer.releaseLock();
+      if (CACHE.has(cacheKey) && age <= CACHE_MAX_AGE) {
+        // skip request if cache is valid
+        continue;
       }
+
+      cached = false;
+
+      CACHE.delete(cacheKey);
+      CACHE_TIMESTAMPS.delete(cacheKey);
+
+      req.nonce = cacheKey;
+      this.request(req);
     }
 
     if (cached) {
@@ -147,13 +138,16 @@ export class Accessor<
        */
       createRequest(query: Query): RequestMessage[] | undefined;
       /**
-       * Handle and transform data from request. Data returned by this method will be cached by params["query"] as key.
+       * Filter and transform responses from request. Data returned by this method will be cached by params["query"] as key. If undefined is returned, the data will be disposed.
        */
       transform(msg: ResponseMessage): HandledMessage | undefined;
       /**
        * Filter / Transform / Aggregate cached data.
        */
-      compute: (data: (HandledMessage | undefined)[], params: Params | undefined) => Data;
+      compute: (
+        data: (HandledMessage | undefined)[],
+        params: Params | undefined,
+      ) => Data;
     },
   ) {
     for (const client of clients) {
@@ -171,14 +165,26 @@ export class Accessor<
       data.push(CACHE.get(key));
     }
 
-    this.emit("data", this._strategy.compute(data, this.params));
-    this.pending = false;
+    try {
+      const output = this._strategy.compute(data, this.params);
+      this.emit("data", output);
+    } catch (e: unknown) {
+      this.emit("error", e as Error);
+    }
+
+    // set pending to false if data is in cache
+    this.pending = data.some((d) => d === undefined);
   }
 
   private receive = new WritableStream<ResponseMessage>({
     write: async (msg) => {
+      if (msg.type === "error") {
+        this.emit("error", msg.error);
+        return;
+      }
+
       if (msg.type === "state") {
-        this.state = Object.assign(this.state, msg.state);
+        this.state = { ...this.state, ...msg.state };
         this.emit("state", this.state);
         return;
       }
@@ -188,7 +194,6 @@ export class Accessor<
       if (nonce && this.cacheKeys.includes(nonce)) {
         const data = await this._strategy.transform(msg);
 
-        // TODO: if the data is partial, eg streamed, the cache will just be overwritten
         CACHE.set(nonce, data);
         CACHE_TIMESTAMPS.set(nonce, Date.now());
 
@@ -200,14 +205,17 @@ export class Accessor<
   private streams: WritableStream<RequestMessage>[] = [];
 
   private stream(client: {
-    stream(): readonly [ReadableStream<ResponseMessage>, WritableStream<RequestMessage>];
+    stream(): readonly [
+      ReadableStream<ResponseMessage>,
+      WritableStream<RequestMessage>,
+    ];
   }) {
     const [read, write] = client.stream();
     this.streams.push(write);
     read.pipeTo(new MultiplexStream(this.receive));
   }
 
-  public request(mutation: any) {
+  public request(mutation) {
     this.pending = true;
 
     // replicate the request to all peers
@@ -224,11 +232,21 @@ export class Accessor<
   private target = new EventTarget();
 
   public on(event: "data", callback: (payload?: Data) => void): () => void;
-  public on(event: "pending", callback: (payload?: undefined) => void): () => void;
-  public on(event: "error", callback: (payload?: undefined) => void): () => void;
-  public on(event: "state", callback: (payload?: AccessorState) => void): () => void;
+  public on(
+    event: "pending",
+    callback: (payload?: undefined) => void,
+  ): () => void;
+  public on(
+    event: "error",
+    callback: (payload?: Error | string) => void,
+  ): () => void;
+  public on(
+    event: "state",
+    callback: (payload?: AccessorState) => void,
+  ): () => void;
   public on(event: string, callback: (payload?: undefined) => void) {
-    const listener = ((ev: CustomEvent) => callback(ev.detail)) as EventListener;
+    const listener = ((ev: CustomEvent) =>
+      callback(ev.detail)) as EventListener;
 
     this.target.addEventListener(event, listener);
 
@@ -245,6 +263,7 @@ export class Accessor<
   private emit(event: "state", payload?: AccessorState): void;
   private emit(event: "data", payload?: Data): void;
   private emit(event: "pending", payload?: undefined): void;
+  private emit(event: "error", payload?: Error | string): void;
   private emit(event: string, payload?: undefined) {
     this.target.dispatchEvent(new CustomEvent(event, { detail: payload }));
   }
