@@ -23,11 +23,17 @@ The desktop and mobile app is built on Tauri, a lightweight Rust framework for b
 #### Setup
 
 ```sh
-mise run setup
+task setup
+```
+
+#### List of all available tasks:
+
+```sh
+task
 ```
 
 #### Running the desktop app:
 
 ```sh
-mise run dev
+task desktop:dev
 ```
