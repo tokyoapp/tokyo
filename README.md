@@ -20,6 +20,9 @@ The desktop and mobile app is built on Tauri, a lightweight Rust framework for b
 
 [mise](https://github.com/jdx/mise) is required to install required tools and run scripts for the project.
 
+Or install required tools listed in `mise.yml` manually.
+
+
 #### Setup
 
 ```sh
