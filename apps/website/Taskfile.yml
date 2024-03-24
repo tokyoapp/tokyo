@@ -3,6 +3,11 @@
 version: "3"
 
 tasks:
+  setup:
+    desc: Install dependencies
+    cmds:
+      - bun install
+
   dev:
     desc: Run website dev server
     prefix: "library"
@@ -11,6 +16,7 @@ tasks:
 
   build:
     desc: Build website
+    deps: [setup]
     sources:
       - "src/**/*.astro"
       - "src/**/*.ts"
