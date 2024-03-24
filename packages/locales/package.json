@@ -4,6 +4,7 @@
   "main": "src/lib.ts",
   "type": "module",
   "dependencies": {
-    "solid-js": "^1.7.8"
+    "@luckydye/log": "^0.6.0",
+    "i18next": "^23.10.0"
   }
 }
