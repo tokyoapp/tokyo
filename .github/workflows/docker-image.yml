@@ -12,9 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: arduino/setup-task@v1
-        with:
-          version: 3.30.1
       - uses: jdx/mise-action@v2
       # - name: Build the Docker image
       #   run: task build:docker

@@ -16,7 +16,7 @@ tasks:
       - "src/**/*.ts"
     cmds:
       # - bun x astro check
-      - bun x astro build
+      - bun x astro build {{.CLI_ARGS}}
 
   start:
     desc: Run website preview
