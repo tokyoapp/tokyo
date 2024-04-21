@@ -1,39 +1,40 @@
-import { createSignal } from "solid-js";
+import logger from "@luckydye/log";
+import i18next from "i18next";
+
 import de from "../locales/de.json";
 import en from "../locales/en.json";
 import kr from "../locales/kr.json";
 
-export const langs = {
-  en: en as Record<string, string>,
-  de: de as Record<string, string>,
-  kr: kr as Record<string, string>,
-} as const;
+export const AVAILABLE_LANGS = ["en"];
+export const DEFAULT_LANGUAGE = "en";
 
-export type LocaleKey = keyof typeof en;
-export type LocaleLang = keyof typeof langs;
+const log = logger().prefix("i18next").trace();
 
-export const [language, setLanguage] = createSignal<LocaleLang>("en");
+// https://www.i18next.com/overview/api
 
-export function t(id: LocaleKey, args: Array<string | number> = []) {
-  const lang = language();
-  const str = langs[lang][id] || langs.en[id];
+i18next.init(
+  {
+    // partialBundledLanguages: true, /* partialy from backend */
+    fallbackLng: "en",
+    defaultNS: "global",
+    resources: {},
+  },
+  (err) => {
+    if (err) return log.error("something went wrong loading", err);
+    log.info("i18next loaded");
+  },
+);
 
-  if (str) {
-    const parts = str.split("{}");
-    if (parts.length > 0) {
-      const merged: Array<string | number> = [];
+i18next.addResourceBundle("de", "global", de);
+i18next.addResourceBundle("en", "global", en);
+i18next.addResourceBundle("kr", "global", kr);
 
-      parts.forEach((part, i) => {
-        merged.push(part);
-        const arg = args[i];
-        if (arg) {
-          merged.push(arg);
-        }
-      });
+export type LocaleKey = keyof typeof de;
 
-      return merged.join("") || id;
-    }
-  }
-
-  return str;
+export function translation(
+  id: LocaleKey | LocaleKey[],
+  lang: string,
+  args: Array<number | string | undefined> = [],
+): string | undefined {
+  return i18next.t(id, { lng: lang, ...args });
 }
