@@ -9,6 +9,8 @@ pub async fn request(message: Vec<u8>) -> Result<Vec<u8>> {
     .await
     .expect("Could not handle");
 
+  info!("Response: {:?}", res);
+
   let bytes = res.write_to_bytes().unwrap();
   return Ok(bytes);
 }
