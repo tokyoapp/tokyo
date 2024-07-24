@@ -6,7 +6,7 @@
     "tokyo-ui": "./cli/main.ts"
   },
   "dependencies": {
-    "@atrium-ui/mono": "0.2.0-4",
+    "@sv/elements": "^1.8.0",
     "@kobalte/core": "0.11.2",
     "@minht11/solid-virtual-container": "^0.2.1",
     "@phosphor-icons/web": "^2.0.3",

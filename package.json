@@ -1,16 +1,11 @@
 {
-  "name": "evolution",
+  "name": "tokyo",
   "version": "0.0.0",
   "description": "",
   "author": "luckydye (Tim Havlicek)",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git@gitlab.luckydye.de:apps/evolution.git"
-  },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "@biomejs/biome": "^1.6.0"
+    "@biomejs/biome": "^1.8.0"
   },
   "workspaces": [
     "packages/*",

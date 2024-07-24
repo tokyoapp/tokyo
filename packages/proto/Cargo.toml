@@ -9,11 +9,11 @@ protoc = []
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-protobuf = { version = "3.4.0", features = ["with-bytes"] }
+protobuf = { version = "3.5.0", features = ["with-bytes"] }
 bytes = "1"
 
 [build-dependencies]
-protobuf-codegen = "3.4.0"
+protobuf-codegen = "3.5.0"
 
 [[bin]]
 name = "force-build"

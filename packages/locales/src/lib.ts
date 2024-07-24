@@ -31,10 +31,10 @@ i18next.addResourceBundle("kr", "global", kr);
 
 export type LocaleKey = keyof typeof de;
 
-export function translation(
+export function t(
   id: LocaleKey | LocaleKey[],
-  lang: string,
   args: Array<number | string | undefined> = [],
+  lang?: string,
 ): string | undefined {
-  return i18next.t(id, { lng: lang, ...args });
+  return i18next.t(id, { lng: lang ?? DEFAULT_LANGUAGE, ...args });
 }

@@ -2,12 +2,6 @@
 
 version: "3"
 
-env:
-  RUST_LOG: info,rawler=error
-  JS_LOG: info
-  RUST_BACKTRACE: 1
-  DATABASE: "file:///tmp/tokyo.db"
-
 includes:
   server:
     aliases: [s]

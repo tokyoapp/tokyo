@@ -1,5 +1,11 @@
 [tools]
-bun = "1.0.33"
 node = "21"
 rust = "1.75.0"
 task = "3.35"
+bun = "1.1.15"
+
+[env]
+RUST_LOG = "info,rawler=error"
+JS_LOG = "info"
+RUST_BACKTRACE = 1
+DATABASE = "file:///tmp/tokyo.db"

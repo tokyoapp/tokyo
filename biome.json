@@ -1,41 +1,18 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
-  "files": {
-    "ignoreUnknown": true,
-    "ignore": [
-      "gen",
-      ".mise",
-      ".astro",
-      ".nuxt",
-      ".output",
-      "vendor",
-      "public",
-      "dist"
-    ]
-  },
   "organizeImports": {
     "enabled": false
-  },
-  "formatter": {
-    "enabled": true,
-    "indentWidth": 2,
-    "lineWidth": 90,
-    "indentStyle": "space",
-    "formatWithErrors": true,
-    "lineEnding": "lf"
   },
   "linter": {
     "rules": {
       "style": {
-        "noDefaultExport": "warn"
-      },
-      "security": {
-        "noGlobalEval": "off"
+        "noDefaultExport": "warn",
+        "useExponentiationOperator": "warn"
       },
       "complexity": {
         "noStaticOnlyClass": "warn",
@@ -47,7 +24,7 @@
       "suspicious": {
         "noArrayIndexKey": "off",
         "noExplicitAny": "warn",
-        "noConsoleLog": "warn"
+        "noConsoleLog": "error"
       },
       "nursery": {
         "useSortedClasses": {
@@ -67,19 +44,51 @@
       }
     }
   },
+  "formatter": {
+    "enabled": true,
+    "indentWidth": 2,
+    "lineWidth": 90,
+    "indentStyle": "space",
+    "formatWithErrors": true,
+    "lineEnding": "lf"
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
       "semicolons": "always",
-      "trailingComma": "all",
+      "trailingCommas": "all",
       "quoteProperties": "asNeeded",
       "jsxQuoteStyle": "double"
     }
   },
+  "css": {
+    "formatter": {
+      "lineWidth": 90,
+      "quoteStyle": "double",
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
   "json": {
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    },
     "formatter": {
       "trailingCommas": "none",
       "lineWidth": 30
     }
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "ignore": [
+      ".mise",
+      ".astro",
+      ".nuxt",
+      ".output",
+      "vendor",
+      "public",
+      "dist"
+    ]
   }
 }

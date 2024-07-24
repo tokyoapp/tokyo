@@ -1,4 +1,4 @@
-import { langs, language, setLanguage } from "tokyo-locales";
+// import { langs, language, setLanguage } from "tokyo-locales";
 // import storage from '../services/ClientStorage.worker.ts';
 import { setSettingOpen } from "../App.jsx";
 import Button from "./ui/Button.jsx";
@@ -32,10 +32,10 @@ export default function () {
         <Select
           items={Object.keys(langs).map((lang) => ({ id: lang, value: lang }))}
           onChange={(value) => {
-            setLanguage(value);
+            // setLanguage(value);
           }}
         >
-          Language: {language()}
+          Language: {"en"}
         </Select>
 
         <br />
