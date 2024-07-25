@@ -1,4 +1,4 @@
-import "@sv/elements/expandable";
+import "@atrium-ui/elements/expandable";
 import { type ParentProps, createSignal } from "solid-js";
 import Icon from "../ui/Icon.jsx";
 

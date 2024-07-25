@@ -1,4 +1,5 @@
-import "@sv/elements/blur";
+import "@atrium-ui/elements/blur";
+import "@atrium-ui/elements/command";
 import { type ParentProps, createSignal } from "solid-js";
 import { t } from "tokyo-locales";
 import Icon from "./ui/Icon.jsx";
