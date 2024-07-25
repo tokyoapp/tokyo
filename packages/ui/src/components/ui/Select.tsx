@@ -1,5 +1,5 @@
-import "@atrium-ui/mono/dropdown";
-import "@atrium-ui/mono/toggle";
+import "@atrium-ui/elements/dropdown";
+import "@atrium-ui/elements/toggle";
 import type { ParentProps } from "solid-js";
 import Icon from "../ui/Icon.jsx";
 
