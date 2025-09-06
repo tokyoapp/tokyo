@@ -1,0 +1,333 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables for Lightroom-style theme */
+:root {
+	--bg-primary: #1a1a1a;
+	--bg-secondary: #2a2a2a;
+	--bg-tertiary: #3a3a3a;
+	--border-color: #404040;
+	--text-primary: #ffffff;
+	--text-secondary: #b3b3b3;
+	--text-muted: #808080;
+	--accent-blue: #0ea5e9;
+	--accent-blue-hover: #0284c7;
+	--accent-orange: #f97316;
+	--success-green: #10b981;
+	--warning-yellow: #f59e0b;
+	--error-red: #ef4444;
+}
+
+/* Base styles */
+html {
+	background-color: var(--bg-primary);
+}
+
+body {
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+		"Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+/* Image preview styles */
+.image-preview {
+	background:
+		repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 20px 20px;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.image-preview img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* Panel transitions */
+.panel-transition {
+	transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #666;
+}
+
+/* Button styles */
+.btn-primary {
+	background: var(--accent-blue);
+	color: white;
+	border: none;
+	padding: 8px 16px;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease-in-out;
+}
+
+.btn-primary:hover {
+	background: var(--accent-blue-hover);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.btn-primary:active {
+	transform: translateY(0);
+}
+
+.btn-secondary {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	padding: 8px 16px;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease-in-out;
+}
+
+.btn-secondary:hover {
+	background: #4a4a4a;
+	border-color: #505050;
+}
+
+/* Status indicators */
+.status-indicator {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 8px;
+}
+
+.status-indicator.online {
+	background: var(--success-green);
+	box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.status-indicator.offline {
+	background: var(--error-red);
+	box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.status-indicator.processing {
+	background: var(--warning-yellow);
+	box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+	animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Panel headers */
+.panel-header {
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-color);
+	padding: 12px 16px;
+	font-weight: 600;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--text-secondary);
+}
+
+/* Adjustment panel styles */
+.adjustment-panel {
+	background: var(--bg-secondary);
+}
+
+.adjustment-group {
+	border-bottom: 1px solid var(--border-color);
+	padding: 16px;
+}
+
+.adjustment-group:last-child {
+	border-bottom: none;
+}
+
+.adjustment-label {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-secondary);
+	margin-bottom: 8px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.adjustment-value {
+	font-size: 12px;
+	color: var(--text-muted);
+	font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace;
+	min-width: 48px;
+	text-align: right;
+}
+
+/* Before/After comparison */
+.comparison-view {
+	position: relative;
+	overflow: hidden;
+}
+
+.comparison-divider {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--accent-blue);
+	cursor: ew-resize;
+	z-index: 10;
+}
+
+.comparison-divider::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	background: var(--accent-blue);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* Histogram styles */
+.histogram {
+	background: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	height: 80px;
+	margin: 12px 0;
+	position: relative;
+	overflow: hidden;
+}
+
+.histogram-bars {
+	display: flex;
+	align-items: flex-end;
+	height: 100%;
+	padding: 4px;
+}
+
+.histogram-bar {
+	flex: 1;
+	background: linear-gradient(to top, var(--accent-blue), transparent);
+	margin: 0 0.5px;
+	border-radius: 1px 1px 0 0;
+}
+
+/* Tool tips */
+.tooltip {
+	position: relative;
+}
+
+.tooltip::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(0, 0, 0, 0.9);
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s;
+	z-index: 1000;
+}
+
+.tooltip:hover::after {
+	opacity: 1;
+}
+
+/* Loading spinner */
+.loading-spinner {
+	width: 20px;
+	height: 20px;
+	border: 2px solid var(--border-color);
+	border-top: 2px solid var(--accent-blue);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+	.adjustment-panel {
+		width: 280px;
+	}
+}
+
+@media (max-width: 900px) {
+	.adjustment-panel {
+		width: 240px;
+	}
+
+	.adjustment-group {
+		padding: 12px;
+	}
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus {
+	outline: 2px solid var(--accent-blue);
+	outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	:root {
+		--bg-primary: #000000;
+		--bg-secondary: #1a1a1a;
+		--text-primary: #ffffff;
+		--border-color: #666666;
+	}
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

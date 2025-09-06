@@ -1,0 +1,36 @@
+[package]
+name = "shade"
+version = "0.2.0"
+edition = "2024"
+description = "GPU-accelerated image processing and color grading tool"
+license = "MIT"
+repository = "https://github.com/luckydye/shade"
+
+[dependencies]
+anyhow = "1.0.99"
+base64 = "0.22"
+clap = { version = "4.0", features = ["derive"] }
+env_logger = "0.11.8"
+exr = "1.72.0"
+flume = "0.11.1"
+half = "2.3"
+image = "0.25.6"
+log = "0.4.27"
+png = "0.17.16"
+pollster = "0.4.0"
+rawler = { git = "https://github.com/tokyoapp/dnglab.git" }
+rust-ini = "0.21.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["io-util", "io-std", "rt", "macros", "time"] }
+wasm-bindgen = "0.2.100"
+wgpu = "26.0.1"
+sha2 = "0.10"
+bincode = "1.3"
+dirs = "5.0"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.7"
+console_log = "1.0.0"
+wasm-bindgen-futures = "0.4.43"
+web-sys = "0.3.70"
