@@ -11,8 +11,8 @@ use futures::StreamExt;
 use log::{error, info};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_proto::schema;
-use tokyo_proto::Message;
+use tokyo_schema::schema;
+use tokyo_schema::Message;
 
 async fn hnadle_client_message(
   msg: schema::ClientMessage,

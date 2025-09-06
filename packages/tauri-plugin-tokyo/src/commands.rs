@@ -1,5 +1,5 @@
 use crate::Result;
-use tokyo_proto::{schema, Message};
+use tokyo_schema::{schema, Message};
 
 #[tauri::command(async)]
 pub async fn request(message: Vec<u8>) -> Result<Vec<u8>> {

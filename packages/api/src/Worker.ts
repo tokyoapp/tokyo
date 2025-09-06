@@ -1,5 +1,5 @@
 import * as Comlink from "comlink";
-import type * as library from "tokyo-proto";
+import type * as library from "tokyo-schema";
 import RemoteLibrary from "./api/RemoteLibrary.ts?worker";
 
 type Remote = typeof import("./api/RemoteLibrary.ts").default;

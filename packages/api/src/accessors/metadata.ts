@@ -1,5 +1,5 @@
 import { Accessor } from "tokyo-accessors";
-import * as proto from "tokyo-proto";
+import * as proto from "tokyo-schema";
 import { DynamicImage } from "../DynamicImage.js";
 import { MessageType } from "../MessageTypes.js";
 import Worker from "../Worker.js";

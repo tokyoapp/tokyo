@@ -13,6 +13,15 @@ fn main() -> std::io::Result<()> {
     fs::create_dir_all(dist.clone())?;
   }
 
+  let out = Command::new("protoc")
+    .args([
+      "--version",
+    ])
+    .output()
+    .expect("failed to execute process");
+
+  println!("{:?}", out);
+
   Command::new("protoc")
     .args([
       "-I",
@@ -24,14 +33,7 @@ fn main() -> std::io::Result<()> {
     .status()
     .expect("failed to execute process");
 
-  Command::new("protoc")
-    .args([
-      "--rust_out",
-      dist.to_str().unwrap(),
-      input.to_str().unwrap(),
-    ])
-    .status()
-    .expect("failed to execute process");
+  tonic_prost_build::compile_protos("proto/service.proto")?;
 
   Ok(())
 }

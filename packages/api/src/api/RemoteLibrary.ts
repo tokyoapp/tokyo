@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import * as Comlink from "comlink";
-import * as library from "tokyo-proto";
+import * as library from "tokyo-schema";
 import { parseMessage } from "../MessageTypes.ts";
 
 export class RemoteLibrary {

@@ -1,5 +1,5 @@
 import { Accessor } from "tokyo-accessors";
-import * as proto from "tokyo-proto";
+import * as proto from "tokyo-schema";
 import Worker from "../Worker.js";
 import { MessageType } from "../lib.js";
 import { HostLibrary } from "../api/HostLibrary.js";

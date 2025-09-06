@@ -1,5 +1,5 @@
 import { request } from "tauri-plugin-tokyo";
-import * as library from "tokyo-proto";
+import * as library from "tokyo-schema";
 import { parseMessage } from "../MessageTypes.ts";
 
 export class HostLibrary {

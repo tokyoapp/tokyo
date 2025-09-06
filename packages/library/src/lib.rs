@@ -8,7 +8,7 @@ mod ws;
 
 use crate::library::Library;
 use serde::{Deserialize, Serialize};
-use tokyo_proto::schema;
+use tokyo_schema::schema;
 
 pub use messages::handle_client_request;
 pub use ws::start_websocket_server;

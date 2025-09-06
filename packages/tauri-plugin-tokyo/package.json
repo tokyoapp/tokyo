@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "devDependencies": {},
   "dependencies": {
-    "tokyo-proto": "workspace:",
+    "tokyo-schema": "workspace:",
     "@tauri-apps/api": "^2"
   }
 }

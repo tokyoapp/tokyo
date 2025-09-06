@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ClientMessage, Message } from "tokyo-proto";
+import { ClientMessage, Message } from "tokyo-schema";
 
 export async function request(clientMessage: ClientMessage) {
   const message = ClientMessage.encode(clientMessage).finish();

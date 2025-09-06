@@ -1,6 +1,6 @@
 import { platform } from "@tauri-apps/plugin-os";
 import { ErrorBoundary, createSignal } from "solid-js";
-import type { IndexEntryMessage } from "tokyo-proto";
+import type { IndexEntryMessage } from "tokyo-schema";
 import Jobs from "./actions/Action.ts";
 import { ActivityBar } from "./components/Activitybar.jsx";
 import Explorer from "./components/Explorer";

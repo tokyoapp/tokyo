@@ -3,6 +3,7 @@ node = "21"
 rust = "1.89.0"
 task = "3.44.1"
 bun = "1.2.21"
+protoc = "32.0"
 
 [env]
 RUST_LOG = "info,rawler=error"

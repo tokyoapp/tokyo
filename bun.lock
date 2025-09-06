@@ -29,7 +29,7 @@
         "comlink": "^4.4.1",
         "tauri-plugin-tokyo": "workspace:",
         "tokyo-accessors": "workspace:",
-        "tokyo-proto": "workspace:",
+        "tokyo-schema": "workspace:",
       },
     },
     "packages/app": {
@@ -57,7 +57,7 @@
       "name": "tokyo-properties",
     },
     "packages/proto": {
-      "name": "tokyo-proto",
+      "name": "tokyo-schema",
       "version": "0.1.0",
       "dependencies": {
         "ts-proto": "^1.157.0",
@@ -68,7 +68,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@tauri-apps/api": "2.0.0-beta.6",
-        "tokyo-proto": "workspace:",
+        "tokyo-schema": "workspace:",
       },
     },
     "packages/ui": {
@@ -96,7 +96,7 @@
         "tokyo-api": "workspace:",
         "tokyo-locales": "workspace:",
         "tokyo-properties": "workspace:",
-        "tokyo-proto": "workspace:",
+        "tokyo-schema": "workspace:",
         "vite": "^5.0.11",
         "vite-plugin-solid": "^2.8.0",
         "vite-plugin-wrap-worker": "^0.3.0",
@@ -1234,7 +1234,7 @@
 
     "tokyo-properties": ["tokyo-properties@workspace:packages/properties"],
 
-    "tokyo-proto": ["tokyo-proto@workspace:packages/proto"],
+    "tokyo-schema": ["tokyo-schema@workspace:packages/proto"],
 
     "tokyo-ui": ["tokyo-ui@workspace:packages/ui"],
 

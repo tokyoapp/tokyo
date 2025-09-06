@@ -8,7 +8,7 @@ import {
   createMetadataAccessor,
 } from "tokyo-api";
 import { t } from "tokyo-locales";
-import type { IndexEntryMessage } from "tokyo-proto";
+import type { IndexEntryMessage } from "tokyo-schema";
 import Jobs from "../actions/Action.ts";
 import Combobox from "./ui/Combobox.jsx";
 import Icon from "./ui/Icon.jsx";

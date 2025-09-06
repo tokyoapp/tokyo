@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 ccapi = { path = "../ccapi" }
 tokyo-shadow = { path = "../shadow" }
-tokyo-proto = { path = "../proto", features = ["protoc"] }
+tokyo-schema = { path = "../schema", features = ["protoc"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.105"
 sha256 = "1.4.0"

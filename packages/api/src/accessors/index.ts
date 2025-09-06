@@ -1,6 +1,6 @@
 import { Accessor } from "tokyo-accessors";
-import type { IndexEntryMessage } from "tokyo-proto";
-import * as proto from "tokyo-proto";
+import type { IndexEntryMessage } from "tokyo-schema";
+import * as proto from "tokyo-schema";
 import Worker from "../Worker.js";
 import { MessageType } from "../lib.js";
 import { HostLibrary } from "../api/HostLibrary.js";

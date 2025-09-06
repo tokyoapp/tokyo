@@ -9,8 +9,8 @@ use log::error;
 use log::info;
 use std::path::Path;
 use tokio::time::Instant;
-use tokyo_proto::schema::MetadataEntryMessage;
-use tokyo_proto::schema::{self, ClientMessage, IndexEntryMessage};
+use tokyo_schema::schema::MetadataEntryMessage;
+use tokyo_schema::schema::{self, ClientMessage, IndexEntryMessage};
 
 async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
   let mut msg = schema::Message::new();
@@ -91,19 +91,19 @@ pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<D
   let start = Instant::now();
 
   info!("Load image");
-  let image = tokyo_shadow::get_image(&Path::new(path)).await?;
+  // let image = tokyo_shadow::get_image(&Path::new(path)).await?;
 
   info!("Resize image");
-  let image = image.resize(2048, 2048, FilterType::Lanczos3);
+  // let image = image.resize(2048, 2048, FilterType::Lanczos3);
 
-  let edits: tokyo_shadow::Edits = match edits_json {
-    Some(json) => tokyo_shadow::Edits::from_json(json),
-    _ => tokyo_shadow::Edits::new(),
-  };
+  // let edits: tokyo_shadow::Edits = match edits_json {
+  //   Some(json) => tokyo_shadow::Edits::from_json(json),
+  //   _ => tokyo_shadow::Edits::new(),
+  // };
 
   info!("Process image");
-  let img = tokyo_shadow::process(image.to_rgb32f(), &edits);
-  let image = DynamicImage::ImageRgb32F(img);
+  // let img = tokyo_shadow::process(image.to_rgb32f(), &edits);
+  let image = DynamicImage::default();
 
   info!("done in {}ms", start.elapsed().as_millis());
 

@@ -1,4 +1,4 @@
-import type * as library from "tokyo-proto";
+import type * as library from "tokyo-schema";
 
 export enum MessageType {
   Error = "error",
