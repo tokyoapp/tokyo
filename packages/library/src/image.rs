@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use image::imageops::FilterType;
 use log::{error, info};
 use rawler::decoders::{RawDecodeParams, RawMetadata};
-use rawler::{analyze::extract_thumbnail_pixels, get_decoder, imgop::develop::RawDevelop, RawFile};
+use rawler::{RawFile, analyze::extract_thumbnail_pixels, get_decoder, imgop::develop::RawDevelop};
 use std::io::Cursor;
 use std::{
   fs::File,

@@ -20,9 +20,6 @@
         "solid-js": "^1.7.8",
       },
     },
-    "packages/actions": {
-      "name": "tokyo-actions",
-    },
     "packages/api": {
       "name": "tokyo-api",
       "dependencies": {
@@ -1221,8 +1218,6 @@
     "to-regex-range": ["to-regex-range@5.0.1", "", { "dependencies": { "is-number": "^7.0.0" } }, "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ=="],
 
     "tokyo-accessors": ["tokyo-accessors@workspace:packages/accessors"],
-
-    "tokyo-actions": ["tokyo-actions@workspace:packages/actions"],
 
     "tokyo-api": ["tokyo-api@workspace:packages/api"],
 

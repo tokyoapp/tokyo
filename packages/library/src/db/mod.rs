@@ -1,7 +1,7 @@
 pub mod schema;
 
 use anyhow::Result;
-use libsql::{params, Connection, Database};
+use libsql::{Connection, Database, params};
 use std::env;
 use std::{fs, path::Path};
 

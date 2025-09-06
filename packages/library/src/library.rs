@@ -1,9 +1,9 @@
-use crate::db;
-use crate::filesystem;
-use crate::image;
 use crate::IndexEntry;
 use crate::MetadataEntry;
 use crate::SystemInfo;
+use crate::db;
+use crate::filesystem;
+use crate::image;
 use ccapi;
 
 use anyhow::Result;

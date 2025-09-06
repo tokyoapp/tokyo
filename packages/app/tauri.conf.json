@@ -1,4 +1,5 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "tokyo-desktop",
   "version": "0.0.0",
   "identifier": "com.tokyo.dev",
@@ -11,7 +12,6 @@
     "windows": [
       {
         "transparent": true,
-        "fileDropEnabled": true,
         "titleBarStyle": "Overlay",
         "decorations": true,
         "hiddenTitle": true,

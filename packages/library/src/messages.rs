@@ -1,25 +1,23 @@
 use crate::IndexEntry;
 use crate::Library;
-use anyhow::anyhow;
 use anyhow::Result;
-use image::imageops::FilterType;
+use anyhow::anyhow;
 use image::DynamicImage;
 use image::EncodableLayout;
+use image::imageops::FilterType;
 use log::error;
 use log::info;
 use std::path::Path;
 use tokio::time::Instant;
-use tokyo_schema::schema::MetadataEntryMessage;
-use tokyo_schema::schema::{self, ClientMessage, IndexEntryMessage};
 
-async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
-  let mut msg = schema::Message::new();
-  let mut entires_msg = schema::MetadataMessage::new();
+async fn metadata(lib: &Library, file: &Vec<String>) -> tokyo_schema::proto::Message {
+  let mut msg = tokyo_schema::proto::Message::default();
+  let mut entires_msg = tokyo_schema::proto::MetadataMessage::default();
 
   for f in file {
     let meta = lib.metadata(f.clone()).await;
     if let Some(metadata) = meta {
-      let entry: MetadataEntryMessage = metadata.into();
+      let entry: tokyo_schema::proto::MetadataEntryMessage = metadata.into();
       entires_msg.entries.push(entry);
     } else {
       error!("Failed to get lib metadata for {}", f);
@@ -30,15 +28,15 @@ async fn metadata(lib: &Library, file: &Vec<String>) -> schema::Message {
   return msg;
 }
 
-async fn get_location_list(lib: &Library) -> schema::LibraryListMessage {
+async fn get_location_list(lib: &Library) -> tokyo_schema::proto::LibraryListMessage {
   let list = lib.list_locations().await.unwrap();
   let tags = lib.list_tags().await;
 
-  let mut list_msg = schema::LibraryListMessage::new();
+  let mut list_msg = tokyo_schema::proto::LibraryListMessage::default();
   list_msg.tags = tags
     .iter()
     .map(|t| {
-      let mut m = schema::TagMessage::new();
+      let mut m = tokyo_schema::proto::TagMessage::default();
       m.id = t.id.clone();
       m.name = t.name.clone();
       return m;
@@ -47,7 +45,7 @@ async fn get_location_list(lib: &Library) -> schema::LibraryListMessage {
   list_msg.libraries = list
     .into_iter()
     .map(|loc| {
-      let mut m = schema::LibraryMessage::new();
+      let mut m = tokyo_schema::proto::LibraryMessage::default();
       m.id = loc.id;
       m.name = loc.name;
       m.path = loc.path;
@@ -59,7 +57,10 @@ async fn get_location_list(lib: &Library) -> schema::LibraryListMessage {
   list_msg
 }
 
-async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexMessage {
+async fn get_index_msg(
+  lib: &Library,
+  ids: Vec<String>,
+) -> tokyo_schema::proto::LibraryIndexMessage {
   let mut _index: Vec<IndexEntry> = Vec::new();
 
   for id in ids {
@@ -75,11 +76,11 @@ async fn get_index_msg(lib: &Library, ids: Vec<String>) -> schema::LibraryIndexM
     }
   }
 
-  let mut index_msg = schema::LibraryIndexMessage::new();
+  let mut index_msg = tokyo_schema::proto::LibraryIndexMessage::default();
   index_msg.index = _index
     .into_iter()
     .map(|entry| {
-      let msg: IndexEntryMessage = entry.into();
+      let msg: tokyo_schema::proto::IndexEntryMessage = entry.into();
       msg
     })
     .collect();
@@ -110,20 +111,22 @@ pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<D
   Ok(image)
 }
 
-pub async fn handle_client_request(req: ClientMessage) -> Result<schema::Message> {
+pub async fn handle_client_request(
+  req: tokyo_schema::proto::ClientMessage,
+) -> Result<tokyo_schema::proto::Message> {
   let lib = &Library::new().await;
 
   info!("Request: {:?}", req);
 
   if req.has_locations() {
-    let mut msg = schema::Message::new();
+    let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
     msg.set_list(get_location_list(lib).await);
     return Ok(msg);
   }
 
   if req.has_index() {
-    let mut msg = schema::Message::new();
+    let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce.clone();
 
     let index = req.index();
@@ -139,7 +142,7 @@ pub async fn handle_client_request(req: ClientMessage) -> Result<schema::Message
       .await;
 
     if _cr.is_ok() {
-      let mut msg = schema::Message::new();
+      let mut msg = tokyo_schema::proto::Message::default();
       msg.set_list(get_location_list(lib).await);
       return Ok(msg);
     }
@@ -154,13 +157,13 @@ pub async fn handle_client_request(req: ClientMessage) -> Result<schema::Message
 
   if req.has_image() {
     let file = &req.image().file; // should be the hash,
-    let mut img_msg = schema::ImageMessage::new();
+    let mut img_msg = tokyo_schema::proto::ImageMessage::default();
     let image = edited_image(file, req.image().edits.to_owned()).await?;
     let v = image.to_rgb8().as_bytes().to_vec();
     img_msg.image = v;
     img_msg.width = image.width() as i32;
     img_msg.height = image.height() as i32;
-    let mut msg = schema::Message::new();
+    let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
     msg.set_image(img_msg);
     return Ok(msg);
@@ -171,7 +174,7 @@ pub async fn handle_client_request(req: ClientMessage) -> Result<schema::Message
     let rating = req.postmeta().rating.unwrap();
     lib.set_rating(file.clone(), rating).await?;
 
-    let mut msg = schema::Message::new();
+    let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
     msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
     return Ok(msg);

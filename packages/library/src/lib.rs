@@ -8,7 +8,6 @@ mod ws;
 
 use crate::library::Library;
 use serde::{Deserialize, Serialize};
-use tokyo_schema::schema;
 
 pub use messages::handle_client_request;
 pub use ws::start_websocket_server;
@@ -58,9 +57,9 @@ pub struct Edits {
   pub exposure: u32,
 }
 
-impl Into<schema::SystemInfo> for SystemInfo {
-  fn into(self) -> schema::SystemInfo {
-    let mut _msg = schema::SystemInfo::new();
+impl Into<tokyo_schema::proto::SystemInfo> for SystemInfo {
+  fn into(self) -> tokyo_schema::proto::SystemInfo {
+    let mut _msg = tokyo_schema::proto::SystemInfo::default();
     _msg.disk_name = self.disk_name;
     _msg.disk_size = self.disk_size;
     _msg.disk_available = self.disk_available;
@@ -68,9 +67,9 @@ impl Into<schema::SystemInfo> for SystemInfo {
   }
 }
 
-impl Into<schema::IndexEntryMessage> for IndexEntry {
-  fn into(self) -> schema::IndexEntryMessage {
-    let mut _msg = schema::IndexEntryMessage::new();
+impl Into<tokyo_schema::proto::IndexEntryMessage> for IndexEntry {
+  fn into(self) -> tokyo_schema::proto::IndexEntryMessage {
+    let mut _msg = tokyo_schema::proto::IndexEntryMessage::default();
     _msg.hash = self.hash;
     _msg.name = self.name;
     _msg.path = self.path;
@@ -82,9 +81,9 @@ impl Into<schema::IndexEntryMessage> for IndexEntry {
   }
 }
 
-impl Into<schema::MetadataEntryMessage> for MetadataEntry {
-  fn into(self) -> schema::MetadataEntryMessage {
-    let mut _msg = schema::MetadataEntryMessage::new();
+impl Into<tokyo_schema::proto::MetadataEntryMessage> for MetadataEntry {
+  fn into(self) -> tokyo_schema::proto::MetadataEntryMessage {
+    let mut _msg = tokyo_schema::proto::MetadataEntryMessage::default();
     _msg.hash = self.hash;
     _msg.name = self.name;
     _msg.create_date = self.create_date;

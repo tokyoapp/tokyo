@@ -612,10 +612,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "client-actions"
-version = "0.1.0"
-
-[[package]]
 name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5553,6 +5549,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.6.20",
+ "bytes",
  "ccapi",
  "env_logger",
  "futures",
@@ -5570,6 +5567,7 @@ dependencies = [
  "tokio",
  "tokyo-schema",
  "tokyo-shadow",
+ "tonic 0.14.2",
  "url",
  "uuid",
  "walkdir",
