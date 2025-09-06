@@ -7,6 +7,6 @@
   "devDependencies": {},
   "dependencies": {
     "tokyo-proto": "workspace:",
-    "@tauri-apps/api": "2.0.0-beta.6"
+    "@tauri-apps/api": "^2"
   }
 }

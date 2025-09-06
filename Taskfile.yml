@@ -7,17 +7,14 @@ includes:
     aliases: [s]
     dir: packages/server
     taskfile: packages/server/Taskfile.yml
-
   app:
     aliases: [a]
     dir: packages/app
     taskfile: packages/app/Taskfile.yml
-
   desktop:
     aliases: [d]
     dir: packages/desktop
     taskfile: packages/desktop/Taskfile.yml
-
   website:
     aliases: [w]
     dir: packages/website
@@ -39,10 +36,9 @@ tasks:
       - "**/package.json"
     cmds:
       - bun install
-      - cargo install cargo-watch
-      - cargo install wasm-pack
-      - cargo install tauri-cli
-      - cargo install protobuf-codegen
+      - cargo install wasm-pack@0.13.1
+      - cargo install tauri-cli@2.8.4
+      - cargo install protobuf-codegen@3.7.1
       - cargo check
       - task: codegen
 
@@ -63,12 +59,6 @@ tasks:
     deps: [setup]
     cmds:
       - task --parallel server:dev desktop:dev
-
-  dev:shadow:
-    desc: Run shadow pacakge test
-    dir: "packages/shadow"
-    deps: [setup]
-    cmd: cargo watch -x run
 
   dev:ios:
     desc: Run ios app in simulator

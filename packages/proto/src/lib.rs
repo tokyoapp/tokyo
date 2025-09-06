@@ -1,7 +1,7 @@
 #[cfg(feature = "protoc")]
-mod gen;
+mod generated;
 
 #[cfg(feature = "protoc")]
-pub use gen::schema;
+pub use generated::schema;
 
 pub use protobuf::Message;

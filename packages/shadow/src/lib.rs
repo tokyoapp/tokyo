@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use image::{DynamicImage, ImageBuffer};
 use image::{Pixel, Rgb};
-use log::{error, info};
+use log::error;
 use rawler::buffer::Buffer;
 use rawler::imgop::develop::RawDevelop;
 use rawler::{
@@ -11,7 +11,7 @@ use rawler::{
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tokio::fs::File;
-use tokio::io::{self, AsyncReadExt};
+use tokio::io::AsyncReadExt;
 
 pub async fn get_image(path: &Path) -> anyhow::Result<DynamicImage> {
   let mut file = File::open(&path).await.unwrap();
@@ -160,7 +160,7 @@ fn temprature(color: [f32; 3], temp: f32, tint: f32) -> [f32; 3] {
   let [x, y, z] = color;
 
   let mut u = (2.0 / 3.0) * x;
-  let mut v = y;
+  let v = y;
   let mut w = (1.0 / 2.0) * (-x + 3.0 * y + z);
 
   u = u * (1.0 + tint);
