@@ -77,8 +77,8 @@ export default function App() {
 
       <notification-feed class="fixed left-1/2 top-20 z-50 w-80 -translate-x-1/2" />
 
-      <div class="grid grid-cols-[auto_1fr]">
-        <ActivityBar />
+      <div class="grid grid-cols-[1fr]">
+        {/*<ActivityBar />*/}
 
         <div
           class={`relative grid h-full w-full ${

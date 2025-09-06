@@ -3,5 +3,9 @@
   "identifier": "main-capability",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["tokyo:allow-request"]
+  "permissions": [
+    "tokyo:allow-request",
+    "core:window:default",
+    "core:window:allow-start-dragging"
+  ]
 }

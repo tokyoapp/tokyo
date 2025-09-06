@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "identifier": "com.tokyo.dev",
   "build": {
-    "devUrl": "http://localhost:8080",
     "frontendDist": "./dist"
   },
   "app": {

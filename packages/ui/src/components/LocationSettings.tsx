@@ -1,5 +1,4 @@
-// import { langs, language, setLanguage } from "tokyo-locales";
-// import storage from '../services/ClientStorage.worker.ts';
+import { AVAILABLE_LANGS } from "tokyo-locales";
 import { setSettingOpen } from "../App.jsx";
 import Button from "./ui/Button.jsx";
 import Icon from "./ui/Icon.jsx";
@@ -30,7 +29,10 @@ export default function () {
 
       <div>
         <Select
-          items={Object.keys(langs).map((lang) => ({ id: lang, value: lang }))}
+          items={Object.keys(AVAILABLE_LANGS).map((lang) => ({
+            id: lang,
+            value: lang,
+          }))}
           onChange={(value) => {
             // setLanguage(value);
           }}
@@ -41,7 +43,7 @@ export default function () {
         <br />
         <br />
 
-        <Button onClick={() => storage.reset()}>Reset Cache</Button>
+        <Button onClick={() => {}}>Reset Cache</Button>
       </div>
     </div>
   );

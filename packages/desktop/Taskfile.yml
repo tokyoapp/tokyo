@@ -27,6 +27,7 @@ tasks:
     desc: Dev
     prefix: "desktop"
     dir: ./
+    deps: [ui:build]
     cmd: task --parallel ui:dev tauri:dev
 
   build:

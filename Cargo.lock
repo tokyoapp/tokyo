@@ -280,12 +280,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "az"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b7e4c2464d97fe331d41de9d5db0def0a96f4d823b8b32a2efd503578988973"
-
-[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1546,12 +1540,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "glam"
-version = "0.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e4afd9ad95555081e109fe1d21f2a30c691b5f0919c67dfa690a2e1eb6bd51c"
-
-[[package]]
 name = "glib"
 version = "0.18.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1603,16 +1591,6 @@ name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
-
-[[package]]
-name = "gmp-mpfr-sys"
-version = "1.6.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60f8970a75c006bb2f8ae79c6768a116dd215fa8346a87aed99bf9d82ca43394"
-dependencies = [
- "libc",
- "windows-sys 0.60.2",
-]
 
 [[package]]
 name = "gobject-sys"
@@ -2354,24 +2332,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kitty_image"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59bed8e1e801b75e8a97ecef1d8a3528ec8b38ceafd354691ddde887aac35736"
-dependencies = [
- "base64 0.21.7",
-]
-
-[[package]]
-name = "kolor"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be0b28eb1aad615eb53ab25d3ee308204cfd33b738864bed6ffec1d842e9d92e"
-dependencies = [
- "glam",
-]
-
-[[package]]
 name = "kuchikiki"
 version = "0.8.8-speedreader"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2474,12 +2434,6 @@ dependencies = [
  "cfg-if",
  "windows-targets 0.53.3",
 ]
-
-[[package]]
-name = "libm"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
 name = "library"
@@ -2843,74 +2797,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "num"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35bd024e8b2ff75562e5f34e7f4905839deb4b22955ef5e73d2fea1b9813cb23"
-dependencies = [
- "num-bigint",
- "num-complex",
- "num-integer",
- "num-iter",
- "num-rational",
- "num-traits",
-]
-
-[[package]]
-name = "num-bigint"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
-dependencies = [
- "num-integer",
- "num-traits",
-]
-
-[[package]]
-name = "num-complex"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
 name = "num-conv"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
-
-[[package]]
-name = "num-integer"
-version = "0.1.46"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
-name = "num-iter"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1429034a0490724d0075ebb2bc9e875d6503c3cf69e235a8941aa757d83ef5bf"
-dependencies = [
- "autocfg",
- "num-integer",
- "num-traits",
-]
-
-[[package]]
-name = "num-rational"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
-dependencies = [
- "num-bigint",
- "num-integer",
- "num-traits",
-]
 
 [[package]]
 name = "num-traits"
@@ -3973,40 +3863,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rawler"
-version = "0.6.0"
-source = "git+https://github.com/luckydye/dnglab?rev=c088515#c0885150299e07f5a9c778876df0cf83c41cedbc"
-dependencies = [
- "async-trait",
- "backtrace",
- "bitstream-io",
- "byteorder",
- "chrono",
- "enumn",
- "futures",
- "glob",
- "hex",
- "image",
- "itertools",
- "lazy_static",
- "libc",
- "libflate",
- "log",
- "md5",
- "multiversion",
- "num_enum",
- "rayon",
- "rustc_version",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "toml 0.8.2",
- "uuid",
- "weezl",
-]
-
-[[package]]
 name = "rawloader"
 version = "0.37.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4186,15 +4042,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rgb_derivation"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "354d3cd896a835d55d83bae057d95cb03164f801e2a6a0d7d8b39d64a342fe9f"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
 name = "ring"
 version = "0.17.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4221,18 +4068,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "862340e351ce1b271a378ec53f304a5558f7db87f3769dc655a8f6ecbb68b302"
 dependencies = [
  "xmlparser",
-]
-
-[[package]]
-name = "rug"
-version = "1.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58ad2e973fe3c3214251a840a621812a4f40468da814b1a3d6947d433c2af11f"
-dependencies = [
- "az",
- "gmp-mpfr-sys",
- "libc",
- "libm",
 ]
 
 [[package]]
@@ -4821,17 +4656,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "srgb"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e36277299377ddb7c305f4e2808a19d40a7df87026b1c43935e998d8b4bc4ab"
-dependencies = [
- "num",
- "rgb_derivation",
- "rug",
-]
-
-[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5215,7 +5039,6 @@ dependencies = [
  "tokio",
  "tokyo-library",
  "tokyo-schema",
- "tokyo-shadow",
 ]
 
 [[package]]
@@ -5557,7 +5380,7 @@ dependencies = [
  "image",
  "libsql",
  "log",
- "rawler 0.6.0 (git+https://github.com/tokyoapp/dnglab?rev=11450c60e34e1deb7fa371e0a0a0b4e6e131c53b)",
+ "rawler",
  "rawloader",
  "roxmltree",
  "serde",
@@ -5566,7 +5389,6 @@ dependencies = [
  "sysinfo",
  "tokio",
  "tokyo-schema",
- "tokyo-shadow",
  "tonic 0.14.2",
  "url",
  "uuid",
@@ -5587,23 +5409,6 @@ dependencies = [
  "protobuf-codegen",
  "tonic 0.14.2",
  "tonic-prost-build",
-]
-
-[[package]]
-name = "tokyo-shadow"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "env_logger",
- "image",
- "kitty_image",
- "kolor",
- "log",
- "rawler 0.6.0 (git+https://github.com/luckydye/dnglab?rev=c088515)",
- "serde",
- "serde_json",
- "srgb",
- "tokio",
 ]
 
 [[package]]
