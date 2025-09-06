@@ -50,7 +50,7 @@ tasks:
       - task: setup
 
   codegen:
-    dir: "./packages/proto"
+    dir: "./packages/schema"
     cmds:
       - bun x cargo run --bin force-build
 

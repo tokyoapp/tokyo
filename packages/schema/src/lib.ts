@@ -1,1 +1,1 @@
-export * from "./gen/schema.js";
+export * from "./schema.js";

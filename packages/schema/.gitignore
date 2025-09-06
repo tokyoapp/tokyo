@@ -1,4 +1,3 @@
 node_modules
-src/generated/*.rs
-src/generated/*.ts
-!src/generated/mod.rs
+src/proto.rs
+src/schema.ts

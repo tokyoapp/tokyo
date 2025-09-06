@@ -56,7 +56,7 @@
     "packages/properties": {
       "name": "tokyo-properties",
     },
-    "packages/proto": {
+    "packages/schema": {
       "name": "tokyo-schema",
       "version": "0.1.0",
       "dependencies": {
@@ -67,7 +67,7 @@
       "name": "tauri-plugin-tokyo",
       "version": "0.0.0",
       "dependencies": {
-        "@tauri-apps/api": "2.0.0-beta.6",
+        "@tauri-apps/api": "^2",
         "tokyo-schema": "workspace:",
       },
     },
@@ -83,8 +83,8 @@
         "@phosphor-icons/web": "^2.0.3",
         "@rive-app/canvas-single": "^2.3.0",
         "@tailwindcss/container-queries": "^0.1.1",
-        "@tauri-apps/api": "2.0.0-beta.6",
-        "@tauri-apps/plugin-os": "2.0.0-beta.2",
+        "@tauri-apps/api": "^2",
+        "@tauri-apps/plugin-os": "^2",
         "autoprefixer": "^10.4.15",
         "comlink": "^4.4.1",
         "lit": "^2.6.1",
@@ -444,9 +444,9 @@
 
     "@tailwindcss/container-queries": ["@tailwindcss/container-queries@0.1.1", "", { "peerDependencies": { "tailwindcss": ">=3.2.0" } }, "sha512-p18dswChx6WnTSaJCSGx6lTmrGzNNvm2FtXmiO6AuA1V4U5REyoqwmT6kgAsIMdjo07QdAfYXHJ4hnMtfHzWgA=="],
 
-    "@tauri-apps/api": ["@tauri-apps/api@2.0.0-beta.6", "", {}, "sha512-ay3kAXYQoqC3rX4Vr3y6uGwrBhRPM7UQqZ9wr1VYzN6lkcMIcu7+UBvytmcfXDlVctqFoMQJafn6+dK/Oqh8+Q=="],
+    "@tauri-apps/api": ["@tauri-apps/api@2.8.0", "", {}, "sha512-ga7zdhbS2GXOMTIZRT0mYjKJtR9fivsXzsyq5U3vjDL0s6DTMwYRm0UHNjzTY5dh4+LSC68Sm/7WEiimbQNYlw=="],
 
-    "@tauri-apps/plugin-os": ["@tauri-apps/plugin-os@2.0.0-beta.2", "", { "dependencies": { "@tauri-apps/api": "2.0.0-beta.4" } }, "sha512-rhJ/sEYvEAeMUQt6UiFODi5dT6F/ciNZYBQrbFTwhIqwQ2fp87dmzsscMy7FQ9LOor8AW+kL1KWoadfgzA/mSA=="],
+    "@tauri-apps/plugin-os": ["@tauri-apps/plugin-os@2.3.1", "", { "dependencies": { "@tauri-apps/api": "^2.8.0" } }, "sha512-ty5V8XDUIFbSnrk3zsFoP3kzN+vAufYzalJSlmrVhQTImIZa1aL1a03bOaP2vuBvfR+WDRC6NgV2xBl8G07d+w=="],
 
     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
 
@@ -1234,7 +1234,7 @@
 
     "tokyo-properties": ["tokyo-properties@workspace:packages/properties"],
 
-    "tokyo-schema": ["tokyo-schema@workspace:packages/proto"],
+    "tokyo-schema": ["tokyo-schema@workspace:packages/schema"],
 
     "tokyo-ui": ["tokyo-ui@workspace:packages/ui"],
 
@@ -1389,8 +1389,6 @@
     "@babel/helper-compilation-targets/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
-
-    "@tauri-apps/plugin-os/@tauri-apps/api": ["@tauri-apps/api@2.0.0-beta.4", "", {}, "sha512-Nxtj28NYUo5iwYkpYslxmOPkdI2WkELU2e3UH9nbJm9Ydki2CQwJVGQxx4EANtdZcMNsEsUzRqaDTvEUYH1l6w=="],
 
     "ansi-align/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
