@@ -5,23 +5,23 @@ version: "3"
 includes:
   server:
     aliases: [s]
-    dir: apps/server
-    taskfile: apps/server/Taskfile.yml
+    dir: packages/server
+    taskfile: packages/server/Taskfile.yml
 
   app:
     aliases: [a]
-    dir: apps/app
-    taskfile: apps/app/Taskfile.yml
+    dir: packages/app
+    taskfile: packages/app/Taskfile.yml
 
   desktop:
     aliases: [d]
-    dir: apps/desktop
-    taskfile: apps/desktop/Taskfile.yml
+    dir: packages/desktop
+    taskfile: packages/desktop/Taskfile.yml
 
   website:
     aliases: [w]
-    dir: apps/website
-    taskfile: apps/website/Taskfile.yml
+    dir: packages/website
+    taskfile: packages/website/Taskfile.yml
 
 tasks:
   default:
@@ -82,7 +82,7 @@ tasks:
 
   build:docker:
     desc: Build docker image for library server
-    cmd: docker buildx build --platform linux/amd64 -f apps/server/Dockerfile --tag luckydye/tokyo:latest .
+    cmd: docker buildx build --platform linux/amd64 -f packages/server/Dockerfile --tag luckydye/tokyo:latest .
 
   check:
     desc: Check files
