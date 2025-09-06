@@ -2,7 +2,7 @@
 name = "app"
 version = "0.0.0"
 description = "A Tauri App"
-edition = "2021"
+edition = "2024"
 
 [lib]
 name = "tauri_app_lib"
