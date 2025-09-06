@@ -5,14 +5,12 @@ use axum::Router;
 use axum::extract::WebSocketUpgrade;
 use axum::extract::ws;
 use axum::routing::get;
-use bytes::{Buf, BufMut, Bytes, BytesMut};
 use futures::StreamExt;
 use futures::sink::SinkExt;
 use futures::stream::SplitSink;
 use log::{error, info};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokyo_schema::prost::Message;
 
 async fn hnadle_client_message(
   msg: tokyo_schema::proto::ClientMessage,
@@ -28,7 +26,7 @@ async fn hnadle_client_message(
     // TODO: streamed responses
     if let Ok(mut message) = message {
       message.nonce = nonce;
-      let packet = ws::Message::Binary(message.write_to_bytes().unwrap());
+      let packet = ws::Message::Binary(message.into());
       sender
         .lock()
         .await
@@ -43,14 +41,10 @@ async fn hnadle_client_message(
       error_message.error = Some(true);
       error_message.message = Some(error);
 
-      let mut msg_buf = Vec::new();
-      msg_buf.reserve(tokyo_schema::proto::Message::encoded_len(&error_message));
-      tokyo_schema::proto::Message::encode(&error_message, &mut msg_buf);
-
       sender
         .lock()
         .await
-        .send(ws::Message::Binary(msg_buf))
+        .send(ws::Message::Binary(error_message.into()))
         .await
         .expect("Error sending message");
     }
@@ -63,13 +57,9 @@ pub async fn handle_socket(mut socket: ws::WebSocket) {
   // send system info
   let mut sys_msg = tokyo_schema::proto::Message::default();
   let info_msg = tokyo_schema::proto::SystemInfo::from(Library::sysinfo().into());
-  let msg = tokyo_schema::proto::message::Msg::System(info_msg);
+  sys_msg.msg = Some(tokyo_schema::proto::message::Msg::System(info_msg));
 
-  let mut msg_buf = Vec::new();
-  msg_buf.reserve(msg.encoded_len());
-  msg.encode(&mut msg_buf);
-
-  let _ = socket.send(ws::Message::Binary(msg_buf)).await;
+  let _ = socket.send(ws::Message::Binary(sys_msg.into())).await;
 
   let (sender, mut receiver) = socket.split();
 
@@ -86,7 +76,7 @@ pub async fn handle_socket(mut socket: ws::WebSocket) {
 
     let data = msg.into_data();
 
-    if let Ok(msg) = tokyo_schema::proto::ClientMessage::parse_from_bytes(&data) {
+    if let Ok(msg) = tokyo_schema::proto::ClientMessage::try_from(data) {
       let sender = sender.clone();
       hnadle_client_message(msg, sender).await;
     } else {
@@ -97,11 +87,7 @@ pub async fn handle_socket(mut socket: ws::WebSocket) {
       if sender
         .lock()
         .await
-        .send(ws::Message::Binary(
-          error_message
-            .write_to_bytes()
-            .expect("Filed to write error message."),
-        ))
+        .send(ws::Message::Binary(error_message.into()))
         .await
         .is_err()
       {
