@@ -4,10 +4,10 @@ use anyhow::Result;
 use anyhow::anyhow;
 use image::DynamicImage;
 use image::EncodableLayout;
-use image::imageops::FilterType;
+
 use log::error;
 use log::info;
-use std::path::Path;
+
 use tokio::time::Instant;
 
 async fn metadata(lib: &Library, file: &Vec<String>) -> tokyo_schema::proto::Message {
@@ -24,7 +24,7 @@ async fn metadata(lib: &Library, file: &Vec<String>) -> tokyo_schema::proto::Mes
     }
   }
 
-  msg.set_metadata(entires_msg);
+  msg.msg = Some(tokyo_schema::proto::message::Msg::Metadata(entires_msg));
   return msg;
 }
 
@@ -88,7 +88,7 @@ async fn get_index_msg(
   return index_msg;
 }
 
-pub async fn edited_image(path: &String, edits_json: Option<String>) -> Result<DynamicImage> {
+pub async fn edited_image(_path: &String, _edits_json: Option<String>) -> Result<DynamicImage> {
   let start = Instant::now();
 
   info!("Load image");
@@ -118,65 +118,63 @@ pub async fn handle_client_request(
 
   info!("Request: {:?}", req);
 
-  if req.has_locations() {
+  if let Some(tokyo_schema::proto::client_message::Msg::Locations(_)) = &req.msg {
     let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
-    msg.set_list(get_location_list(lib).await);
+    msg.msg = Some(tokyo_schema::proto::message::Msg::List(get_location_list(lib).await));
     return Ok(msg);
   }
 
-  if req.has_index() {
+  if let Some(tokyo_schema::proto::client_message::Msg::Index(index)) = &req.msg {
     let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce.clone();
 
-    let index = req.index();
     info!("Requested Index {:?}", index);
-    msg.set_index(get_index_msg(lib, index.ids.clone()).await);
+    msg.msg = Some(tokyo_schema::proto::message::Msg::Index(get_index_msg(lib, index.ids.clone()).await));
     return Ok(msg);
   }
 
-  if req.has_create() {
-    let create = req.create();
+  if let Some(tokyo_schema::proto::client_message::Msg::Create(create)) = &req.msg {
     let _cr = lib
       .create_library(create.name.to_string(), create.path.to_string())
       .await;
 
     if _cr.is_ok() {
       let mut msg = tokyo_schema::proto::Message::default();
-      msg.set_list(get_location_list(lib).await);
+      msg.msg = Some(tokyo_schema::proto::message::Msg::List(get_location_list(lib).await));
       return Ok(msg);
     }
   }
 
-  if req.has_meta() {
-    let file = &req.meta().file;
+  if let Some(tokyo_schema::proto::client_message::Msg::Meta(meta)) = &req.msg {
+    let file = &meta.file;
     let mut msg = metadata(lib, file).await;
     msg.nonce = req.nonce;
     return Ok(msg);
   }
 
-  if req.has_image() {
-    let file = &req.image().file; // should be the hash,
+  if let Some(tokyo_schema::proto::client_message::Msg::Image(image_req)) = &req.msg {
+    let file = &image_req.file; // should be the hash,
     let mut img_msg = tokyo_schema::proto::ImageMessage::default();
-    let image = edited_image(file, req.image().edits.to_owned()).await?;
+    let image = edited_image(file, image_req.edits.to_owned()).await?;
     let v = image.to_rgb8().as_bytes().to_vec();
     img_msg.image = v;
     img_msg.width = image.width() as i32;
     img_msg.height = image.height() as i32;
     let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
-    msg.set_image(img_msg);
+    msg.msg = Some(tokyo_schema::proto::message::Msg::Image(img_msg));
     return Ok(msg);
   }
 
-  if req.has_postmeta() {
-    let file = &req.postmeta().file;
-    let rating = req.postmeta().rating.unwrap();
+  if let Some(tokyo_schema::proto::client_message::Msg::Postmeta(postmeta)) = &req.msg {
+    let file = &postmeta.file;
+    let rating = postmeta.rating.unwrap();
     lib.set_rating(file.clone(), rating).await?;
 
     let mut msg = tokyo_schema::proto::Message::default();
     msg.nonce = req.nonce;
-    msg.set_index(get_index_msg(lib, ["default".to_string()].to_vec()).await);
+    msg.msg = Some(tokyo_schema::proto::message::Msg::Index(get_index_msg(lib, ["default".to_string()].to_vec()).await));
     return Ok(msg);
   }
 
