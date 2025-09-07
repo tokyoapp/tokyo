@@ -127,7 +127,7 @@ async fn start_shade_process(state: State<'_, Arc<Mutex<ShadeProcess>>>) -> Resu
   }
 
   // Start the shade process in socket mode
-  let mut child = Command::new("../shade/target/release/shade")
+  let mut child = Command::new("../../target/release/shade")
     .arg("--socket")
     .stdin(Stdio::piped())
     .stdout(Stdio::piped())
