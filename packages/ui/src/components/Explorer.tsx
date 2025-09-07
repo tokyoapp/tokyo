@@ -20,6 +20,7 @@ import Jobs from "../actions/Action.ts";
 import Combobox from "./Combobox.jsx";
 import Icon from "./Icon.jsx";
 import { Rating, Stars } from "./Stars.jsx";
+import "@sv/elements/box";
 
 export function ExplorerView(props: { small?: boolean }) {
   const index = useAccessor(createIndexAccessor);
@@ -73,8 +74,8 @@ export function ExplorerView(props: { small?: boolean }) {
         if (selectedLocations().length === 0 && locs.length > 0) {
           if (locs[0]) setSelectedLocations([locs[0].id]);
         }
-      }
-    )
+      },
+    ),
   );
 
   const rows = createMemo(() => {
@@ -138,11 +139,9 @@ export function ExplorerView(props: { small?: boolean }) {
     }
   };
 
-  let scrollTargetElement!: HTMLDivElement;
-
   return (
     <div
-      class="@container relative grid h-full grid-rows-[auto_1fr] overflow-auto bg-[#111]"
+      class="@container relative grid h-full grid-rows-[auto_1fr]  bg-[#111]"
       onKeyDown={onKeyDown}
     >
       <nav class="bg-[#111]">
@@ -276,20 +275,13 @@ export function ExplorerView(props: { small?: boolean }) {
         </div>
       </nav>
 
-      <div
-        class="w-full overflow-auto overscroll-none p-1"
-        ref={scrollTargetElement}
-      >
-        <div class="@5xl:block hidden">{/* <SystemInfo /> */}</div>
-
-        <div class="overscroll-none pb-24">
-          <ThumbnailRows
-            items={rows()}
-            viewSettings={viewSettings}
-            selection={selection()}
-            setSelection={setSelection}
-          />
-        </div>
+      <div class="relative w-full h-full">
+        <ThumbnailRows
+          items={rows()}
+          viewSettings={viewSettings}
+          selection={selection()}
+          setSelection={setSelection}
+        />
       </div>
 
       {selection().length > 0 ? (
@@ -330,14 +322,14 @@ function ThumbnailRows(props: {
     return arr || [];
   }
 
-  const rootHeight = 800;
+  const [rootHeight, setRootHeight] = createSignal(800);
 
   const virtualList = createMemo(() => {
     const [list, onScroll] = createVirtualList({
       // the list of items - can be a signal
       items: props.items,
       // the height of the root element of the virtualizedList - can be a signal
-      rootHeight,
+      rootHeight: rootHeight(),
       // the height of individual rows in the virtualizedList - can be a signal
       rowHeight: 208,
       // the number of elements to render both before and after the visible section of the list, so passing 5 will render 5 items before the list, and 5 items after. Defaults to 1, cannot be set to zero. This is necessary to hide the blank space around list items when scrolling - can be a signal
@@ -351,73 +343,81 @@ function ThumbnailRows(props: {
   });
 
   return (
-    <div
-      style={{
-        overflow: "auto",
-        // root element's height must be rootHeight
-        height: `${rootHeight}px`,
+    <a-box
+      class="absolute inset-0"
+      onResize={(e) => {
+        setRootHeight(e.target.offsetHeight);
       }}
-      // outermost container must use onScroll
-      onScroll={virtualList().onScroll}
     >
       <div
-        class="relative w-full"
+        class="overflow-auto h-full"
         style={{
-          height: `${virtualList().list().containerHeight}px`,
+          height: `${rootHeight}px`,
         }}
+        // outermost container must use onScroll
+        onScroll={virtualList().onScroll}
       >
         <div
-          class="absolute w-full"
+          class="relative w-full"
           style={{
-            // viewer element's top must be set to viewerTop()
-            top: `${virtualList().list().viewerTop}px`,
+            height: `${virtualList().list().containerHeight}px`,
           }}
         >
-          <For fallback={"no items"} each={virtualList().list().visibleItems}>
-            {(items, index) => (
-              <div class="flex w-full gap-1 justify-start items-start">
-                <For each={items}>
-                  {(items, i) => {
-                    return (
-                      <Thumbnail
-                        onMount={() => {
-                          const ids = metadata.query()?.ids || [];
-                          const id = items[0].path;
-                          if (!ids.includes(id)) {
-                            metadata.query({
-                              ids: [...ids, items[0].path],
-                            });
+          <div
+            class="absolute w-full"
+            style={{
+              // viewer element's top must be set to viewerTop()
+              top: `${virtualList().list().viewerTop}px`,
+            }}
+          >
+            <For fallback={"no items"} each={virtualList().list().visibleItems}>
+              {(items, index) => (
+                <div class="flex w-full gap-1 justify-start items-start">
+                  <For each={items}>
+                    {(items, i) => {
+                      return (
+                        <Thumbnail
+                          onMount={() => {
+                            const ids = metadata.query()?.ids || [];
+                            const id = items[0].path;
+                            if (!ids.includes(id)) {
+                              metadata.query({
+                                ids: [...ids, items[0].path],
+                              });
+                            }
+                          }}
+                          selected={props.selection.includes(items[0])}
+                          number={(index() * 4 + i() + 1).toString()}
+                          name={props.viewSettings.showName}
+                          tags={
+                            props.viewSettings.showTags ? tags(items[0]) : []
                           }
-                        }}
-                        selected={props.selection.includes(items[0])}
-                        number={(index() * 4 + i() + 1).toString()}
-                        name={props.viewSettings.showName}
-                        tags={props.viewSettings.showTags ? tags(items[0]) : []}
-                        rating={
-                          props.viewSettings.showRating
-                            ? items[0].rating
-                            : undefined
-                        }
-                        image={
-                          metadata
-                            .data()
-                            ?.find((item) => item.hash === items[0].hash)
-                            ?.thumbnail
-                        }
-                        onClick={() => {
-                          props.setSelection(items);
-                        }}
-                        items={items}
-                      />
-                    );
-                  }}
-                </For>
-              </div>
-            )}
-          </For>
+                          rating={
+                            props.viewSettings.showRating
+                              ? items[0].rating
+                              : undefined
+                          }
+                          image={
+                            metadata
+                              .data()
+                              ?.find((item) => item.hash === items[0].hash)
+                              ?.thumbnail
+                          }
+                          onClick={() => {
+                            props.setSelection(items);
+                          }}
+                          items={items}
+                        />
+                      );
+                    }}
+                  </For>
+                </div>
+              )}
+            </For>
+          </div>
         </div>
       </div>
-    </div>
+    </a-box>
   );
 }
 
@@ -437,7 +437,7 @@ function Thumbnail(props: {
   });
 
   return (
-    <div class="thumbnail relative z-0 h-52 overflow-hidden min-w-[200px]">
+    <div class="thumbnail relative z-0 h-52 overflow-hidden flex-1">
       <div
         data-selected={props.selected || undefined}
         class={[

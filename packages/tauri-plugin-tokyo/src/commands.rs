@@ -10,7 +10,7 @@ pub async fn request(message: Vec<u8>) -> Result<Vec<u8>> {
     .await
     .expect("Could not handle");
 
-  info!("Response: {:?}", res);
+  info!("Response: {:?}", res.message);
 
   return Ok(res.into());
 }

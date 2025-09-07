@@ -1,5 +1,5 @@
-import "@atrium-ui/elements/dropdown";
-import "@atrium-ui/elements/toggle";
+// import "@sv/elements/dropdown";
+import "@sv/elements/toggle";
 import type { ParentProps } from "solid-js";
 import Icon from "./Icon.jsx";
 
@@ -12,7 +12,7 @@ export default function Select(
     onChange: (value: string[]) => void;
     items: { id: string; value: string }[];
     content?: Element;
-  } & ParentProps
+  } & ParentProps,
 ) {
   return (
     <a-dropdown

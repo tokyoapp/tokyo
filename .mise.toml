@@ -8,5 +8,5 @@ protoc = "32.0"
 [env]
 RUST_LOG = "info,rawler=error"
 JS_LOG = "info"
-RUST_BACKTRACE = 1
+RUST_BACKTRACE = 0
 DATABASE = "file:///tmp/tokyo.db"

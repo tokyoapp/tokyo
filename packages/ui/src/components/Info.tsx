@@ -1,4 +1,4 @@
-import "@atrium-ui/elements/expandable";
+import "@sv/elements/expandable";
 import { useAccessor } from "tokyo-accessors/solid";
 import { createMetadataAccessor } from "tokyo-api";
 import { t } from "tokyo-locales";

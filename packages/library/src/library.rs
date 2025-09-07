@@ -86,7 +86,7 @@ impl Library {
       return Some(meta_data);
     }
 
-    let meta = image::metadat(&p.to_string());
+    let meta = image::metadata(&p.to_string());
 
     if let Ok(metadata) = meta {
       let file = self.get_file(metadata.hash.clone()).await;
@@ -134,11 +134,11 @@ impl Library {
     let mut index: Vec<image::Metadata> = Vec::new();
 
     for path in list {
-      let meta = image::metadat(&path);
+      let meta = image::metadata(&path);
       if let Ok(meta) = meta {
         index.push(meta);
       } else {
-        error!("Failed to get metadata for {}", path);
+        error!("Failed to get metadata get_index for {} {:?}", path, meta.err());
       }
     }
 

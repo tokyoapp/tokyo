@@ -3,6 +3,7 @@ use image::imageops::FilterType;
 use image::{imageops, ImageFormat};
 use log::{error, info};
 use rawler::decoders::{RawDecodeParams, RawMetadata};
+use rawler::exif::Exif;
 use rawler::rawsource::RawSource;
 use rawler::{analyze::extract_thumbnail_pixels, get_decoder};
 use std::io::Cursor;
@@ -60,9 +61,8 @@ pub fn get_rating(path: String) -> Option<u32> {
   return None;
 }
 
-pub fn metadat(path: &String) -> Result<Metadata> {
+pub fn metadata(path: &String) -> Result<Metadata> {
   let raw_file = File::open(&path);
-
   if raw_file.is_err() {
     return Err(anyhow!("File is error"));
   }
@@ -70,11 +70,29 @@ pub fn metadat(path: &String) -> Result<Metadata> {
   let p = PathBuf::from(path.clone());
 
   let mut rawfile = RawSource::new(&p)?;
-  let decoder = get_decoder(&rawfile)?;
 
-  let metadata = decoder
-    .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
-    .expect("Failed to get metadata");
+  if let Ok(decoder) = get_decoder(&rawfile) {
+    let metadata = decoder
+      .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
+      .expect("Failed to get metadata");
+
+    return Ok(Metadata {
+      hash: file_hash(path).unwrap(),
+      name: String::from(p.file_name().unwrap().to_str().unwrap()),
+      path: String::from(p.to_str().unwrap()),
+      width: 0,
+      height: 0,
+      exif: metadata.exif.clone(),
+      rating: metadata
+        .rating
+        .or(get_rating(path.to_string()))
+        .or(Some(0))
+        .unwrap(),
+      make: metadata.make,
+      create_date: metadata.exif.create_date.unwrap(),
+      orientation: metadata.exif.orientation.unwrap(),
+    });
+  }
 
   Ok(Metadata {
     hash: file_hash(path).unwrap(),
@@ -82,41 +100,49 @@ pub fn metadat(path: &String) -> Result<Metadata> {
     path: String::from(p.to_str().unwrap()),
     width: 0,
     height: 0,
-    exif: metadata.exif.clone(),
-    rating: metadata
-      .rating
-      .or(get_rating(path.to_string()))
-      .or(Some(0))
-      .unwrap(),
-    make: metadata.make,
-    create_date: metadata.exif.create_date.unwrap(),
-    orientation: metadata.exif.orientation.unwrap(),
+    exif: Exif::default(),
+    rating: 0,
+    make: "".to_string(),
+    create_date: "".to_string(),
+    orientation: 0,
   })
 }
 
 pub fn file_hash(path: &String) -> Result<String> {
   let p = Path::new(&path);
 
-  let mut rawfile = RawSource::new(&p)?;
+  // Try to get metadata from raw files first
+  if let Ok(mut rawfile) = RawSource::new(&p) {
+    let meta: Option<RawMetadata> = match get_decoder(&rawfile) {
+      Ok(decoder) => Some(
+        decoder
+          .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
+          .unwrap(),
+      ),
+      Err(error) => {
+        error!("Error reading metadata {}", error.to_string());
+        None
+      }
+    };
 
-  let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
-    Ok(decoder) => Some(
-      decoder
-        .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
-        .unwrap(),
-    ),
-    Err(error) => {
-      error!("Error reading metadata {}", error.to_string());
-      None
+    if let Some(metadata) = meta {
+      if let Some(create_date) = metadata.exif.create_date {
+        return Ok(sha256::digest(
+          create_date + p.file_name().unwrap().to_str().unwrap(),
+        ));
+      }
     }
-  };
-
-  match meta {
-    Some(metadata) => Ok(sha256::digest(
-      metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
-    )),
-    None => Err(anyhow!("Error getting file hash")),
   }
+
+  // Fall back to using file metadata for any file format
+  let file_metadata = std::fs::metadata(p)?;
+  let modified_time = file_metadata.modified()
+    .unwrap_or_else(|_| std::time::SystemTime::UNIX_EPOCH);
+
+  let time_string = format!("{:?}", modified_time);
+  let filename = p.file_name().unwrap().to_str().unwrap();
+
+  Ok(sha256::digest(time_string + filename))
 }
 
 pub fn thumbnail(path: String) -> Vec<u8> {

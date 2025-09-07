@@ -85,7 +85,7 @@ export default function App() {
           }`}
         >
           <div class="relative">
-            <div class="absolute left-0 top-0 h-full w-full">
+            <div class="absolute left-0 top-0 bottom-0 w-full">
               <ExplorerView />
             </div>
           </div>

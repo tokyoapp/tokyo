@@ -6,12 +6,12 @@
     "tokyo-ui": "./cli/main.ts"
   },
   "dependencies": {
-    "@atrium-ui/elements": "^1.8.0",
     "@kobalte/core": "0.11.2",
     "@minht11/solid-virtual-container": "^0.2.1",
     "@phosphor-icons/web": "^2.0.3",
     "@rive-app/canvas-single": "^2.3.0",
     "@solid-primitives/virtual": "^0.2.2",
+    "@sv/elements": "^2.13.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tauri-apps/api": "^2.3.0",
     "@tauri-apps/plugin-os": "^2.3.0",
