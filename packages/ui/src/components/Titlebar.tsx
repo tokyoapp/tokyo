@@ -65,7 +65,7 @@ export default function Titlebar(props: { style: string } & ParentProps) {
         data-tauri-drag-region
         class="relative z-50 flex items-start justify-between border-zinc-800 border-b bg-[rgba(24,24,27,0.9)]"
       >
-        <div class="pointer-events-none grid w-full grid-cols-[350px_1fr_350px] items-center px-2 py-1 text-xs text-zinc-500">
+        <div class="pointer-events-none grid w-full grid-cols-[0.3fr_1fr_0.3fr] items-center px-2 py-1 text-xs text-zinc-500">
           <div class="flex items-center gap-4">
             {props.style === "macos" ? <MacTitle /> : null}
 

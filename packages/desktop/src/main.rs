@@ -10,6 +10,7 @@ pub fn main() {
     // .plugin(tauri_plugin_app::init())
     // .plugin(tauri_plugin_window::init())
     .plugin(tauri_plugin_tokyo::init())
+    .plugin(tauri_plugin_shade::init())
     .setup(move |app| {
       let window = app.get_webview_window("main").unwrap();
       #[cfg(target_os = "macos")]

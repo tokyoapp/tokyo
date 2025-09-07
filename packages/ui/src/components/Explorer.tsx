@@ -350,7 +350,7 @@ function ThumbnailRows(props: {
       }}
     >
       <div
-        class="overflow-auto h-full"
+        class="overflow-auto h-full overscroll-none"
         style={{
           height: `${rootHeight}px`,
         }}

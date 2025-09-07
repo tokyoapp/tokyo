@@ -61,7 +61,7 @@ export default function App() {
 
             <div
               class={`relative grid h-full w-full p-10${
-                file() ? "grid-cols-[250px_1.25fr_300px]" : "grid-cols-1"
+                file() ? "grid-cols-[auto_1.25fr_300px]" : "grid-cols-1"
               }`}
             >
               <div>
@@ -81,12 +81,12 @@ export default function App() {
       <div class="grid grid-cols-[1fr]">
         <div
           class={`relative grid h-full w-full ${
-            file() ? "grid-cols-[250px_1.25fr_300px]" : "grid-cols-1"
+            file() ? "grid-cols-[auto_1.25fr_300px]" : "grid-cols-1"
           }`}
         >
-          <div class="relative">
+          <div class="relative min-w-[300px]">
             <div class="absolute left-0 top-0 bottom-0 w-full">
-              <ExplorerView />
+              <ExplorerView small={!!file()} />
             </div>
           </div>
 

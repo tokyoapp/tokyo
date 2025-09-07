@@ -1,5 +1,5 @@
-// import "@sv/elements/dropdown";
-import "@sv/elements/toggle";
+import "@sv/elements/popover";
+import "@sv/elements/list";
 import type { ParentProps } from "solid-js";
 import Icon from "./Icon.jsx";
 
@@ -15,7 +15,7 @@ export default function Combobox(
   } & ParentProps,
 ) {
   return (
-    <a-dropdown
+    <a-popover-trigger
       class={`relative inline-block${props.class}`}
       style="--dropdown-speed: 0s"
       onInput={(e) => {
@@ -27,13 +27,13 @@ export default function Combobox(
       <button
         title={props.title}
         type="button"
-        slot="input"
+        slot="trigger"
         class="rounded-md bg-zinc-800 px-2 py-1 text-left shadow-none"
       >
         {props.children}
       </button>
 
-      <div class="mt-1 min-w-[150px] rounded-md border border-zinc-800 bg-zinc-800 p-1">
+      <a-popover class="mt-1 min-w-[150px] rounded-md border border-zinc-800 bg-zinc-800 p-1">
         <a-toggle
           multiple={props.multiple}
           value={props.items
@@ -57,7 +57,7 @@ export default function Combobox(
 
           <div value="none">{props.content || null}</div>
         </a-toggle>
-      </div>
-    </a-dropdown>
+      </a-popover>
+    </a-popover-trigger>
   );
 }

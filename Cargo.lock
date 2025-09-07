@@ -1328,6 +1328,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-os",
+ "tauri-plugin-shade",
  "tauri-plugin-tokyo",
  "tokio",
  "tokyo-library",
@@ -6760,6 +6761,23 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "thiserror 2.0.16",
+]
+
+[[package]]
+name = "tauri-plugin-shade"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "env_logger 0.11.8",
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-dialog",
+ "tauri-plugin-opener",
+ "thiserror 2.0.16",
+ "tokio",
 ]
 
 [[package]]
