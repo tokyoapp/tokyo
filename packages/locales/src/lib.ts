@@ -1,4 +1,3 @@
-import logger from "@luckydye/log";
 import i18next from "i18next";
 
 import de from "../locales/de.json";
@@ -8,7 +7,7 @@ import kr from "../locales/kr.json";
 export const AVAILABLE_LANGS = ["en"];
 export const DEFAULT_LANGUAGE = "en";
 
-const log = logger().prefix("i18next").trace();
+const log = console;
 
 // https://www.i18next.com/overview/api
 
@@ -22,7 +21,7 @@ i18next.init(
   (err) => {
     if (err) return log.error("something went wrong loading", err);
     log.info("i18next loaded");
-  },
+  }
 );
 
 i18next.addResourceBundle("de", "global", de);
@@ -34,7 +33,7 @@ export type LocaleKey = keyof typeof de;
 export function t(
   id: LocaleKey | LocaleKey[],
   args: Array<number | string | undefined> = [],
-  lang?: string,
+  lang?: string
 ): string | undefined {
   return i18next.t(id, { lng: lang ?? DEFAULT_LANGUAGE, ...args });
 }

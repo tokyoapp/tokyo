@@ -1,8 +1,8 @@
 import { AVAILABLE_LANGS } from "tokyo-locales";
 import { setSettingOpen } from "../App.jsx";
-import Button from "./ui/Button.jsx";
-import Icon from "./ui/Icon.jsx";
-import Select from "./ui/Select.jsx";
+import Button from "./Button.jsx";
+import Icon from "./Icon.jsx";
+import Select from "./Select.jsx";
 
 export default function () {
   return (

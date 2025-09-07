@@ -2,14 +2,14 @@ import { platform } from "@tauri-apps/plugin-os";
 import { ErrorBoundary, createSignal } from "solid-js";
 import type { IndexEntryMessage } from "tokyo-schema";
 import Jobs from "./actions/Action.ts";
-import { ActivityBar } from "./components/Activitybar.jsx";
 import Explorer from "./components/Explorer";
 import LocationSettings from "./components/LocationSettings.jsx";
 import { Properties } from "./components/Properties.tsx";
 import Titlebar from "./components/Titlebar.jsx";
 import Preview from "./components/Viewer";
-import { Notifications } from "./components/notifications/Notifications.ts";
+import { Notifications } from "./components/Notifications.ts";
 import { Basic } from "./properties/Basic.ts";
+import "./App.css";
 
 export const [settingsOpen, setSettingOpen] = createSignal(false);
 
@@ -92,7 +92,7 @@ export default function App() {
                 </div>
               ) : null}
 
-              <Explorer small={!!file()} />
+              {/*<Explorer small={!!file()} />*/}
             </div>
           </div>
 

@@ -6,8 +6,8 @@ import {
 } from "tokyo-properties";
 import { useProperties } from "../utils/useProperties.ts";
 import Info from "./Info.tsx";
-import { Tabs } from "./layout/Tabs.tsx";
-import "./ui/FluidInput.ts";
+import { Tabs } from "./Tabs.tsx";
+import "./FluidInput.ts";
 
 export function Properties(props: {
   file: any;
@@ -32,7 +32,7 @@ export function Properties(props: {
 
 function Panel(props: { model: PropertyModel }) {
   const properties = useProperties(props.model, () =>
-    Model.properties(props.model),
+    Model.properties(props.model)
   );
 
   return (

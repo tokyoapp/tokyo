@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  desc: Start dev server for ui package
+  dev:
+    cmds:
+      - bun x tokyo-ui dev
+
+  build:
+    desc: Build ui package
+    cmds:
+      - bun x tokyo-ui build

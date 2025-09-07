@@ -2,6 +2,9 @@
 
 version: "3"
 
+includes:
+  ui: ../ui/Taskfile.yml
+
 tasks:
   tauri:dev:
     dir: ./
@@ -12,16 +15,6 @@ tasks:
     dir: ./
     cmds:
       - cargo tauri build
-
-  ui:dev:
-    dir: ./
-    cmds:
-      - bun x tokyo-ui dev
-
-  ui:build:
-    dir: ./
-    cmds:
-      - bun x tokyo-ui build
 
   dev:
     desc: Dev

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { type Accessor } from "./lib.js";
-import logger from "@luckydye/log";
 
-const log = logger().trace().prefix("accessors");
+const log = console;
 
 /**
  * Accessor React hook that will return the data, error and pending state of the accessor.
@@ -13,7 +12,7 @@ const log = logger().trace().prefix("accessors");
 export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
   accessorFn: () => T,
   query: Partial<T["query"]>,
-  params?: Partial<T["params"]>,
+  params?: Partial<T["params"]>
 ) {
   const accessor = useMemo(() => accessorFn(), [accessorFn]);
   const [data, setData] = useState<ReturnType<T["_strategy"]["compute"]>>();
@@ -22,7 +21,7 @@ export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
 
   const pending = useSyncExternalStore(
     (callback) => accessor.on("pending", callback),
-    () => accessor.pending,
+    () => accessor.pending
   );
 
   useEffect(
@@ -31,7 +30,7 @@ export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
         log.error("Error in accessor", error);
         setError(error);
       }),
-    [accessor],
+    [accessor]
   );
 
   useEffect(
@@ -39,7 +38,7 @@ export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
       accessor.on("state", (state) => {
         setState(state);
       }),
-    [accessor],
+    [accessor]
   );
 
   useEffect(
@@ -47,7 +46,7 @@ export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
       accessor.on("data", (data) => {
         setData(data);
       }),
-    [accessor],
+    [accessor]
   );
 
   useEffect(() => {

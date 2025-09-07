@@ -12,7 +12,6 @@ export const config = defineConfig({
   },
   envPrefix: ["VITE_", "TAURI_"],
   plugins: [
-    //
     import.meta.env.DEV &&
       terminal({
         console: "terminal",

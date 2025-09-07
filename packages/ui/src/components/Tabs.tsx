@@ -1,6 +1,6 @@
 import "@atrium-ui/elements/expandable";
 import { type ParentProps, createSignal } from "solid-js";
-import Icon from "../ui/Icon.jsx";
+import Icon from "./Icon.jsx";
 
 export function Tabs(props: ParentProps) {
   const children = props.children as Element[];
@@ -8,7 +8,9 @@ export function Tabs(props: ParentProps) {
   return <div>{children}</div>;
 }
 
-Tabs.Tab = (props: ParentProps & { title: string; icon: string; open?: boolean }) => {
+Tabs.Tab = (
+  props: ParentProps & { title: string; icon: string; open?: boolean }
+) => {
   const [open, setOpen] = createSignal(props.open || false);
 
   return (

@@ -15,6 +15,9 @@ includes:
     aliases: [d]
     dir: packages/desktop
     taskfile: packages/desktop/Taskfile.yml
+  ui:
+    dir: packages/ui
+    taskfile: packages/ui/Taskfile.yml
 
 tasks:
   default:

@@ -1,12 +1,18 @@
-import { type ParentProps, createEffect, createSignal, on, onMount } from "solid-js";
+import {
+  type ParentProps,
+  createEffect,
+  createSignal,
+  on,
+  onMount,
+} from "solid-js";
 import { useAccessor } from "tokyo-accessors/solid";
 import { createImageAccessor, createMetadataAccessor } from "tokyo-api";
 import { DynamicImage } from "tokyo-api/src/DynamicImage.ts";
 import { t } from "tokyo-locales";
 import { Model, type PropertyModel } from "tokyo-properties";
-import Button from "./ui/Button.jsx";
-import Icon from "./ui/Icon.jsx";
-import { Stars } from "./ui/Stars.jsx";
+import Button from "./Button.jsx";
+import Icon from "./Icon.jsx";
+import { Stars } from "./Stars.jsx";
 
 const [app, setApp] = createSignal({
   zoom: 1,
@@ -49,7 +55,11 @@ export default function Preview(props: {
 
   const [edits, setEdits] = createSignal();
 
-  const renderImage = (image: { width: number; height: number; image: Uint8Array }) => {
+  const renderImage = (image: {
+    width: number;
+    height: number;
+    image: Uint8Array;
+  }) => {
     if (!image) return;
 
     const img = new DynamicImage();
@@ -114,7 +124,7 @@ export default function Preview(props: {
           }, 100);
         });
       },
-    }),
+    })
   );
 
   createEffect(() => {

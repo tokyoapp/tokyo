@@ -2,8 +2,8 @@ import "@atrium-ui/elements/blur";
 // import "@atrium-ui/elements/command";
 import { type ParentProps, createSignal } from "solid-js";
 import { t } from "tokyo-locales";
-import Icon from "./ui/Icon.jsx";
-import Button from "./ui/Button.jsx";
+import Icon from "./Icon.jsx";
+import Button from "./Button.jsx";
 import { setSettingOpen, settingsOpen } from "../App.jsx";
 
 const MacTitle = () => {
@@ -65,7 +65,7 @@ export default function Titlebar(props: { style: string } & ParentProps) {
         data-tauri-drag-region
         class="relative z-50 flex items-start justify-between border-zinc-800 border-b bg-[rgba(24,24,27,0.9)]"
       >
-        <div class="pointer-events-none grid h-11 w-full grid-cols-[350px_1fr_350px] items-center px-2 py-2 text-xs text-zinc-500">
+        <div class="pointer-events-none grid w-full grid-cols-[350px_1fr_350px] items-center px-2 py-1 text-xs text-zinc-500">
           <div class="flex items-center gap-4">
             {props.style === "macos" ? <MacTitle /> : null}
 
@@ -81,7 +81,7 @@ export default function Titlebar(props: { style: string } & ParentProps) {
                   settingsOpen() ? "rotate-90" : "rotate-0"
                 }`}
               >
-                <Icon name="chevron-right" />
+                <Icon name="cogwheel" />
               </div>
             </Button>
 

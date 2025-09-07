@@ -1,8 +1,7 @@
 import { createSignal } from "solid-js";
 import { type Accessor } from "./lib.js";
-import logger from "@luckydye/log";
 
-const log = logger().trace().prefix("accessors");
+const log = console;
 
 /**
  * Accessor React hook that will return the data, error and pending state of the accessor.
@@ -11,7 +10,7 @@ const log = logger().trace().prefix("accessors");
  */
 
 export function useAccessor<T extends Accessor<any, any, any, any, any, any>>(
-  accessorFn: () => T,
+  accessorFn: () => T
 ) {
   const accessor = accessorFn();
 

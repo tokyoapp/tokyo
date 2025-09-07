@@ -10,9 +10,9 @@ import {
 import { t } from "tokyo-locales";
 import type { IndexEntryMessage } from "tokyo-schema";
 import Jobs from "../actions/Action.ts";
-import Combobox from "./ui/Combobox.jsx";
-import Icon from "./ui/Icon.jsx";
-import { Rating, Stars } from "./ui/Stars.jsx";
+import Combobox from "./Combobox.jsx";
+import Icon from "./Icon.jsx";
+import { Rating, Stars } from "./Stars.jsx";
 
 export default function ExplorerView(props: { small: boolean }) {
   const index = useAccessor(createIndexAccessor);
@@ -70,8 +70,8 @@ export default function ExplorerView(props: { small: boolean }) {
         if (selectedLocations().length === 0 && locs.length > 0) {
           if (locs[0]) setSelectedLocations([locs[0].id]);
         }
-      },
-    ),
+      }
+    )
   );
 
   const rows = (width = 4) => {

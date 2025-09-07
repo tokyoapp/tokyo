@@ -4,7 +4,6 @@
   "main": "src/lib.ts",
   "type": "module",
   "dependencies": {
-    "@luckydye/log": "^0.6.0",
     "i18next": "^23.10.0"
   }
 }

@@ -3,7 +3,7 @@ import { useAccessor } from "tokyo-accessors/solid";
 import { createMetadataAccessor } from "tokyo-api";
 import { t } from "tokyo-locales";
 import { fileTypes } from "../utils/fileTypes.js";
-import Icon from "./ui/Icon.jsx";
+import Icon from "./Icon.jsx";
 
 function Seperator() {
   return <hr class="border-zinc-500" />;
@@ -16,7 +16,9 @@ function Property(props: { title: string; value: string | string[] }) {
         <div class="mb-1 text-xs opacity-50">{props.title}</div>
         <div class="flex flex-wrap gap-2 text-xs">
           {props.value.filter(Boolean).map((value) => {
-            return <div class="rounded-md bg-zinc-700 p-[2px_6px]">{value}</div>;
+            return (
+              <div class="rounded-md bg-zinc-700 p-[2px_6px]">{value}</div>
+            );
           })}
         </div>
       </div>
@@ -26,7 +28,9 @@ function Property(props: { title: string; value: string | string[] }) {
   return (
     <div class="my-4 px-3">
       <div class="mb-1 text-xs opacity-50">{props.title}</div>
-      <div class="select-text overflow-hidden text-ellipsis text-xs">{props.value}</div>
+      <div class="select-text overflow-hidden text-ellipsis text-xs">
+        {props.value}
+      </div>
     </div>
   );
 }
@@ -39,9 +43,7 @@ function typeFromFilename(name: string) {
   return "unknown";
 }
 
-export default function Info(props: {
-  file?: any;
-}) {
+export default function Info(props: { file?: any }) {
   const metadata = useAccessor(createMetadataAccessor);
 
   if (props.file)
@@ -69,13 +71,18 @@ export default function Info(props: {
   return (
     <div class="overflow-auto">
       {!props.file ? (
-        <div class="mt-10 p-3 text-center text-xs opacity-50">No file selected</div>
+        <div class="mt-10 p-3 text-center text-xs opacity-50">
+          No file selected
+        </div>
       ) : (
         <>
           <Property title={t("info_name")} value={props.file.name} />
           <Property title={t("info_hash")} value={props.file.hash} />
           <Property title={t("info_path")} value={props.file.path} />
-          <Property title={t("info_date_created")} value={props.file.create_date} />
+          <Property
+            title={t("info_date_created")}
+            value={props.file.create_date}
+          />
           {/* <Property
             title={t('info_tags')}
             value={[typeFromFilename(props.file.name), ...file_tags()]}
@@ -101,8 +108,14 @@ export default function Info(props: {
                 title={t("info_focal_length")}
                 value={`${exif()?.focal_length.split("/")[0]}mm`}
               />
-              <Property title={t("info_exposure_time")} value={exif()?.exposure_time} />
-              <Property title={t("info_iso")} value={exif()?.iso_speed_ratings} />
+              <Property
+                title={t("info_exposure_time")}
+                value={exif()?.exposure_time}
+              />
+              <Property
+                title={t("info_iso")}
+                value={exif()?.iso_speed_ratings}
+              />
 
               <Seperator />
             </>
