@@ -40,6 +40,7 @@ export default function App() {
   if ("__TAURI_INVOKE__" in window) {
     platform()
       .then((os) => {
+        console.info(os);
         setOS(os);
       })
       .catch((err) => {
@@ -78,8 +79,6 @@ export default function App() {
       <notification-feed class="fixed left-1/2 top-20 z-50 w-80 -translate-x-1/2" />
 
       <div class="grid grid-cols-[1fr]">
-        {/*<ActivityBar />*/}
-
         <div
           class={`relative grid h-full w-full ${
             file() ? "grid-cols-[250px_1.25fr_300px]" : "grid-cols-1"

@@ -10,17 +10,17 @@ pub fn main() {
     // .plugin(tauri_plugin_app::init())
     // .plugin(tauri_plugin_window::init())
     .plugin(tauri_plugin_tokyo::init())
-    // .setup(move |app| {
-    //   let window = app.get_webview_window("main").unwrap();
-    //   #[cfg(target_os = "macos")]
-    //   apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(1.0))
-    //     .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
-    //   #[cfg(target_os = "windows")]
-    //   apply_blur(&window, Some((18, 18, 18, 125)))
-    //     .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    .setup(move |app| {
+      let window = app.get_webview_window("main").unwrap();
+      #[cfg(target_os = "macos")]
+      apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(1.0))
+        .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+      #[cfg(target_os = "windows")]
+      apply_blur(&window, Some((18, 18, 18, 125)))
+        .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
 
-    //   Ok(())
-    // })
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

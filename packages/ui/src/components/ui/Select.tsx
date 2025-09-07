@@ -37,7 +37,7 @@ export default function Select(
             <a-option
               type="button"
               value={item.id}
-              class="group flex w-full items-center justify-start rounded-md bg-transparent px-2 py-1 shadow-none outline-none active:bg-zinc-800 hover:bg-zinc-700"
+              class="group flex w-full items-center justify-start rounded-md bg-transparent px-2 py-1 shadow-none outline-hidden active:bg-zinc-800 hover:bg-zinc-700"
             >
               <div class="mr-2 ml-1 opacity-0 group-[&[selected]]:opacity-100">
                 <Icon name="check" />

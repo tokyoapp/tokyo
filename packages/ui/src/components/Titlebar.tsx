@@ -3,6 +3,8 @@ import "@atrium-ui/elements/blur";
 import { type ParentProps, createSignal } from "solid-js";
 import { t } from "tokyo-locales";
 import Icon from "./ui/Icon.jsx";
+import Button from "./ui/Button.jsx";
+import { setSettingOpen, settingsOpen } from "../App.jsx";
 
 const MacTitle = () => {
   const dot =
@@ -33,10 +35,18 @@ const WindowsTitle = () => {
     "p-0 w-[45px] h-[32px] rounded-none shadow-none border-none hover:bg-zinc-800 flex items-center justify-center";
   return (
     <div class="pointer-events-auto flex">
-      <button type="button" class={`${dot}`} onClick={() => appWindow.minimize()}>
+      <button
+        type="button"
+        class={`${dot}`}
+        onClick={() => appWindow.minimize()}
+      >
         <Icon name="ph-arrows-in-simple" />
       </button>
-      <button type="button" class={`${dot}`} onClick={() => appWindow.toggleMaximize()}>
+      <button
+        type="button"
+        class={`${dot}`}
+        onClick={() => appWindow.toggleMaximize()}
+      >
         <Icon name="ph-corners-out" />
       </button>
       <button type="button" class={`${dot}`} onClick={() => appWindow.close()}>
@@ -58,6 +68,23 @@ export default function Titlebar(props: { style: string } & ParentProps) {
         <div class="pointer-events-none grid h-11 w-full grid-cols-[350px_1fr_350px] items-center px-2 py-2 text-xs text-zinc-500">
           <div class="flex items-center gap-4">
             {props.style === "macos" ? <MacTitle /> : null}
+
+            <Button
+              label="Settings"
+              variant="square"
+              onClick={() => {
+                setSettingOpen(!settingsOpen());
+              }}
+            >
+              <div
+                class={`flex items-center justify-center transition-transform duration-100${
+                  settingsOpen() ? "rotate-90" : "rotate-0"
+                }`}
+              >
+                <Icon name="chevron-right" />
+              </div>
+            </Button>
+
             <div />
             <div>
               {props.children}

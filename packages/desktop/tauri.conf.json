@@ -18,7 +18,8 @@
         "resizable": true,
         "title": "TOKYO",
         "width": 1400,
-        "height": 1200
+        "height": 1200,
+        "trafficLightPosition": { "x": 18, "y": 20 }
       }
     ],
     "security": {
