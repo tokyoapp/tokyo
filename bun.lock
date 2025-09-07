@@ -4,8 +4,8 @@
     "": {
       "name": "tokyo",
       "devDependencies": {
-        "@biomejs/biome": "^1.8.0",
-        "typescript": "^5.3.3",
+        "@biomejs/biome": "^1.9.4",
+        "typescript": "^5.9.2",
       },
     },
     "packages/accessors": {
@@ -109,6 +109,7 @@
         "@minht11/solid-virtual-container": "^0.2.1",
         "@phosphor-icons/web": "^2.0.3",
         "@rive-app/canvas-single": "^2.3.0",
+        "@solid-primitives/virtual": "^0.2.2",
         "@tailwindcss/container-queries": "^0.1.1",
         "@tauri-apps/api": "^2.3.0",
         "@tauri-apps/plugin-os": "^2.3.0",
@@ -388,6 +389,8 @@
     "@solid-primitives/trigger": ["@solid-primitives/trigger@1.2.2", "", { "dependencies": { "@solid-primitives/utils": "^6.3.2" }, "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-IWoptVc0SWYgmpBPpCMehS5b07+tpFcvw15tOQ3QbXedSYn6KP8zCjPkHNzMxcOvOicTneleeZDP7lqmz+PQ6g=="],
 
     "@solid-primitives/utils": ["@solid-primitives/utils@6.3.2", "", { "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-hZ/M/qr25QOCcwDPOHtGjxTD8w2mNyVAYvcfgwzBHq2RwNqHNdDNsMZYap20+ruRwW4A3Cdkczyoz0TSxLCAPQ=="],
+
+    "@solid-primitives/virtual": ["@solid-primitives/virtual@0.2.2", "", { "dependencies": { "@solid-primitives/utils": "^6.3.2" }, "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-ofaVh6EQ/QMah0aUKZIuDQD+WdYBaoJMcHcnJqDtE4ZRmsqyxL4EFD3sqxdC18GCV7Zwhg/NYh9QHM6JZq3SSw=="],
 
     "@swc/helpers": ["@swc/helpers@0.5.17", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A=="],
 

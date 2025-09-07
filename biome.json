@@ -29,16 +29,10 @@
       "nursery": {
         "useSortedClasses": {
           "level": "warn",
+          "fix": "safe",
           "options": {
-            "attributes": [
-              "classList"
-            ],
-            "functions": [
-              "clsx",
-              "cva",
-              "twMerge",
-              "tw"
-            ]
+            "attributes": ["classList"],
+            "functions": ["clsx", "cva", "twMerge", "tw"]
           }
         }
       }

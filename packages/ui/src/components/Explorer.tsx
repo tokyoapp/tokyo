@@ -1,5 +1,12 @@
-import { VirtualContainer } from "@minht11/solid-virtual-container";
-import { For, createEffect, createSignal, on, onMount } from "solid-js";
+import { createVirtualList, VirtualList } from "@solid-primitives/virtual";
+import {
+  For,
+  createEffect,
+  createMemo,
+  createSignal,
+  on,
+  onMount,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAccessor } from "tokyo-accessors/solid";
 import {
@@ -14,12 +21,14 @@ import Combobox from "./Combobox.jsx";
 import Icon from "./Icon.jsx";
 import { Rating, Stars } from "./Stars.jsx";
 
-export default function ExplorerView(props: { small: boolean }) {
+export function ExplorerView(props: { small?: boolean }) {
   const index = useAccessor(createIndexAccessor);
-  const metadata = useAccessor(createMetadataAccessor);
   const locations = useAccessor(createLocationsAccessor);
 
-  locations.query({});
+  onMount(() => {
+    console.log("Query locations");
+    locations.query({});
+  });
 
   index.params({
     sortCreated: true,
@@ -29,6 +38,7 @@ export default function ExplorerView(props: { small: boolean }) {
   const [selectedLocations, setSelectedLocations] = createSignal<string[]>([]);
 
   createEffect(() => {
+    console.log(selectedLocations());
     index.query({
       locations: selectedLocations(),
     });
@@ -45,13 +55,6 @@ export default function ExplorerView(props: { small: boolean }) {
   });
 
   const [selection, setSelection] = createSignal<IndexEntryMessage[]>([]);
-
-  function tags(entry: IndexEntryMessage) {
-    const arr = entry.tags.filter(Boolean).map((tag) => {
-      return [].find((t) => t.id === tag)?.name || tag;
-    });
-    return arr || [];
-  }
 
   createEffect(() => {
     const entires = selection();
@@ -74,7 +77,8 @@ export default function ExplorerView(props: { small: boolean }) {
     )
   );
 
-  const rows = (width = 4) => {
+  const rows = createMemo(() => {
+    const width = props.small ? 1 : 5;
     const rs = [];
     let currRow: IndexEntryMessage[][] = [];
     const items = index.data();
@@ -93,7 +97,7 @@ export default function ExplorerView(props: { small: boolean }) {
     rs.push(currRow);
 
     return rs;
-  };
+  });
 
   createEffect(() => {
     if (props.small) {
@@ -160,7 +164,7 @@ export default function ExplorerView(props: { small: boolean }) {
               }
               title={"Library"}
               onInput={(values) => {
-                setSelectedLocations(values);
+                // setSelectedLocations(values);
               }}
               content={
                 <div>
@@ -279,60 +283,12 @@ export default function ExplorerView(props: { small: boolean }) {
         <div class="@5xl:block hidden">{/* <SystemInfo /> */}</div>
 
         <div class="overscroll-none pb-24">
-          <VirtualContainer
-            scrollTarget={scrollTargetElement}
-            itemSize={{ height: 208 }}
-            overscan={2}
-            items={rows(props.small ? 1 : 5)}
-          >
-            {(props: {
-              index: number;
-              style: string;
-              item: IndexEntryMessage[][];
-            }) => {
-              return (
-                <div style={props.style} class="flex w-full gap-1">
-                  <For each={props.item}>
-                    {(items, i) => {
-                      return (
-                        <Thumbnail
-                          onMount={() => {
-                            const ids = metadata.query()?.ids || [];
-                            const id = items[0].path;
-                            if (!ids.includes(id)) {
-                              metadata.query({
-                                ids: [...ids, items[0].path],
-                              });
-                            }
-                          }}
-                          class="flex-1 pb-1"
-                          selected={selection().includes(items[0])}
-                          number={(props.index * 4 + i() + 1).toString()}
-                          name={viewSettings.showName}
-                          tags={viewSettings.showTags ? tags(items[0]) : []}
-                          rating={
-                            viewSettings.showRating
-                              ? items[0].rating
-                              : undefined
-                          }
-                          image={
-                            metadata
-                              .data()
-                              ?.find((item) => item.hash === items[0].hash)
-                              ?.thumbnail
-                          }
-                          onClick={() => {
-                            setSelection(items);
-                          }}
-                          items={items}
-                        />
-                      );
-                    }}
-                  </For>
-                </div>
-              );
-            }}
-          </VirtualContainer>
+          <ThumbnailRows
+            items={rows()}
+            viewSettings={viewSettings}
+            selection={selection()}
+            setSelection={setSelection}
+          />
         </div>
       </div>
 
@@ -359,7 +315,113 @@ export default function ExplorerView(props: { small: boolean }) {
   );
 }
 
-type ThumbProps = {
+function ThumbnailRows(props: {
+  items: any[];
+  viewSettings: any;
+  selection: any;
+  setSelection: () => void;
+}) {
+  const metadata = useAccessor(createMetadataAccessor);
+
+  function tags(entry: IndexEntryMessage) {
+    const arr = entry.tags.filter(Boolean).map((tag) => {
+      return [].find((t) => t.id === tag)?.name || tag;
+    });
+    return arr || [];
+  }
+
+  const rootHeight = 800;
+
+  const virtualList = createMemo(() => {
+    const [list, onScroll] = createVirtualList({
+      // the list of items - can be a signal
+      items: props.items,
+      // the height of the root element of the virtualizedList - can be a signal
+      rootHeight,
+      // the height of individual rows in the virtualizedList - can be a signal
+      rowHeight: 208,
+      // the number of elements to render both before and after the visible section of the list, so passing 5 will render 5 items before the list, and 5 items after. Defaults to 1, cannot be set to zero. This is necessary to hide the blank space around list items when scrolling - can be a signal
+      overscanCount: 2,
+    });
+
+    return {
+      list,
+      onScroll,
+    };
+  });
+
+  return (
+    <div
+      style={{
+        overflow: "auto",
+        // root element's height must be rootHeight
+        height: `${rootHeight}px`,
+      }}
+      // outermost container must use onScroll
+      onScroll={virtualList().onScroll}
+    >
+      <div
+        class="relative w-full"
+        style={{
+          height: `${virtualList().list().containerHeight}px`,
+        }}
+      >
+        <div
+          class="absolute w-full"
+          style={{
+            // viewer element's top must be set to viewerTop()
+            top: `${virtualList().list().viewerTop}px`,
+          }}
+        >
+          <For fallback={"no items"} each={virtualList().list().visibleItems}>
+            {(items, index) => (
+              <div class="flex w-full gap-1 justify-start items-start">
+                <For each={items}>
+                  {(items, i) => {
+                    return (
+                      <Thumbnail
+                        onMount={() => {
+                          const ids = metadata.query()?.ids || [];
+                          const id = items[0].path;
+                          if (!ids.includes(id)) {
+                            metadata.query({
+                              ids: [...ids, items[0].path],
+                            });
+                          }
+                        }}
+                        selected={props.selection.includes(items[0])}
+                        number={(index() * 4 + i() + 1).toString()}
+                        name={props.viewSettings.showName}
+                        tags={props.viewSettings.showTags ? tags(items[0]) : []}
+                        rating={
+                          props.viewSettings.showRating
+                            ? items[0].rating
+                            : undefined
+                        }
+                        image={
+                          metadata
+                            .data()
+                            ?.find((item) => item.hash === items[0].hash)
+                            ?.thumbnail
+                        }
+                        onClick={() => {
+                          props.setSelection(items);
+                        }}
+                        items={items}
+                      />
+                    );
+                  }}
+                </For>
+              </div>
+            )}
+          </For>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Thumbnail(props: {
   selected: boolean;
   name: boolean;
   rating?: number;
@@ -367,20 +429,15 @@ type ThumbProps = {
   number?: string;
   items: IndexEntryMessage[];
   image?: HTMLCanvasElement;
-  class?: string;
   onClick: () => void;
   onMount: () => void;
-};
-
-function Thumbnail(props: ThumbProps) {
+}) {
   onMount(() => {
     props.onMount?.();
   });
 
   return (
-    <div
-      class={`thumbnail relative z-0 h-52 overflow-hidden ${props.class || ""}`}
-    >
+    <div class="thumbnail relative z-0 h-52 overflow-hidden min-w-[200px]">
       <div
         data-selected={props.selected || undefined}
         class={[

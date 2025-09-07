@@ -122,9 +122,9 @@ impl Library {
       };
 
       return Some(meta_data);
+    } else {
+      error!("Failed to get metadata for {}", p);
     }
-
-    error!("Failed to get metadata for {}", p);
 
     None
   }

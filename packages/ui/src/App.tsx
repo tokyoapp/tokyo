@@ -2,7 +2,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { ErrorBoundary, createSignal } from "solid-js";
 import type { IndexEntryMessage } from "tokyo-schema";
 import Jobs from "./actions/Action.ts";
-import Explorer from "./components/Explorer";
+import { ExplorerView } from "./components/Explorer";
 import LocationSettings from "./components/LocationSettings.jsx";
 import { Properties } from "./components/Properties.tsx";
 import Titlebar from "./components/Titlebar.jsx";
@@ -86,13 +86,7 @@ export default function App() {
         >
           <div class="relative">
             <div class="absolute left-0 top-0 h-full w-full">
-              {settingsOpen() ? (
-                <div class="absolute left-0 top-0 z-40 h-full w-full">
-                  <LocationSettings />
-                </div>
-              ) : null}
-
-              <Explorer small={!!file()} />
+              <ExplorerView />
             </div>
           </div>
 
@@ -111,6 +105,12 @@ export default function App() {
           ) : null}
         </div>
       </div>
+
+      {settingsOpen() ? (
+        <div class="absolute left-1/2 top-1/2 z-40 w-[800px] h-[800px] rounded-xl -translate-1/2 bg-zinc-700">
+          <LocationSettings />
+        </div>
+      ) : null}
     </ErrorBoundary>
   );
 }

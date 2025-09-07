@@ -8,7 +8,6 @@ includes:
 tasks:
   dev:
     dir: ./
-    deps: [ui:build]
     cmds:
       - cargo tauri dev
 
