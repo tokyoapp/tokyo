@@ -20,11 +20,18 @@ function createCanvas(width: number, height: number) {
 }
 
 export class DynamicImage {
-  static fromRaw(img: Uint8Array, width = 5472, height = 3648, meta?: ImageMeta) {
+  static fromRaw(
+    img: Uint8Array,
+    width = 5472,
+    height = 3648,
+    meta?: ImageMeta
+  ) {
     const canvas = document.createElement("canvas");
     const ctxt = canvas.getContext("2d");
 
-    const data = new ImageData(width, height, { colorSpace: meta?.colorSpace || "srgb" });
+    const data = new ImageData(width, height, {
+      colorSpace: meta?.colorSpace || "srgb",
+    });
 
     for (let i = 0; i < data.data.length / 4; i++) {
       data.data[i * 4 + 0] = img[i * 3 + 0];
@@ -52,7 +59,10 @@ export class DynamicImage {
   }
 
   constructor(image?: Drawable, meta?: ImageMeta) {
-    const { canvas, context } = createCanvas(image?.width || 0, image?.height || 0);
+    const { canvas, context } = createCanvas(
+      image?.width || 0,
+      image?.height || 0
+    );
     this.#canvas = canvas;
     this.#context = context;
 
@@ -60,19 +70,23 @@ export class DynamicImage {
   }
 
   fromRaw(data: Uint8Array, width: number, height: number) {
-    this.#canvas.width = width;
-    this.#canvas.height = height;
+    try {
+      this.#canvas.width = width;
+      this.#canvas.height = height;
 
-    const imgData = this.#context.getImageData(0, 0, width, height);
+      const imgData = this.#context.getImageData(0, 0, width, height);
 
-    for (let i = 0; i < imgData.data.length; i += 4) {
-      imgData.data[i + 0] = data[(i / 4) * 3 + 0];
-      imgData.data[i + 1] = data[(i / 4) * 3 + 1];
-      imgData.data[i + 2] = data[(i / 4) * 3 + 2];
-      imgData.data[i + 3] = 255;
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        imgData.data[i + 0] = data[(i / 4) * 3 + 0];
+        imgData.data[i + 1] = data[(i / 4) * 3 + 1];
+        imgData.data[i + 2] = data[(i / 4) * 3 + 2];
+        imgData.data[i + 3] = 255;
+      }
+
+      this.#context.putImageData(imgData, 0, 0);
+    } catch (err) {
+      console.error(err);
     }
-
-    this.#context.putImageData(imgData, 0, 0);
 
     return this;
   }
@@ -139,7 +153,10 @@ export class DynamicImage {
   }
 
   rotate90() {
-    const { canvas, context } = createCanvas(this.#canvas.height, this.#canvas.width);
+    const { canvas, context } = createCanvas(
+      this.#canvas.height,
+      this.#canvas.width
+    );
     context.translate(canvas.width / 2, canvas.height / 2);
     context.rotate((Math.PI / 180) * 90);
     context.drawImage(this.#canvas, -canvas.height / 2, -canvas.width / 2);
@@ -148,7 +165,10 @@ export class DynamicImage {
   }
 
   rotate180() {
-    const { canvas, context } = createCanvas(this.#canvas.width, this.#canvas.height);
+    const { canvas, context } = createCanvas(
+      this.#canvas.width,
+      this.#canvas.height
+    );
     context.translate(canvas.width / 2, canvas.height / 2);
     context.rotate((Math.PI / 180) * 180);
     context.drawImage(this.#canvas, -canvas.height / 2, -canvas.width / 2);
@@ -157,7 +177,10 @@ export class DynamicImage {
   }
 
   rotate270() {
-    const { canvas, context } = createCanvas(this.#canvas.height, this.#canvas.width);
+    const { canvas, context } = createCanvas(
+      this.#canvas.height,
+      this.#canvas.width
+    );
     context.translate(canvas.width / 2, canvas.height / 2);
     context.rotate((Math.PI / 180) * 270);
     context.drawImage(this.#canvas, -canvas.height / 2, -canvas.width / 2);
