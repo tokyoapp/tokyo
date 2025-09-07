@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { createSignal, createEffect, createMemo, onCleanup } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 
@@ -291,12 +291,12 @@ export interface UseImageProcessorOptions {
 
 export interface UseImageProcessorReturn {
   // State
-  selectedFile: string | null;
-  previewState: PreviewState;
-  error: string | null;
-  shadeStatus: ShadeStatus | null;
-  operations: OperationSpec[];
-  adjustments: ImageAdjustments;
+  selectedFile: () => string | null;
+  previewState: () => PreviewState;
+  error: () => string | null;
+  shadeStatus: () => ShadeStatus | null;
+  operations: () => OperationSpec[];
+  adjustments: () => ImageAdjustments;
 
   // Actions
   selectFile: () => Promise<void>;
@@ -310,7 +310,7 @@ export interface UseImageProcessorReturn {
 }
 
 /**
- * Custom hook for image processing functionality
+ * Custom composable for image processing functionality
  *
  * Provides complete image processing workflow including:
  * - File selection and loading with multiple fallback methods
@@ -319,7 +319,7 @@ export interface UseImageProcessorReturn {
  * - Shade API integration and status monitoring
  * - Memory management for blob URLs
  *
- * @param options Configuration options for the hook
+ * @param options Configuration options for the composable
  * @returns Object containing all image processing state and functions
  */
 export function useImageProcessor(
@@ -333,16 +333,15 @@ export function useImageProcessor(
   } = options;
 
   // Core state management
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [previewState, setPreviewState] = useState<PreviewState>({
+  const [selectedFile, setSelectedFile] = createSignal<string | null>(null);
+  const [previewState, setPreviewState] = createSignal<PreviewState>({
     original: null,
     processed: null,
     isProcessing: false,
   });
-  const [error, setError] = useState<string | null>(null);
-  const [shadeStatus, setShadeStatus] = useState<ShadeStatus | null>(null);
-  const [operations, setOperations] = useState<OperationSpec[]>([]);
-  const [adjustments, setAdjustments] = useState<ImageAdjustments>({
+  const [error, setError] = createSignal<string | null>(null);
+  const [shadeStatus, setShadeStatus] = createSignal<ShadeStatus | null>(null);
+  const [adjustments, setAdjustments] = createSignal<ImageAdjustments>({
     ...defaultAdjustments,
     ...initialAdjustments,
   });
@@ -351,57 +350,71 @@ export function useImageProcessor(
    * Convert UI adjustment values to Shade operations
    * Maps slider values to appropriate operation parameters
    */
-  useEffect(() => {
+  const operations = createMemo(() => {
     const newOperations: OperationSpec[] = [];
+    const currentAdjustments = adjustments();
 
     // Combine exposure and brightness into a single brightness operation
     const combinedBrightness =
-      (1.0 + adjustments.exposure) * adjustments.brightness;
+      (1.0 + currentAdjustments.exposure) * currentAdjustments.brightness;
     if (combinedBrightness !== 1.0) {
       newOperations.push(ShadeAPI.operations.brightness(combinedBrightness));
     }
-    if (adjustments.contrast !== 1.0) {
-      newOperations.push(ShadeAPI.operations.contrast(adjustments.contrast));
-    }
-    if (adjustments.saturation !== 1.0) {
+    if (currentAdjustments.contrast !== 1.0) {
       newOperations.push(
-        ShadeAPI.operations.saturation(adjustments.saturation),
+        ShadeAPI.operations.contrast(currentAdjustments.contrast),
       );
     }
-    if (adjustments.hue !== 0.0) {
-      newOperations.push(ShadeAPI.operations.hue(adjustments.hue));
+    if (currentAdjustments.saturation !== 1.0) {
+      newOperations.push(
+        ShadeAPI.operations.saturation(currentAdjustments.saturation),
+      );
     }
-    if (adjustments.gamma !== 1.0) {
-      newOperations.push(ShadeAPI.operations.gamma(adjustments.gamma));
+    if (currentAdjustments.hue !== 0.0) {
+      newOperations.push(ShadeAPI.operations.hue(currentAdjustments.hue));
     }
-    if (adjustments.temperature !== 0.0 || adjustments.tint !== 0.0) {
+    if (currentAdjustments.gamma !== 1.0) {
+      newOperations.push(ShadeAPI.operations.gamma(currentAdjustments.gamma));
+    }
+    if (
+      currentAdjustments.temperature !== 0.0 ||
+      currentAdjustments.tint !== 0.0
+    ) {
       newOperations.push(
         ShadeAPI.operations.whiteBalance({
-          temperature: 5500 + adjustments.temperature * 2000,
-          tint: adjustments.tint,
+          temperature: 5500 + currentAdjustments.temperature * 2000,
+          tint: currentAdjustments.tint,
         }),
       );
     }
-    if (adjustments.blur > 0.0) {
-      newOperations.push(ShadeAPI.operations.blur(adjustments.blur));
+    if (currentAdjustments.blur > 0.0) {
+      newOperations.push(ShadeAPI.operations.blur(currentAdjustments.blur));
     }
-    if (adjustments.sharpen > 0.0) {
-      newOperations.push(ShadeAPI.operations.sharpen(adjustments.sharpen));
+    if (currentAdjustments.sharpen > 0.0) {
+      newOperations.push(
+        ShadeAPI.operations.sharpen(currentAdjustments.sharpen),
+      );
     }
-    if (adjustments.noise > 0.0) {
-      newOperations.push(ShadeAPI.operations.noise(adjustments.noise));
+    if (currentAdjustments.noise > 0.0) {
+      newOperations.push(ShadeAPI.operations.noise(currentAdjustments.noise));
     }
 
     // Log unsupported adjustments for debugging
     const unsupportedAdjustments = [];
-    if (adjustments.highlights !== 0.0)
+    if (currentAdjustments.highlights !== 0.0)
       unsupportedAdjustments.push("highlights");
-    if (adjustments.shadows !== 0.0) unsupportedAdjustments.push("shadows");
-    if (adjustments.whites !== 0.0) unsupportedAdjustments.push("whites");
-    if (adjustments.blacks !== 0.0) unsupportedAdjustments.push("blacks");
-    if (adjustments.vibrance !== 0.0) unsupportedAdjustments.push("vibrance");
-    if (adjustments.clarity !== 0.0) unsupportedAdjustments.push("clarity");
-    if (adjustments.dehaze !== 0.0) unsupportedAdjustments.push("dehaze");
+    if (currentAdjustments.shadows !== 0.0)
+      unsupportedAdjustments.push("shadows");
+    if (currentAdjustments.whites !== 0.0)
+      unsupportedAdjustments.push("whites");
+    if (currentAdjustments.blacks !== 0.0)
+      unsupportedAdjustments.push("blacks");
+    if (currentAdjustments.vibrance !== 0.0)
+      unsupportedAdjustments.push("vibrance");
+    if (currentAdjustments.clarity !== 0.0)
+      unsupportedAdjustments.push("clarity");
+    if (currentAdjustments.dehaze !== 0.0)
+      unsupportedAdjustments.push("dehaze");
 
     if (unsupportedAdjustments.length > 0) {
       console.warn(
@@ -410,57 +423,54 @@ export function useImageProcessor(
       );
     }
 
-    setOperations(newOperations);
-  }, [adjustments]);
+    return newOperations;
+  });
 
   /**
    * Debounced image processing function
    * Handles the core processing workflow with Shade API
    */
-  const process = useCallback(
-    debounce(
-      async (args: { selectedFile: string; operations: OperationSpec[] }) => {
-        setPreviewState((prev) => ({ ...prev, isProcessing: true }));
+  const process = debounce(
+    async (args: { selectedFile: string; operations: OperationSpec[] }) => {
+      setPreviewState((prev) => ({ ...prev, isProcessing: true }));
 
-        try {
-          const result = await ShadeAPI.processImageFile(
-            args.selectedFile,
-            args.operations,
-            "png",
-          );
+      try {
+        const result = await ShadeAPI.processImageFile(
+          args.selectedFile,
+          args.operations,
+          "png",
+        );
 
-          /**
-           * Binary Data Processing:
-           * 1. Result is already Uint8Array from Tauri
-           * 2. Create blob with PNG MIME type
-           * 3. Create object URL for display in img elements
-           */
-          const binaryData = new Uint8Array(result);
-          const blob = new Blob([binaryData], {
-            type: "image/png",
-          });
-          const blobUrl = URL.createObjectURL(blob);
+        /**
+         * Binary Data Processing:
+         * 1. Result is already Uint8Array from Tauri
+         * 2. Create blob with PNG MIME type
+         * 3. Create object URL for display in img elements
+         */
+        const binaryData = new Uint8Array(result);
+        const blob = new Blob([binaryData], {
+          type: "image/png",
+        });
+        const blobUrl = URL.createObjectURL(blob);
 
-          setPreviewState((prev) => ({
-            ...prev,
-            processed: prev.original
-              ? {
-                  ...prev.original,
-                  src: blobUrl,
-                  name: `processed_${prev.original.name}`,
-                }
-              : null,
-            isProcessing: false,
-          }));
-        } catch (err) {
-          console.error("Preview processing failed:", err);
-          setError(`Preview failed: ${err}`);
-          setPreviewState((prev) => ({ ...prev, isProcessing: false }));
-        }
-      },
-      debounceMs,
-    ),
-    [],
+        setPreviewState((prev) => ({
+          ...prev,
+          processed: prev.original
+            ? {
+                ...prev.original,
+                src: blobUrl,
+                name: `processed_${prev.original.name}`,
+              }
+            : null,
+          isProcessing: false,
+        }));
+      } catch (err) {
+        console.error("Preview processing failed:", err);
+        setError(`Preview failed: ${err}`);
+        setPreviewState((prev) => ({ ...prev, isProcessing: false }));
+      }
+    },
+    debounceMs,
   );
 
   /**
@@ -473,8 +483,11 @@ export function useImageProcessor(
    * 4. Creates blob URL for display in UI
    * 5. Cleans up blob URLs to prevent memory leaks
    */
-  useEffect(() => {
-    if (!selectedFile || operations.length === 0) {
+  createEffect(() => {
+    const currentFile = selectedFile();
+    const currentOperations = operations();
+
+    if (!currentFile || currentOperations.length === 0) {
       // Reset to original image if no operations
       setPreviewState((prev) => ({
         ...prev,
@@ -485,137 +498,133 @@ export function useImageProcessor(
     }
 
     process({
-      selectedFile,
-      operations,
+      selectedFile: currentFile,
+      operations: currentOperations,
     });
-  }, [selectedFile, operations, process]);
+  });
 
   /**
    * Memory Management: Clean up blob URLs to prevent memory leaks
    * Blob URLs must be explicitly revoked when no longer needed
    */
-  useEffect(() => {
-    return () => {
-      // Clean up all blob URLs when component unmounts or state changes
-      if (previewState.processed?.src?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewState.processed.src);
-      }
-      if (previewState.original?.src?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewState.original.src);
-      }
-    };
-  }, [previewState.processed, previewState.original]);
+  onCleanup(() => {
+    const state = previewState();
+    // Clean up all blob URLs when component unmounts or state changes
+    if (state.processed?.src?.startsWith("blob:")) {
+      URL.revokeObjectURL(state.processed.src);
+    }
+    if (state.original?.src?.startsWith("blob:")) {
+      URL.revokeObjectURL(state.original.src);
+    }
+  });
 
   /**
    * Multi-method image loading with fallbacks
    * Tries different approaches to load images in Tauri environment
    */
-  const tryLoadImage = useCallback(
-    async (filePath: string): Promise<ImageData> => {
-      const fileName = filePath.split("/").pop() || "Unknown";
+  const tryLoadImage = async (filePath: string): Promise<ImageData> => {
+    const fileName = filePath.split("/").pop() || "Unknown";
 
-      // Method 1: Try Tauri's convertFileSrc first (recommended)
-      try {
-        const tauriSrc = convertFileSrc(filePath);
+    // Method 1: Try Tauri's convertFileSrc first (recommended)
+    try {
+      const tauriSrc = convertFileSrc(filePath);
 
-        const imageData = await new Promise<ImageData>((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            resolve({
-              src: tauriSrc,
-              width: img.naturalWidth,
-              height: img.naturalHeight,
-              name: fileName,
-            });
-          };
-          img.onerror = () => {
-            reject(new Error("Tauri method failed"));
-          };
-          img.src = tauriSrc;
-        });
-
-        return imageData;
-      } catch (error) {
-        // Continue to next method
-      }
-
-      // Method 2: Use custom Tauri command to read file as raw bytes and create blob
-      try {
-        // Use our custom Tauri command to read the file as bytes and create blob URL
-        const blobUrl = await ShadeAPI.readImageAsBlob(filePath);
-
-        const imageData = await new Promise<ImageData>((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            resolve({
-              src: blobUrl,
-              width: img.naturalWidth,
-              height: img.naturalHeight,
-              name: fileName,
-            });
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(blobUrl); // Clean up on error
-            reject(new Error("Binary blob method failed"));
-          };
-          img.src = blobUrl;
-        });
-
-        return imageData;
-      } catch (error) {
-        // Continue to next method
-      }
-
-      // Method 3: Try various URL encoding approaches as fallback
-      const encodedPath = encodeURI(filePath);
-      const encodedPathComponents = filePath
-        .split("/")
-        .map(encodeURIComponent)
-        .join("/");
-
-      const urlsToTry = [
-        `file://${encodedPath}`,
-        `file://${encodedPathComponents}`,
-        `file://localhost${encodedPath}`,
-        `file://localhost${encodedPathComponents}`,
-        `file://${filePath.replace(/\s+/g, "%20")}`,
-      ];
-
-      for (let i = 0; i < urlsToTry.length; i++) {
-        const srcUrl = urlsToTry[i];
-        try {
-          const imageData = await new Promise<ImageData>((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-              resolve({
-                src: srcUrl,
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-                name: fileName,
-              });
-            };
-            img.onerror = () => {
-              reject(new Error(`Failed to load: ${srcUrl}`));
-            };
-            img.src = srcUrl;
+      const imageData = await new Promise<ImageData>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            src: tauriSrc,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            name: fileName,
           });
+        };
+        img.onerror = () => {
+          reject(new Error("Tauri method failed"));
+        };
+        img.src = tauriSrc;
+      });
 
-          return imageData;
-        } catch (error) {
-          // Continue to next method
-        }
+      return imageData;
+    } catch (error) {
+      // Continue to next method
+    }
+
+    // Method 2: Use custom Tauri command to read file as raw bytes and create blob
+    try {
+      // Use our custom Tauri command to read the file as bytes and create blob URL
+      const blobUrl = await ShadeAPI.readImageAsBlob(filePath);
+
+      const imageData = await new Promise<ImageData>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            src: blobUrl,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            name: fileName,
+          });
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(blobUrl); // Clean up on error
+          reject(new Error("Binary blob method failed"));
+        };
+        img.src = blobUrl;
+      });
+
+      return imageData;
+    } catch (error) {
+      // Continue to next method
+    }
+
+    // Method 3: Try various URL encoding approaches as fallback
+    const encodedPath = encodeURI(filePath);
+    const encodedPathComponents = filePath
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+
+    const urlsToTry = [
+      `file://${encodedPath}`,
+      `file://${encodedPathComponents}`,
+      `file://localhost${encodedPath}`,
+      `file://localhost${encodedPathComponents}`,
+      `file://${filePath.replace(/\s+/g, "%20")}`,
+    ];
+
+    for (let i = 0; i < urlsToTry.length; i++) {
+      const srcUrl = urlsToTry[i];
+      try {
+        const imageData = await new Promise<ImageData>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            resolve({
+              src: srcUrl,
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+              name: fileName,
+            });
+          };
+          img.onerror = () => {
+            reject(new Error(`Failed to load: ${srcUrl}`));
+          };
+          img.src = srcUrl;
+        });
+
+        return imageData;
+      } catch (error) {
+        // Continue to next method
       }
+    }
 
-      throw new Error(`All loading methods failed for: ${filePath}`);
-    },
-    [],
-  );
+    throw new Error(`All loading methods failed for: ${filePath}`);
+  };
 
   /**
    * File selection handler with integrated image loading
    * Opens file dialog and loads selected image with error handling
    */
-  const selectFile = useCallback(async () => {
+  const selectFile = async () => {
     try {
       const selected = await open({
         multiple: false,
@@ -677,13 +686,13 @@ export function useImageProcessor(
     } catch (err) {
       setError(`Failed to select file: ${err}`);
     }
-  }, [tryLoadImage]);
+  };
 
   /**
    * Shade API status monitoring
    * Periodically checks if the Shade server is running and responsive
    */
-  useEffect(() => {
+  createEffect(() => {
     if (!enableStatusCheck) return;
 
     const checkStatus = async () => {
@@ -697,35 +706,33 @@ export function useImageProcessor(
 
     checkStatus();
     const interval = setInterval(checkStatus, statusCheckInterval);
-    return () => clearInterval(interval);
-  }, [enableStatusCheck, statusCheckInterval]);
+
+    onCleanup(() => clearInterval(interval));
+  });
 
   /**
    * Update individual adjustment parameter
    */
-  const updateAdjustment = useCallback(
-    (key: keyof ImageAdjustments, value: number) => {
-      setAdjustments((prev) => ({ ...prev, [key]: value }));
-    },
-    [],
-  );
+  const updateAdjustment = (key: keyof ImageAdjustments, value: number) => {
+    setAdjustments((prev) => ({ ...prev, [key]: value }));
+  };
 
   /**
    * Reset all adjustments to default values
    */
-  const resetAdjustments = useCallback(() => {
+  const resetAdjustments = () => {
     setAdjustments({ ...defaultAdjustments, ...initialAdjustments });
-  }, [initialAdjustments]);
+  };
 
   /**
    * Clear current error message
    */
-  const clearError = useCallback(() => {
+  const clearError = () => {
     setError(null);
-  }, []);
+  };
 
   return {
-    // State
+    // State (as getter functions for SolidJS reactivity)
     selectedFile,
     previewState,
     error,
