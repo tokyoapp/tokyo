@@ -92,7 +92,7 @@ export default function App() {
                 </div>
               ) : null}
 
-              {/*<Explorer small={!!file()} />*/}
+              <Explorer small={!!file()} />
             </div>
           </div>
 

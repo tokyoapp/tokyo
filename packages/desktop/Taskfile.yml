@@ -6,29 +6,18 @@ includes:
   ui: ../ui/Taskfile.yml
 
 tasks:
-  tauri:dev:
-    dir: ./
-    cmds:
-      - cargo tauri dev
-
-  tauri:build:
-    dir: ./
-    cmds:
-      - cargo tauri build
-
   dev:
-    desc: Dev
-    prefix: "desktop"
     dir: ./
     deps: [ui:build]
-    cmd: task --parallel ui:dev tauri:dev
+    cmds:
+      - cargo tauri dev
 
   build:
     desc: Build app
     dir: ./
     cmds:
       - task: ui:build
-      - task: tauri:build
+      - cargo tauri build
 
   start:
     desc: Start app production build

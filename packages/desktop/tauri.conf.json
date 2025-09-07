@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.tokyo.dev",
   "build": {
+    "beforeDevCommand": "task ui:dev",
+    "devUrl": "http://localhost:8080",
+    "beforeBuildCommand": "task ui:build",
     "frontendDist": "./dist"
   },
   "app": {
