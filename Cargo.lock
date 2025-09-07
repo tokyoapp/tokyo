@@ -2868,24 +2868,6 @@ dependencies = [
 
 [[package]]
 name = "image"
-version = "0.24.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5690139d2f55868e080017335e4b94cb7414274c74f1669c84fb5feba2c9f69d"
-dependencies = [
- "bytemuck",
- "byteorder",
- "color_quant",
- "exr",
- "gif",
- "jpeg-decoder",
- "num-traits",
- "png 0.17.16",
- "qoi",
- "tiff 0.9.1",
-]
-
-[[package]]
-name = "image"
 version = "0.25.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "529feb3e6769d234375c4cf1ee2ce713682b8e76538cb13f9fc23e1400a591e7"
@@ -2903,7 +2885,7 @@ dependencies = [
  "ravif",
  "rayon",
  "rgb",
- "tiff 0.10.3",
+ "tiff",
  "zune-core",
  "zune-jpeg",
 ]
@@ -3130,15 +3112,6 @@ checksum = "9afb3de4395d6b3e67a780b6de64b51c978ecf11cb9a462c66be7d4ca9039d33"
 dependencies = [
  "getrandom 0.3.3",
  "libc",
-]
-
-[[package]]
-name = "jpeg-decoder"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00810f1d8b74be64b13dbf3db89ac67740615d6c891f0e7b6179326533011a07"
-dependencies = [
- "rayon",
 ]
 
 [[package]]
@@ -3520,7 +3493,7 @@ dependencies = [
 [[package]]
 name = "libsql"
 version = "0.2.0-alpha.1"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -3555,7 +3528,7 @@ dependencies = [
 [[package]]
 name = "libsql-ffi"
 version = "0.1.0"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "bindgen",
  "cc",
@@ -3564,7 +3537,7 @@ dependencies = [
 [[package]]
 name = "libsql-replication"
 version = "0.1.0"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -3587,7 +3560,7 @@ dependencies = [
 [[package]]
 name = "libsql-sys"
 version = "0.2.14"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "libsql-ffi",
  "once_cell",
@@ -3715,12 +3688,6 @@ dependencies = [
 
 [[package]]
 name = "md5"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "490cc448043f947bae3cbee9c203358d62dbee0db12107a74be5c30ccfd09771"
-
-[[package]]
-name = "md5"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae960838283323069879657ca3de837e9f7bbb4c7bf6ea7f1b290d5e9476d2e0"
@@ -3836,33 +3803,11 @@ checksum = "1d87ecb2933e8aeadb3e3a02b828fed80a7528047e68b4f424523a0981a3a084"
 
 [[package]]
 name = "multiversion"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4851161a11d3ad0bf9402d90ffc3967bf231768bfd7aeb61755ad06dbf1a142"
-dependencies = [
- "multiversion-macros 0.7.4",
- "target-features",
-]
-
-[[package]]
-name = "multiversion"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edb7f0ff51249dfda9ab96b5823695e15a052dc15074c9dbf3d118afaf2c201"
 dependencies = [
- "multiversion-macros 0.8.0",
- "target-features",
-]
-
-[[package]]
-name = "multiversion-macros"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79a74ddee9e0c27d2578323c13905793e91622148f138ba29738f9dddb835e90"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
+ "multiversion-macros",
  "target-features",
 ]
 
@@ -5379,36 +5324,35 @@ checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
 
 [[package]]
 name = "rawler"
-version = "0.6.0"
-source = "git+https://github.com/tokyoapp/dnglab?rev=11450c60e34e1deb7fa371e0a0a0b4e6e131c53b#11450c60e34e1deb7fa371e0a0a0b4e6e131c53b"
+version = "0.7.0"
+source = "git+https://github.com/tokyoapp/dnglab?rev=be0ff30c8bc8f097ae93b057deb90074c0f041ab#be0ff30c8bc8f097ae93b057deb90074c0f041ab"
 dependencies = [
- "async-trait",
  "backtrace",
- "bitstream-io 2.6.0",
+ "bitstream-io 4.5.0",
  "byteorder",
  "chrono",
  "enumn",
- "futures",
  "glob",
  "hex",
- "image 0.24.9",
- "itertools 0.12.1",
+ "image",
+ "itertools 0.14.0",
+ "jxl-oxide",
  "lazy_static",
- "libc",
  "libflate",
  "log",
- "md5 0.7.0",
- "multiversion 0.7.4",
+ "md5",
+ "memmap2",
+ "multiversion",
+ "num",
  "num_enum",
  "rayon",
  "rustc_version",
  "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
+ "thiserror 2.0.16",
  "toml 0.8.2",
  "uuid",
  "weezl",
+ "zerocopy 0.8.26",
 ]
 
 [[package]]
@@ -5423,15 +5367,15 @@ dependencies = [
  "enumn",
  "glob",
  "hex",
- "image 0.25.8",
+ "image",
  "itertools 0.14.0",
  "jxl-oxide",
  "lazy_static",
  "libflate",
  "log",
- "md5 0.8.0",
+ "md5",
  "memmap2",
- "multiversion 0.8.0",
+ "multiversion",
  "num",
  "num_enum",
  "rayon",
@@ -5701,7 +5645,7 @@ dependencies = [
 [[package]]
 name = "rusqlite"
 version = "0.29.0"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "bitflags 2.9.4",
  "fallible-iterator 0.2.0",
@@ -6183,11 +6127,11 @@ dependencies = [
  "exr",
  "flume",
  "half",
- "image 0.25.8",
+ "image",
  "log",
  "png 0.17.16",
  "pollster",
- "rawler 0.7.0",
+ "rawler 0.7.0 (git+https://github.com/tokyoapp/dnglab.git)",
  "rust-ini",
  "serde",
  "serde_json",
@@ -6367,7 +6311,7 @@ dependencies = [
 [[package]]
 name = "sqlite3-parser"
 version = "0.11.0"
-source = "git+https://github.com/tursodatabase/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
+source = "git+https://github.com/tokyoapp/libsql?rev=513941b768124985c8ca6c95e9dd3aa50410dc33#513941b768124985c8ca6c95e9dd3aa50410dc33"
 dependencies = [
  "bitflags 2.9.4",
  "cc",
@@ -7011,17 +6955,6 @@ dependencies = [
 
 [[package]]
 name = "tiff"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba1310fcea54c6a9a4fd1aad794ecc02c31682f6bfbecdf460bf19533eed1e3e"
-dependencies = [
- "flate2",
- "jpeg-decoder",
- "weezl",
-]
-
-[[package]]
-name = "tiff"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af9605de7fee8d9551863fd692cce7637f548dbd9db9180fcc07ccc6d26c336f"
@@ -7196,10 +7129,10 @@ dependencies = [
  "env_logger 0.10.2",
  "futures",
  "hyper 1.7.0",
- "image 0.24.9",
+ "image",
  "libsql",
  "log",
- "rawler 0.6.0",
+ "rawler 0.7.0 (git+https://github.com/tokyoapp/dnglab?rev=be0ff30c8bc8f097ae93b057deb90074c0f041ab)",
  "rawloader",
  "roxmltree",
  "serde",

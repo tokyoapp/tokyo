@@ -10,15 +10,15 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.105"
 sha256 = "1.4.0"
 walkdir = "2.3.3"
-image = "0.24.7"
+image = "0.25.8"
 rawloader = "0.37.1"
-rawler = { git = "https://github.com/tokyoapp/dnglab", rev = "11450c60e34e1deb7fa371e0a0a0b4e6e131c53b" }
+rawler = { git = "https://github.com/tokyoapp/dnglab", rev = "be0ff30c8bc8f097ae93b057deb90074c0f041ab" }
 roxmltree = "0.18"
 tokio = "1.32.0"
 anyhow = "1.0.75"
 sysinfo = { version = "0.29.10", features = ["serde"] }
 futures = "0.3.29"
-libsql = { git = "https://github.com/tursodatabase/libsql", rev = "513941b768124985c8ca6c95e9dd3aa50410dc33" }
+libsql = { git = "https://github.com/tokyoapp/libsql", rev = "513941b768124985c8ca6c95e9dd3aa50410dc33" }
 url = "2.5.0"
 axum = { version = "0.6.20", features = ["ws", "macros"] }
 env_logger = "0.10.1"

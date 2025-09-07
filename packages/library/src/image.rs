@@ -1,12 +1,14 @@
 use anyhow::{Result, anyhow};
 use image::imageops::FilterType;
+use image::{imageops, ImageFormat};
 use log::{error, info};
 use rawler::decoders::{RawDecodeParams, RawMetadata};
-use rawler::{RawFile, analyze::extract_thumbnail_pixels, get_decoder, imgop::develop::RawDevelop};
+use rawler::rawsource::RawSource;
+use rawler::{analyze::extract_thumbnail_pixels, get_decoder};
 use std::io::Cursor;
 use std::{
   fs::File,
-  io::{BufReader, Read},
+  io::{Read},
   path::{Path, PathBuf},
 };
 use tokio::fs;
@@ -66,13 +68,12 @@ pub fn metadat(path: &String) -> Result<Metadata> {
   }
 
   let p = PathBuf::from(path.clone());
-  let reader = BufReader::new(raw_file.unwrap());
 
-  let mut rawfile = RawFile::new(&p, reader);
-  let decoder = get_decoder(&mut rawfile)?;
+  let mut rawfile = RawSource::new(&p)?;
+  let decoder = get_decoder(&rawfile)?;
 
   let metadata = decoder
-    .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+    .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
     .expect("Failed to get metadata");
 
   Ok(Metadata {
@@ -93,21 +94,15 @@ pub fn metadat(path: &String) -> Result<Metadata> {
   })
 }
 
-pub fn file_hash(path: &String) -> Option<String> {
+pub fn file_hash(path: &String) -> Result<String> {
   let p = Path::new(&path);
-  let raw_file = File::open(&path);
 
-  if raw_file.is_err() {
-    return None;
-  }
-
-  let reader = BufReader::new(raw_file.unwrap());
-  let mut rawfile = RawFile::new(&p, reader);
+  let mut rawfile = RawSource::new(&p)?;
 
   let meta: Option<RawMetadata> = match get_decoder(&mut rawfile) {
     Ok(decoder) => Some(
       decoder
-        .raw_metadata(&mut rawfile, RawDecodeParams { image_index: 0 })
+        .raw_metadata(&mut rawfile, &RawDecodeParams { image_index: 0 })
         .unwrap(),
     ),
     Err(error) => {
@@ -117,15 +112,15 @@ pub fn file_hash(path: &String) -> Option<String> {
   };
 
   match meta {
-    Some(metadata) => Some(sha256::digest(
+    Some(metadata) => Ok(sha256::digest(
       metadata.exif.create_date.clone().unwrap() + p.file_name().unwrap().to_str().unwrap(),
     )),
-    None => None,
+    None => Err(anyhow!("Error getting file hash")),
   }
 }
 
 pub fn thumbnail(path: String) -> Vec<u8> {
-  let mut thumb = extract_thumbnail_pixels(path, RawDecodeParams { image_index: 0 }).unwrap();
+  let mut thumb = extract_thumbnail_pixels(path, &RawDecodeParams { image_index: 0 }).unwrap();
   // TODO: use my own io and use tokio::fs for this
   thumb = thumb.resize(thumb.width() / 5, thumb.height() / 5, FilterType::Nearest);
 
@@ -133,7 +128,7 @@ pub fn thumbnail(path: String) -> Vec<u8> {
   thumb
     .write_to(
       &mut Cursor::new(&mut bytes),
-      image::ImageOutputFormat::Jpeg(85),
+      image::ImageFormat::Jpeg,
     )
     .unwrap();
 
